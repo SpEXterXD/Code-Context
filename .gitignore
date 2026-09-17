@@ -1,0 +1,73 @@
+# Dependencies
+node_modules/
+
+# Production & Build outputs
+dist/
+out-e2e/
+*.vsix
+*.tsbuildinfo
+.eslintcache
+
+# OCC Index & Storage
+.occ-store/
+.occ-test-store/
+.occ-demo-store/
+**/.occ-store/
+**/.occ-test-store/
+**/.occ-demo-store/
+
+# Test coverage & test caches
+coverage/
+.nyc_output/
+.vscode-test/
+.vitest/
+test-results/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment & Secrets
+.env
+.env.*
+*.env
+*.pem
+*.key
+!.env.example
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDE & Editor files
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# AI / Agent Assistants & Tooling Artifacts
+.freebuff/
+.cursor/
+.windsurf/
+.claude/
+.gemini/
+.cline/
+.roo/
+
+# Temporary files & debug
+.dbg/
+.cache/
+.tmp/
+tmp/
+temp/

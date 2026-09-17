@@ -1,0 +1,312 @@
+{
+  "name": "offline-code-context-compiler",
+  "displayName": "Offline Code Context Compiler",
+  "description": "Analyzes your workspace entirely offline and compiles a deterministic, explainable, LLM-ready context package that you copy to the clipboard. No AI models, no network calls, no telemetry.",
+  "version": "0.2.0",
+  "private": true,
+  "publisher": "offline-code-context",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SpEXterXD/Code-Context"
+  },
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.85.0",
+    "node": ">=18"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages",
+    "Linters"
+  ],
+  "keywords": [
+    "context",
+    "llm",
+    "clipboard",
+    "offline",
+    "privacy",
+    "code search"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "offlineCodeContext.indexWorkspace",
+        "title": "OCC: Index Workspace",
+        "category": "Offline Code Context"
+      },
+      {
+        "command": "offlineCodeContext.rebuildIndex",
+        "title": "OCC: Rebuild Index",
+        "category": "Offline Code Context"
+      },
+      {
+        "command": "offlineCodeContext.indexCurrentFile",
+        "title": "OCC: Index Current File",
+        "category": "Offline Code Context"
+      },
+      {
+        "command": "offlineCodeContext.showIndexStatus",
+        "title": "OCC: Show Index Status",
+        "category": "Offline Code Context"
+      },
+      {
+        "command": "offlineCodeContext.searchCodebase",
+        "title": "OCC: Search Codebase",
+        "category": "Offline Code Context"
+      },
+      {
+        "command": "offlineCodeContext.generateProjectContext",
+        "title": "OCC: Generate Project Context",
+        "category": "Offline Code Context"
+      },
+      {
+        "command": "offlineCodeContext.copyProjectContextToClipboard",
+        "title": "OCC: Copy Project Context to Clipboard",
+        "category": "Offline Code Context"
+      },
+      {
+        "command": "offlineCodeContext.generateFileContext",
+        "title": "OCC: Generate File Context",
+        "category": "Offline Code Context"
+      },
+      {
+        "command": "offlineCodeContext.copyFileContextToClipboard",
+        "title": "OCC: Copy File Context to Clipboard",
+        "category": "Offline Code Context"
+      },
+      {
+        "command": "offlineCodeContext.generateTaskContext",
+        "title": "OCC: Generate Task Context",
+        "category": "Offline Code Context"
+      },
+      {
+        "command": "offlineCodeContext.generateSelectionContext",
+        "title": "OCC: Generate Selection Context",
+        "category": "Offline Code Context"
+      },
+      {
+        "command": "offlineCodeContext.previewContext",
+        "title": "OCC: Preview Context",
+        "category": "Offline Code Context"
+      },
+      {
+        "command": "offlineCodeContext.copyContext",
+        "title": "OCC: Copy Context to Clipboard",
+        "category": "Offline Code Context"
+      },
+      {
+        "command": "offlineCodeContext.securityScan",
+        "title": "OCC: Security Scan",
+        "category": "Offline Code Context"
+      },
+      {
+        "command": "offlineCodeContext.clearIndex",
+        "title": "OCC: Clear Local Index",
+        "category": "Offline Code Context"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "offlineCodeContext",
+          "title": "Code Context",
+          "icon": "$(output)"
+        }
+      ]
+    },
+    "views": {
+      "offlineCodeContext": [
+        {
+          "id": "offlineCodeContext.indexStatus",
+          "name": "Index Status",
+          "when": "true"
+        }
+      ]
+    },
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "offlineCodeContext.generateProjectContext",
+          "when": "explorerResourceIsFolder",
+          "group": "occ@1"
+        },
+        {
+          "command": "offlineCodeContext.copyProjectContextToClipboard",
+          "when": "explorerResourceIsFolder",
+          "group": "occ@2"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "offlineCodeContext.generateFileContext",
+          "when": "editorTextFocus",
+          "group": "occ@1"
+        },
+        {
+          "command": "offlineCodeContext.copyFileContextToClipboard",
+          "when": "editorTextFocus",
+          "group": "occ@2"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "offlineCodeContext.generateFileContext",
+          "when": "resourceScheme == file",
+          "group": "occ@1"
+        },
+        {
+          "command": "offlineCodeContext.copyFileContextToClipboard",
+          "when": "resourceScheme == file",
+          "group": "occ@2"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Offline Code Context",
+      "properties": {
+        "offlineCodeContext.maxFiles": {
+          "type": "integer",
+          "default": 40,
+          "minimum": 1,
+          "maximum": 500,
+          "description": "Maximum number of files included in a generated context package."
+        },
+        "offlineCodeContext.maxChars": {
+          "type": "integer",
+          "default": 120000,
+          "minimum": 1000,
+          "description": "Maximum total characters of a generated context package."
+        },
+        "offlineCodeContext.maxLines": {
+          "type": "integer",
+          "default": 3000,
+          "minimum": 10,
+          "description": "Maximum total source lines included in a generated context package."
+        },
+        "offlineCodeContext.maxTokens": {
+          "type": "integer",
+          "default": 30000,
+          "minimum": 100,
+          "description": "Maximum estimated tokens (estimate is characters/4; it is an estimate, not an exact count)."
+        },
+        "offlineCodeContext.maxGraphDepth": {
+          "type": "integer",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Hard depth limit for dependency graph traversal used during context selection."
+        },
+        "offlineCodeContext.maxCodeLinesPerFile": {
+          "type": "integer",
+          "default": 400,
+          "minimum": 10,
+          "description": "Maximum source lines emitted per file before truncation degrades excerpts."
+        },
+        "offlineCodeContext.structureDepth": {
+          "type": "integer",
+          "default": 4,
+          "minimum": 1,
+          "maximum": 12,
+          "description": "Depth of the PROJECT STRUCTURE tree in generated context."
+        },
+        "offlineCodeContext.excludePatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            ".git",
+            "node_modules",
+            "dist",
+            "build",
+            "out",
+            "coverage",
+            ".cache",
+            ".tmp",
+            "tmp",
+            ".env",
+            ".env.*",
+            "*.pem",
+            "*.key",
+            "*.log",
+            "*.min.js",
+            "*.map",
+            "__pycache__"
+          ],
+          "description": "Paths matching these globs are never indexed and never appear in output."
+        },
+        "offlineCodeContext.maxFileSizeBytes": {
+          "type": "integer",
+          "default": 1048576,
+          "description": "Files larger than this are skipped during indexing (recorded as SKIPPED_TOO_LARGE, never silent)."
+        },
+        "offlineCodeContext.secretPolicy": {
+          "type": "string",
+          "enum": [
+            "block",
+            "warn",
+            "allow"
+          ],
+          "default": "block",
+          "description": "Policy for potential secrets found in files selected for a context package. block: exclude the file's source. warn: include source but list the finding. allow: ignore findings (not recommended)."
+        },
+        "offlineCodeContext.redactSecrets": {
+          "type": "boolean",
+          "default": true,
+          "description": "When true, secret-like matches in WARN policy files are deterministically redacted before inclusion. BLOCK policy files are excluded entirely regardless of this setting."
+        },
+        "offlineCodeContext.enableGitRecency": {
+          "type": "boolean",
+          "default": false,
+          "description": "Add a small deterministic recency bonus from local git history (read-only; still fully offline)."
+        },
+        "offlineCodeContext.respectGitignore": {
+          "type": "boolean",
+          "default": true,
+          "description": "Respect .gitignore files during workspace discovery (best-effort subset of gitignore syntax)."
+        },
+        "offlineCodeContext.statusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the index status bar item."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "format:check": "prettier --check \"src/**/*.ts\" \"scripts/**/*.ts\"",
+    "build:ext": "esbuild src/extension/main.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --target=node18",
+    "compile": "npm run typecheck && npm run build:ext",
+    "package": "npm run compile && npx @vscode/vsce package --no-git-tag-version --allow-missing-repository",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:docs-sync": "tsx scripts/check-docs-sync.ts",
+    "bench": "tsx scripts/benchmark.ts",
+    "bench:small": "tsx scripts/benchmark.ts --max 500",
+    "ci": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run test:docs-sync && npm run compile"
+  },
+  "dependencies": {
+    "typescript": "^5.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.16.0",
+    "@typescript-eslint/parser": "^7.16.0",
+    "@vscode/test-electron": "^2.4.0",
+    "@vscode/vsce": "^2.30.0",
+    "esbuild": "^0.23.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-boundaries": "^7.2.0",
+    "prettier": "^3.3.3",
+    "tsx": "^4.16.2",
+    "typescript-eslint": "^7.16.0",
+    "vitest": "^2.0.3"
+  }
+}
