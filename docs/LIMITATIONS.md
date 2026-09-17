@@ -1,6 +1,6 @@
 # Limitations
 
-Honest, current as of v0.2.0.
+Honest, current as of v0.3.0.
 
 ## Analysis depth
 

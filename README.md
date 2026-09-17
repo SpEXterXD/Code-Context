@@ -30,13 +30,13 @@ The extension is **100% offline**: it contains no embedded AI models, executes z
 Using the VS Code CLI:
 
 ```bash
-code --install-extension offline-code-context-compiler-0.2.0.vsix
+code --install-extension offline-code-context-compiler-0.3.0.vsix
 ```
 
 Or within VS Code:
 1. Open the **Extensions** view (`Ctrl+Shift+X` or `Cmd+Shift+X`).
 2. Click the `...` menu in the top-right corner of the Extensions view.
-3. Select **Install from VSIX...** and choose `offline-code-context-compiler-0.2.0.vsix`.
+3. Select **Install from VSIX...** and choose `offline-code-context-compiler-0.3.0.vsix`.
 4. Reload VS Code when prompted.
 
 ### From Source
@@ -52,7 +52,7 @@ npm run compile
 
 # Package the extension
 npm run package
-# Produces offline-code-context-compiler-0.2.0.vsix
+# Produces offline-code-context-compiler-0.3.0.vsix
 ```
 
 **Requirements**: VS Code `^1.85.0` and Node.js `>=18`.

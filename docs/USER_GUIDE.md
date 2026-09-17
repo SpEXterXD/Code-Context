@@ -9,7 +9,7 @@ Task-oriented instructions for using the extension. For design details see
 From a terminal:
 
 ```bash
-code --install-extension offline-code-context-compiler-0.2.0.vsix
+code --install-extension offline-code-context-compiler-0.3.0.vsix
 ```
 
 Or: Extensions view (`Ctrl+Shift+X`) → `…` menu → **Install from VSIX…** →

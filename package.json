@@ -2,7 +2,7 @@
   "name": "offline-code-context-compiler",
   "displayName": "Offline Code Context Compiler",
   "description": "Analyzes your workspace entirely offline and compiles a deterministic, explainable, LLM-ready context package that you copy to the clipboard. No AI models, no network calls, no telemetry.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "publisher": "offline-code-context",
   "repository": {
