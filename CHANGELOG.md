@@ -4,6 +4,12 @@
 
 ### Fixed
 
+- The watcher debounce no longer resets its timer on every incoming event
+  (F6): a continuous save stream used to postpone indexing indefinitely
+  because each event pushed the flush further out. The flush is now anchored
+  to the first pending event, bounding indexing latency to one debounce
+  window (600 ms); events arriving after a flush schedule the next batch.
+  Covered by a new dedicated watcher suite (fake timers).
 - The index manifest's `projectFingerprint` is now verified at load (F5).
   A manifest copied from a different workspace root (schema-valid, correct
   entry count) was previously accepted as-is; it is now rebuilt from the
