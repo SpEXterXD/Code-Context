@@ -4,6 +4,11 @@
 
 ### Fixed
 
+- The index manifest's `projectFingerprint` is now verified at load (F5).
+  A manifest copied from a different workspace root (schema-valid, correct
+  entry count) was previously accepted as-is; it is now rebuilt from the
+  entries, which are the source of truth. Entries are untouched, so the
+  index stays valid and the next run reconciles as usual.
 - The retrieval candidate cap now scales with the configured `maxFiles`
   budget instead of a hardcoded 60 (F4). Previously `maxFiles` values above
   60 were unreachable in Task/File/Selection modes because the ranker

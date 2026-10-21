@@ -97,7 +97,14 @@ export class JsonIndexStore implements IndexStore {
       }
       // Reconcile: the entries directory is the source of truth. Any drift
       // (crash between entry and manifest writes, dropped corrupt entries,
-      // schema bump) is repaired by rebuilding the manifest from entries.
+      // schema bump, manifest copied from a different workspace root) is
+      // repaired by rebuilding the manifest from entries.
+      if (parsed.projectFingerprint !== this.projectFingerprint) {
+        logger.warn(
+          `manifest fingerprint ${parsed.projectFingerprint} ≠ ${this.projectFingerprint}; rebuilding manifest`,
+        );
+        return this.rebuildManifest(entries);
+      }
       const manifestCount = Object.keys(parsed.files ?? {}).length;
       if (manifestCount !== entries.size) {
         return this.rebuildManifest(entries);

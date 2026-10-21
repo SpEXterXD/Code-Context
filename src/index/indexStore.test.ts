@@ -114,4 +114,21 @@ describe("JsonIndexStore", () => {
     const { manifest } = store2.load();
     expect(manifest.schemaVersion).toBe(STORE_SCHEMA_VERSION);
   });
+
+  it("rejects a foreign project fingerprint by rebuilding the manifest (F5)", () => {
+    // A manifest copied from a different workspace root must not be accepted:
+    // the loaded manifest carries the constructing store's fingerprint.
+    root = makeTempDir();
+    const store = new JsonIndexStore(root, "fp-a");
+    store.upsertEntries([fakeEntry("a.ts")]);
+    const manifestPath = path.join(root, "manifest.json");
+    const parsed = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    parsed.projectFingerprint = "fp-other-workspace";
+    fs.writeFileSync(manifestPath, JSON.stringify(parsed));
+
+    const store2 = new JsonIndexStore(root, "fp-a");
+    const { manifest, entries } = store2.load();
+    expect(entries.size).toBe(1); // entries stay valid
+    expect(manifest.projectFingerprint).toBe("fp-a");
+  });
 });
