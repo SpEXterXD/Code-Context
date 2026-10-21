@@ -63,9 +63,31 @@ export interface ContextModel {
   metadata: ContextMetadata;
 }
 
-function fence(language: string): string {
-  // Avoid fence collisions with content containing triple backticks.
-  let ticks = "```";
+/** Longest per-line run of backticks inside `text`. */
+function maxBacktickRun(text: string): number {
+  let max = 0;
+  for (const line of text.split("\n")) {
+    let run = 0;
+    for (const ch of line) {
+      if (ch === "`") {
+        run++;
+        if (run > max) max = run;
+      } else {
+        run = 0;
+      }
+    }
+  }
+  return max;
+}
+
+/**
+ * Fence length for one source block: longer than any backtick run inside the
+ * block's content (so content containing ``` cannot close the block), and
+ * longer than any run inside the language label. Markdown requires opening
+ * and closing fences of equal length, so both use the same string.
+ */
+function fenceFor(text: string, language: string): string {
+  let ticks = "`".repeat(Math.max(3, maxBacktickRun(text) + 1));
   while (language.includes(ticks)) ticks += "`";
   return ticks;
 }
@@ -76,9 +98,10 @@ export function renderSourceFileSection(section: SourceFileSection): string {
   lines.push(`### FILE: ${section.path}`);
   for (const block of section.blocks) {
     lines.push(`### LINES: ${block.startLine}-${block.endLine}`);
-    lines.push(fence(section.language));
+    const fence = fenceFor(block.text, section.language);
+    lines.push(fence);
     lines.push(block.text);
-    lines.push(fence(section.language));
+    lines.push(fence);
     lines.push("");
   }
   lines.push("");

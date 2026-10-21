@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Fixed
+
+- Content-aware source-block fences (F1): the emitted ``` fence for each
+  `## SOURCE` block is now longer than any backtick run inside the block's
+  content (and language label), so repository content can never close a
+  source block and masquerade as payload structure. Previously the fence
+  length only depended on the language label.
+
 ### Added
 
 - `scripts/check-docs-sync.ts` verifies the suite/test counts published in
