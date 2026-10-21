@@ -4,6 +4,10 @@
 
 ### Fixed
 
+- The retrieval candidate cap now scales with the configured `maxFiles`
+  budget instead of a hardcoded 60 (F4). Previously `maxFiles` values above
+  60 were unreachable in Task/File/Selection modes because the ranker
+  truncated its candidate list before budgeting ever saw the tail.
 - Secret findings are now ordered with the same code-point comparator used
   everywhere else (F3). The findings sort previously used
   `String.prototype.localeCompare`, whose collation is locale- and

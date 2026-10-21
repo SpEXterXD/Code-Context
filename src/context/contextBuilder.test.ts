@@ -326,6 +326,42 @@ describe("ContextBuilder", () => {
     expect(fenceLines).toEqual(["````", "````"]);
   });
 
+  it("the retrieval candidate cap scales with maxFiles so maxFiles > 60 is reachable (F4)", async () => {
+    // Build a repo whose files all exact-match one query term: the ranked
+    // list has 70 candidates, more than the historical hardcoded cap of 60.
+    root = makeTempDir();
+    const manyFiles: Record<string, string> = {
+      "package.json": JSON.stringify({ name: "large-fixture", version: "1.0.0" }) + "\n",
+    };
+    for (let i = 0; i < 70; i++) {
+      manyFiles[`src/mod-${i}/widget.ts`] = [
+        "/** widget number" + i + ". */",
+        "export function targetFn() { return " + i + "; }",
+        "",
+      ].join("\n");
+    }
+    writeRepo(root, manyFiles);
+    const app2 = new OccApplication(root, path.join(root, ".occ-store"), {
+      maxFiles: 500,
+      maxChars: 400000,
+      maxLines: 5000,
+      maxTokens: 90000,
+      maxGraphDepth: 3,
+      maxCodeLinesPerFile: 400,
+      structureDepth: 4,
+      secretPolicy: "block",
+      redactSecrets: true,
+      enableGitRecency: false,
+      excludePatterns: [],
+      respectGitignore: true,
+      maxFileSizeBytes: 1024 * 1024,
+    });
+    await app2.indexing.indexWorkspace(CancellationSource.never());
+    const result = app2.buildContext("task", { taskText: "targetFn" });
+    // Every matched file must be a candidate, not truncated at 60.
+    expect(result.filesIncluded).toBeGreaterThan(60);
+  });
+
   it("payload bytes are invariant under a hostile localeCompare (F3)", async () => {
     const a = (await makeApp({ secretPolicy: "block" })).buildContext("task", {
       taskText: "leak apiKey environment",
@@ -333,7 +369,7 @@ describe("ContextBuilder", () => {
     // Simulate a collation that orders strings by reversed code point order:
     // if any output-affecting sort still used localeCompare, the payload would
     // come out in a different byte order than the default locale.
-    const hostileLocaleCompare = function (this: String, other: string | String): number {
+    const hostileLocaleCompare = function (this: string, other: string): number {
       const s = String(this);
       const o = String(other);
       return s < o ? 1 : s > o ? -1 : 0;
