@@ -4,6 +4,13 @@
 
 ### Fixed
 
+- Secret findings are now ordered with the same code-point comparator used
+  everywhere else (F3). The findings sort previously used
+  `String.prototype.localeCompare`, whose collation is locale- and
+  platform-dependent — a hidden cross-platform determinism leak that could
+  reorder WHY reasons for files with multiple findings and therefore change
+  payload bytes. A new test proves the payload is byte-identical under a
+  hostile `localeCompare` replacement.
 - Content-aware source-block fences (F1): the emitted ``` fence for each
   `## SOURCE` block is now longer than any backtick run inside the block's
   content (and language label), so repository content can never close a

@@ -77,7 +77,7 @@ const FIXTURE: Record<string, string> = {
   // a file with TWO findings on the same line (different kinds): the findings
   // sort is the only thing that decides their order in the WHY reasons.
   "src/leak2.ts": [
-    'const API_KEY = "AKIAD8FK29FJ30FJ40"; // key material',
+    'const API_KEY = "AKIAQW8Z7XP6M5L4K3J2"; // key material',
     "export const use = API_KEY;",
     "",
   ].join("\n"),
@@ -324,6 +324,30 @@ describe("ContextBuilder", () => {
     // lines can never close the block even if they appear unnumbered.
     const fenceLines = rendered.split("\n").filter((l) => /^`+$/.test(l));
     expect(fenceLines).toEqual(["````", "````"]);
+  });
+
+  it("payload bytes are invariant under a hostile localeCompare (F3)", async () => {
+    const a = (await makeApp({ secretPolicy: "block" })).buildContext("task", {
+      taskText: "leak apiKey environment",
+    }).payload;
+    // Simulate a collation that orders strings by reversed code point order:
+    // if any output-affecting sort still used localeCompare, the payload would
+    // come out in a different byte order than the default locale.
+    const hostileLocaleCompare = function (this: String, other: string | String): number {
+      const s = String(this);
+      const o = String(other);
+      return s < o ? 1 : s > o ? -1 : 0;
+    };
+    const original = String.prototype.localeCompare;
+    String.prototype.localeCompare = hostileLocaleCompare as unknown as typeof original;
+    try {
+      const b = (await makeApp({ secretPolicy: "block" })).buildContext("task", {
+        taskText: "leak apiKey environment",
+      }).payload;
+      expect(b).toBe(a);
+    } finally {
+      String.prototype.localeCompare = original;
+    }
   });
 
   it("an embedded ``` fence in source content cannot corrupt the payload structure", async () => {
