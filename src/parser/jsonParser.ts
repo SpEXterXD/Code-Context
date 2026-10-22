@@ -43,6 +43,11 @@ export class JsonParser implements SourceParser {
     }
 
     const symbols: SymbolDef[] = [];
+    // One pass over the content builds the key→line index up front; the walk
+    // below does O(1) lookups instead of rescanning every line per key (the
+    // old per-key findKeyLine was O(keys × lines)).
+    const keyLines = keyLineIndex(content);
+    const lineOf = (k: string): number => keyLines.get(k) ?? 1;
     const walk = (v: unknown, keyPath: string, line: number, depth: number): void => {
       if (symbols.length >= MAX_JSON_SYMBOLS || depth > MAX_JSON_DEPTH) return;
       if (keyPath && symbols.length < MAX_JSON_SYMBOLS) {
@@ -65,7 +70,7 @@ export class JsonParser implements SourceParser {
           ? v.slice(0, 20).map((item, i) => [String(i), item] as const)
           : Object.entries(v as Record<string, unknown>);
         for (const [k, child] of entries) {
-          walk(child, keyPath ? `${keyPath}.${k}` : k, findKeyLine(content, k), depth + 1);
+          walk(child, keyPath ? `${keyPath}.${k}` : k, lineOf(k), depth + 1);
         }
       }
     };
@@ -90,13 +95,26 @@ export class JsonParser implements SourceParser {
 
 type ParsedResult = import("./parser").ParsedFile;
 
-function findKeyLine(content: string, key: string): number {
+/**
+ * Single pass over the content: map each quoted key at `"key":` positions to
+ * its first line number. Keys are indexed both in their raw JSON-text form
+ * (with escapes) and unescaped, since walk sees post-parse key strings.
+ */
+function keyLineIndex(content: string): Map<string, number> {
+  const map = new Map<string, number>();
   const lines = content.split(/\r?\n/);
+  const re = /"((?:[^"\\]|\\.)*)"\s*:/g;
   for (let i = 0; i < lines.length; i++) {
-    const re = new RegExp(`"${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"\\s*:`);
-    if (re.test(lines[i])) return i + 1;
+    re.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(lines[i])) !== null) {
+      const raw = m[1];
+      if (!map.has(raw)) map.set(raw, i + 1);
+      const unescaped = raw.replace(/\\(.)/g, "$1");
+      if (unescaped !== raw && !map.has(unescaped)) map.set(unescaped, i + 1);
+    }
   }
-  return 1;
+  return map;
 }
 
 function stripJsonc(text: string): string {
