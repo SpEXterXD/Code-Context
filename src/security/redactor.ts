@@ -25,7 +25,13 @@ export function redactMatch(
 export function assertSecretsAbsent(findings: SecretFinding[], output: string): string[] {
   const leaks: string[] = [];
   for (const finding of findings) {
-    if (finding.match.length >= 8 && output.includes(finding.match)) {
+    // High-confidence kinds are gated regardless of match length — the kind
+    // patterns already keep false positives out, so short matches get no
+    // length-based exemption. Medium-confidence (entropy-heuristic) matches
+    // keep a length floor: short strings are too weak a leak indicator
+    // against arbitrary payload text.
+    const longEnough = finding.confidence === "high" || finding.match.length >= 8;
+    if (longEnough && output.includes(finding.match)) {
       leaks.push(`${finding.kind} at ${finding.filePath}:${finding.line}`);
     }
   }
