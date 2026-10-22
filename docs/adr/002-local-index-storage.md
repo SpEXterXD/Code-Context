@@ -40,9 +40,10 @@ A **sharded JSON KV store** (`JsonIndexStore`):
 
 ## Trade-offs
 
-- No SQL queries; aggregations happen in memory. The graph and inverted
-  index rebuild from entries at startup in roughly 10 ms per 1,000 files
-  (measured, see IMPLEMENTATION_REPORT.md).
+- No SQL queries; aggregations happen in memory. Loading and rebuilding the
+  graph + inverted index from a persisted store is O(entries-forfiles) work:
+  measured ≈ 5–6 s for a 5,000-file store on the audit machine
+  (node v24.15.0, Windows_NT 10.0.26300, AMD Ryzen 7 4800H, 15 GB RAM).
 - More inodes for large repos; acceptable (one small file per indexed file).
 
 ## Consequences

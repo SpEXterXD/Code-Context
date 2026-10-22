@@ -5,12 +5,11 @@ import * as path from "node:path";
 import { OccApplication } from "../application/contextService";
 
 /**
- * Retrieval evaluation set (spec §8.4) run against the real demo-project.
+ * Retrieval evaluation set run against the real demo-project.
  * Expectations are adapted to the demo-project layout (which has dedicated
- * config/rateLimit.ts and middleware/rateLimit.ts files the spec's
- * hypothetical fixture did not). Numbers are asserted to stay stable and are
- * reported in IMPLEMENTATION_REPORT.md. Do not hide poor results; if these
- * regress, fix the retrieval or update the documented numbers knowingly.
+ * config/rateLimit.ts and middleware/rateLimit.ts files). Numbers are
+ * asserted to stay stable. Do not hide poor results; if these regress,
+ * fix the retrieval or update the documented numbers knowingly.
  */
 const EVAL_TABLE: Array<{ query: string; expectedTop1: string; expectedInTop5: string[] }> = [
   {

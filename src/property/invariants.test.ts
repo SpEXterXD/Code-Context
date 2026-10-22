@@ -10,7 +10,7 @@ import { CancellationSource } from "../shared/cancellation";
 import { mulberry32 } from "../testing/prng";
 
 /**
- * Property / invariant tests (spec §8.11) driven by a seeded PRNG so the
+ * Property / invariant tests driven by a seeded PRNG so the
  * suite is reproducible: random file operations must preserve the invariants
  * (no stale records, no reparses of unchanged files, ignored files never
  * indexed).
