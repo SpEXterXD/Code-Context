@@ -30,6 +30,16 @@
   "activationEvents": [
     "onStartupFinished"
   ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true,
+      "description": "OCC only reads workspace files into a local index and copies context to the clipboard; it never writes workspace files or executes workspace content, so it works in restricted mode."
+    },
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "OCC reads workspace files directly from the local file system for deterministic indexing; virtual (VFS-only) workspaces are unsupported."
+    }
+  },
   "contributes": {
     "commands": [
       {
