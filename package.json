@@ -3,13 +3,12 @@
   "displayName": "Offline Code Context Compiler",
   "description": "Analyzes your workspace entirely offline and compiles a deterministic, explainable, LLM-ready context package that you copy to the clipboard. No AI models, no network calls, no telemetry.",
   "version": "0.3.0",
-  "private": true,
   "publisher": "offline-code-context",
   "repository": {
     "type": "git",
     "url": "https://github.com/SpEXterXD/Code-Context"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.85.0",
     "node": ">=18"
@@ -31,6 +30,16 @@
   "activationEvents": [
     "onStartupFinished"
   ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true,
+      "description": "OCC only reads workspace files into a local index and copies context to the clipboard; it never writes workspace files or executes workspace content, so it works in restricted mode."
+    },
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "OCC reads workspace files directly from the local file system for deterministic indexing; virtual (VFS-only) workspaces are unsupported."
+    }
+  },
   "contributes": {
     "commands": [
       {

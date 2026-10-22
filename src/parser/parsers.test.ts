@@ -166,6 +166,26 @@ describe("JsonParser", () => {
     expect(parsed.symbols.find((s) => s.name === "scripts.build")?.startLine).toBe(4);
   });
 
+  it("resolves key lines with a single-pass index (duplicate names keep first occurrence)", () => {
+    const parsed = parser.parse(
+      "cfg.json",
+      `{
+  "outer": {
+    "dup": 1,
+    "inner": { "dup": 2 }
+  },
+  "dup": 3
+}
+`,
+    );
+    const byName = (name: string) => parsed.symbols.find((s) => s.name === name)!;
+    expect(byName("outer").startLine).toBe(2);
+    expect(byName("outer.dup").startLine).toBe(3);
+    expect(byName("outer.inner").startLine).toBe(4);
+    expect(byName("outer.inner.dup").startLine).toBe(3); // first "dup" line wins
+    expect(byName("dup").startLine).toBe(3); // same first-occurrence index
+  });
+
   it("falls back leniently for JSONC and records it", () => {
     const parsed = parser.parse("cfg.jsonc", '{\n  // comment\n  "a": 1,\n}\n');
     expect(parsed.parseError).toContain("non-strict");

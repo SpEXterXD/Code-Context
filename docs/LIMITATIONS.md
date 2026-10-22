@@ -60,8 +60,9 @@ Honest, current as of v0.3.0.
   in-place write; under pathological antivirus interference an index write
   could theoretically fail; the error surfaces (STORE_CORRUPT / IO), and
   the next run reconciles.
-- Benchmarks are reported for the machine that ran them (see
-  IMPLEMENTATION_REPORT.md); your numbers will differ.
+- Benchmarks are reported for the machine that ran them (node v24.15.0,
+  Windows_NT 10.0.26300, AMD Ryzen 7 4800H, 15 GB RAM); your numbers will
+  differ.
 
 ## Explicitly out of scope (v1)
 

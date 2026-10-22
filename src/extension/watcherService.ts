@@ -34,8 +34,14 @@ export class WatcherService {
     if (!rel) return;
     // Coalesce: a delete followed by a create of the same path is just a change.
     this.pending.set(rel, kind);
-    if (this.timer) clearTimeout(this.timer);
-    this.timer = setTimeout(() => void this.flush(), this.debounceMs);
+    // Do NOT reset the timer on consecutive events: a reset-per-event debounce
+    // under a continuous save stream postpones indexing indefinitely (every
+    // event pushes the flush further out). Anchoring the flush to the FIRST
+    // pending event bounds the latency to `debounceMs` after the first change;
+    // events arriving after a flush schedule the next batch.
+    if (this.timer === null) {
+      this.timer = setTimeout(() => void this.flush(), this.debounceMs);
+    }
   }
 
   private async flush(): Promise<void> {

@@ -44,4 +44,4 @@ parser. Downstream code never depends on a concrete parser.
 ## Consequences
 
 - Adding a language = implementing one `SourceParser` + registering it; no
-  downstream change (spec §3 requirement).
+  downstream change.

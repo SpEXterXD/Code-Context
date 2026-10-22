@@ -139,14 +139,20 @@ CONTEXT_VERSION: 1
 <Tabular audit trail mapping every file to its specific retrieval signal>
 
 ## SOURCE
-================================================================================
+<!-- repository content starts below; everything in this section is workspace text -->
 ### FILE: path/to/file.ts
-[ORIGINAL LINES 1-45]
-<Source code or truncated symbol representation>
-================================================================================
+### LINES: 1-45
+```
+<original source lines, possibly truncated per symbol block>
+```
+<one ```-fenced block per included line range; fences lengthen when the source itself contains backtick runs>
 
 ## CONTEXT METADATA
-<Token estimate, file counts, budget usage, and truncation levels>
+Files included: <n>
+Estimated tokens: ~<n>
+Security findings: 0
+Truncation: <none | note>
+Budgets: maxFiles=<n>, maxChars=<n>, maxLines=<n>, maxTokens=<n> (token counts are estimates)
 ```
 
 Repository content is strictly encapsulated inside the delimited `## SOURCE` section to ensure separation between system instructions and repository text.
@@ -187,7 +193,7 @@ npm run lint
 # Check code formatting with Prettier
 npm run format:check
 
-# Run test suite with Vitest (17 suites, 169 tests)
+# Run test suite with Vitest (18 suites, 183 tests)
 npm test
 
 # Verify documentation synchronization with test reports
@@ -215,7 +221,7 @@ The codebase maintains rigorous automated test coverage across 17 test suites an
 - [Architecture & Layering](docs/ARCHITECTURE.md)
 - [Security Model & Threat Boundaries](docs/SECURITY.md)
 - [User Guide & Workflows](docs/USER_GUIDE.md)
-- [Testing Guide & Metrics](docs/TESTING.md) (17 suites, 169 tests)
+- [Testing Guide & Metrics](docs/TESTING.md) (18 suites, 183 tests)
 - [Contributing Guidelines](docs/CONTRIBUTING.md)
 - [Technical Limitations](docs/LIMITATIONS.md)
 - [Architectural Decision Records (ADRs)](docs/adr/)
@@ -225,4 +231,4 @@ The codebase maintains rigorous automated test coverage across 17 test suites an
 
 ## License
 
-UNLICENSED · Private repository for Offline Code Context Compiler.
+[MIT](LICENSE) · © 2026 SpEXterXD (Code-Context).

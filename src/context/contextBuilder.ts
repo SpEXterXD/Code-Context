@@ -347,11 +347,15 @@ export class ContextBuilder {
   }
 
   private retrieveForMode(request: ContextRequest, pinnedPaths: string[]): RetrievalResult {
+    // The retrieval `limit` is a candidate cap, not a final selection cap: it
+    // must not prevent `maxFiles` from binding. Derive it from the configured
+    // budget (with generous headroom for tier-based selection) instead of a
+    // hardcoded 60 that silently capped maxFiles at 60 (F4).
     const opts = {
       maxGraphDepth: this.deps.budget.maxGraphDepth,
       enableGitRecency: this.deps.enableGitRecency,
       pinnedPaths,
-      limit: request.candidateLimit ?? 60,
+      limit: request.candidateLimit ?? Math.max(60, this.deps.budget.maxFiles * 2),
     };
     if (request.mode === "project") {
       return this.retrieveProject(opts, request.scope);

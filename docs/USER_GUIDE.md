@@ -191,7 +191,7 @@ exact reasons it matched. Selecting a result opens the file.
 | File shows as skipped during indexing | `SKIPPED_TOO_LARGE`: raise `maxFileSizeBytes` or add the file to exclusions. `SKIPPED_BINARY`: binary content is never analyzed; this is expected for images and archives. `FAILED`: see the parse error in the index record; the file contributes metadata only. |
 | Package feels too large for your model | Lower `maxFiles`, `maxChars`, `maxTokens`; or raise them for models with big windows. |
 | Package lacks detail on a big file | Lower or raise `maxCodeLinesPerFile`; degradation steps are listed under `Truncation:`. |
-| Large repository, slow first index | Expected: indexing parses every file once (5,000 files took about 15 seconds on the reference machine; see IMPLEMENTATION_REPORT.md). Later runs re-parse changed files only. |
+| Large repository, slow first index | Expected: indexing parses every file once (5,000 files took ≈16–18 s on the audit machine: node v24.15.0, Windows 10.0.26300, AMD Ryzen 7 4800H, 15 GB RAM). Later runs re-parse changed files only. |
 | Results seem stale after changing settings | Run **OCC: Rebuild Index**; exclusion changes in particular require a rebuild. |
 | Copy aborted with a `SECURITY:` error | The final leak gate found a secret value that survived redaction. Review the file named in the Output panel; change `secretPolicy` only if you accept the risk. |
 

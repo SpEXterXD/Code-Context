@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { InMemoryClipboard } from "./clipboardExporter";
 import { OccError } from "../shared/errors";
 
-/** Clipboard tests (spec §8.9): the mock exporter is the clipboard abstraction. */
+/** Clipboard tests: the mock exporter is the clipboard abstraction. */
 describe("ClipboardExporter (mocked)", () => {
   it("copies the exact payload", async () => {
     const clipboard = new InMemoryClipboard();

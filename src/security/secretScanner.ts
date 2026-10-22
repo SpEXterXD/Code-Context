@@ -3,6 +3,7 @@
  * SECURITY.md and LIMITATIONS.md): high-confidence patterns block, entropy
  * heuristics catch generic credential-like values. Fixtures use fake values.
  */
+import { compareStrings } from "../shared/text";
 
 export type SecretKind =
   | "aws-access-key"
@@ -181,7 +182,7 @@ export class SecretScanner {
       }
     }
 
-    return findings.sort((a, b) => a.line - b.line || a.kind.localeCompare(b.kind));
+    return findings.sort((a, b) => a.line - b.line || compareStrings(a.kind, b.kind));
   }
 }
 

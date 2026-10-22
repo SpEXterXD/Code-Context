@@ -219,4 +219,34 @@ describe("verifyNoSecretLeaks (final gate)", () => {
     ).toThrow();
     expect(() => verifyNoSecretLeaks(raw, "payload is clean")).not.toThrow();
   });
+
+  it("gates every high-confidence finding regardless of match length (F10)", () => {
+    const shortHighConfidence: SecretFinding[] = [
+      {
+        kind: "jwt",
+        filePath: "a.ts",
+        line: 1,
+        match: "a1b2",
+        description: "JWT token",
+        confidence: "high",
+      },
+    ];
+    expect(() => verifyNoSecretLeaks(shortHighConfidence, "payload leaks a1b2")).toThrow();
+    expect(() => verifyNoSecretLeaks(shortHighConfidence, "payload is clean")).not.toThrow();
+  });
+
+  it("does not gate short medium-confidence matches (false-positive guard)", () => {
+    const shortMedium: SecretFinding[] = [
+      {
+        kind: "generic-credential",
+        filePath: "a.ts",
+        line: 1,
+        match: "k=v",
+        description: 'high-entropy value assigned to "k"',
+        confidence: "medium",
+      },
+    ];
+    // "k=v" is too short to trust as a leak indicator in arbitrary output.
+    expect(() => verifyNoSecretLeaks(shortMedium, "payload k=v clean")).not.toThrow();
+  });
 });

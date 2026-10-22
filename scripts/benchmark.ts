@@ -88,9 +88,7 @@ async function runScale(fileCount: number): Promise<void> {
 
   const app = new OccApplication(root, store);
   const memoryBefore = process.memoryUsage().heapUsed / 1024 / 1024;
-  const indexMs = await measure("initial index", () =>
-    app.indexing.indexWorkspace(CancellationSource.never()),
-  );
+  await measure("initial index", () => app.indexing.indexWorkspace(CancellationSource.never()));
   const heapAfterIndex = process.memoryUsage().heapUsed / 1024 / 1024;
 
   // Incremental: touch 5% of files.
@@ -102,17 +100,17 @@ async function runScale(fileCount: number): Promise<void> {
     const full = path.join(root, rel);
     fs.writeFileSync(full, fs.readFileSync(full, "utf8") + `// touch ${Date.now() % 1000}\n`);
   }
-  const incrementalMs = await measure(`incremental (${toTouch.length} files changed)`, () =>
+  await measure(`incremental (${toTouch.length} files changed)`, () =>
     app.indexing.indexWorkspace(CancellationSource.never()),
   );
 
-  const searchMs = await measure("search (3 queries)", () => {
+  await measure("search (3 queries)", () => {
     for (const q of ["service run helper", "module0 process data", "test check"]) {
       app.retriever.retrieve(q, { maxGraphDepth: 3, limit: 20 });
     }
   });
 
-  const contextMs = await measure("context generation (task)", () =>
+  await measure("context generation (task)", () =>
     app.buildContext("task", { taskText: "handle service requests in module0" }),
   );
 
@@ -121,7 +119,6 @@ async function runScale(fileCount: number): Promise<void> {
   );
 
   fs.rmSync(root, { recursive: true, force: true });
-  void indexMs;
 }
 
 async function main(): Promise<void> {
