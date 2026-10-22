@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 
 import { OccApplication } from "../application/contextService";
 import type { ContextBuildResult, ContextMode, ContextScope } from "../context/contextBuilder";
+import { readConfig } from "./config";
 import { ContextPreviewProvider } from "./previewProvider";
 import { OccError } from "../shared/errors";
 import { logger } from "../shared/logging";
@@ -220,7 +221,11 @@ export function registerCommands(
         placeHolder: "e.g. rate limiting middleware",
       });
       if (query === undefined || query.trim().length === 0) return;
-      const result = app.retriever.retrieve(query, { maxGraphDepth: 3, limit: 15 });
+      // F13: search depth comes from the user setting, not a hardcoded value.
+      const result = app.retriever.retrieve(query, {
+        maxGraphDepth: readConfig().maxGraphDepth,
+        limit: 15,
+      });
       if (result.ranked.length === 0) {
         void vscode.window.showInformationMessage(`OCC: no results for "${query}"`);
         return;

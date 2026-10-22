@@ -34,6 +34,7 @@ const state = vi.hoisted(() => ({
   outputLines: [] as string[],
   cancelled: false,
   executed: [] as string[],
+  configOverrides: {} as Record<string, unknown>,
 }));
 
 function fileUri(p: string): { scheme: string; path: string; fsPath: string } {
@@ -64,7 +65,7 @@ vi.mock("vscode", () => {
         respectGitignore: true,
         statusBar: true,
       };
-      return defaults[key];
+      return key in state.configOverrides ? state.configOverrides[key] : defaults[key];
     },
   };
   return {
@@ -280,7 +281,7 @@ beforeEach(async () => {
   state.configChangeListeners = [];
   state.outputLines = [];
   state.executed = [];
-  state.cancelled = false;
+  state.configOverrides = {};
 
   root = fs.mkdtempSync(path.join(os.tmpdir(), "occ-activate-"));
   state.root = root;
@@ -454,6 +455,46 @@ describe("activation audit (real activate(), mocked vscode)", () => {
     await state.commands.get("offlineCodeContext.copyContext")!();
     expect(state.clipboard).toContain("### FILE: src/app/index.ts");
     expect(state.clipboard).not.toContain("### FILE: src/app/api.ts");
+  });
+
+  it("search wires the maxGraphDepth setting into graph traversal (F13)", async () => {
+    fs.mkdirSync(path.join(root, "src", "chain"), { recursive: true });
+    fs.writeFileSync(
+      path.join(root, "src", "chain", "chain0.ts"),
+      'import { c1 } from "./chain1";\nexport const c0 = c1;\n',
+    );
+    fs.writeFileSync(
+      path.join(root, "src", "chain", "chain1.ts"),
+      'import { c2 } from "./chain2";\nexport const c1 = c2;\n',
+    );
+    fs.writeFileSync(
+      path.join(root, "src", "chain", "chain2.ts"),
+      'import { zeta } from "./chain3";\nexport const c2 = zeta;\n',
+    );
+    fs.writeFileSync(path.join(root, "src", "chain", "chain3.ts"), "export const zeta = 7;\n");
+    await state.commands.get("offlineCodeContext.indexWorkspace")!();
+    await waitFor(
+      () => countStoreEntries(storageDir) >= 10,
+      10000,
+      "re-index after adding chain files",
+    );
+
+    const pickTargets = (): string[] =>
+      (state.quickPickOptions as Array<{ target?: string }> | null)?.map((p) => p.target ?? "") ?? [];
+
+    // depth 1: chain0 is two dependency hops from any "zeta" hit → no graph signal
+    state.configOverrides.maxGraphDepth = 1;
+    state.inputBox = "zeta";
+    await state.commands.get("offlineCodeContext.searchCodebase")!();
+    expect(pickTargets()).toContain("src/chain/chain3.ts");
+    expect(pickTargets()).toContain("src/chain/chain2.ts");
+    expect(pickTargets()).not.toContain("src/chain/chain0.ts");
+
+    // depth 3: chain0 becomes reachable through chain1 ← chain2
+    state.configOverrides.maxGraphDepth = 3;
+    state.inputBox = "zeta";
+    await state.commands.get("offlineCodeContext.searchCodebase")!();
+    expect(pickTargets()).toContain("src/chain/chain0.ts");
   });
 
   it("watcher: a debounced edit re-indexes only the changed file", async () => {
