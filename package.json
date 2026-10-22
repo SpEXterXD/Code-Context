@@ -298,6 +298,7 @@
     "test:docs-sync": "tsx scripts/check-docs-sync.ts",
     "bench": "tsx scripts/benchmark.ts",
     "bench:small": "tsx scripts/benchmark.ts --max 500",
+    "eval:build-dataset": "tsx scripts/eval-build-dataset.ts",
     "ci": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run test:docs-sync && npm run compile"
   },
   "dependencies": {
