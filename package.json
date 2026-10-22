@@ -3,13 +3,12 @@
   "displayName": "Offline Code Context Compiler",
   "description": "Analyzes your workspace entirely offline and compiles a deterministic, explainable, LLM-ready context package that you copy to the clipboard. No AI models, no network calls, no telemetry.",
   "version": "0.3.0",
-  "private": true,
   "publisher": "offline-code-context",
   "repository": {
     "type": "git",
     "url": "https://github.com/SpEXterXD/Code-Context"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.85.0",
     "node": ">=18"

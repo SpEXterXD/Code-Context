@@ -225,4 +225,4 @@ The codebase maintains rigorous automated test coverage across 17 test suites an
 
 ## License
 
-UNLICENSED · Private repository for Offline Code Context Compiler.
+[MIT](LICENSE) · © 2026 SpEXterXD (Code-Context).
