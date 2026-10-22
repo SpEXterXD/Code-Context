@@ -282,6 +282,7 @@ beforeEach(async () => {
   state.outputLines = [];
   state.executed = [];
   state.configOverrides = {};
+  state.cancelled = false;;
 
   root = fs.mkdtempSync(path.join(os.tmpdir(), "occ-activate-"));
   state.root = root;
