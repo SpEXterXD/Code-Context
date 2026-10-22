@@ -88,9 +88,7 @@ async function runScale(fileCount: number): Promise<void> {
 
   const app = new OccApplication(root, store);
   const memoryBefore = process.memoryUsage().heapUsed / 1024 / 1024;
-  await measure("initial index", () =>
-    app.indexing.indexWorkspace(CancellationSource.never()),
-  );
+  await measure("initial index", () => app.indexing.indexWorkspace(CancellationSource.never()));
   const heapAfterIndex = process.memoryUsage().heapUsed / 1024 / 1024;
 
   // Incremental: touch 5% of files.

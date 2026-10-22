@@ -4,6 +4,36 @@
 
 ### Fixed
 
+- Search (`OCC: Search Codebase`) now follows the configured
+  `maxGraphDepth` setting instead of a hardcoded 3 (F13), with a
+  black-box activation-audit regression test that observes graph-reachable
+  picks at depth 1 vs 3. Dead recorded-but-unused measured variables were
+  also removed from `scripts/benchmark.ts`.
+- `package.json` now declares its VS Code capability surface (F8):
+  `untrustedWorkspaces.supported: true` (OCC only reads files; it never
+  writes workspace files or executes workspace content) and
+  `virtualWorkspaces.supported: false` (indexing requires direct local
+  file system access).
+- The final leak gate now checks every high-confidence finding regardless
+  of match length (F10). Matches shorter than 8 characters were previously
+  exempt from the fail-closed check, so a short high-confidence match could
+  slip past it; the length floor now applies only to medium-confidence
+  (entropy-heuristic) matches, keeping short strings from tripping the gate
+  against arbitrary payload text. Covered by tests in both directions.
+- JSON parsing no longer rescans the whole document per key (F9): a
+  single pass builds the key→line index and the walk does O(1) lookups
+  (previously O(keys × lines)). Line resolution behavior is unchanged.
+- Docs and metadata hygiene (F2, F12): removed all dangling references to
+  a non-existent IMPLEMENTATION_REPORT.md and "spec §" citations; replaced
+  the undocumented performance claims with actual measured benchmark
+  numbers (5,000-file index = 16.1 s on the audit machine: node v24.15.0,
+  Windows_NT 10.0.26300, AMD Ryzen 7 4800H, 15 GB RAM; startup store
+  load+rebuild = 5–6 s for ~5,000 entries). The extension is now MIT
+  licensed (`license: MIT` + LICENSE file, "private" removed) and the
+  README wire-format sketch now matches the actual output
+  (`### LINES: 1-45` fenced blocks instead of `[ORIGINAL LINES 1-45]`).
+- Test-count documentation updated to the new 18 suites / 183 tests;
+  docs-sync verifies against a real vitest run.
 - The watcher debounce no longer resets its timer on every incoming event
   (F6): a continuous save stream used to postpone indexing indefinitely
   because each event pushed the flush further out. The flush is now anchored

@@ -282,7 +282,7 @@ beforeEach(async () => {
   state.outputLines = [];
   state.executed = [];
   state.configOverrides = {};
-  state.cancelled = false;;
+  state.cancelled = false;
 
   root = fs.mkdtempSync(path.join(os.tmpdir(), "occ-activate-"));
   state.root = root;
@@ -481,7 +481,8 @@ describe("activation audit (real activate(), mocked vscode)", () => {
     );
 
     const pickTargets = (): string[] =>
-      (state.quickPickOptions as Array<{ target?: string }> | null)?.map((p) => p.target ?? "") ?? [];
+      (state.quickPickOptions as Array<{ target?: string }> | null)?.map((p) => p.target ?? "") ??
+      [];
 
     // depth 1: chain0 is two dependency hops from any "zeta" hit → no graph signal
     state.configOverrides.maxGraphDepth = 1;

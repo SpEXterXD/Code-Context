@@ -242,7 +242,7 @@ describe("verifyNoSecretLeaks (final gate)", () => {
         filePath: "a.ts",
         line: 1,
         match: "k=v",
-        description: "high-entropy value assigned to \"k\"",
+        description: 'high-entropy value assigned to "k"',
         confidence: "medium",
       },
     ];
