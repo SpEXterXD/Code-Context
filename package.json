@@ -301,7 +301,8 @@
     "eval:build-dataset": "tsx scripts/eval-build-dataset.ts",
     "eval:retrieval": "tsx scripts/eval-retrieval.ts",
     "ci": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run test:docs-sync && npm run compile",
-    "eval:fsmonitor-repro": "tsx scripts/eval/fsmonitor-repro.ts"
+    "eval:fsmonitor-repro": "tsx scripts/eval/fsmonitor-repro.ts",
+    "eval:diagnose": "tsx scripts/eval/eval-diagnose.ts"
   },
   "dependencies": {
     "typescript": "^5.5.4"

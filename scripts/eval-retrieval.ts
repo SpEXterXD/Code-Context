@@ -33,22 +33,9 @@ import process from "node:process";
 import { OccApplication } from "../src/application/contextService";
 import { CancellationSource } from "../src/shared/cancellation";
 
-import { bm25Baseline, filenameBaseline, randomBaseline, type Snapshot } from "./eval/baselines";
-import {
-  applyModeGoldFilter,
-  buildDataset,
-  datasetHash,
-  type DatasetStats,
-  type DatasetTask,
-} from "./eval/dataset";
-import {
-  cloneDirFor,
-  lsTree,
-  materializeSnapshot,
-  mineCommits,
-  verifyPinnedCommit,
-  type LsTreeEntry,
-} from "./eval/gitminer";
+import { bm25Baseline, filenameBaseline, randomBaseline } from "./eval/baselines";
+import type { DatasetTask } from "./eval/dataset";
+import { cloneDirFor, materializeSnapshot, verifyPinnedCommit } from "./eval/gitminer";
 import {
   aggregateRuns,
   pairedDiffCi,
@@ -69,10 +56,17 @@ import {
   isSourcePath,
   isTestPath,
 } from "./eval/lib";
+import {
+  buildTuningDataset,
+  loadEvalDataset,
+  loadReposFile,
+  readSnapshot,
+  type DatasetFile,
+  type RepoEntry,
+  type ReposFile,
+} from "./eval/splitLoader";
 
 const ROOT = path.resolve(import.meta.dirname ?? path.join(process.cwd(), "scripts"), "..");
-const REPOS_JSON = path.join(ROOT, "scripts", "eval", "repos.json");
-const DATASET_JSON = path.join(ROOT, "docs", "eval", "dataset.json");
 const RESULTS_JSON = path.join(ROOT, "docs", "eval", "results.json");
 const RESULTS_MD = path.join(ROOT, "docs", "eval", "results.md");
 const TUNING_RESULTS_JSON = path.join(ROOT, "docs", "eval", "results-tuning.json");
@@ -81,11 +75,6 @@ const SCRATCH_ROOT = path.join(ROOT, ".eval-cache", "scratch");
 
 const SEED = 20260918;
 const RETRIEVE_LIMIT = 50;
-// Baselines read file contents up to OCC's own scanner limit (1 MiB,
-// src/workspace/workspaceScanner.ts) so every system ranks the same file
-// universe; larger files exist in gold but are invisible to all systems
-// equally rather than to the baselines only.
-const MAX_SNAPSHOT_FILE_BYTES = 1024 * 1024;
 
 type SystemName = "occ" | "filename" | "bm25" | "random";
 const SYSTEMS: SystemName[] = ["occ", "filename", "bm25", "random"];
@@ -100,36 +89,6 @@ const PAIRED_METRIC_KEYS: PairedMetricKey[] = [
   "mrr",
   "packageRecall",
 ];
-
-interface ReposFile {
-  seed: number;
-  tasksPerRepo: number;
-  repos: {
-    id: string;
-    url: string;
-    defaultBranch: string;
-    pinnedCommit: string;
-    license: string;
-    note: string;
-  }[];
-}
-
-interface RepoEntry {
-  pinnedCommit: string;
-  license: string;
-  note: string;
-  sourceFilesAtPin: number;
-  stats: DatasetStats;
-  datasetHash: string;
-}
-
-interface DatasetFile {
-  seed: number;
-  tasksPerRepo: number;
-  datasetHash: string;
-  repos: Record<string, RepoEntry>;
-  tasks: DatasetTask[];
-}
 
 interface SystemSummary {
   overall: RunMetrics;
@@ -224,31 +183,6 @@ function argSplit(): "eval" | "tuning" {
   return "eval";
 }
 
-/** Reads every text file of the snapshot dir into an in-memory map. */
-function readSnapshot(dir: string): Snapshot {
-  const out: Snapshot = new Map();
-  const stack = [dir];
-  while (stack.length > 0) {
-    const cur = stack.pop()!;
-    for (const name of fs.readdirSync(cur, { withFileTypes: true })) {
-      const full = path.join(cur, name.name);
-      if (name.isDirectory()) {
-        stack.push(full);
-        continue;
-      }
-      if (!name.isFile()) continue;
-      const rel = path.relative(dir, full).replace(/\\/g, "/");
-      try {
-        if (fs.statSync(full).size > MAX_SNAPSHOT_FILE_BYTES) continue;
-        out.set(rel, fs.readFileSync(full, "utf8"));
-      } catch {
-        /* unreadable file is simply not a snapshot candidate */
-      }
-    }
-  }
-  return out;
-}
-
 function occHeadCommit(): string {
   try {
     return execFileSync("git", ["-C", ROOT, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
@@ -269,68 +203,11 @@ function occWorkingTreeClean(): boolean {
   }
 }
 
-/**
- * Builds the TUNING dataset in memory: mines each pinned clone, samples the
- * earlier half of the time split (buildDataset split="tuning"), applies the
- * same mode gold filter. Never reads or writes docs/eval/dataset.json.
- */
-function buildTuningDataset(repos: ReposFile, wanted: string[] | undefined): DatasetFile {
-  const perRepo: Record<string, RepoEntry> = {};
-  const allTasks: DatasetTask[] = [];
-  for (const repo of repos.repos) {
-    if (wanted && !wanted.includes(repo.id)) continue;
-    const clonePath = cloneDirFor(repo.id);
-    try {
-      verifyPinnedCommit(clonePath, repo.pinnedCommit);
-    } catch (error) {
-      console.error(`[${repo.id}] ${(error as Error).message}`);
-      process.exit(1);
-    }
-    const built = buildDataset(
-      repo.id,
-      mineCommits(clonePath),
-      repos.tasksPerRepo,
-      repos.seed,
-      "tuning",
-    );
-    const treeCache = new Map<string, LsTreeEntry[]>();
-    const filtered = applyModeGoldFilter(built.tasks, (parentSha) => {
-      let entries = treeCache.get(parentSha);
-      if (!entries) {
-        entries = lsTree(clonePath, parentSha);
-        treeCache.set(parentSha, entries);
-      }
-      return entries;
-    });
-    const stats: DatasetStats = { ...built.stats, ...filtered.stats };
-    perRepo[repo.id] = {
-      pinnedCommit: repo.pinnedCommit,
-      license: repo.license,
-      note: repo.note,
-      sourceFilesAtPin: 0,
-      stats,
-      datasetHash: datasetHash(filtered.tasks),
-    };
-    allTasks.push(...filtered.tasks);
-    console.log(
-      `[${repo.id}] TUNING half: sampled=${stats.sampled} evaluated=${stats.evaluatedTasks}` +
-        ` (empty-gold dropped=${stats.tasksDroppedEmptyGold}, partial-gold tasks=${stats.tasksWithPartialGoldDrop})`,
-    );
-  }
-  return {
-    seed: repos.seed,
-    tasksPerRepo: repos.tasksPerRepo,
-    datasetHash: datasetHash(allTasks),
-    repos: perRepo,
-    tasks: allTasks,
-  };
-}
-
 async function run(): Promise<void> {
   const split = argSplit();
   const outJson = split === "tuning" ? TUNING_RESULTS_JSON : RESULTS_JSON;
   const outMd = split === "tuning" ? TUNING_RESULTS_MD : RESULTS_MD;
-  const repos = JSON.parse(fs.readFileSync(REPOS_JSON, "utf8")) as ReposFile;
+  const repos = loadReposFile();
   const filter = argReposFilter();
   let dataset: DatasetFile;
   if (split === "tuning") {
@@ -342,17 +219,10 @@ async function run(): Promise<void> {
     );
     dataset = buildTuningDataset(repos, filter);
   } else {
-    if (!fs.existsSync(DATASET_JSON)) {
-      console.error(
-        `Missing ${path.relative(ROOT, DATASET_JSON)} — build it first: npm run eval:build-dataset (needs network once).`,
-      );
-      process.exit(1);
-    }
-    dataset = JSON.parse(fs.readFileSync(DATASET_JSON, "utf8")) as DatasetFile;
-    if (dataset.datasetHash !== datasetHash(dataset.tasks)) {
-      console.error(
-        `Dataset hash mismatch in ${path.relative(ROOT, DATASET_JSON)} — it was edited or built with different code. Re-run eval:build-dataset.`,
-      );
+    try {
+      dataset = loadEvalDataset();
+    } catch (error) {
+      console.error((error as Error).message);
       process.exit(1);
     }
   }
