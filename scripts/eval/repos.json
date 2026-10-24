@@ -1,6 +1,7 @@
 {
   "seed": 20260918,
-  "tasksPerRepo": 40,
+  "tasksPerRepo": 100,
+  "tuningTasksPerRepo": 60,
   "repos": [
     {
       "id": "hono",

@@ -27,6 +27,8 @@ export const DATASET_JSON = path.join(ROOT, "docs", "eval", "dataset.json");
 export interface ReposFile {
   seed: number;
   tasksPerRepo: number;
+  /** M3: separate sample size for the tuning split (defaults to tasksPerRepo). */
+  tuningTasksPerRepo?: number;
   repos: {
     id: string;
     url: string;
@@ -125,7 +127,7 @@ export function buildTuningDataset(repos: ReposFile, wanted: string[] | undefine
     const built = buildDataset(
       repo.id,
       mineCommits(clonePath),
-      repos.tasksPerRepo,
+      repos.tuningTasksPerRepo ?? repos.tasksPerRepo,
       repos.seed,
       "tuning",
     );

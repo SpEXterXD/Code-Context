@@ -138,6 +138,11 @@ interface CaseStudy {
 interface ResultsFile {
   /** Which half of the time split this run measured. */
   split: "eval" | "tuning";
+  /**
+   * M3 eval-run budget: how many full eval-split runs (including this one)
+   * have happened on this machine across the milestone. null for tuning.
+   */
+  evalSplitRunsIncludingThis: number | null;
   seed: number;
   /** OCC commit the run was executed from (captured at run start). */
   occCommit: string;
@@ -205,8 +210,28 @@ function occWorkingTreeClean(): boolean {
   }
 }
 
+/**
+ * M3 budget guard: counts FULL eval-split runs in a git-ignored counter file
+ * so results.json can prove how many eval runs happened in the milestone
+ * (tuning runs are unlimited and never counted).
+ */
+const EVAL_RUN_COUNTER = path.join(ROOT, ".eval-cache", "eval-split-runs.json");
+function nextEvalRunIndex(): number {
+  let n = 0;
+  try {
+    n = (JSON.parse(fs.readFileSync(EVAL_RUN_COUNTER, "utf8")) as { count?: number }).count ?? 0;
+  } catch {
+    /* fresh counter */
+  }
+  n += 1;
+  fs.mkdirSync(path.dirname(EVAL_RUN_COUNTER), { recursive: true });
+  fs.writeFileSync(EVAL_RUN_COUNTER, `${JSON.stringify({ count: n })}\n`);
+  return n;
+}
+
 async function run(): Promise<void> {
   const split = argSplit();
+  const evalRunIndex = split === "eval" ? nextEvalRunIndex() : null;
   const outJson = split === "tuning" ? TUNING_RESULTS_JSON : RESULTS_JSON;
   const outMd = split === "tuning" ? TUNING_RESULTS_MD : RESULTS_MD;
   const repos = loadReposFile();
@@ -539,6 +564,7 @@ async function run(): Promise<void> {
 
   const results: ResultsFile = {
     split,
+    evalSplitRunsIncludingThis: evalRunIndex,
     seed: SEED,
     occCommit: occHeadCommit(),
     workingTreeClean: occWorkingTreeClean(),
@@ -586,7 +612,7 @@ function writeResultsMd(results: ResultsFile, dataset: DatasetFile, outPath: str
   );
   lines.push("");
   lines.push(
-    `Dataset hash \`${results.datasetHash}\` · ${results.tasks} tasks · seed ${results.seed} · split **${results.split}** · OCC commit \`${results.occCommit.slice(0, 12)}\` · working tree clean at run start: ${results.workingTreeClean ? "yes" : "NO"}`,
+    `Dataset hash \`${results.datasetHash}\` · ${results.tasks} tasks · seed ${results.seed} · split **${results.split}**${results.evalSplitRunsIncludingThis ? ` · eval-split run #${results.evalSplitRunsIncludingThis} this milestone` : ""} · OCC commit \`${results.occCommit.slice(0, 12)}\` · working tree clean at run start: ${results.workingTreeClean ? "yes" : "NO"}`,
   );
   lines.push("");
   lines.push("## Overall (mean [95% bootstrap CI], per task)");
