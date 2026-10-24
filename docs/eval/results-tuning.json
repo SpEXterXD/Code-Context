@@ -2,7 +2,7 @@
   "split": "tuning",
   "evalSplitRunsIncludingThis": null,
   "seed": 20260918,
-  "occCommit": "821c5c8d5ef94c291e2871f3eb26a44b27c89921",
+  "occCommit": "1b63fad8b37074f22f0b4795df2e69fe00d1b109",
   "workingTreeClean": true,
   "datasetHash": "ec50ab4f",
   "tasks": 300,
@@ -12,98 +12,98 @@
       "overall": {
         "top1": {
           "n": 300,
-          "mean": 0.46,
-          "ciLow": 0.4033333333333333,
-          "ciHigh": 0.5166666666666667
+          "mean": 0.4533333333333333,
+          "ciLow": 0.39666666666666667,
+          "ciHigh": 0.51
         },
         "recall5": {
           "n": 300,
-          "mean": 0.508484126984127,
-          "ciLow": 0.4700634920634923,
-          "ciHigh": 0.5481746031746032
+          "mean": 0.5160714285714285,
+          "ciLow": 0.47577777777777774,
+          "ciHigh": 0.5546666666666669
         },
         "recall10": {
           "n": 300,
-          "mean": 0.6276111111111113,
-          "ciLow": 0.5880793650793652,
-          "ciHigh": 0.6648888888888891
+          "mean": 0.6537301587301588,
+          "ciLow": 0.6140079365079365,
+          "ciHigh": 0.6916349206349207
         },
         "allGoldAcc10": {
           "n": 300,
-          "mean": 0.39,
-          "ciLow": 0.33666666666666667,
-          "ciHigh": 0.44666666666666666
+          "mean": 0.42333333333333334,
+          "ciLow": 0.37,
+          "ciHigh": 0.48
         },
         "mrr": {
           "n": 300,
-          "mean": 0.6019493851772755,
-          "ciLow": 0.559064894318608,
-          "ciHigh": 0.6468012509784008
+          "mean": 0.597019137539119,
+          "ciLow": 0.5520127043845166,
+          "ciHigh": 0.6429634196835319
         }
       },
       "perRepo": {
         "axios": {
           "top1": {
             "n": 60,
-            "mean": 0.4666666666666667,
-            "ciLow": 0.35,
-            "ciHigh": 0.5833333333333334
+            "mean": 0.45,
+            "ciLow": 0.3333333333333333,
+            "ciHigh": 0.5666666666666667
           },
           "recall5": {
             "n": 60,
-            "mean": 0.5067460317460317,
-            "ciLow": 0.41242063492063485,
-            "ciHigh": 0.6046031746031745
+            "mean": 0.4611904761904761,
+            "ciLow": 0.36142857142857143,
+            "ciHigh": 0.5549206349206348
           },
           "recall10": {
             "n": 60,
-            "mean": 0.5920238095238095,
-            "ciLow": 0.49583333333333335,
-            "ciHigh": 0.6843650793650793
+            "mean": 0.6336904761904762,
+            "ciLow": 0.5318253968253968,
+            "ciHigh": 0.7242063492063493
           },
           "allGoldAcc10": {
             "n": 60,
-            "mean": 0.38333333333333336,
-            "ciLow": 0.26666666666666666,
-            "ciHigh": 0.5
+            "mean": 0.45,
+            "ciLow": 0.3333333333333333,
+            "ciHigh": 0.5666666666666667
           },
           "mrr": {
             "n": 60,
-            "mean": 0.5837193703340317,
-            "ciLow": 0.48125595561017553,
-            "ciHigh": 0.6819466780521363
+            "mean": 0.5549098465245078,
+            "ciLow": 0.45483361177103393,
+            "ciHigh": 0.6545261437908497
           }
         },
         "fastify": {
           "top1": {
             "n": 60,
-            "mean": 0.43333333333333335,
-            "ciLow": 0.3,
-            "ciHigh": 0.5666666666666667
+            "mean": 0.38333333333333336,
+            "ciLow": 0.26666666666666666,
+            "ciHigh": 0.5166666666666667
           },
           "recall5": {
             "n": 60,
-            "mean": 0.508968253968254,
-            "ciLow": 0.4203571428571428,
-            "ciHigh": 0.5967460317460317
+            "mean": 0.5302380952380953,
+            "ciLow": 0.4446825396825397,
+            "ciHigh": 0.6213095238095239
           },
           "recall10": {
             "n": 60,
-            "mean": 0.6209523809523809,
-            "ciLow": 0.5428571428571428,
-            "ciHigh": 0.7015079365079365
+            "mean": 0.6534920634920632,
+            "ciLow": 0.5756746031746031,
+            "ciHigh": 0.7295238095238096
           },
           "allGoldAcc10": {
             "n": 60,
-            "mean": 0.3333333333333333,
-            "ciLow": 0.21666666666666667,
-            "ciHigh": 0.45
+            "mean": 0.36666666666666664,
+            "ciLow": 0.25,
+            "ciHigh": 0.48333333333333334
           },
           "mrr": {
             "n": 60,
-            "mean": 0.6139817123965676,
-            "ciLow": 0.5139559893273661,
-            "ciHigh": 0.7068506493506495
+            "mean": 0.5792610313662947,
+            "ciLow": 0.4852746765904662,
+            "ciHigh": 0.6746854510012404
           }
         },
         "hono": {
@@ -115,59 +115,59 @@
           },
           "recall5": {
             "n": 60,
-            "mean": 0.491388888888889,
-            "ciLow": 0.3916666666666666,
-            "ciHigh": 0.583888888888889
+            "mean": 0.5002777777777778,
+            "ciLow": 0.40444444444444444,
+            "ciHigh": 0.5958333333333333
           },
           "recall10": {
             "n": 60,
-            "mean": 0.6549999999999998,
-            "ciLow": 0.5600000000000002,
-            "ciHigh": 0.7441666666666665
+            "mean": 0.6769444444444442,
+            "ciLow": 0.5855555555555555,
+            "ciHigh": 0.7655555555555555
           },
           "allGoldAcc10": {
             "n": 60,
-            "mean": 0.45,
-            "ciLow": 0.31666666666666665,
-            "ciHigh": 0.5666666666666667
+            "mean": 0.48333333333333334,
+            "ciLow": 0.36666666666666664,
+            "ciHigh": 0.6
           },
           "mrr": {
             "n": 60,
-            "mean": 0.5036451899596188,
-            "ciLow": 0.41138924817278466,
-            "ciHigh": 0.5982539682539684
+            "mean": 0.506685648896817,
+            "ciLow": 0.41416702595056243,
+            "ciHigh": 0.6021428571428572
           }
         },
         "undici": {
           "top1": {
             "n": 60,
-            "mean": 0.43333333333333335,
-            "ciLow": 0.31666666666666665,
-            "ciHigh": 0.55
+            "mean": 0.4666666666666667,
+            "ciLow": 0.3333333333333333,
+            "ciHigh": 0.5833333333333334
           },
           "recall5": {
             "n": 60,
-            "mean": 0.495,
-            "ciLow": 0.3927777777777778,
-            "ciHigh": 0.595
+            "mean": 0.5602777777777778,
+            "ciLow": 0.4597222222222222,
+            "ciHigh": 0.6494444444444445
           },
           "recall10": {
             "n": 60,
-            "mean": 0.6619444444444444,
-            "ciLow": 0.5694444444444445,
-            "ciHigh": 0.7544444444444445
+            "mean": 0.6908333333333333,
+            "ciLow": 0.5944444444444446,
+            "ciHigh": 0.7819444444444447
           },
           "allGoldAcc10": {
             "n": 60,
-            "mean": 0.5,
-            "ciLow": 0.36666666666666664,
-            "ciHigh": 0.6166666666666667
+            "mean": 0.5333333333333333,
+            "ciLow": 0.4,
+            "ciHigh": 0.65
           },
           "mrr": {
             "n": 60,
-            "mean": 0.5459256605109141,
-            "ciLow": 0.45212917659346225,
-            "ciHigh": 0.646905476905477
+            "mean": 0.5844654153882628,
+            "ciLow": 0.48465230129765513,
+            "ciHigh": 0.6801937774401542
           }
         },
         "zod": {
@@ -179,15 +179,15 @@
           },
           "recall5": {
             "n": 60,
-            "mean": 0.5403174603174604,
-            "ciLow": 0.46388888888888885,
-            "ciHigh": 0.6197619047619048
+            "mean": 0.5283730158730159,
+            "ciLow": 0.45369047619047626,
+            "ciHigh": 0.6005952380952381
           },
           "recall10": {
             "n": 60,
-            "mean": 0.6081349206349207,
-            "ciLow": 0.5317063492063493,
-            "ciHigh": 0.6853571428571429
+            "mean": 0.6136904761904762,
+            "ciLow": 0.5383333333333333,
+            "ciHigh": 0.6900793650793652
           },
           "allGoldAcc10": {
             "n": 60,
@@ -197,53 +197,53 @@
           },
           "mrr": {
             "n": 60,
-            "mean": 0.7624749926852462,
-            "ciLow": 0.668692899202692,
-            "ciHigh": 0.8492290249433108
+            "mean": 0.7597737455197132,
+            "ciLow": 0.6636626344086023,
+            "ciHigh": 0.8469444444444444
           }
         }
       },
       "overallSourceOnly": {
         "top1": {
           "n": 300,
-          "mean": 0.46,
-          "ciLow": 0.4033333333333333,
-          "ciHigh": 0.5166666666666667
+          "mean": 0.4533333333333333,
+          "ciLow": 0.39666666666666667,
+          "ciHigh": 0.51
         },
         "recall5": {
           "n": 300,
-          "mean": 0.5117301587301588,
-          "ciLow": 0.47307936507936543,
-          "ciHigh": 0.5511349206349206
+          "mean": 0.5194285714285715,
+          "ciLow": 0.47926984126984146,
+          "ciHigh": 0.5578968253968253
         },
         "recall10": {
           "n": 300,
-          "mean": 0.631793650793651,
-          "ciLow": 0.5929761904761904,
-          "ciHigh": 0.6700714285714285
+          "mean": 0.6575793650793652,
+          "ciLow": 0.6179126984126984,
+          "ciHigh": 0.6948412698412699
         },
         "allGoldAcc10": {
           "n": 300,
-          "mean": 0.39666666666666667,
-          "ciLow": 0.3433333333333333,
-          "ciHigh": 0.4533333333333333
+          "mean": 0.43,
+          "ciLow": 0.37666666666666665,
+          "ciHigh": 0.4866666666666667
         },
         "mrr": {
           "n": 300,
-          "mean": 0.6019493851772755,
-          "ciLow": 0.559064894318608,
-          "ciHigh": 0.6468012509784008
+          "mean": 0.597019137539119,
+          "ciLow": 0.5520127043845166,
+          "ciHigh": 0.6429634196835319
         }
       },
       "packageRecall": {
         "n": 300,
-        "mean": 0.5947103174603178,
-        "ciLow": 0.5538333333333335,
-        "ciHigh": 0.6350079365079366
+        "mean": 0.6020436507936511,
+        "ciLow": 0.5622182539682542,
+        "ciHigh": 0.6415277777777779
       },
       "packageStats": {
-        "meanTokens": 25213.533333333333,
-        "meanFilesIncluded": 14.923333333333334
+        "meanTokens": 25174.133333333335,
+        "meanFilesIncluded": 14.986666666666666
       }
     },
     "filename": {
@@ -991,88 +991,88 @@
     "full": {
       "top1": {
         "n": 300,
-        "meanDiff": 0.16666666666666666,
-        "ciLow": 0.09333333333333334,
-        "ciHigh": 0.24,
+        "meanDiff": 0.16,
+        "ciLow": 0.08666666666666667,
+        "ciHigh": 0.23,
         "excludesZero": true
       },
       "recall5": {
         "n": 300,
-        "meanDiff": 0.08128174603174604,
-        "ciLow": 0.03569841269841272,
-        "ciHigh": 0.13194444444444445,
+        "meanDiff": 0.08886904761904763,
+        "ciLow": 0.04655158730158732,
+        "ciHigh": 0.13646031746031748,
         "excludesZero": true
       },
       "recall10": {
         "n": 300,
-        "meanDiff": 0.035928571428571435,
-        "ciLow": -0.006626984126984129,
-        "ciHigh": 0.07884920634920634,
-        "excludesZero": false
+        "meanDiff": 0.06204761904761906,
+        "ciLow": 0.020269841269841292,
+        "ciHigh": 0.10250793650793655,
+        "excludesZero": true
       },
       "allGoldAcc10": {
         "n": 300,
-        "meanDiff": 0.016666666666666666,
-        "ciLow": -0.03333333333333333,
-        "ciHigh": 0.07,
+        "meanDiff": 0.05,
+        "ciLow": 0,
+        "ciHigh": 0.10333333333333333,
         "excludesZero": false
       },
       "mrr": {
         "n": 300,
-        "meanDiff": 0.1422706478174747,
-        "ciLow": 0.08769795904906248,
-        "ciHigh": 0.19436302747910356,
+        "meanDiff": 0.13734040017931812,
+        "ciLow": 0.08705692288323165,
+        "ciHigh": 0.1878871817717142,
         "excludesZero": true
       },
       "packageRecall": {
         "n": 300,
-        "meanDiff": 0.06026190476190475,
-        "ciLow": 0.012626984126984118,
-        "ciHigh": 0.11188095238095236,
+        "meanDiff": 0.06759523809523807,
+        "ciLow": 0.019412698412698413,
+        "ciHigh": 0.11869047619047621,
         "excludesZero": true
       }
     },
     "sourceOnly": {
       "top1": {
         "n": 300,
-        "meanDiff": 0.17,
-        "ciLow": 0.1,
-        "ciHigh": 0.24,
+        "meanDiff": 0.16333333333333333,
+        "ciLow": 0.09333333333333334,
+        "ciHigh": 0.23,
         "excludesZero": true
       },
       "recall5": {
         "n": 300,
-        "meanDiff": 0.08309920634920634,
-        "ciLow": 0.03758730158730159,
-        "ciHigh": 0.13065873015873022,
+        "meanDiff": 0.09079761904761906,
+        "ciLow": 0.0484404761904762,
+        "ciHigh": 0.135734126984127,
         "excludesZero": true
       },
       "recall10": {
         "n": 300,
-        "meanDiff": 0.037357142857142846,
-        "ciLow": -0.010222222222222221,
-        "ciHigh": 0.08329365079365082,
-        "excludesZero": false
+        "meanDiff": 0.06314285714285715,
+        "ciLow": 0.014166666666666666,
+        "ciHigh": 0.10761904761904761,
+        "excludesZero": true
       },
       "allGoldAcc10": {
         "n": 300,
-        "meanDiff": 0.02,
-        "ciLow": -0.03666666666666667,
-        "ciHigh": 0.07333333333333333,
+        "meanDiff": 0.05333333333333334,
+        "ciLow": 0,
+        "ciHigh": 0.10333333333333333,
         "excludesZero": false
       },
       "mrr": {
         "n": 300,
-        "meanDiff": 0.14393731448414135,
-        "ciLow": 0.09182007652123575,
-        "ciHigh": 0.1993582012702778,
+        "meanDiff": 0.13900706684598477,
+        "ciLow": 0.08682128966589302,
+        "ciHigh": 0.19277081205364743,
         "excludesZero": true
       },
       "packageRecall": {
         "n": 300,
-        "meanDiff": 0.06099206349206348,
-        "ciLow": 0.01313492063492064,
-        "ciHigh": 0.11303968253968258,
+        "meanDiff": 0.0683253968253968,
+        "ciLow": 0.01876984126984127,
+        "ciHigh": 0.12134126984126989,
         "excludesZero": true
       }
     }
@@ -1108,19 +1108,6 @@
             "type": "other",
             "occRank": 50,
             "bm25Rank": 1,
-            "inOccCandidates": true
-          }
-        ]
-      },
-      {
-        "id": "axios:83ae3830e407",
-        "repoId": "axios",
-        "missing": [
-          {
-            "path": "test/specs/interceptors.spec.js",
-            "type": "test",
-            "occRank": 12,
-            "bm25Rank": 3,
             "inOccCandidates": true
           }
         ]
@@ -1185,19 +1172,6 @@
         ]
       },
       {
-        "id": "fastify:84122c9e4b57",
-        "repoId": "fastify",
-        "missing": [
-          {
-            "path": "test/listen.test.js",
-            "type": "test",
-            "occRank": 13,
-            "bm25Rank": 1,
-            "inOccCandidates": true
-          }
-        ]
-      },
-      {
         "id": "fastify:978dd0c00bf1",
         "repoId": "fastify",
         "missing": [
@@ -1217,20 +1191,7 @@
           {
             "path": "package.json",
             "type": "ci-config",
-            "occRank": 29,
-            "bm25Rank": 4,
-            "inOccCandidates": true
-          }
-        ]
-      },
-      {
-        "id": "fastify:ac8fed4387d1",
-        "repoId": "fastify",
-        "missing": [
-          {
-            "path": "test/custom-parser.test.js",
-            "type": "test",
-            "occRank": 13,
+            "occRank": 16,
             "bm25Rank": 4,
             "inOccCandidates": true
           }
@@ -1256,35 +1217,35 @@
           {
             "path": "deno_dist/jsx/dom/index.ts",
             "type": "source",
-            "occRank": 11,
+            "occRank": 12,
             "bm25Rank": 7,
             "inOccCandidates": true
           },
           {
             "path": "deno_dist/jsx/hooks/index.ts",
             "type": "source",
-            "occRank": 40,
+            "occRank": 18,
             "bm25Rank": 4,
             "inOccCandidates": true
           },
           {
             "path": "src/jsx/dom/index.test.tsx",
             "type": "test",
-            "occRank": 39,
+            "occRank": 11,
             "bm25Rank": 1,
             "inOccCandidates": true
           },
           {
             "path": "src/jsx/dom/index.ts",
             "type": "source",
-            "occRank": 12,
+            "occRank": 13,
             "bm25Rank": 6,
             "inOccCandidates": true
           },
           {
             "path": "src/jsx/hooks/index.ts",
             "type": "source",
-            "occRank": 41,
+            "occRank": 19,
             "bm25Rank": 3,
             "inOccCandidates": true
           }
@@ -1304,14 +1265,14 @@
           {
             "path": "src/context.test.ts",
             "type": "test",
-            "occRank": null,
+            "occRank": 34,
             "bm25Rank": 6,
-            "inOccCandidates": false
+            "inOccCandidates": true
           },
           {
             "path": "src/middleware/pretty-json/index.ts",
             "type": "source",
-            "occRank": 29,
+            "occRank": 32,
             "bm25Rank": 8,
             "inOccCandidates": true
           }
@@ -1357,7 +1318,7 @@
           {
             "path": "lib/fetch/body.js",
             "type": "source",
-            "occRank": 31,
+            "occRank": 17,
             "bm25Rank": 4,
             "inOccCandidates": true
           },
@@ -1366,19 +1327,6 @@
             "type": "test",
             "occRank": 51,
             "bm25Rank": 3,
-            "inOccCandidates": true
-          }
-        ]
-      },
-      {
-        "id": "undici:1b858fbcaec4",
-        "repoId": "undici",
-        "missing": [
-          {
-            "path": "lib/websocket/receiver.js",
-            "type": "source",
-            "occRank": 49,
-            "bm25Rank": 1,
             "inOccCandidates": true
           }
         ]
@@ -1436,20 +1384,7 @@
           {
             "path": "test/fetch/client-fetch.js",
             "type": "test",
-            "occRank": 36,
-            "bm25Rank": 2,
-            "inOccCandidates": true
-          }
-        ]
-      },
-      {
-        "id": "undici:fa6b2100a1b5",
-        "repoId": "undici",
-        "missing": [
-          {
-            "path": "lib/fetch/util.js",
-            "type": "source",
-            "occRank": 33,
+            "occRank": 37,
             "bm25Rank": 2,
             "inOccCandidates": true
           }
@@ -1472,20 +1407,6 @@
             "occRank": null,
             "bm25Rank": 2,
             "inOccCandidates": false
-          },
-          {
-            "path": "deno/lib/__tests__/partials.test.ts",
-            "type": "test",
-            "occRank": 48,
-            "bm25Rank": 8,
-            "inOccCandidates": true
-          },
-          {
-            "path": "src/__tests__/partials.test.ts",
-            "type": "test",
-            "occRank": 49,
-            "bm25Rank": 7,
-            "inOccCandidates": true
           }
         ]
       },
@@ -1496,9 +1417,9 @@
           {
             "path": "deno/lib/README.md",
             "type": "docs",
-            "occRank": null,
+            "occRank": 29,
             "bm25Rank": 2,
-            "inOccCandidates": false
+            "inOccCandidates": true
           }
         ]
       },
@@ -1549,14 +1470,14 @@
           {
             "path": "deno/lib/__tests__/discriminatedUnions.test.ts",
             "type": "test",
-            "occRank": 71,
+            "occRank": 68,
             "bm25Rank": 9,
             "inOccCandidates": true
           },
           {
             "path": "src/__tests__/discriminatedUnions.test.ts",
             "type": "test",
-            "occRank": 72,
+            "occRank": 69,
             "bm25Rank": 8,
             "inOccCandidates": true
           }
@@ -1569,9 +1490,9 @@
           {
             "path": "README.md",
             "type": "docs",
-            "occRank": null,
+            "occRank": 12,
             "bm25Rank": 2,
-            "inOccCandidates": false
+            "inOccCandidates": true
           }
         ]
       },
@@ -1590,17 +1511,17 @@
       }
     ],
     "summary": {
-      "tasks": 30,
-      "missingFiles": 47,
+      "tasks": 25,
+      "missingFiles": 40,
       "byType": {
         "ci-config": 4,
         "docs": 7,
         "other": 1,
-        "source": 18,
-        "test": 17
+        "source": 16,
+        "test": 12
       },
-      "notInOccCandidates": 12,
-      "occRankMedian": 34,
+      "notInOccCandidates": 9,
+      "occRankMedian": 24,
       "bm25RankMedian": 4
     }
   },
@@ -1703,9 +1624,9 @@
           "configs/ts-jest.config.json",
           "configs/jest.config.json",
           "jest.config.json",
+          "configs/swc-jest.config.json",
           "deno/lib/__tests__/default.test.ts",
-          "src/__tests__/default.test.ts",
-          "deno/lib/__tests__/catch.test.ts"
+          "src/__tests__/default.test.ts"
         ],
         "mrr": 0,
         "recall10": 0
@@ -1783,15 +1704,15 @@
         ],
         "topRanked": [
           "fastify.js",
+          "docs/Server.md",
+          "lib/logger.js",
           "lib/reply.js",
           "test/internals/handleRequest.test.js",
           "test/internals/contentTypeParser.test.js",
+          "test/logger.test.js",
+          "docs/Reply.md",
           "lib/wrapThenable.js",
-          "lib/handleRequest.js",
-          "lib/request.js",
-          "lib/hookRunner.js",
-          "lib/validation.js",
-          "lib/schemas.js"
+          "lib/handleRequest.js"
         ],
         "mrr": 1,
         "recall10": 1
@@ -1806,15 +1727,15 @@
         ],
         "topRanked": [
           "fastify.js",
+          "docs/Server.md",
           "lib/logger.js",
+          "test/logger.test.js",
           "lib/reply.js",
+          "test/internals/logger.test.js",
           "lib/validation.js",
           "test/internals/handleRequest.test.js",
           "lib/request.js",
-          "lib/handleRequest.js",
-          "lib/wrapThenable.js",
-          "docs/Server.md",
-          "lib/reqIdGenFactory.js"
+          "test/genReqId.test.js"
         ],
         "mrr": 1,
         "recall10": 1
@@ -1829,16 +1750,16 @@
           "lib/hooks.js"
         ],
         "topRanked": [
-          "lib/hooks.js",
           "lib/ContentTypeParser.js",
+          "lib/hooks.js",
           "lib/logger.js",
+          "docs/ContentTypeParser.md",
           "fastify.js",
+          "docs/Hooks.md",
+          "docs/Reply.md",
           "lib/reply.js",
           "lib/handleRequest.js",
-          "lib/validation.js",
-          "test/internals/handleRequest.test.js",
-          "lib/errorUtils.js",
-          "lib/pluginUtils.js"
+          "lib/validation.js"
         ],
         "mrr": 1,
         "recall10": 1
@@ -1846,10 +1767,10 @@
     ]
   },
   "timingMs": {
-    "snapshotMs": 2936998.5421,
-    "indexMs": 284695.85000000056,
-    "occMs": 32640.105299997842,
-    "baselinesMs": 52269.63060000099
+    "snapshotMs": 121192.39170000034,
+    "indexMs": 438762.17819999944,
+    "occMs": 48551.37970000016,
+    "baselinesMs": 78952.84379999999
   },
   "environment": {
     "node": "v24.15.0",

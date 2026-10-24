@@ -32,6 +32,7 @@ import process from "node:process";
 
 import { OccApplication } from "../src/application/contextService";
 import { CancellationSource } from "../src/shared/cancellation";
+import { M3_CONTENT_FUSION } from "../src/retrieval/hybridRetriever";
 
 import { bm25Baseline, filenameBaseline, randomBaseline } from "./eval/baselines";
 import type { DatasetTask } from "./eval/dataset";
@@ -138,6 +139,8 @@ interface CaseStudy {
 interface ResultsFile {
   /** Which half of the time split this run measured. */
   split: "eval" | "tuning";
+  /** Named scoring constants disabled for this run (--ablate), if any. */
+  ablations: string[];
   /**
    * M3 eval-run budget: how many full eval-split runs (including this one)
    * have happened on this machine across the milestone. null for tuning.
@@ -169,6 +172,30 @@ interface ResultsFile {
     };
   };
   caseStudies: { worst: CaseStudy[]; best: CaseStudy[] };
+  /**
+   * OCC per-task metric values (full + source-only slices), enabling paired
+   * old-vs-new comparisons across runs (metrics.pairedDiffCi on aligned ids).
+   */
+  perTask: Array<{
+    id: string;
+    goldFiles: number;
+    full: {
+      top1: number;
+      recall5: number;
+      recall10: number;
+      allGoldAcc10: number;
+      mrr: number;
+      packageRecall: number;
+    };
+    sourceOnly: {
+      top1: number;
+      recall5: number;
+      recall10: number;
+      allGoldAcc10: number;
+      mrr: number;
+      packageRecall: number;
+    };
+  }>;
   timingMs: { snapshotMs: number; indexMs: number; occMs: number; baselinesMs: number };
   environment: { node: string; platform: string; cpu: string; totalMemGB: number };
 }
@@ -229,8 +256,45 @@ function nextEvalRunIndex(): number {
   return n;
 }
 
+/**
+ * M3 ablation registry: named scoring changes can be switched off for a run
+ * via `--ablate <name>` (repeatable). The harness flips the exported named
+ * constant (the extension default stays on) and records the ablation in
+ * results.json so A/B comparisons are provably configured.
+ */
+const ABLATIONS: Record<string, { label: string; apply: () => void }> = {
+  fusion: {
+    label: "M3_CONTENT_FUSION (E2 content-score fusion) disabled",
+    apply: () => {
+      M3_CONTENT_FUSION.enabled = false;
+    },
+  },
+};
+
+function argAblations(): string[] {
+  const out: string[] = [];
+  for (
+    let i = process.argv.indexOf("--ablate");
+    i !== -1;
+    i = process.argv.indexOf("--ablate", i + 1)
+  ) {
+    const name = process.argv[i + 1];
+    if (!name || !ABLATIONS[name]) {
+      console.error(`--ablate must be one of: ${Object.keys(ABLATIONS).join(", ")}`);
+      process.exit(1);
+    }
+    out.push(name);
+  }
+  return out;
+}
+
 async function run(): Promise<void> {
   const split = argSplit();
+  const ablations = argAblations();
+  for (const name of ablations) {
+    ABLATIONS[name]!.apply();
+    console.log(`ABLATION active: ${name} — ${ABLATIONS[name]!.label}`);
+  }
   const outJson = split === "tuning" ? TUNING_RESULTS_JSON : RESULTS_JSON;
   const outMd = split === "tuning" ? TUNING_RESULTS_MD : RESULTS_MD;
   const repos = loadReposFile();
@@ -623,8 +687,31 @@ async function run(): Promise<void> {
   // Eval-run budget is consumed only by runs that COMPLETE (a crashed run
   // measures nothing and must not burn one of the two allowed eval runs).
   const evalRunIndex = split === "eval" ? nextEvalRunIndex() : null;
+  const occRankingOf = (id: string): RankedFile[] => ranks.get("occ")!.get(id) ?? [];
+  const perTask = [...tasks]
+    .sort((a, b) => (a.id < b.id ? -1 : 1))
+    .map((t) => {
+      const gold = goldOf("full")(t);
+      const srcGold = goldOf("sourceOnly")(t);
+      const f = taskMetrics(occRankingOf(t.id), gold);
+      const s =
+        srcGold.length > 0
+          ? taskMetrics(occRankingOf(t.id), srcGold)
+          : { top1: 0, recall5: 0, recall10: 0, allGoldAcc10: 0, mrr: 0 };
+      return {
+        id: t.id,
+        goldFiles: gold.length,
+        full: { ...f, packageRecall: packageRecallValue("occ", t, gold) },
+        sourceOnly: {
+          ...s,
+          packageRecall: srcGold.length > 0 ? packageRecallValue("occ", t, srcGold) : 0,
+        },
+      };
+    });
+
   const results: ResultsFile = {
     split,
+    ablations,
     evalSplitRunsIncludingThis: evalRunIndex,
     seed: SEED,
     occCommit: occHeadCommit(),
@@ -637,6 +724,7 @@ async function run(): Promise<void> {
     pairedBootstrap,
     allGoldGap,
     caseStudies,
+    perTask,
     timingMs,
     environment: {
       node: process.version,
