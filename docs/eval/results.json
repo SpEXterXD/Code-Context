@@ -1,0 +1,1054 @@
+{
+  "seed": 20260918,
+  "occCommit": "c5b3e634af1decf37c5a3ab081fbf5b82d81847f",
+  "workingTreeClean": true,
+  "datasetHash": "9b42dc9b",
+  "tasks": 200,
+  "systems": {
+    "occ": {
+      "overall": {
+        "top1": {
+          "n": 200,
+          "mean": 0.305,
+          "ciLow": 0.24,
+          "ciHigh": 0.37
+        },
+        "recall5": {
+          "n": 200,
+          "mean": 0.3708095238095239,
+          "ciLow": 0.3213392857142857,
+          "ciHigh": 0.41989880952380965
+        },
+        "recall10": {
+          "n": 200,
+          "mean": 0.4784047619047619,
+          "ciLow": 0.426011904761905,
+          "ciHigh": 0.5292916666666667
+        },
+        "allGoldAcc10": {
+          "n": 200,
+          "mean": 0.255,
+          "ciLow": 0.195,
+          "ciHigh": 0.32
+        },
+        "mrr": {
+          "n": 200,
+          "mean": 0.44898808764215353,
+          "ciLow": 0.39497212277600235,
+          "ciHigh": 0.5039054091048658
+        }
+      },
+      "perRepo": {
+        "axios": {
+          "top1": {
+            "n": 40,
+            "mean": 0.4,
+            "ciLow": 0.25,
+            "ciHigh": 0.55
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.4705059523809524,
+            "ciLow": 0.34273809523809506,
+            "ciHigh": 0.5966666666666667
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.5741071428571428,
+            "ciLow": 0.46273809523809517,
+            "ciHigh": 0.6895238095238096
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0.35,
+            "ciLow": 0.2,
+            "ciHigh": 0.5
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.5431223739495799,
+            "ciLow": 0.41472193043884226,
+            "ciHigh": 0.6738515406162464
+          }
+        },
+        "fastify": {
+          "top1": {
+            "n": 40,
+            "mean": 0.275,
+            "ciLow": 0.15,
+            "ciHigh": 0.4
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.31791666666666674,
+            "ciLow": 0.22333333333333333,
+            "ciHigh": 0.4175000000000001
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.3929166666666667,
+            "ciLow": 0.29375,
+            "ciHigh": 0.48999999999999994
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0.15,
+            "ciLow": 0.05,
+            "ciHigh": 0.275
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.44229700160950164,
+            "ciLow": 0.3191962620712621,
+            "ciHigh": 0.5579842657342657
+          }
+        },
+        "hono": {
+          "top1": {
+            "n": 40,
+            "mean": 0.325,
+            "ciLow": 0.2,
+            "ciHigh": 0.475
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.5258333333333334,
+            "ciLow": 0.4108333333333333,
+            "ciHigh": 0.6508333333333334
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.6960416666666667,
+            "ciLow": 0.5741666666666666,
+            "ciHigh": 0.8116666666666668
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0.525,
+            "ciLow": 0.375,
+            "ciHigh": 0.675
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.5032437288743512,
+            "ciLow": 0.39612075922982964,
+            "ciHigh": 0.6252664542394678
+          }
+        },
+        "undici": {
+          "top1": {
+            "n": 40,
+            "mean": 0.175,
+            "ciLow": 0.075,
+            "ciHigh": 0.3
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.179375,
+            "ciLow": 0.10187500000000002,
+            "ciHigh": 0.2654166666666667
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.28770833333333334,
+            "ciLow": 0.19520833333333334,
+            "ciHigh": 0.38583333333333336
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0.1,
+            "ciLow": 0.025,
+            "ciHigh": 0.2
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.3065149780774781,
+            "ciLow": 0.19683531746031752,
+            "ciHigh": 0.41898008241758233
+          }
+        },
+        "zod": {
+          "top1": {
+            "n": 40,
+            "mean": 0.35,
+            "ciLow": 0.2,
+            "ciHigh": 0.5
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.36041666666666666,
+            "ciLow": 0.26000000000000006,
+            "ciHigh": 0.4691666666666666
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.44125000000000003,
+            "ciLow": 0.3433333333333333,
+            "ciHigh": 0.5404166666666667
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0.15,
+            "ciLow": 0.05,
+            "ciHigh": 0.275
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.44976235569985573,
+            "ciLow": 0.32090909090909087,
+            "ciHigh": 0.5732738095238095
+          }
+        }
+      },
+      "packageStats": {
+        "meanTokens": 27360.9,
+        "meanFilesIncluded": 8.045
+      }
+    },
+    "filename": {
+      "overall": {
+        "top1": {
+          "n": 200,
+          "mean": 0.16,
+          "ciLow": 0.11,
+          "ciHigh": 0.21
+        },
+        "recall5": {
+          "n": 200,
+          "mean": 0.27092261904761905,
+          "ciLow": 0.21729761904761913,
+          "ciHigh": 0.3256666666666667
+        },
+        "recall10": {
+          "n": 200,
+          "mean": 0.36758928571428556,
+          "ciLow": 0.3106666666666667,
+          "ciHigh": 0.4298095238095238
+        },
+        "allGoldAcc10": {
+          "n": 200,
+          "mean": 0.265,
+          "ciLow": 0.205,
+          "ciHigh": 0.33
+        },
+        "mrr": {
+          "n": 200,
+          "mean": 0.2640313188760755,
+          "ciLow": 0.21931902311266657,
+          "ciHigh": 0.31313153903406876
+        }
+      },
+      "perRepo": {
+        "axios": {
+          "top1": {
+            "n": 40,
+            "mean": 0.2,
+            "ciLow": 0.075,
+            "ciHigh": 0.325
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.28273809523809523,
+            "ciLow": 0.1625,
+            "ciHigh": 0.39880952380952384
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.36190476190476184,
+            "ciLow": 0.22916666666666666,
+            "ciHigh": 0.49107142857142855
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0.25,
+            "ciLow": 0.125,
+            "ciHigh": 0.375
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.28383841894317174,
+            "ciLow": 0.16960032233137973,
+            "ciHigh": 0.40862720542550673
+          }
+        },
+        "fastify": {
+          "top1": {
+            "n": 40,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.14125,
+            "ciLow": 0.06416666666666666,
+            "ciHigh": 0.22625
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.2525,
+            "ciLow": 0.1583333333333333,
+            "ciHigh": 0.3533333333333334
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0.1,
+            "ciLow": 0.025,
+            "ciHigh": 0.2
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.13276330029619504,
+            "ciLow": 0.08788239538239537,
+            "ciHigh": 0.18675865800865799
+          }
+        },
+        "hono": {
+          "top1": {
+            "n": 40,
+            "mean": 0.2,
+            "ciLow": 0.1,
+            "ciHigh": 0.325
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.41541666666666666,
+            "ciLow": 0.28500000000000003,
+            "ciHigh": 0.5591666666666667
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.6433333333333333,
+            "ciLow": 0.5041666666666667,
+            "ciHigh": 0.7725
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0.6,
+            "ciLow": 0.45,
+            "ciHigh": 0.75
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.32480320256055545,
+            "ciLow": 0.2207945291768821,
+            "ciHigh": 0.4356161518661518
+          }
+        },
+        "undici": {
+          "top1": {
+            "n": 40,
+            "mean": 0.175,
+            "ciLow": 0.075,
+            "ciHigh": 0.3
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.21520833333333336,
+            "ciLow": 0.10791666666666666,
+            "ciHigh": 0.3258333333333333
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.2627083333333333,
+            "ciLow": 0.15145833333333333,
+            "ciHigh": 0.3795833333333333
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0.175,
+            "ciLow": 0.075,
+            "ciHigh": 0.3
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.2494514589052404,
+            "ciLow": 0.1395513963161022,
+            "ciHigh": 0.3583047385620915
+          }
+        },
+        "zod": {
+          "top1": {
+            "n": 40,
+            "mean": 0.225,
+            "ciLow": 0.1,
+            "ciHigh": 0.35
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.3,
+            "ciLow": 0.1895833333333333,
+            "ciHigh": 0.4229166666666667
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.3175,
+            "ciLow": 0.20916666666666664,
+            "ciHigh": 0.4379166666666666
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0.2,
+            "ciLow": 0.075,
+            "ciHigh": 0.325
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.32930021367521367,
+            "ciLow": 0.21912393162393165,
+            "ciHigh": 0.45376602564102564
+          }
+        }
+      }
+    },
+    "bm25": {
+      "overall": {
+        "top1": {
+          "n": 200,
+          "mean": 0.255,
+          "ciLow": 0.195,
+          "ciHigh": 0.315
+        },
+        "recall5": {
+          "n": 200,
+          "mean": 0.35897619047619045,
+          "ciLow": 0.29938690476190477,
+          "ciHigh": 0.41275000000000006
+        },
+        "recall10": {
+          "n": 200,
+          "mean": 0.48131547619047615,
+          "ciLow": 0.4251785714285715,
+          "ciHigh": 0.535797619047619
+        },
+        "allGoldAcc10": {
+          "n": 200,
+          "mean": 0.31,
+          "ciLow": 0.245,
+          "ciHigh": 0.375
+        },
+        "mrr": {
+          "n": 200,
+          "mean": 0.39551342134091216,
+          "ciLow": 0.3398278980144129,
+          "ciHigh": 0.4468343838881013
+        }
+      },
+      "perRepo": {
+        "axios": {
+          "top1": {
+            "n": 40,
+            "mean": 0.175,
+            "ciLow": 0.075,
+            "ciHigh": 0.3
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.26276785714285716,
+            "ciLow": 0.1575,
+            "ciHigh": 0.3782440476190476
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.3896428571428572,
+            "ciLow": 0.275952380952381,
+            "ciHigh": 0.513392857142857
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0.2,
+            "ciLow": 0.075,
+            "ciHigh": 0.35
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.3260757433376903,
+            "ciLow": 0.2232797313279061,
+            "ciHigh": 0.4333685861158273
+          }
+        },
+        "fastify": {
+          "top1": {
+            "n": 40,
+            "mean": 0.2,
+            "ciLow": 0.075,
+            "ciHigh": 0.325
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.3135714285714285,
+            "ciLow": 0.21071428571428572,
+            "ciHigh": 0.4260714285714286
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.4306547619047619,
+            "ciLow": 0.320952380952381,
+            "ciHigh": 0.5466666666666666
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0.225,
+            "ciLow": 0.1,
+            "ciHigh": 0.375
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.360640324450107,
+            "ciLow": 0.25798732879439396,
+            "ciHigh": 0.47356612318840574
+          }
+        },
+        "hono": {
+          "top1": {
+            "n": 40,
+            "mean": 0.475,
+            "ciLow": 0.3,
+            "ciHigh": 0.625
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.5872916666666665,
+            "ciLow": 0.45041666666666663,
+            "ciHigh": 0.7166666666666667
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.673125,
+            "ciLow": 0.5349999999999999,
+            "ciHigh": 0.788125
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0.575,
+            "ciLow": 0.4,
+            "ciHigh": 0.725
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.5775480769230769,
+            "ciLow": 0.4483104395604395,
+            "ciHigh": 0.7
+          }
+        },
+        "undici": {
+          "top1": {
+            "n": 40,
+            "mean": 0.325,
+            "ciLow": 0.175,
+            "ciHigh": 0.475
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.4483333333333334,
+            "ciLow": 0.3258333333333333,
+            "ciHigh": 0.5779166666666666
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.5125,
+            "ciLow": 0.38708333333333333,
+            "ciHigh": 0.6408333333333334
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0.325,
+            "ciLow": 0.175,
+            "ciHigh": 0.475
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.4624697068359412,
+            "ciLow": 0.33380951622010524,
+            "ciHigh": 0.5910328439676266
+          }
+        },
+        "zod": {
+          "top1": {
+            "n": 40,
+            "mean": 0.1,
+            "ciLow": 0.025,
+            "ciHigh": 0.2
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.18291666666666667,
+            "ciLow": 0.09374999999999999,
+            "ciHigh": 0.2841666666666666
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.4006547619047619,
+            "ciLow": 0.28148809523809526,
+            "ciHigh": 0.5149999999999999
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0.225,
+            "ciLow": 0.1,
+            "ciHigh": 0.35
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.2508332551577436,
+            "ciLow": 0.17564006272925708,
+            "ciHigh": 0.34284097002031777
+          }
+        }
+      }
+    },
+    "random": {
+      "overall": {
+        "top1": {
+          "n": 200,
+          "mean": 0,
+          "ciLow": 0,
+          "ciHigh": 0
+        },
+        "recall5": {
+          "n": 200,
+          "mean": 0.0074583333333333324,
+          "ciLow": 0.0016250000000000001,
+          "ciHigh": 0.015
+        },
+        "recall10": {
+          "n": 200,
+          "mean": 0.009125,
+          "ciLow": 0.0022916666666666667,
+          "ciHigh": 0.017083333333333336
+        },
+        "allGoldAcc10": {
+          "n": 200,
+          "mean": 0,
+          "ciLow": 0,
+          "ciHigh": 0
+        },
+        "mrr": {
+          "n": 200,
+          "mean": 0.015509595713129027,
+          "ciLow": 0.009584216009476803,
+          "ciHigh": 0.022144400038523932
+        }
+      },
+      "perRepo": {
+        "axios": {
+          "top1": {
+            "n": 40,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.005,
+            "ciLow": 0,
+            "ciHigh": 0.015000000000000003
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.005,
+            "ciLow": 0,
+            "ciHigh": 0.015000000000000003
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.02022426517315865,
+            "ciLow": 0.007897426647426648,
+            "ciHigh": 0.03969582706407537
+          }
+        },
+        "fastify": {
+          "top1": {
+            "n": 40,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.016666666666666666,
+            "ciLow": 0,
+            "ciHigh": 0.041666666666666664
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.016666666666666666,
+            "ciLow": 0,
+            "ciHigh": 0.041666666666666664
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.01964915521900816,
+            "ciLow": 0.008087276782129723,
+            "ciHigh": 0.035820521390374324
+          }
+        },
+        "hono": {
+          "top1": {
+            "n": 40,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.003125,
+            "ciLow": 0,
+            "ciHigh": 0.009375
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.003125,
+            "ciLow": 0,
+            "ciHigh": 0.009375
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.014680868838763577,
+            "ciLow": 0.0028412698412698415,
+            "ciHigh": 0.03548872180451128
+          }
+        },
+        "undici": {
+          "top1": {
+            "n": 40,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.005275932400932401,
+            "ciLow": 0.001,
+            "ciHigh": 0.011744463869463869
+          }
+        },
+        "zod": {
+          "top1": {
+            "n": 40,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "recall5": {
+            "n": 40,
+            "mean": 0.0125,
+            "ciLow": 0,
+            "ciHigh": 0.0375
+          },
+          "recall10": {
+            "n": 40,
+            "mean": 0.020833333333333332,
+            "ciLow": 0,
+            "ciHigh": 0.05833333333333333
+          },
+          "allGoldAcc10": {
+            "n": 40,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "mrr": {
+            "n": 40,
+            "mean": 0.01771775693378237,
+            "ciLow": 0.0052468271743187755,
+            "ciHigh": 0.03629453097028285
+          }
+        }
+      }
+    }
+  },
+  "caseStudies": {
+    "worst": [
+      {
+        "id": "hono:645b4f21eb2c",
+        "repoId": "hono",
+        "subject": "fix(jsx/dom): Fixed to not give \"px\" for certain properties, even if numeric value is given (#2845)",
+        "task": "fix(jsx/dom): Fixed to not give \"px\" for certain properties, even if numeric value is given",
+        "gold": [
+          "src/jsx/utils.ts"
+        ],
+        "topRanked": [
+          "src/jsx/intrinsic-elements.ts",
+          "src/jsx/dom/index.test.tsx",
+          "src/adapter/aws-lambda/handler.ts",
+          "src/jsx/base.ts",
+          "src/jsx/dom/render.ts",
+          "src/jsx/jsx-runtime.ts",
+          "src/jsx/constants.ts",
+          "src/jsx/dom/index.ts",
+          "src/jsx/dom/utils.ts",
+          "src/adapter/aws-lambda/custom-context.ts"
+        ],
+        "mrr": 0,
+        "recall10": 0
+      },
+      {
+        "id": "hono:9a6e52d734df",
+        "repoId": "hono",
+        "subject": "feat(middleware/combine): Introduce combine middleware (#2941)",
+        "task": "feat(middleware/combine): Introduce combine middleware * feat(middleware/predicate): Introduce predicate middleware * fix: apply `bun run format:fix` * refactor: rename middleware predicate -> combine",
+        "gold": [
+          "jsr.json",
+          "package.json"
+        ],
+        "topRanked": [
+          "src/types.test.ts",
+          "src/utils/concurrent.ts",
+          "src/jsx/dom/render.ts",
+          "src/helper/ssg/ssg.ts",
+          "src/adapter/bun/websocket.ts",
+          "src/helper/streaming/sse.ts",
+          "src/helper/ssg/middleware.ts",
+          "src/adapter/bun/server.ts",
+          "runtime_tests/deno/middleware.test.tsx",
+          "src/types.ts"
+        ],
+        "mrr": 0,
+        "recall10": 0
+      },
+      {
+        "id": "zod:50ef910565a1",
+        "repoId": "zod",
+        "subject": "Add output type generic test",
+        "task": "Add output type generic test",
+        "gold": [
+          "packages/zod/src/v4/classic/tests/generics.test.ts",
+          "play.ts"
+        ],
+        "topRanked": [
+          "packages/zod/src/v3/types.ts",
+          "packages/zod/src/v3/tests/language-server.source.ts",
+          "packages/zod/src/v3/standard-schema.ts",
+          "packages/zod/src/v3/tests/tuple.test.ts",
+          "packages/zod/src/v3/ZodError.ts",
+          "packages/zod/src/v3/tests/standard-schema.test.ts",
+          "packages/zod/src/v3/tests/all-errors.test.ts",
+          "packages/zod/src/v3/tests/refine.test.ts",
+          "packages/zod/src/v3/tests/error.test.ts",
+          "packages/zod/src/v3/helpers/typeAliases.ts"
+        ],
+        "mrr": 0,
+        "recall10": 0
+      },
+      {
+        "id": "zod:813451db7fcf",
+        "repoId": "zod",
+        "subject": "v4.0.10 (#4978)",
+        "task": "v4.0.10 * Add discriminator to invalid_union. Closes * WIP * Closes * 4.0.10",
+        "gold": [
+          "packages/zod/jsr.json",
+          "packages/zod/package.json",
+          "packages/zod/src/v4/classic/tests/discriminated-unions.test.ts",
+          "packages/zod/src/v4/core/errors.ts",
+          "packages/zod/src/v4/core/schemas.ts",
+          "packages/zod/src/v4/core/versions.ts",
+          "play.ts"
+        ],
+        "topRanked": [
+          "packages/zod/src/v3/types.ts",
+          "packages/zod/src/v3/ZodError.ts",
+          "packages/zod/src/v3/tests/error.test.ts",
+          "packages/zod/src/v3/locales/en.ts",
+          "packages/zod/src/v4/locales/fi.ts",
+          "packages/zod/src/v3/helpers/parseUtil.ts",
+          "packages/zod/src/v4/locales/fr-CA.ts",
+          "packages/zod/src/v4/locales/fr.ts",
+          "packages/zod/src/v4/locales/en.ts",
+          "packages/zod/src/v4/locales/he.ts"
+        ],
+        "mrr": 0,
+        "recall10": 0
+      },
+      {
+        "id": "zod:d3da530deb71",
+        "repoId": "zod",
+        "subject": "reflect the specified regex correctly in error (#5338)",
+        "task": "reflect the specified regex correctly in error",
+        "gold": [
+          "packages/zod/src/v4/core/schemas.ts"
+        ],
+        "topRanked": [
+          "packages/zod/src/v3/types.ts",
+          "packages/zod/src/v4/core/api.ts",
+          "packages/zod/src/v4/classic/schemas.ts",
+          "packages/zod/src/v4/core/errors.ts",
+          "packages/zod/src/v4/core/regexes.ts",
+          "packages/zod/src/v4/locales/ar.ts",
+          "packages/zod/src/v4/locales/az.ts",
+          "packages/zod/src/v4/locales/be.ts",
+          "packages/zod/src/v4/locales/bg.ts",
+          "packages/zod/src/v4/locales/ca.ts"
+        ],
+        "mrr": 0,
+        "recall10": 0
+      }
+    ],
+    "best": [
+      {
+        "id": "fastify:3b0f76993d51",
+        "repoId": "fastify",
+        "subject": "fix: anchor keyValuePairsReg to prevent quadratic backtracking (#6558)",
+        "task": "fix: anchor keyValuePairsReg to prevent quadratic backtracking",
+        "gold": [
+          "lib/content-type.js"
+        ],
+        "topRanked": [
+          "lib/content-type.js",
+          "lib/plugin-utils.js",
+          "lib/reply.js",
+          "lib/route.js",
+          "fastify.js",
+          "lib/decorate.js",
+          "lib/plugin-override.js",
+          "lib/handle-request.js",
+          "test/types/plugin.test-d.ts",
+          "lib/promise.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      },
+      {
+        "id": "fastify:329e40f09f23",
+        "repoId": "fastify",
+        "subject": "fix: error throwing in reply (#6299)",
+        "task": "fix: error throwing in reply * fix: instantiate readable stream error * Create reply-web-stream-locked.test.js * fix test ---------",
+        "gold": [
+          "lib/reply.js"
+        ],
+        "topRanked": [
+          "lib/reply.js",
+          "test/types/plugin.test-d.ts",
+          "test/types/register.test-d.ts",
+          "test/internals/reply.test.js",
+          "fastify.js",
+          "lib/error-handler.js",
+          "test/diagnostics-channel/error-before-handler.test.js",
+          "test/diagnostics-channel/error-request.test.js",
+          "test/logger/logging.test.js",
+          "test/logger/instantiation.test.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      },
+      {
+        "id": "fastify:3f02c96bc379",
+        "repoId": "fastify",
+        "subject": "fix: return 431 status code on HTTP header overflow error (#4856)",
+        "task": "fix: return 431 status code on HTTP header overflow error",
+        "gold": [
+          "fastify.js"
+        ],
+        "topRanked": [
+          "fastify.js",
+          "lib/error-handler.js",
+          "lib/reply.js",
+          "lib/route.js",
+          "types/reply.d.ts",
+          "lib/validation.js",
+          "lib/request.js",
+          "test/internals/reply.test.js",
+          "test/types/route.test-d.ts",
+          "test/internals/request.test.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      },
+      {
+        "id": "axios:315ec44489ca",
+        "repoId": "axios",
+        "subject": "refactor(http): extract Http2Sessions into its own module (#10861)",
+        "task": "refactor(http): extract Http2Sessions into its own module * refactor(http): extract Http2Sessions to lib/helpers for direct unit tests * fix(http2): clear pending idle timer when session closes * fix(http2): address review — strict mode, Node-only note, observable timer test ---------",
+        "gold": [
+          "lib/adapters/http.js"
+        ],
+        "topRanked": [
+          "lib/adapters/http.js",
+          "lib/defaults/index.js",
+          "lib/helpers/resolveConfig.js",
+          "index.d.ts",
+          "tests/unit/adapters/http.test.js",
+          "lib/core/AxiosHeaders.js",
+          "lib/adapters/fetch.js",
+          "index.d.cts",
+          "tests/setup/server.js",
+          "lib/core/InterceptorManager.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      },
+      {
+        "id": "axios:8d372335f5c5",
+        "repoId": "axios",
+        "subject": "fix(http): fix 'socket hang up' bug for keep-alive requests when using timeouts; (#7206)",
+        "task": "fix(http): fix 'socket hang up' bug for keep-alive requests when using timeouts;",
+        "gold": [
+          "lib/adapters/http.js",
+          "test/unit/adapters/http.js"
+        ],
+        "topRanked": [
+          "lib/adapters/http.js",
+          "test/unit/adapters/http.js",
+          "test/helpers/server.js",
+          "test/unit/adapters/fetch.js",
+          "lib/adapters/xhr.js",
+          "index.js",
+          "lib/core/Axios.js",
+          "lib/adapters/fetch.js",
+          "lib/helpers/parseHeaders.js",
+          "test/specs/defaults.spec.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      }
+    ]
+  },
+  "timingMs": {
+    "snapshotMs": 213494.78300000064,
+    "indexMs": 1092482.9626000002,
+    "occMs": 34119.8731999993,
+    "baselinesMs": 169620.85140000045
+  },
+  "environment": {
+    "node": "v24.15.0",
+    "platform": "win32 10.0.26300",
+    "cpu": "AMD Ryzen 7 4800H with Radeon Graphics         ",
+    "totalMemGB": 15.4
+  }
+}
