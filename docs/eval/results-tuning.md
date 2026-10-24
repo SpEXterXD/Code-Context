@@ -1,6 +1,6 @@
 # Retrieval Evaluation Results — TUNING SPLIT
 
-Dataset hash `ec50ab4f` · 300 tasks · seed 20260918 · split **tuning** · OCC commit `1b63fad8b370` · working tree clean at run start: yes
+Dataset hash `ec50ab4f` · 300 tasks · seed 20260918 · split **tuning** · OCC commit `82e75222bcaf` · working tree clean at run start: NO
 
 ## Overall (mean [95% bootstrap CI], per task)
 
@@ -270,4 +270,4 @@ Mined 2935, accepted 494, sampled 60, evaluated 60 (dropped for empty effective 
 
 {"node":"v24.15.0","platform":"win32 10.0.26300","cpu":"AMD Ryzen 7 4800H with Radeon Graphics         ","totalMemGB":15.4}
 
-timings (ms): {"snapshotMs":121192.39170000034,"indexMs":438762.17819999944,"occMs":48551.37970000016,"baselinesMs":78952.84379999999}
+timings (ms): {"snapshotMs":106871.88789999994,"indexMs":378837.4823000001,"occMs":45764.52700000045,"baselinesMs":74586.24369999953}
