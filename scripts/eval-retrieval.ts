@@ -17,7 +17,12 @@
  * the working-tree-clean flag and machine info live only in the dedicated
  * timing/environment sections.
  *
- * Usage: npm run eval:retrieval [-- [--repos id1,id2]]
+ * Splits: `--split eval` (default) runs the eval half and writes
+ * docs/eval/results.{json,md}; `--split tuning` samples the EARLIER half of
+ * the time split and writes docs/eval/results-tuning.{json,md} only, so
+ * tuning experiments can never touch the eval-half results.
+ *
+ * Usage: npm run eval:retrieval [-- [--repos id1,id2] [--split tuning]]
  */
 import { execFileSync } from "node:child_process";
 import * as fs from "node:fs";
@@ -29,16 +34,49 @@ import { OccApplication } from "../src/application/contextService";
 import { CancellationSource } from "../src/shared/cancellation";
 
 import { bm25Baseline, filenameBaseline, randomBaseline, type Snapshot } from "./eval/baselines";
-import { datasetHash, type DatasetStats, type DatasetTask } from "./eval/dataset";
-import { cloneDirFor, materializeSnapshot, verifyPinnedCommit } from "./eval/gitminer";
-import { aggregateRuns, taskMetrics, type RankedFile, type RunMetrics } from "./eval/metrics";
-import { hashString } from "./eval/lib";
+import {
+  applyModeGoldFilter,
+  buildDataset,
+  datasetHash,
+  type DatasetStats,
+  type DatasetTask,
+} from "./eval/dataset";
+import {
+  cloneDirFor,
+  lsTree,
+  materializeSnapshot,
+  mineCommits,
+  verifyPinnedCommit,
+  type LsTreeEntry,
+} from "./eval/gitminer";
+import {
+  aggregateRuns,
+  pairedDiffCi,
+  recallAtK,
+  summarize as summarizeMetric,
+  taskMetrics,
+  type MetricSummary,
+  type PairedDiff,
+  type RankedFile,
+  type RunMetrics,
+} from "./eval/metrics";
+import {
+  hashString,
+  isCiConfigPath,
+  isDocsPath,
+  isLockFilePath,
+  isOccParsedPath,
+  isSourcePath,
+  isTestPath,
+} from "./eval/lib";
 
 const ROOT = path.resolve(import.meta.dirname ?? path.join(process.cwd(), "scripts"), "..");
 const REPOS_JSON = path.join(ROOT, "scripts", "eval", "repos.json");
 const DATASET_JSON = path.join(ROOT, "docs", "eval", "dataset.json");
 const RESULTS_JSON = path.join(ROOT, "docs", "eval", "results.json");
 const RESULTS_MD = path.join(ROOT, "docs", "eval", "results.md");
+const TUNING_RESULTS_JSON = path.join(ROOT, "docs", "eval", "results-tuning.json");
+const TUNING_RESULTS_MD = path.join(ROOT, "docs", "eval", "results-tuning.md");
 const SCRATCH_ROOT = path.join(ROOT, ".eval-cache", "scratch");
 
 const SEED = 20260918;
@@ -51,6 +89,17 @@ const MAX_SNAPSHOT_FILE_BYTES = 1024 * 1024;
 
 type SystemName = "occ" | "filename" | "bm25" | "random";
 const SYSTEMS: SystemName[] = ["occ", "filename", "bm25", "random"];
+type GoldSlice = "full" | "sourceOnly";
+/** Metric keys used by the paired OCC−BM25 analysis (RunMetrics keys + package recall). */
+type PairedMetricKey = "top1" | "recall5" | "recall10" | "allGoldAcc10" | "mrr" | "packageRecall";
+const PAIRED_METRIC_KEYS: PairedMetricKey[] = [
+  "top1",
+  "recall5",
+  "recall10",
+  "allGoldAcc10",
+  "mrr",
+  "packageRecall",
+];
 
 interface ReposFile {
   seed: number;
@@ -85,8 +134,35 @@ interface DatasetFile {
 interface SystemSummary {
   overall: RunMetrics;
   perRepo: Record<string, RunMetrics>;
+  /** Same metrics on the source-only gold slice (OCC-fully-parsed gold). */
+  overallSourceOnly: RunMetrics;
+  /**
+   * Gold coverage of the delivered answer: OCC = fraction of gold files in
+   * the generated package (parsed from its `### FILE:` headings); baselines
+   * = Recall@8, matching OCC's mean package size.
+   */
+  packageRecall: MetricSummary;
   /** OCC only, from the generated context package. */
   packageStats?: { meanTokens: number; meanFilesIncluded: number };
+}
+
+/** One gold file OCC's top-10 missed on a task where BM25 got all gold. */
+interface GapMissingFile {
+  path: string;
+  /** source | test | docs | lockfile | ci-config | other. */
+  type: string;
+  /** 1-based rank in OCC's UNTRUNCATED candidate ranking, or null. */
+  occRank: number | null;
+  /** 1-based rank in BM25's ranking (≤ 10 by construction), or null. */
+  bm25Rank: number | null;
+  /** Whether OCC's retrieval returned the file at all. */
+  inOccCandidates: boolean;
+}
+
+interface GoldSliceStats {
+  full: { goldFiles: number; tasks: number };
+  sourceOnly: { goldFiles: number; tasks: number; tasksExcludedEmpty: number };
+  perRepo: Record<string, { fullFiles: number; sourceFiles: number; sourceTasks: number }>;
 }
 
 interface CaseStudy {
@@ -101,6 +177,8 @@ interface CaseStudy {
 }
 
 interface ResultsFile {
+  /** Which half of the time split this run measured. */
+  split: "eval" | "tuning";
   seed: number;
   /** OCC commit the run was executed from (captured at run start). */
   occCommit: string;
@@ -109,6 +187,21 @@ interface ResultsFile {
   datasetHash: string;
   tasks: number;
   systems: Record<SystemName, SystemSummary>;
+  goldSliceStats: GoldSliceStats;
+  /** Seeded PAIRED bootstrap over per-task differences (OCC − BM25). */
+  pairedBootstrap: Record<GoldSlice, Record<PairedMetricKey, PairedDiff>>;
+  /** Tasks where BM25 placed all gold in its top 10 and OCC did not. */
+  allGoldGap: {
+    tasks: Array<{ id: string; repoId: string; missing: GapMissingFile[] }>;
+    summary: {
+      tasks: number;
+      missingFiles: number;
+      byType: Record<string, number>;
+      notInOccCandidates: number;
+      occRankMedian: number | null;
+      bm25RankMedian: number | null;
+    };
+  };
   caseStudies: { worst: CaseStudy[]; best: CaseStudy[] };
   timingMs: { snapshotMs: number; indexMs: number; occMs: number; baselinesMs: number };
   environment: { node: string; platform: string; cpu: string; totalMemGB: number };
@@ -118,6 +211,17 @@ function argReposFilter(): string[] | undefined {
   const i = process.argv.indexOf("--repos");
   const value = i >= 0 ? process.argv[i + 1] : undefined;
   return value ? value.split(",").filter((s) => s.length > 0) : undefined;
+}
+
+function argSplit(): "eval" | "tuning" {
+  const i = process.argv.indexOf("--split");
+  const value = i >= 0 ? process.argv[i + 1] : undefined;
+  if (value === "tuning") return "tuning";
+  if (value !== undefined && value !== "eval") {
+    console.error(`--split must be "eval" or "tuning" (got ${value})`);
+    process.exit(1);
+  }
+  return "eval";
 }
 
 /** Reads every text file of the snapshot dir into an in-memory map. */
@@ -165,23 +269,94 @@ function occWorkingTreeClean(): boolean {
   }
 }
 
-async function run(): Promise<void> {
-  if (!fs.existsSync(DATASET_JSON)) {
-    console.error(
-      `Missing ${path.relative(ROOT, DATASET_JSON)} — build it first: npm run eval:build-dataset (needs network once).`,
+/**
+ * Builds the TUNING dataset in memory: mines each pinned clone, samples the
+ * earlier half of the time split (buildDataset split="tuning"), applies the
+ * same mode gold filter. Never reads or writes docs/eval/dataset.json.
+ */
+function buildTuningDataset(repos: ReposFile, wanted: string[] | undefined): DatasetFile {
+  const perRepo: Record<string, RepoEntry> = {};
+  const allTasks: DatasetTask[] = [];
+  for (const repo of repos.repos) {
+    if (wanted && !wanted.includes(repo.id)) continue;
+    const clonePath = cloneDirFor(repo.id);
+    try {
+      verifyPinnedCommit(clonePath, repo.pinnedCommit);
+    } catch (error) {
+      console.error(`[${repo.id}] ${(error as Error).message}`);
+      process.exit(1);
+    }
+    const built = buildDataset(
+      repo.id,
+      mineCommits(clonePath),
+      repos.tasksPerRepo,
+      repos.seed,
+      "tuning",
     );
-    process.exit(1);
+    const treeCache = new Map<string, LsTreeEntry[]>();
+    const filtered = applyModeGoldFilter(built.tasks, (parentSha) => {
+      let entries = treeCache.get(parentSha);
+      if (!entries) {
+        entries = lsTree(clonePath, parentSha);
+        treeCache.set(parentSha, entries);
+      }
+      return entries;
+    });
+    const stats: DatasetStats = { ...built.stats, ...filtered.stats };
+    perRepo[repo.id] = {
+      pinnedCommit: repo.pinnedCommit,
+      license: repo.license,
+      note: repo.note,
+      sourceFilesAtPin: 0,
+      stats,
+      datasetHash: datasetHash(filtered.tasks),
+    };
+    allTasks.push(...filtered.tasks);
+    console.log(
+      `[${repo.id}] TUNING half: sampled=${stats.sampled} evaluated=${stats.evaluatedTasks}` +
+        ` (empty-gold dropped=${stats.tasksDroppedEmptyGold}, partial-gold tasks=${stats.tasksWithPartialGoldDrop})`,
+    );
   }
+  return {
+    seed: repos.seed,
+    tasksPerRepo: repos.tasksPerRepo,
+    datasetHash: datasetHash(allTasks),
+    repos: perRepo,
+    tasks: allTasks,
+  };
+}
+
+async function run(): Promise<void> {
+  const split = argSplit();
+  const outJson = split === "tuning" ? TUNING_RESULTS_JSON : RESULTS_JSON;
+  const outMd = split === "tuning" ? TUNING_RESULTS_MD : RESULTS_MD;
   const repos = JSON.parse(fs.readFileSync(REPOS_JSON, "utf8")) as ReposFile;
-  const dataset = JSON.parse(fs.readFileSync(DATASET_JSON, "utf8")) as DatasetFile;
-  if (dataset.datasetHash !== datasetHash(dataset.tasks)) {
-    console.error(
-      `Dataset hash mismatch in ${path.relative(ROOT, DATASET_JSON)} — it was edited or built with different code. Re-run eval:build-dataset.`,
+  const filter = argReposFilter();
+  let dataset: DatasetFile;
+  if (split === "tuning") {
+    console.log(
+      "======================================================================\n" +
+        " TUNING SPLIT RUN — writes docs/eval/results-tuning.* only;\n" +
+        " docs/eval/results.* (the eval half) is never touched.\n" +
+        "======================================================================",
     );
-    process.exit(1);
+    dataset = buildTuningDataset(repos, filter);
+  } else {
+    if (!fs.existsSync(DATASET_JSON)) {
+      console.error(
+        `Missing ${path.relative(ROOT, DATASET_JSON)} — build it first: npm run eval:build-dataset (needs network once).`,
+      );
+      process.exit(1);
+    }
+    dataset = JSON.parse(fs.readFileSync(DATASET_JSON, "utf8")) as DatasetFile;
+    if (dataset.datasetHash !== datasetHash(dataset.tasks)) {
+      console.error(
+        `Dataset hash mismatch in ${path.relative(ROOT, DATASET_JSON)} — it was edited or built with different code. Re-run eval:build-dataset.`,
+      );
+      process.exit(1);
+    }
   }
 
-  const filter = argReposFilter();
   const tasks = filter ? dataset.tasks.filter((t) => filter.includes(t.repoId)) : dataset.tasks;
   const repoIds = [...new Set(tasks.map((t) => t.repoId))].sort();
 
@@ -214,6 +389,10 @@ async function run(): Promise<void> {
   const ranks = new Map<SystemName, Map<string, RankedFile[]>>(SYSTEMS.map((s) => [s, new Map()]));
   const occPackageStats: Array<{ tokens: number; files: number }> = [];
   const timingMs = { snapshotMs: 0, indexMs: 0, occMs: 0, baselinesMs: 0 };
+  /** OCC's UNTRUNCATED candidate ranking per task (path order), for the gap analysis. */
+  const fullRankedByTask = new Map<string, string[]>();
+  /** Files actually included in OCC's generated package, parsed from the payload. */
+  const packageFilesByTask = new Map<string, string[]>();
 
   for (const repoId of repoIds) {
     for (const t of tasks.filter((x) => x.repoId === repoId)) {
@@ -248,10 +427,21 @@ async function run(): Promise<void> {
 
       const occStart = performance.now();
       const context = app.buildContext("task", { taskText: t.task });
-      const occRanking = (context.retrieval?.ranked ?? [])
+      const rankedAll = context.retrieval?.ranked ?? [];
+      const occRanking = rankedAll
         .slice(0, RETRIEVE_LIMIT)
         .map((r) => ({ path: r.path, score: r.score }));
       ranks.get("occ")!.set(t.id, occRanking);
+      fullRankedByTask.set(
+        t.id,
+        rankedAll.map((r) => r.path),
+      );
+      // Package contents: the wire format emits `### FILE: <path>` at line
+      // start; repository content is fenced and line-numbered, so it can
+      // never forge these headings (content-aware fences, M1/F1).
+      packageFilesByTask.set(t.id, [
+        ...new Set([...context.payload.matchAll(/^### FILE: (.+)$/gm)].map((m) => m[1]!)),
+      ]);
       occPackageStats.push({ tokens: context.estimatedTokens, files: context.filesIncluded });
       timingMs.occMs += performance.now() - occStart;
 
@@ -272,14 +462,35 @@ async function run(): Promise<void> {
   }
 
   // ---- aggregation ---------------------------------------------------------
-  function summarize(name: SystemName, taskList: DatasetTask[]): RunMetrics {
+  const goldOf =
+    (slice: GoldSlice) =>
+    (t: DatasetTask): string[] =>
+      slice === "full" ? t.gold : t.gold.filter(isOccParsedPath);
+  const tasksFor = (slice: GoldSlice): DatasetTask[] =>
+    slice === "full" ? tasks : tasks.filter((t) => goldOf("sourceOnly")(t).length > 0);
+
+  function summarize(name: SystemName, taskList: DatasetTask[], slice: GoldSlice): RunMetrics {
     const map = ranks.get(name)!;
+    const gold = goldOf(slice);
     return aggregateRuns(
-      taskList.map((t) => taskMetrics(map.get(t.id) ?? [], t.gold)),
+      taskList.map((t) => taskMetrics(map.get(t.id) ?? [], gold(t))),
       SEED + hashString(name),
     );
   }
 
+  /** Package-level gold coverage: OCC = generated package, baselines = top-8. */
+  function packageRecallValue(name: SystemName, t: DatasetTask, gold: string[]): number {
+    if (gold.length === 0) return 0;
+    if (name === "occ") {
+      const pkg = new Set(packageFilesByTask.get(t.id) ?? []);
+      let hits = 0;
+      for (const g of gold) if (pkg.has(g)) hits++;
+      return hits / gold.length;
+    }
+    return recallAtK(ranks.get(name)!.get(t.id) ?? [], gold, 8);
+  }
+
+  const sourceTasks = tasksFor("sourceOnly");
   const systems = {} as Record<SystemName, SystemSummary>;
   for (const name of SYSTEMS) {
     const perRepo: Record<string, RunMetrics> = {};
@@ -287,11 +498,18 @@ async function run(): Promise<void> {
       perRepo[repoId] = summarize(
         name,
         tasks.filter((t) => t.repoId === repoId),
+        "full",
       );
     }
+    const gold = goldOf("full");
     systems[name] = {
-      overall: summarize(name, tasks),
+      overall: summarize(name, tasks, "full"),
       perRepo,
+      overallSourceOnly: summarize(name, sourceTasks, "sourceOnly"),
+      packageRecall: summarizeMetric(
+        tasks.map((t) => packageRecallValue(name, t, gold(t))),
+        SEED + hashString(`${name}:package`),
+      ),
       ...(name === "occ"
         ? {
             packageStats: {
@@ -306,6 +524,114 @@ async function run(): Promise<void> {
         : {}),
     };
   }
+
+  // ---- gold slice stats ------------------------------------------------------
+  const sourceGold = goldOf("sourceOnly");
+  const goldSliceStats: GoldSliceStats = {
+    full: {
+      goldFiles: tasks.reduce((a, t) => a + t.gold.length, 0),
+      tasks: tasks.length,
+    },
+    sourceOnly: {
+      goldFiles: sourceTasks.reduce((a, t) => a + sourceGold(t).length, 0),
+      tasks: sourceTasks.length,
+      tasksExcludedEmpty: tasks.length - sourceTasks.length,
+    },
+    perRepo: Object.fromEntries(
+      repoIds.map((repoId) => {
+        const list = tasks.filter((t) => t.repoId === repoId);
+        return [
+          repoId,
+          {
+            fullFiles: list.reduce((a, t) => a + t.gold.length, 0),
+            sourceFiles: list.reduce((a, t) => a + sourceGold(t).length, 0),
+            sourceTasks: list.filter((t) => sourceGold(t).length > 0).length,
+          },
+        ];
+      }),
+    ),
+  };
+
+  // ---- paired bootstrap (OCC − BM25), per slice --------------------------------
+  const pairedBootstrap = {} as Record<GoldSlice, Record<PairedMetricKey, PairedDiff>>;
+  for (const slice of ["full", "sourceOnly"] as GoldSlice[]) {
+    const list = tasksFor(slice);
+    const gold = goldOf(slice);
+    const occPerTask = list.map((t) => taskMetrics(ranks.get("occ")!.get(t.id) ?? [], gold(t)));
+    const bm25PerTask = list.map((t) => taskMetrics(ranks.get("bm25")!.get(t.id) ?? [], gold(t)));
+    const row = {} as Record<PairedMetricKey, PairedDiff>;
+    for (const key of PAIRED_METRIC_KEYS) {
+      if (key === "packageRecall") {
+        row[key] = pairedDiffCi(
+          list.map((t) => packageRecallValue("occ", t, gold(t))),
+          list.map((t) => packageRecallValue("bm25", t, gold(t))),
+          SEED + hashString(`packageRecall:${slice}`),
+        );
+      } else {
+        row[key] = pairedDiffCi(
+          occPerTask.map((m) => m[key]),
+          bm25PerTask.map((m) => m[key]),
+          SEED + hashString(`${key}:${slice}`),
+        );
+      }
+    }
+    pairedBootstrap[slice] = row;
+  }
+
+  // ---- all-gold gap analysis (full slice): BM25 all-gold in top 10, OCC not ----
+  function classifyGoldType(p: string): string {
+    if (isTestPath(p)) return "test";
+    if (isSourcePath(p)) return "source";
+    if (isLockFilePath(p)) return "lockfile";
+    if (isDocsPath(p)) return "docs";
+    if (isCiConfigPath(p)) return "ci-config";
+    return "other";
+  }
+  const gapTasks: Array<{ id: string; repoId: string; missing: GapMissingFile[] }> = [];
+  for (const t of [...tasks].sort((a, b) => (a.id < b.id ? -1 : 1))) {
+    const occM = taskMetrics(ranks.get("occ")!.get(t.id) ?? [], t.gold);
+    const bmM = taskMetrics(ranks.get("bm25")!.get(t.id) ?? [], t.gold);
+    if (bmM.allGoldAcc10 !== 1 || occM.allGoldAcc10 === 1) continue;
+    const occTop10 = new Set((ranks.get("occ")!.get(t.id) ?? []).slice(0, 10).map((r) => r.path));
+    const bm25RankOf = new Map(
+      (ranks.get("bm25")!.get(t.id) ?? []).map((r, i) => [r.path, i + 1] as const),
+    );
+    const fullRanked = fullRankedByTask.get(t.id) ?? [];
+    const missing = t.gold
+      .filter((g) => !occTop10.has(g))
+      .sort()
+      .map<GapMissingFile>((g) => {
+        const idx = fullRanked.indexOf(g);
+        return {
+          path: g,
+          type: classifyGoldType(g),
+          occRank: idx >= 0 ? idx + 1 : null,
+          bm25Rank: bm25RankOf.get(g) ?? null,
+          inOccCandidates: idx >= 0,
+        };
+      });
+    gapTasks.push({ id: t.id, repoId: t.repoId, missing });
+  }
+  const allMissing = gapTasks.flatMap((g) => g.missing);
+  const occRanks = allMissing.map((m) => m.occRank).filter((r): r is number => r !== null);
+  const bm25Ranks = allMissing.map((m) => m.bm25Rank).filter((r): r is number => r !== null);
+  const median = (xs: number[]): number | null =>
+    xs.length === 0
+      ? null
+      : (xs.slice().sort((a, b) => a - b)[Math.floor((xs.length - 1) / 2)] ?? null);
+  const byType: Record<string, number> = {};
+  for (const m of allMissing) byType[m.type] = (byType[m.type] ?? 0) + 1;
+  const allGoldGap = {
+    tasks: gapTasks,
+    summary: {
+      tasks: gapTasks.length,
+      missingFiles: allMissing.length,
+      byType: Object.fromEntries(Object.entries(byType).sort(([a], [b]) => a.localeCompare(b))),
+      notInOccCandidates: allMissing.filter((m) => !m.inOccCandidates).length,
+      occRankMedian: median(occRanks),
+      bm25RankMedian: median(bm25Ranks),
+    },
+  };
 
   // ---- case studies: 5 worst / 5 best by (MRR, recall10) on OCC ----------------
   const occMap = ranks.get("occ")!;
@@ -328,12 +654,16 @@ async function run(): Promise<void> {
   };
 
   const results: ResultsFile = {
+    split,
     seed: SEED,
     occCommit: occHeadCommit(),
     workingTreeClean: occWorkingTreeClean(),
     datasetHash: dataset.datasetHash,
     tasks: tasks.length,
     systems,
+    goldSliceStats,
+    pairedBootstrap,
+    allGoldGap,
     caseStudies,
     timingMs,
     environment: {
@@ -344,12 +674,10 @@ async function run(): Promise<void> {
     },
   };
 
-  fs.mkdirSync(path.dirname(RESULTS_JSON), { recursive: true });
-  fs.writeFileSync(RESULTS_JSON, `${JSON.stringify(results, null, 2)}\n`);
-  writeResultsMd(results, dataset);
-  console.log(
-    `results written: ${path.relative(ROOT, RESULTS_JSON)} + ${path.relative(ROOT, RESULTS_MD)}`,
-  );
+  fs.mkdirSync(path.dirname(outJson), { recursive: true });
+  fs.writeFileSync(outJson, `${JSON.stringify(results, null, 2)}\n`);
+  writeResultsMd(results, dataset, outMd);
+  console.log(`results written: ${path.relative(ROOT, outJson)} + ${path.relative(ROOT, outMd)}`);
 }
 
 // ---- results.md ---------------------------------------------------------------
@@ -366,12 +694,14 @@ function fmt(s: { mean: number; ciLow: number; ciHigh: number }): string {
   return `${s.mean.toFixed(3)} [${s.ciLow.toFixed(3)}, ${s.ciHigh.toFixed(3)}]`;
 }
 
-function writeResultsMd(results: ResultsFile, dataset: DatasetFile): void {
+function writeResultsMd(results: ResultsFile, dataset: DatasetFile, outPath: string): void {
   const lines: string[] = [];
-  lines.push("# Retrieval Evaluation Results");
+  lines.push(
+    `# Retrieval Evaluation Results${results.split === "tuning" ? " — TUNING SPLIT" : ""}`,
+  );
   lines.push("");
   lines.push(
-    `Dataset hash \`${results.datasetHash}\` · ${results.tasks} tasks · seed ${results.seed} · OCC commit \`${results.occCommit.slice(0, 12)}\` · working tree clean at run start: ${results.workingTreeClean ? "yes" : "NO"}`,
+    `Dataset hash \`${results.datasetHash}\` · ${results.tasks} tasks · seed ${results.seed} · split **${results.split}** · OCC commit \`${results.occCommit.slice(0, 12)}\` · working tree clean at run start: ${results.workingTreeClean ? "yes" : "NO"}`,
   );
   lines.push("");
   lines.push("## Overall (mean [95% bootstrap CI], per task)");
@@ -390,6 +720,67 @@ function writeResultsMd(results: ResultsFile, dataset: DatasetFile): void {
     );
     lines.push("");
   }
+  lines.push("## Source-only gold slice (OCC-fully-parsed gold)");
+  lines.push("");
+  const gs = results.goldSliceStats;
+  lines.push(
+    `Full gold: ${gs.full.goldFiles} gold files across ${gs.full.tasks} tasks. Source-only slice: ${gs.sourceOnly.goldFiles} gold files across ${gs.sourceOnly.tasks} tasks (${gs.sourceOnly.tasksExcludedEmpty} tasks excluded for an empty slice).`,
+  );
+  lines.push("");
+  lines.push("| System | " + METRIC_KEYS.map((m) => m.label).join(" | ") + " |");
+  lines.push("|---|" + METRIC_KEYS.map(() => "---").join("|") + "|");
+  for (const system of SYSTEMS) {
+    const summary = results.systems[system].overallSourceOnly;
+    lines.push(`| ${system} | ` + METRIC_KEYS.map((m) => fmt(summary[m.key])).join(" | ") + " |");
+  }
+  lines.push("");
+  lines.push("## Package recall (gold coverage of the delivered answer)");
+  lines.push("");
+  lines.push(
+    "OCC = fraction of gold files inside the generated package (parsed from its `### FILE:` headings); baselines = Recall@8, matching OCC's mean package size.",
+  );
+  lines.push("");
+  lines.push("| System | Package recall (mean [95% CI]) |");
+  lines.push("|---|---|");
+  for (const system of SYSTEMS) {
+    lines.push(`| ${system} | ${fmt(results.systems[system].packageRecall)} |`);
+  }
+  lines.push("");
+  lines.push("## Paired bootstrap: OCC − BM25 per-task differences");
+  lines.push("");
+  for (const slice of ["full", "sourceOnly"] as GoldSlice[]) {
+    lines.push(`### ${slice === "full" ? "Full gold" : "Source-only slice"}`);
+    lines.push("");
+    lines.push("| Metric | Mean diff (OCC − BM25) [95% CI] | Excludes 0 |");
+    lines.push("|---|---|---|");
+    for (const key of PAIRED_METRIC_KEYS) {
+      const d = results.pairedBootstrap[slice][key];
+      lines.push(
+        `| ${key} | ${d.meanDiff.toFixed(3)} [${d.ciLow.toFixed(3)}, ${d.ciHigh.toFixed(3)}] | ${d.excludesZero ? "**yes**" : "no"} |`,
+      );
+    }
+    lines.push("");
+  }
+  lines.push("## All-gold gap analysis (BM25 all-gold in top 10, OCC not)");
+  lines.push("");
+  const gap = results.allGoldGap.summary;
+  lines.push(
+    `${gap.tasks} tasks, ${gap.missingFiles} missing gold files. Missing by type: ${
+      Object.entries(gap.byType)
+        .map(([k, v]) => `${k}=${v}`)
+        .join(", ") || "none"
+    }. Not in OCC's candidate set at all: ${gap.notInOccCandidates}. Median OCC rank of missing files: ${gap.occRankMedian ?? "n/a (none ranked)"}; median BM25 rank: ${gap.bm25RankMedian ?? "n/a"}.`,
+  );
+  for (const t of results.allGoldGap.tasks) {
+    lines.push("");
+    lines.push(`- **${t.id}**`);
+    for (const m of t.missing) {
+      lines.push(
+        `  - ${m.path} (${m.type}): OCC rank ${m.occRank ?? "not in candidates"}, BM25 rank ${m.bm25Rank ?? "n/a"}`,
+      );
+    }
+  }
+  lines.push("");
   lines.push("## Per repository");
   for (const [repoId, entry] of (Object.entries(dataset.repos) as Array<[string, RepoEntry]>).sort(
     ([a], [b]) => a.localeCompare(b),
@@ -437,7 +828,7 @@ function writeResultsMd(results: ResultsFile, dataset: DatasetFile): void {
   lines.push(JSON.stringify(results.environment));
   lines.push("");
   lines.push(`timings (ms): ${JSON.stringify(results.timingMs)}`);
-  fs.writeFileSync(RESULTS_MD, `${lines.join("\n")}\n`);
+  fs.writeFileSync(outPath, `${lines.join("\n")}\n`);
 }
 
 function caseLines(c: CaseStudy): string[] {

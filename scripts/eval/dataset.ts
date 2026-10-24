@@ -79,13 +79,17 @@ interface EvalCandidate extends CommitCandidateInput {
 
 /**
  * Builds a deterministic per-repo dataset. Same mined commits + same
- * (tasksPerRepo, seed) ⇒ same tasks, always.
+ * (tasksPerRepo, seed, split) ⇒ same tasks, always. With split="tuning" the
+ * sample is drawn from the EARLIER half of the time split, so tuning runs
+ * never touch the eval-half tasks.
  */
 export function buildDataset(
   repoId: string,
   mined: MinedCommit[],
   tasksPerRepo: number,
   seed: number,
+  /** Which half of the time split to sample from; default is the eval half. */
+  split: "eval" | "tuning" = "eval",
 ): BuiltDataset {
   const rejectedByReason: Record<string, number> = {};
   const candidates: EvalCandidate[] = [];
@@ -135,7 +139,12 @@ export function buildDataset(
   );
   const duplicateTaskTextDropped = candidates.length - deduped.length;
 
-  const { tuningHalf, evalPool, sampled } = sampleEvalCommits(deduped, tasksPerRepo, seed);
+  const { tuningHalf, evalPool, sampled } = sampleEvalCommits(
+    deduped,
+    tasksPerRepo,
+    seed,
+    split === "tuning" ? "tuningHalf" : "evalPool",
+  );
 
   const tasks: DatasetTask[] = sampled.map((c) => {
     return {

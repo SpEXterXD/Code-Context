@@ -40,6 +40,28 @@ pipeline **headlessly** for every task in `dataset.json`:
    1 MiB — OCC's own scanner limit — so every system ranks the same universe.
 5. Every ranking is scored against the commit's **gold files** with the
    metrics of `scripts/eval/metrics.ts`.
+6. **Gold slices**: all metrics are reported twice — on the full effective
+   gold and on the **source-only slice** (gold files OCC parses with a full
+   structured parser: TS/JS, JSON/JSONC, Markdown; `isOccParsedPath`).
+   Tasks whose source-only slice is empty are excluded from that slice's
+   aggregation and counted in `goldSliceStats`.
+7. **Package recall**: the fraction of gold files inside OCC's *delivered
+   answer* — the generated package, parsed from its `### FILE:` headings —
+   versus Recall@8 for the baselines (8 ≈ OCC's mean package size).
+8. **Paired bootstrap**: seeded CIs over per-task differences (OCC − BM25)
+   for every metric, resampling task indices jointly so within-task
+   correlation is preserved (`pairedDiffCi`). The unpaired per-system CIs
+   cannot remove shared-task variance; the paired ones are the comparison
+   to quote.
+9. **All-gold gap analysis**: for every task where BM25 placed all gold in
+   its top 10 and OCC did not, each OCC-missed gold file is listed with its
+   rank in OCC's untruncated candidate ranking (or "not in candidates"),
+   its BM25 rank, and its file type — evidence for diversity analysis.
+10. **Splits**: `--split eval` (default) measures the eval half and writes
+    `results.{json,md}`; `--split tuning` samples the EARLIER half of the
+    time split (same filters, mode filter included) and writes
+    `results-tuning.{json,md}` only — tuning experiments can never touch
+    the eval-half results.
 
 Systems only ever see the pre-commit snapshot; no post-commit state is
 reachable through the index, the graph, or git metadata.
@@ -157,7 +179,14 @@ at k:
 npm run eval:build-dataset   # once, needs network; writes docs/eval/dataset.json
 npm run eval:retrieval               # writes docs/eval/results.json + results.md
 npm run eval:retrieval -- --repos hono,zod   # subset run
+npm run eval:retrieval -- --split tuning     # tuning half -> results-tuning.{json,md}
+npm run eval:fsmonitor-repro        # reproduction of the core.fsmonitor risk
 ```
 
 `--repos` filters to the given repo ids (from `repos.json`). Snapshots and the
 index store are recreated under the git-ignored `.eval-cache/` on each run.
+
+The fsmonitor reproduction (`scripts/eval/fsmonitor-repro.ts`) creates a
+throwaway repo whose `.git/config` points `core.fsmonitor` at a marker-writing
+script, then runs OCC's exact `git log` invocation plus `git status` and
+`git diff --name-only`, each with and without `-c core.fsmonitor=false`.

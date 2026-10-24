@@ -105,6 +105,30 @@ describe("buildDataset", () => {
     expect(a.stats.tuningHalfSize).toBe(30);
   });
 
+  it("split='tuning' samples the earlier half, disjoint from the eval sample", () => {
+    const pool = Array.from({ length: 60 }, (_, i) =>
+      mined({
+        sha: `sha${i.toString().padStart(3, "0")}`,
+        committerTime: 1_700_000_000 + i * 3_600,
+        subject: `fix: distinct improvement number ${i}`,
+        files: [mod("M", `src/mod${i}.ts`)],
+      }),
+    );
+    const evalRun = buildDataset("rep", pool, 10, 99);
+    const tuningRun = buildDataset("rep", pool, 10, 99, "tuning");
+    expect(tuningRun.tasks).toHaveLength(10);
+    // The tuning sample must come from the earlier half (shas 000-029 here).
+    const evalShas = new Set(evalRun.tasks.map((t) => t.sha));
+    for (const t of tuningRun.tasks) {
+      expect(parseInt(t.sha.slice(3), 10)).toBeLessThan(30);
+      expect(evalShas.has(t.sha)).toBe(false);
+    }
+    // Default argument keeps the eval-half behavior bit-for-bit.
+    expect(buildDataset("rep", pool, 10, 99).tasks.map((t) => t.sha)).toEqual(
+      evalRun.tasks.map((t) => t.sha),
+    );
+  });
+
   it("sorts gold paths and reports excluded new files", () => {
     const { tasks, stats } = buildDataset(
       "rep",

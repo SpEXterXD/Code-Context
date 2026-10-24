@@ -119,6 +119,58 @@ export function summarize(values: number[], seed: number): MetricSummary {
   return { n: values.length, mean, ciLow, ciHigh };
 }
 
+export interface PairedDiff {
+  n: number;
+  meanDiff: number;
+  ciLow: number;
+  ciHigh: number;
+  /** True when the 95% CI lies entirely above or below 0. */
+  excludesZero: boolean;
+}
+
+/**
+ * Seeded percentile bootstrap over PAIRED per-task differences (A − B): each
+ * draw resamples task indices jointly, so within-task correlation is kept
+ * (the unpaired CIs in RunMetrics cannot do this). Inputs must be aligned
+ * per task and equal in length; empty/mismatched input yields a zeroed
+ * result rather than a guess.
+ */
+export function pairedDiffCi(
+  valuesA: number[],
+  valuesB: number[],
+  seed: number,
+  draws = BINDING_COUNT,
+  alpha = CI_ALPHA,
+): PairedDiff {
+  if (valuesA.length === 0 || valuesA.length !== valuesB.length) {
+    return { n: 0, meanDiff: 0, ciLow: 0, ciHigh: 0, excludesZero: false };
+  }
+  const n = valuesA.length;
+  let rngState = seed >>> 0;
+  const next = (): number => {
+    rngState = (rngState + 0x6d2b79f5) | 0;
+    let t = rngState;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  let sumDiff = 0;
+  for (let i = 0; i < n; i++) sumDiff += valuesA[i]! - valuesB[i]!;
+  const boot: number[] = [];
+  for (let d = 0; d < draws; d++) {
+    let s = 0;
+    for (let i = 0; i < n; i++) {
+      const idx = Math.floor(next() * n);
+      s += valuesA[idx]! - valuesB[idx]!;
+    }
+    boot.push(s / n);
+  }
+  boot.sort((a, b) => a - b);
+  const lo = boot[Math.floor((alpha / 2) * draws)]!;
+  const hi = boot[Math.ceil((1 - alpha / 2) * draws) - 1]!;
+  return { n, meanDiff: sumDiff / n, ciLow: lo, ciHigh: hi, excludesZero: lo > 0 || hi < 0 };
+}
+
 /**
  * Computes the full metric family for one ranked list against gold.
  * Returns the raw per-task values so the harness can also report worst/best.

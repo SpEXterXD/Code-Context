@@ -5,6 +5,7 @@ import {
   allGoldAccAtK,
   bestGoldRank,
   bootstrapMeanCi,
+  pairedDiffCi,
   recallAtK,
   reciprocalRank,
   taskMetrics,
@@ -88,5 +89,39 @@ describe("bootstrapMeanCi", () => {
 
   it("handles empty input", () => {
     expect(bootstrapMeanCi([], 1)).toEqual({ mean: 0, ciLow: 0, ciHigh: 0 });
+  });
+});
+
+describe("pairedDiffCi", () => {
+  it("is reproducible and reports the exact observed mean difference", () => {
+    const a = pairedDiffCi([1, 1, 0, 1], [0, 0, 1, 0], 42);
+    expect(a).toEqual(pairedDiffCi([1, 1, 0, 1], [0, 0, 1, 0], 42));
+    expect(a.n).toBe(4);
+    expect(a.meanDiff).toBe(0.5);
+  });
+
+  it("excludes zero for a constant positive paired difference", () => {
+    const d = pairedDiffCi([1, 1, 1, 1], [0, 0, 0, 0], 7);
+    expect(d.meanDiff).toBe(1);
+    expect(d.ciLow).toBe(1);
+    expect(d.ciHigh).toBe(1);
+    expect(d.excludesZero).toBe(true);
+  });
+
+  it("does not exclude zero when differences straddle it", () => {
+    const d = pairedDiffCi([1, 0, 1, 0], [0, 1, 0, 1], 7);
+    expect(d.meanDiff).toBe(0);
+    expect(d.excludesZero).toBe(false);
+  });
+
+  it("returns a zeroed result for empty or misaligned inputs", () => {
+    expect(pairedDiffCi([], [], 1)).toEqual({
+      n: 0,
+      meanDiff: 0,
+      ciLow: 0,
+      ciHigh: 0,
+      excludesZero: false,
+    });
+    expect(pairedDiffCi([1], [1, 2], 1).n).toBe(0);
   });
 });

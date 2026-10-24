@@ -175,6 +175,15 @@ export function isSourcePath(p: string): boolean {
   return SRC_EXT_RE.test(p2) && !TEST_FILE_RE.test(p2) && !/\.d\.[cm]?tsx?$/i.test(p2);
 }
 
+/**
+ * True for files OCC parses with a full structured parser (TS/JS via the
+ * TypeScript API, JSON/JSONC, Markdown) — the "source-only" gold slice. All
+ * other extensions fall back to the generic metadata parser.
+ */
+export function isOccParsedPath(p: string): boolean {
+  return /\.(?:(?:m|c)?(?:t|j)sx?|json|jsonc|md|markdown)$/i.test(p.replace(/\\/g, "/"));
+}
+
 // ---------------------------------------------------------------------------
 // Commit candidate filtering
 // ---------------------------------------------------------------------------
@@ -336,14 +345,17 @@ export interface CommitMeta {
 
 /**
  * Splits candidates into the tuning period (earlier half by committer time)
- * and the eval pool (later half), then samples `count` eval commits with a
- * seeded PRNG. Same candidate list + seed ⇒ same sample, always. Returned
- * commits are sorted by committerTime then sha for total determinism.
+ * and the eval pool (later half), then samples `count` commits from the
+ * chosen half with a seeded PRNG (`sampleFrom` defaults to the eval pool, so
+ * tuning experiments can run on the earlier half without ever touching the
+ * eval half). Same candidate list + seed + half ⇒ same sample, always.
+ * Returned commits are sorted by committerTime then sha for determinism.
  */
 export function sampleEvalCommits<T extends CommitMeta>(
   candidates: T[],
   count: number,
   seed: number,
+  sampleFrom: "evalPool" | "tuningHalf" = "evalPool",
 ): { evalPool: T[]; tuningHalf: T[]; sampled: T[] } {
   const sorted = [...candidates].sort(
     (a, b) => a.committerTime - b.committerTime || (a.sha < b.sha ? -1 : 1),
@@ -351,15 +363,16 @@ export function sampleEvalCommits<T extends CommitMeta>(
   const splitIndex = Math.floor(sorted.length / 2);
   const tuningHalf = sorted.slice(0, splitIndex);
   const evalPool = sorted.slice(splitIndex);
+  const pool = sampleFrom === "tuningHalf" ? tuningHalf : evalPool;
   const rng = mulberry32(seed);
   const picked = new Set<string>();
   const sampled: T[] = [];
   // Reservoir-free approach: repeatedly choose a uniformly random index from
-  // the eval pool until we have `count` distinct commits.
+  // the chosen pool until we have `count` distinct commits.
   let guard = 0;
-  while (sampled.length < Math.min(count, evalPool.length) && guard < count * 100) {
-    const idx = Math.floor(rng() * evalPool.length) % evalPool.length;
-    const candidate = evalPool[idx]!;
+  while (sampled.length < Math.min(count, pool.length) && guard < count * 100) {
+    const idx = Math.floor(rng() * pool.length) % pool.length;
+    const candidate = pool[idx]!;
     if (!picked.has(candidate.sha)) {
       picked.add(candidate.sha);
       sampled.push(candidate);

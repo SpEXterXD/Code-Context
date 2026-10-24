@@ -36,6 +36,25 @@
   future-history-leak mitigation), dataset funnel statistics, and known
   limitations (commit message as a noisy task proxy, gold-set bias, filtered
   task slice). docs/eval/{dataset,results}.json are generated artifacts.
+- Statistical addendum to the harness (analysis only; no retrieval/context/
+  security changes): seeded **paired bootstrap** over per-task differences
+  (OCC − BM25) for every metric, with "excludes 0" flags; per-metric 95%
+  CIs for all systems in results.md; **source-only gold slice** (gold
+  restricted to TS/JS/JSON/MD files the structured parsers fully parse)
+  with every metric reported on both slices and per-slice gold/task counts;
+  **package recall** (gold coverage of OCC's generated package, parsed from
+  its `### FILE:` headings; Recall@8 equivalent for baselines); and an
+  **all-gold gap analysis** listing, for tasks where BM25 placed all gold in
+  its top 10 and OCC did not, each missing file's OCC candidate rank (or
+  absence), BM25 rank, and file type.
+- `--split tuning` runs the harness on the EARLIER half of the time split
+  and writes `docs/eval/results-tuning.{json,md}` only, keeping tuning
+  experiments strictly separate from the eval-half results. Default remains
+  `--split eval`.
+- `npm run eval:fsmonitor-repro` reproduces the untrusted-workspace
+  `core.fsmonitor` risk on this machine: a repo-controlled config executes
+  an arbitrary script on `git status` / `git diff --name-only` (NOT on OCC's
+  exact `git log` invocation), and `-c core.fsmonitor=false` suppresses it.
 
 ### Fixed
 

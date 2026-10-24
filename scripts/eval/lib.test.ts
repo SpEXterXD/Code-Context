@@ -8,6 +8,7 @@ import {
   isCiConfigPath,
   isDocsPath,
   isLockFilePath,
+  isOccParsedPath,
   isSourcePath,
   isTestPath,
   mulberry32,
@@ -218,6 +219,24 @@ describe("deterministic sampling", () => {
     expect(a.sampled.map((s) => s.sha)).not.toEqual(b.sampled.map((s) => s.sha));
   });
 
+  it("samples the tuning half only when asked, disjoint from the eval sample", () => {
+    const list = commits(40);
+    const evalRun = sampleEvalCommits(list, 6, 9, "evalPool");
+    const tuningRun = sampleEvalCommits(list, 6, 9, "tuningHalf");
+    expect(tuningRun.sampled).toHaveLength(6);
+    for (const s of tuningRun.sampled) {
+      expect(tuningRun.tuningHalf.some((c) => c.sha === s.sha)).toBe(true);
+      expect(evalRun.tuningHalf.some((c) => c.sha === s.sha)).toBe(true);
+    }
+    // Tuning and eval samples can never overlap: disjoint halves.
+    const evalShas = new Set(evalRun.sampled.map((s) => s.sha));
+    for (const s of tuningRun.sampled) expect(evalShas.has(s.sha)).toBe(false);
+    // Determinism: same inputs + half ⇒ same sample.
+    expect(tuningRun.sampled.map((s) => s.sha)).toEqual(
+      sampleEvalCommits(list, 6, 9, "tuningHalf").sampled.map((s) => s.sha),
+    );
+  });
+
   it("PRNG is reproducible and seed-independent across instances", () => {
     const a = mulberry32(7);
     const b = mulberry32(7);
@@ -232,5 +251,40 @@ describe("deterministic sampling", () => {
 
   it("wordCount counts content words", () => {
     expect(wordCount("fix the a of to router (v2)")).toBe(2);
+  });
+});
+
+describe("isOccParsedPath (source-only gold slice)", () => {
+  it("accepts exactly the extensions of the three full parsers", () => {
+    for (const p of [
+      "src/a.ts",
+      "src/a.tsx",
+      "src/a.mts",
+      "src/a.cts",
+      "src/a.js",
+      "src/a.jsx",
+      "src/a.mjs",
+      "src/a.cjs",
+      "types/index.d.ts", // ends in .ts; the TypeScript parser fully parses it
+      "data/config.json",
+      "data/config.jsonc",
+      "docs/README.md",
+      "docs/README.markdown",
+    ]) {
+      expect(isOccParsedPath(p), p).toBe(true);
+    }
+  });
+
+  it("rejects generic-parser fallback extensions", () => {
+    for (const p of [
+      "lib/llhttp/llhttp.wasm",
+      "styles.css",
+      "schema.yml",
+      "Dockerfile",
+      "yarn.lock",
+      "no-extension",
+    ]) {
+      expect(isOccParsedPath(p), p).toBe(false);
+    }
   });
 });
