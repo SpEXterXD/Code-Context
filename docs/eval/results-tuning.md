@@ -1,6 +1,6 @@
 # Retrieval Evaluation Results — TUNING SPLIT
 
-Dataset hash `ec50ab4f` · 300 tasks · seed 20260918 · split **tuning** · OCC commit `342706a9dcf8` · working tree clean at run start: NO
+Dataset hash `ec50ab4f` · 300 tasks · seed 20260918 · split **tuning** · OCC commit `80a7b5e9ab03` · working tree clean at run start: NO
 
 ## Overall (mean [95% bootstrap CI], per task)
 
@@ -11,7 +11,7 @@ Dataset hash `ec50ab4f` · 300 tasks · seed 20260918 · split **tuning** · OCC
 | bm25 | 0.293 [0.243, 0.350] | 0.427 [0.380, 0.475] | 0.592 [0.547, 0.636] | 0.373 [0.317, 0.430] | 0.460 [0.415, 0.502] |
 | random | 0.030 [0.013, 0.050] | 0.041 [0.028, 0.055] | 0.089 [0.066, 0.111] | 0.023 [0.007, 0.043] | 0.098 [0.078, 0.120] |
 
-OCC generated package: mean 25696 tokens, mean 15.1 files included per task.
+OCC generated package: mean 25594 tokens, mean 14.5 files included per task.
 
 ## Source-only gold slice (OCC-fully-parsed gold)
 
@@ -30,7 +30,7 @@ OCC = fraction of gold files inside the generated package (parsed from its `### 
 
 | System | Package recall (mean [95% CI]) |
 |---|---|
-| occ | 0.609 [0.569, 0.648] |
+| occ | 0.669 [0.631, 0.706] |
 | filename | 0.275 [0.235, 0.313] |
 | bm25 | 0.534 [0.490, 0.580] |
 | random | 0.079 [0.059, 0.102] |
@@ -46,7 +46,7 @@ OCC = fraction of gold files inside the generated package (parsed from its `### 
 | recall10 | 0.084 [0.043, 0.123] | **yes** |
 | allGoldAcc10 | 0.063 [0.017, 0.113] | **yes** |
 | mrr | 0.161 [0.111, 0.211] | **yes** |
-| packageRecall | 0.074 [0.029, 0.126] | **yes** |
+| packageRecall | 0.135 [0.096, 0.179] | **yes** |
 
 ### Source-only slice
 
@@ -57,7 +57,7 @@ OCC = fraction of gold files inside the generated package (parsed from its `### 
 | recall10 | 0.085 [0.042, 0.127] | **yes** |
 | allGoldAcc10 | 0.067 [0.017, 0.117] | **yes** |
 | mrr | 0.163 [0.113, 0.211] | **yes** |
-| packageRecall | 0.076 [0.026, 0.126] | **yes** |
+| packageRecall | 0.137 [0.091, 0.181] | **yes** |
 
 ## All-gold gap analysis (BM25 all-gold in top 10, OCC not)
 
@@ -255,4 +255,4 @@ Mined 2935, accepted 494, sampled 60, evaluated 60 (dropped for empty effective 
 
 {"node":"v24.15.0","platform":"win32 10.0.26300","cpu":"AMD Ryzen 7 4800H with Radeon Graphics         ","totalMemGB":15.4}
 
-timings (ms): {"snapshotMs":110976.13670000005,"indexMs":418664.7180999997,"occMs":52974.39270000046,"baselinesMs":79467.30020000045}
+timings (ms): {"snapshotMs":58981.585300000035,"indexMs":225245.45910000018,"occMs":25360.56899999979,"baselinesMs":40510.38269999982}
