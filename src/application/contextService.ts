@@ -14,6 +14,7 @@ import {
 } from "../context/contextBuilder";
 import { DEFAULT_BUDGET, type ContextBudgetConfig } from "../context/contextBudget";
 import type { SecretPolicy } from "../security/securityService";
+import type { SeedSet } from "../seeds/seedSet";
 import { OccError } from "../shared/errors";
 
 export type { ContextScope, ContextMode, ContextBuildResult };
@@ -140,6 +141,8 @@ export class OccApplication {
       selectedPaths?: string[];
       expandSelection?: boolean;
       scope?: ContextScope;
+      /** M4 change-aware seeds (see ContextRequest.seedSet). */
+      seedSet?: SeedSet;
     },
   ): ContextBuildResult {
     if (this.indexing.getEntries().size === 0) {
@@ -166,6 +169,7 @@ export class OccApplication {
       selectedPaths: request.selectedPaths,
       expandSelection: request.expandSelection,
       scope: request.scope,
+      seedSet: request.seedSet,
     });
   }
 

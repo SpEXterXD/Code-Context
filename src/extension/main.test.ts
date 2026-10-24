@@ -60,6 +60,7 @@ vi.mock("vscode", () => {
         maxGraphDepth: 3,
         maxCodeLinesPerFile: 400,
         structureDepth: 4,
+        currentChangesMaxTokens: 1500,
         excludePatterns: [],
         maxFileSizeBytes: 1048576,
         secretPolicy: "block",

@@ -25,6 +25,7 @@ export function readConfig(): OccConfig {
     excludePatterns: cfg.get<string[]>("excludePatterns") ?? DEFAULT_CONFIG.excludePatterns,
     respectGitignore: cfg.get<boolean>("respectGitignore") ?? DEFAULT_CONFIG.respectGitignore,
     maxFileSizeBytes: int("maxFileSizeBytes", DEFAULT_CONFIG.maxFileSizeBytes),
+    currentChangesMaxTokens: int("currentChangesMaxTokens", DEFAULT_CONFIG.currentChangesMaxTokens),
   };
   return config;
 }

@@ -25,12 +25,21 @@ export interface SeedSet {
   selection?: { path: string; startLine: number; endLine: number };
   selectionSymbol?: string;
   diagnostics: { path: string; message: string }[];
+  /** Stack-trace frames resolved to workspace-relative paths (extension). */
+  stackFrames: { path: string; line: number }[];
   /** Visible-to-user notes (merge/rebase in progress, truncations, ...). */
   notes: string[];
 }
 
 export function emptySeedSet(): SeedSet {
-  return { changedPaths: [], diffSections: [], openEditors: [], diagnostics: [], notes: [] };
+  return {
+    changedPaths: [],
+    diffSections: [],
+    openEditors: [],
+    diagnostics: [],
+    stackFrames: [],
+    notes: [],
+  };
 }
 
 export const MAX_OPEN_EDITORS = 10;
@@ -129,6 +138,7 @@ export function normalizeSeedSet(
     openEditors,
     selection: partial.selection,
     selectionSymbol: partial.selectionSymbol,
+    stackFrames: partial.stackFrames ?? [],
     diagnostics,
     notes: partial.notes ?? [],
   };

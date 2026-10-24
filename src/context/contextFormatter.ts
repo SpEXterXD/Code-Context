@@ -54,6 +54,7 @@ export interface ContextModel {
   projectName: string;
   indexVersion: string;
   task?: string;
+  currentChanges?: { sections: Array<{ path: string; diff: string }>; truncated: boolean };
   tree: string;
   treeNote?: string;
   architecture: ArchitectureInfo;
@@ -127,6 +128,20 @@ export function formatContext(model: ContextModel): string {
   out.push("## DEVELOPER TASK");
   out.push(model.task && model.task.trim().length > 0 ? model.task : "(no task specified)");
   out.push("");
+  if (model.currentChanges && model.currentChanges.sections.length > 0) {
+    out.push("## CURRENT CHANGES");
+    if (model.currentChanges.truncated) {
+      out.push("(truncated to the current-changes budget)");
+    }
+    for (const section of model.currentChanges.sections) {
+      out.push(`### DIFF: ${section.path}`);
+      const fence = fenceFor(section.diff, "diff");
+      out.push(fence);
+      out.push(section.diff);
+      out.push(fence);
+      out.push("");
+    }
+  }
   out.push("## PROJECT STRUCTURE");
   out.push(model.tree);
   if (model.treeNote) out.push(`(structure note: ${model.treeNote})`);

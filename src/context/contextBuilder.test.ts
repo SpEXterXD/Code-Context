@@ -130,6 +130,7 @@ describe("ContextBuilder", () => {
       maxGraphDepth: 3,
       maxCodeLinesPerFile: 400,
       structureDepth: 4,
+      currentChangesMaxTokens: 1500,
       secretPolicy: "block",
       redactSecrets: true,
       enableGitRecency: false,
@@ -354,6 +355,7 @@ describe("ContextBuilder", () => {
       maxGraphDepth: 3,
       maxCodeLinesPerFile: 400,
       structureDepth: 4,
+      currentChangesMaxTokens: 1500,
       secretPolicy: "block",
       redactSecrets: true,
       enableGitRecency: false,
@@ -451,6 +453,8 @@ describe("ContextBuilder", () => {
           maxGraphDepth: 3,
           maxCodeLinesPerFile: 400,
           structureDepth: 4,
+          currentChangesMaxTokens: 1500,
+          currentChangesMaxTokens: 1500,
         };
         M3B_RANK_PRIORITY.enabled = false;
         const tierFirst = new OccApplication(root, path.join(root, ".occ-store"), tight);
@@ -475,6 +479,136 @@ describe("ContextBuilder", () => {
       } finally {
         M3B_RANK_PRIORITY.enabled = wasEnabled;
       }
+    });
+  });
+
+  describe("M4 change-aware seeds", () => {
+    const NL = "\n";
+    const SEED_FIXTURE: Record<string, string> = {
+      "package.json": JSON.stringify({ name: "seed-fixture", version: "1.0.0" }) + "\n",
+      "src/gizmo.ts": [
+        "/** Gizmo core. */",
+        "export function gizmoWidget(): number {",
+        "  return 42;",
+        "}",
+        "",
+      ].join("\n"),
+      "src/other.ts": ["/** Unrelated. */", "export const unrelated = 1;", ""].join("\n"),
+    };
+
+    async function makeSeedApp(policy: "block" | "warn" = "block"): Promise<OccApplication> {
+      root = makeTempDir();
+      writeRepo(root, SEED_FIXTURE);
+      const app2 = new OccApplication(root, path.join(root, ".occ-store-" + policy), {
+        maxFiles: 40,
+        maxChars: 120000,
+        maxLines: 3000,
+        maxTokens: 30000,
+        maxGraphDepth: 3,
+        maxCodeLinesPerFile: 400,
+        structureDepth: 4,
+        currentChangesMaxTokens: 1500,
+        secretPolicy: policy,
+        redactSecrets: true,
+      });
+      await app2.indexing.indexWorkspace(CancellationSource.never());
+      return app2;
+    }
+
+    it("DIFF_TOUCHED pins the seed, fires a real signal, and labels the tier", async () => {
+      const app = await makeSeedApp();
+      const result = app.buildContext("task", {
+        taskText: "unrelated query with no lexical overlap whatsoever",
+        seedSet: {
+          changedPaths: [{ path: "src/gizmo.ts", state: "unstaged" }],
+          diffSections: [],
+          openEditors: [],
+          diagnostics: [],
+          stackFrames: [],
+          notes: [],
+        },
+      });
+      const gizmo = result.retrieval?.ranked.find((r) => r.path === "src/gizmo.ts");
+      expect(gizmo).toBeDefined();
+      expect(gizmo!.signals.some((s) => s.kind === "DIFF_TOUCHED")).toBe(true);
+      const why = result.rankedForDisplay.find((w) => w.path === "src/gizmo.ts");
+      expect(why?.tierLabel).toContain("changed in your working tree");
+      expect(why?.reasons.some((r) => r.startsWith("Changed in your working tree"))).toBe(true);
+      const source = extractSection(result.payload, "SOURCE");
+      expect(source).toContain("src/gizmo.ts");
+    });
+
+    it("renders CURRENT CHANGES after DEVELOPER TASK with content-aware fences", async () => {
+      const app = await makeSeedApp();
+      const diff =
+        "+export const gizmoNew = 1;" + NL + "```" + NL + "+export const fenceBreak = 1;";
+      const result = app.buildContext("task", {
+        taskText: "anything",
+        seedSet: {
+          changedPaths: [{ path: "src/gizmo.ts", state: "unstaged" }],
+          diffSections: [{ path: "src/gizmo.ts", diff }],
+          openEditors: [],
+          diagnostics: [],
+          stackFrames: [],
+          notes: [],
+        },
+      });
+      const payload = result.payload;
+      const taskIdx = payload.indexOf("## DEVELOPER TASK");
+      const changesIdx = payload.indexOf("## CURRENT CHANGES");
+      const structIdx = payload.indexOf("## PROJECT STRUCTURE");
+      expect(taskIdx).toBeGreaterThanOrEqual(0);
+      expect(changesIdx).toBeGreaterThan(taskIdx);
+      expect(structIdx).toBeGreaterThan(changesIdx);
+      expect(payload).toContain("### DIFF: src/gizmo.ts");
+      const fenceLine = payload.split("\n").find((l) => l.startsWith("````"));
+      expect(fenceLine).toBeDefined();
+    });
+
+    it("applies the sensitive-path veto BEFORE diff content and emits a path-only WHY", async () => {
+      const app = await makeSeedApp();
+      const result = app.buildContext("task", {
+        taskText: "anything",
+        seedSet: {
+          changedPaths: [{ path: ".env", state: "untracked" }],
+          diffSections: [{ path: ".env", diff: "+API_KEY=AKIAQW8Z7XP6M5L4K3J2" + NL }],
+          openEditors: [],
+          diagnostics: [],
+          stackFrames: [],
+          notes: [],
+        },
+      });
+      const why = result.rankedForDisplay.find((w) => w.path === ".env");
+      expect(why).toBeDefined();
+      expect(why?.note).toContain("diff withheld by security policy");
+      expect(result.payload).not.toContain("AKIAQW8Z7XP6M5L4K3J2");
+      expect(result.payload).not.toContain("### DIFF: .env");
+    });
+
+    it("redacts secrets in diffs under WARN policy and stays deterministic", async () => {
+      const app = await makeSeedApp("warn");
+      const seedSet = {
+        changedPaths: [{ path: "src/gizmo.ts", state: "unstaged" as const }],
+        diffSections: [
+          { path: "src/gizmo.ts", diff: "+const apiKey = 'AKIAQW8Z7XP6M5L4K3J2';" + NL },
+        ],
+        openEditors: [],
+        diagnostics: [],
+        stackFrames: [],
+        notes: [],
+      };
+      const r1 = app.buildContext("task", { taskText: "t", seedSet });
+      const r2 = app.buildContext("task", { taskText: "t", seedSet });
+      expect(r1.payload).toBe(r2.payload);
+      expect(r1.payload).toContain("[REDACTED:");
+      expect(r1.payload).not.toContain("AKIAQW8Z7XP6M5L4K3J2");
+    });
+
+    it("unseeded requests stay byte-identical to the pre-M4 format", async () => {
+      const app = await makeSeedApp();
+      const result = app.buildContext("task", { taskText: "gizmo widget" });
+      expect(result.payload).not.toContain("## CURRENT CHANGES");
+      expect(result.payload).toContain("CONTEXT_VERSION: 1");
     });
   });
 });

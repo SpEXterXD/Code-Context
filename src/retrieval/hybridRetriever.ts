@@ -39,6 +39,21 @@ export const M3_CONTENT_FUSION = {
   weight: 2.0,
 };
 
+/**
+ * M4 (ablatable) — change-aware seed signal weights. ONLY diffTouched is
+ * tuned by the seed simulation (ADR-006); openEditor/diagnostic/stackFrame
+ * ship with conservative untuned defaults, documented as untuned, and their
+ * seed sources are off by default behind settings. `enabled: false`
+ * disables seed signals entirely (harness --ablate seeds).
+ */
+export const M4_SEED_WEIGHTS = {
+  enabled: true,
+  diffTouched: 0.6,
+  openEditor: 0.3,
+  diagnostic: 0.4,
+  stackFrame: 0.4,
+};
+
 export interface RetrievalOptions {
   limit?: number;
   /** Hard depth limit for graph expansion around seed files. */
@@ -46,6 +61,16 @@ export interface RetrievalOptions {
   enableGitRecency?: boolean;
   /** Files that must appear in results even when nothing matches (user pins). */
   pinnedPaths?: string[];
+  /**
+   * M4 change-aware seed hints: each fires its signal (weights in
+   * M4_SEED_WEIGHTS) and acts as a pin (survives zero-signal retrieval).
+   * First occurrence of a path wins.
+   */
+  seedHints?: Array<{
+    path: string;
+    kind: "DIFF_TOUCHED" | "OPEN_EDITOR" | "DIAGNOSTIC" | "STACK_FRAME";
+    detail?: string;
+  }>;
 }
 
 export interface RetrievalResult {
@@ -343,6 +368,28 @@ export class HybridRetriever {
       }
     }
 
+    // M4: seed signals fire BEFORE ranking so their weight affects order.
+    if (M4_SEED_WEIGHTS.enabled) {
+      const seen = new Set<string>();
+      for (const hint of options.seedHints ?? []) {
+        if (seen.has(hint.path)) continue;
+        seen.add(hint.path);
+        const weight =
+          hint.kind === "DIFF_TOUCHED"
+            ? M4_SEED_WEIGHTS.diffTouched
+            : hint.kind === "OPEN_EDITOR"
+              ? M4_SEED_WEIGHTS.openEditor
+              : hint.kind === "DIAGNOSTIC"
+                ? M4_SEED_WEIGHTS.diagnostic
+                : M4_SEED_WEIGHTS.stackFrame;
+        bump(hint.path, {
+          kind: hint.kind,
+          weight,
+          detail: hint.detail ?? "",
+        });
+      }
+    }
+
     const ranked: ScoredFile[] = [...contributions.entries()]
       .map(([path, signals]) => {
         const raw = signals.reduce((a, s) => a + s.weight, 0);
@@ -353,9 +400,19 @@ export class HybridRetriever {
       .sort((a, b) => b.score - a.score || compareStrings(a.path, b.path))
       .slice(0, limit);
 
+    // Seeds also act as pins: they survive zero-signal retrieval.
     for (const pinned of options.pinnedPaths ?? []) {
       if (!ranked.some((r) => r.path === pinned)) {
         ranked.push({ path: pinned, score: 0, signals: [] });
+      }
+    }
+    for (const hint of options.seedHints ?? []) {
+      if (!ranked.some((r) => r.path === hint.path)) {
+        ranked.push({
+          path: hint.path,
+          score: 0,
+          signals: [],
+        });
       }
     }
 
