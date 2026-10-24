@@ -268,14 +268,31 @@ async function main(): Promise<void> {
   const checkpointFile = path.join(OUT_DIR, `step0-${split}.records.jsonl`);
   const doneTasks = new Set<string>();
   if (fs.existsSync(checkpointFile)) {
-    for (const line of fs.readFileSync(checkpointFile, "utf8").split(/\r?\n/)) {
+    const lines = fs.readFileSync(checkpointFile, "utf8").split(/\r?\n/);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]!;
       if (line.trim().length === 0) continue;
-      const c = JSON.parse(line) as {
+      let c: {
         task: string;
         perTask: (typeof perTask)[number];
         records: GoldRecord[];
         skipped?: Array<{ task: string; phase: string; error: string }>;
       };
+      try {
+        c = JSON.parse(line);
+      } catch {
+        // A hard kill can truncate the final append. Only a TRAILING partial
+        // line is tolerable (that task simply re-runs); corruption elsewhere
+        // means the file is untrustworthy.
+        const moreAfter = lines.slice(i + 1).some((l) => l.trim().length > 0);
+        if (moreAfter) {
+          throw new Error(
+            `corrupt checkpoint line ${i + 1} in ${checkpointFile} — delete the file and start fresh`,
+          );
+        }
+        console.warn("resuming: ignoring truncated final checkpoint line (task re-runs)");
+        break;
+      }
       doneTasks.add(c.task);
       perTask.push(c.perTask);
       records.push(...c.records);
