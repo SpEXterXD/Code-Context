@@ -7,6 +7,7 @@ import { OccApplication } from "../application/contextService";
 import { makeTempDir, removeRepo, writeRepo } from "../testing/fixtures";
 import { renderSourceFileSection } from "./contextFormatter";
 import { CancellationSource } from "../shared/cancellation";
+import { M3B_RANK_PRIORITY } from "./contextBuilder";
 
 const FIXTURE: Record<string, string> = {
   "package.json": JSON.stringify({ name: "ctx-fixture", version: "1.0.0" }) + "\n",
@@ -404,5 +405,76 @@ describe("ContextBuilder", () => {
     expect(emitted.some((l) => l.length >= 4)).toBe(true);
     // Structure stays intact: the SOURCE section ends where it should.
     expect(result.payload).toContain("## CONTEXT METADATA");
+  });
+
+  describe("M3b/P1 rank-priority content slots (ablatable)", () => {
+    const P1_FIXTURE: Record<string, string> = {
+      "package.json": JSON.stringify({ name: "p1-fixture", version: "1.0.0" }) + "\n",
+      // Strong query symbol: rank 1, EXACT_SYMBOL tier.
+      "src/seed.ts": [
+        "/** Gizmo core. */",
+        "export function gizmoWidget(): number {",
+        "  return 42;",
+        "}",
+        "",
+      ].join("\n"),
+      // Content-matching but graph-disconnected: high rank, STRONG_LEXICAL tier.
+      "src/panel.ts": [
+        "/** Gizmo widget panel rendering and widget layout helpers. */",
+        "export const panelGizmo = 2;",
+        "",
+      ].join("\n"),
+      // Tier-boosted importers of the seed: DIRECT_DEPENDENT, deeper ranks.
+      "src/e1.ts": 'import { gizmoWidget } from "./seed";\nexport const a1 = gizmoWidget;\n',
+      "src/e2.ts": 'import { gizmoWidget } from "./seed";\nexport const a2 = gizmoWidget;\n',
+      "src/e3.ts": 'import { gizmoWidget } from "./seed";\nexport const a3 = gizmoWidget;\n',
+    };
+
+    function payloadFor(app: OccApplication): { source: string; why: string } {
+      const result = app.buildContext("task", { taskText: "gizmo widget" });
+      return {
+        source: extractSection(result.payload, "SOURCE"),
+        why: extractSection(result.payload, "WHY THESE FILES WERE SELECTED"),
+      };
+    }
+
+    it("gives top-ranked files content slots ahead of tier-boosted extras", async () => {
+      const wasEnabled = M3B_RANK_PRIORITY.enabled;
+      try {
+        root = makeTempDir();
+        writeRepo(root, P1_FIXTURE);
+        const tight = {
+          maxFiles: 3,
+          maxChars: 120000,
+          maxLines: 3000,
+          maxTokens: 30000,
+          maxGraphDepth: 3,
+          maxCodeLinesPerFile: 400,
+          structureDepth: 4,
+        };
+        M3B_RANK_PRIORITY.enabled = false;
+        const tierFirst = new OccApplication(root, path.join(root, ".occ-store"), tight);
+        await tierFirst.indexing.indexWorkspace(CancellationSource.never());
+        const baseline = payloadFor(tierFirst);
+        // Tier order (EXACT > DIRECT_DEPENDENT > STRONG_LEXICAL) crowds the
+        // content-matching panel out of the SOURCE section.
+        expect(baseline.source).toContain("src/seed.ts");
+        expect(baseline.source).not.toContain("src/panel.ts");
+        expect(baseline.why).toContain("src/panel.ts"); // explainable omission
+
+        M3B_RANK_PRIORITY.enabled = true;
+        const rankFirst = new OccApplication(root, path.join(root, ".occ-store2"), tight);
+        await rankFirst.indexing.indexWorkspace(CancellationSource.never());
+        const fused = payloadFor(rankFirst);
+        // Rank order claims a slot for the top-ranked content match.
+        expect(fused.source).toContain("src/seed.ts");
+        expect(fused.source).toContain("src/panel.ts");
+        // Still explainable and within the same file budget.
+        expect(fused.why).toContain("src/panel.ts");
+        expect((fused.source.match(/^### FILE: /gm) ?? []).length).toBeLessThanOrEqual(3);
+      } finally {
+        M3B_RANK_PRIORITY.enabled = wasEnabled;
+      }
+    });
   });
 });

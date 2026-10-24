@@ -34,6 +34,7 @@ import { OccApplication } from "../src/application/contextService";
 import { CancellationSource } from "../src/shared/cancellation";
 import { M3_CONTENT_FUSION } from "../src/retrieval/hybridRetriever";
 import { M3_BODY_FIELD } from "../src/retrieval/invertedIndex";
+import { M3B_RANK_PRIORITY } from "../src/context/contextBuilder";
 
 import { bm25Baseline, filenameBaseline, randomBaseline } from "./eval/baselines";
 import type { DatasetTask } from "./eval/dataset";
@@ -274,6 +275,12 @@ const ABLATIONS: Record<string, { label: string; apply: () => void }> = {
     label: "M3_BODY_FIELD (E1 body lexical field) disabled",
     apply: () => {
       M3_BODY_FIELD.enabled = false;
+    },
+  },
+  rankPriority: {
+    label: "M3B_RANK_PRIORITY (M3b/P1 rank-priority content slots) disabled",
+    apply: () => {
+      M3B_RANK_PRIORITY.enabled = false;
     },
   },
 };
