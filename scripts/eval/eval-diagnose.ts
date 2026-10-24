@@ -241,9 +241,44 @@ async function main(): Promise<void> {
     indexedTokens: string[];
     bodyOnlyTokens: string[];
   }> = [];
+  // Per-task checkpoint: a stall or crash never costs more than one task.
+  const checkpointFile = path.join(OUT_DIR, `step0-${split}.records.jsonl`);
+  const doneTasks = new Set<string>();
+  if (fs.existsSync(checkpointFile)) {
+    for (const line of fs.readFileSync(checkpointFile, "utf8").split(/\r?\n/)) {
+      if (line.trim().length === 0) continue;
+      const c = JSON.parse(line) as {
+        task: string;
+        perTask: (typeof perTask)[number];
+        records: GoldRecord[];
+        skipped?: Array<{ task: string; phase: string; error: string }>;
+      };
+      doneTasks.add(c.task);
+      perTask.push(c.perTask);
+      records.push(...c.records);
+      skippedTasks.push(...(c.skipped ?? []));
+    }
+    console.log(`resuming: ${doneTasks.size} tasks already checkpointed`);
+  }
+
+  const checkpoint = (
+    t: DatasetTask,
+    entry: (typeof perTask)[number] | null,
+    taskRecords: GoldRecord[],
+    skipped?: Array<{ task: string; phase: string; error: string }>,
+  ): void => {
+    fs.mkdirSync(OUT_DIR, { recursive: true });
+    fs.appendFileSync(
+      checkpointFile,
+      `${JSON.stringify({ task: t.id, perTask: entry, records: taskRecords, skipped })}\n`,
+    );
+  };
 
   for (const repoId of repoIds) {
     for (const t of tasks.filter((x) => x.repoId === repoId) as DatasetTask[]) {
+      if (doneTasks.has(t.id)) continue;
+      const taskRecords: GoldRecord[] = [];
+      const taskSkips: Array<{ task: string; phase: string; error: string }> = [];
       const clonePath = cloneDirFor(repoId);
       const snapKey = `diag-${repoId}-${t.sha.slice(0, 12)}`;
       const snapDir = materializeSnapshot(clonePath, t.parentSha, SCRATCH_ROOT, snapKey);
@@ -253,6 +288,10 @@ async function main(): Promise<void> {
       const indexResult = await app.indexing.indexWorkspace(CancellationSource.never());
       if (indexResult.cancelled || app.indexing.getEntries().size === 0) {
         console.error(`  ${t.id}: indexing produced no entries — skipping task`);
+        const skipped = { task: t.id, phase: "index", error: "no entries" };
+        skippedTasks.push(skipped);
+        taskSkips.push(skipped);
+        checkpoint(t, null, taskRecords, taskSkips);
         fs.rmSync(snapDir, { recursive: true, force: true });
         continue;
       }
@@ -268,8 +307,11 @@ async function main(): Promise<void> {
       } catch (error) {
         // e.g. CONTEXT_BUDGET_UNREACHABLE when static sections alone exceed
         // the budget on very large snapshots — record and move on.
-        skippedTasks.push({ task: t.id, phase: "build", error: (error as Error).message });
-        console.error(`  ${t.id}: SKIPPED (${(error as Error).message.slice(0, 90)})`);
+        const skipped = { task: t.id, phase: "build", error: (error as Error).message };
+        skippedTasks.push(skipped);
+        taskSkips.push(skipped);
+        console.error(`  ${t.id}: SKIPPED (${skipped.error.slice(0, 90)})`);
+        checkpoint(t, null, taskRecords, taskSkips);
         fs.rmSync(snapDir, { recursive: true, force: true });
         continue;
       }
@@ -296,7 +338,9 @@ async function main(): Promise<void> {
         bigContext = appBig.buildContext("task", { taskText: t.task });
       } catch (error) {
         bigContext = context; // cap probe unavailable; fall back to normal ranking
-        skippedTasks.push({ task: t.id, phase: "build-bigcap", error: (error as Error).message });
+        const skip = { task: t.id, phase: "build-bigcap", error: (error as Error).message };
+        skippedTasks.push(skip);
+        taskSkips.push(skip);
       }
       const bigRanked = bigContext.retrieval?.ranked ?? [];
       const bigRankOf = new Map(bigRanked.map((r, i) => [r.path, i + 1] as const));
@@ -369,9 +413,10 @@ async function main(): Promise<void> {
           if (bigRank !== null && bigRank <= TOP_N) goldNewlyInTop8++;
         }
         records.push(record);
+        taskRecords.push(record);
       }
 
-      perTask.push({
+      const perTaskEntry = {
         task: t.id,
         rankedRecall8: recallAtK(
           ranked.map((r) => ({ path: r.path, score: r.score })),
@@ -386,7 +431,9 @@ async function main(): Promise<void> {
           TOP_N,
         ),
         goldNewlyInTop8BigCap: goldNewlyInTop8,
-      });
+      };
+      perTask.push(perTaskEntry);
+      checkpoint(t, perTaskEntry, taskRecords, taskSkips.length > 0 ? taskSkips : undefined);
       fs.rmSync(snapDir, { recursive: true, force: true });
       console.log(`  ${t.id}: done (${records.length} gold records)`);
     }
@@ -452,6 +499,7 @@ async function main(): Promise<void> {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   const outFile = path.join(OUT_DIR, `step0-${split}.json`);
   fs.writeFileSync(outFile, `${JSON.stringify(out, null, 2)}\n`);
+  fs.rmSync(checkpointFile, { force: true }); // complete: a fresh run starts clean
   console.log(`\n=== Stage-loss (${records.length} gold files, ${tasks.length} tasks) ===`);
   for (const s of STAGES) {
     const row = stageLoss[s]!;
