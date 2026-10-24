@@ -2,8 +2,10 @@
  * Git I/O for the dataset builder: reads commit history from a local clone.
  * NEVER mutates the user's repository — all operations run in the
  * git-ignored clone under .eval-cache/repos/<id>, and are read-only there
- * (log / cat-file / archive). The stream parsers are pure and exported so
- * gitminer.test.ts can pin their behavior without a real git binary.
+ * (log / cat-file / ls-tree; snapshot materialization writes only to the
+ * scratch dir via a temporary GIT_INDEX_FILE). The stream parsers are pure
+ * and exported so gitminer.test.ts can pin their behavior without a real
+ * git binary.
  */
 import { execFileSync } from "node:child_process";
 import * as fs from "node:fs";
@@ -33,11 +35,62 @@ const META_FORMAT = `%H${META_UNIT}%P${META_UNIT}%an${META_UNIT}%ae${META_UNIT}%
 // lines follow the format string, so each entry begins with its own record.
 const FILES_FORMAT = `${RECORD_UNIT}%H`;
 
-function runGit(clonePath: string, args: string[]): string {
+// ---------------------------------------------------------------------------
+// ls-tree: the platform-independent file universe of a commit
+// ---------------------------------------------------------------------------
+
+/** One entry of `git ls-tree -r <commit>` (a path plus its git mode). */
+export interface LsTreeEntry {
+  /** Git object mode: 100644/100755 regular file, 120000 symlink, 160000 gitlink. */
+  mode: string;
+  /** Git object type: "blob" for files and symlinks, "commit" for gitlinks. */
+  type: string;
+  sha: string;
+  path: string;
+}
+
+/** Modes that denote a regular, materializable file. Everything else is excluded. */
+export function isRegularFileMode(mode: string): boolean {
+  return mode === "100644" || mode === "100755";
+}
+
+/**
+ * Parses `git ls-tree -r -z <commit>` output: NUL-separated records of
+ * `<mode> SP <type> SP <sha> TAB <path>`. With -z, paths are raw (never
+ * quoted), so filenames with spaces or non-ASCII survive intact.
+ */
+export function parseLsTreeStream(stream: string): LsTreeEntry[] {
+  const out: LsTreeEntry[] = [];
+  for (const record of stream.split("\0")) {
+    if (record.length === 0) continue;
+    const tab = record.indexOf("\t");
+    if (tab < 0) continue;
+    const head = record.slice(0, tab).split(" ");
+    if (head.length < 3) continue;
+    out.push({ mode: head[0]!, type: head[1]!, sha: head[2]!, path: record.slice(tab + 1) });
+  }
+  return out;
+}
+
+/** Lists the full recursive tree of one commit (read-only on the clone). */
+export function lsTree(clonePath: string, commit: string): LsTreeEntry[] {
+  return parseLsTreeStream(runGit(clonePath, ["ls-tree", "-r", "-z", commit]));
+}
+
+export interface RunGitOptions {
+  /** Extra environment (merged over process.env), e.g. GIT_INDEX_FILE. */
+  env?: NodeJS.ProcessEnv;
+  /** Stdin for commands that read paths via `--stdin`. */
+  input?: string;
+}
+
+function runGit(clonePath: string, args: string[], options: RunGitOptions = {}): string {
   return execFileSync("git", ["-C", clonePath, ...args], {
     encoding: "utf8",
     maxBuffer: 512 * 1024 * 1024,
     timeout: 300000,
+    ...(options.env ? { env: { ...process.env, ...options.env } } : {}),
+    ...(options.input !== undefined ? { input: options.input } : {}),
   });
 }
 
@@ -62,7 +115,10 @@ export function parseMetaStream(stream: string): Map<string, Omit<MinedCommit, "
     const body = (stackParts[2] ?? "").trim();
     out.set(shaKey, {
       sha: shaKey,
-      parents: parents.trim().split(/\s+/).filter((p) => p.length > 0),
+      parents: parents
+        .trim()
+        .split(/\s+/)
+        .filter((p) => p.length > 0),
       authorName: authorName.trim(),
       authorEmail: authorEmail.trim(),
       committerTime: parseInt(committerTime.trim(), 10) || 0,
@@ -107,11 +163,7 @@ export function parseNameStatusStream(stream: string): Map<string, TouchedFile[]
 
 /** Mines the full merge-free history of one clone (read-only). */
 export function mineCommits(clonePath: string): MinedCommit[] {
-  const metaStream = runGit(clonePath, [
-    "log",
-    "--no-merges",
-    `--format=${META_FORMAT}`,
-  ]);
+  const metaStream = runGit(clonePath, ["log", "--no-merges", `--format=${META_FORMAT}`]);
   const filesStream = runGit(clonePath, [
     "log",
     "--no-merges",
@@ -160,7 +212,14 @@ export function ensureClone(repo: CloneSpec): CloneResult {
     fs.mkdirSync(path.dirname(dir), { recursive: true });
     execFileSync(
       "git",
-      ["clone", "--no-checkout", "--single-branch", `--branch=${repo.defaultBranch}`, repo.url, dir],
+      [
+        "clone",
+        "--no-checkout",
+        "--single-branch",
+        `--branch=${repo.defaultBranch}`,
+        repo.url,
+        dir,
+      ],
       { encoding: "utf8", timeout: 600000, stdio: "pipe" },
     );
     return { clonePath: dir, fresh: true };
@@ -173,10 +232,31 @@ export function ensureClone(repo: CloneSpec): CloneResult {
   }
 }
 
+/** Deterministic-materialization git flags, forced on every plumbing call. */
+const SNAPSHOT_GIT_FLAGS = [
+  "-c",
+  "core.symlinks=false",
+  "-c",
+  "core.autocrlf=false",
+  "-c",
+  "core.eol=lf",
+  // Never spend eval time auto-gc'ing the cache clone (objects are read-only
+  // here; packing is dev-time cache maintenance).
+  "-c",
+  "gc.auto=0",
+] as const;
+
 /**
- * Materializes a commit snapshot into a fresh directory via `git archive` +
- * `tar -xf` (both available on Windows and POSIX). Strictly read-only on the
- * clone; the scratch directory is wiped first.
+ * Materializes a commit snapshot into a fresh directory using git plumbing
+ * only (no tar): a temporary index (GIT_INDEX_FILE, never the clone's own
+ * index) is populated from the commit tree with `read-tree`, every
+ * non-regular-file entry — symlinks (mode 120000) and gitlinks/submodules
+ * (mode 160000) — is dropped from that index with `update-index
+ * --force-remove`, and `checkout-index -a` writes exactly the remaining
+ * regular files under the target prefix. Because the file universe is
+ * decided by tree MODES (git metadata) rather than by what a filesystem can
+ * create, and because core.autocrlf/core.eol/core.symlinks are forced, the
+ * on-disk result is identical on Windows, macOS and Linux.
  */
 export function materializeSnapshot(
   clonePath: string,
@@ -185,25 +265,38 @@ export function materializeSnapshot(
   key: string,
 ): string {
   const outDir = path.join(scratchRoot, key);
+  const tmpIndex = path.join(scratchRoot, `${key}.index`);
+  fs.mkdirSync(scratchRoot, { recursive: true });
   fs.rmSync(outDir, { recursive: true, force: true });
-  fs.mkdirSync(outDir, { recursive: true });
-  const tarball = path.join(scratchRoot, `${key}.tar`);
-  fs.rmSync(tarball, { force: true });
+  fs.rmSync(tmpIndex, { force: true });
   try {
-    execFileSync("git", ["-C", clonePath, "archive", "--format=tar", "--output", tarball, commit], {
-      encoding: "utf8",
-      timeout: 120000,
-      stdio: "pipe",
-    });
-    execFileSync("tar", ["-xf", tarball, "-C", outDir], {
-      encoding: "utf8",
-      timeout: 120000,
-      stdio: "pipe",
-    });
+    const git = (args: string[], options: RunGitOptions = {}) =>
+      runGit(clonePath, [...SNAPSHOT_GIT_FLAGS, ...args], {
+        ...options,
+        env: { ...options.env, GIT_INDEX_FILE: tmpIndex },
+      });
+    git(["read-tree", commit]);
+    const nonFiles = lsTree(clonePath, commit).filter((e) => !isRegularFileMode(e.mode));
+    if (nonFiles.length > 0) {
+      git(["update-index", "-z", "--force-remove", "--stdin"], {
+        input: `${nonFiles.map((e) => e.path).join("\0")}\0`,
+      });
+    }
+    // checkout-index concatenates the prefix with each index path; git on
+    // Windows accepts forward-slash absolute prefixes natively.
+    git(["checkout-index", "-a", `--prefix=${outDir.split(path.sep).join("/")}/`]);
   } catch (cause) {
-    throw new Error(`Snapshot materialization failed for ${commit} in ${clonePath}: ${String(cause)}`, { cause });
+    fs.rmSync(outDir, { recursive: true, force: true });
+    const detail =
+      cause && typeof cause === "object" && "stderr" in cause
+        ? `stderr=${String((cause as { stderr?: unknown }).stderr).slice(0, 300)}`
+        : "";
+    throw new Error(
+      `Snapshot materialization failed for ${commit} in ${clonePath}: ${String(cause)} ${detail}`,
+      { cause },
+    );
   } finally {
-    fs.rmSync(tarball, { force: true });
+    fs.rmSync(tmpIndex, { force: true });
   }
   return outDir;
 }

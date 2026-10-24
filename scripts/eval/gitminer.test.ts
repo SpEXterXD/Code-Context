@@ -4,6 +4,8 @@ import {
   META_UNIT,
   RECORD_UNIT,
   STACK_UNIT,
+  isRegularFileMode,
+  parseLsTreeStream,
   parseMetaStream,
   parseNameStatusStream,
 } from "./gitminer";
@@ -59,5 +61,35 @@ describe("parseNameStatusStream", () => {
     const files = parseNameStatusStream(stream);
     expect(files.get("sha")).toEqual([]);
     expect(files.get("sha2")).toEqual([]);
+  });
+});
+
+describe("parseLsTreeStream (git ls-tree -r -z)", () => {
+  it("parses regular files, symlinks, gitlinks and raw paths", () => {
+    const stream = [
+      "100644 blob aaa1\tsrc/index.ts",
+      "100755 blob bbb2\tscripts/run.sh",
+      "120000 blob ccc3\tREADME.md",
+      "160000 commit ddd4\tvendored/submodule",
+      "100644 blob eee5\tdir/with spaces/naïve file.ts",
+      "",
+    ].join("\0");
+    const entries = parseLsTreeStream(stream);
+    expect(entries).toEqual([
+      { mode: "100644", type: "blob", sha: "aaa1", path: "src/index.ts" },
+      { mode: "100755", type: "blob", sha: "bbb2", path: "scripts/run.sh" },
+      { mode: "120000", type: "blob", sha: "ccc3", path: "README.md" },
+      { mode: "160000", type: "commit", sha: "ddd4", path: "vendored/submodule" },
+      { mode: "100644", type: "blob", sha: "eee5", path: "dir/with spaces/naïve file.ts" },
+    ]);
+  });
+
+  it("classifies exactly the two regular-file modes as materializable", () => {
+    expect(isRegularFileMode("100644")).toBe(true);
+    expect(isRegularFileMode("100755")).toBe(true);
+    expect(isRegularFileMode("120000")).toBe(false); // symlink
+    expect(isRegularFileMode("160000")).toBe(false); // gitlink/submodule
+    expect(isRegularFileMode("040000")).toBe(false); // tree (defensive)
+    expect(parseLsTreeStream("")).toEqual([]);
   });
 });
