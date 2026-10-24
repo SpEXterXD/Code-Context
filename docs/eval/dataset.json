@@ -1,7 +1,7 @@
 {
   "seed": 20260918,
   "tasksPerRepo": 40,
-  "datasetHash": "85d638ad",
+  "datasetHash": "9b42dc9b",
   "repos": {
     "hono": {
       "pinnedCommit": "5ca49b0720755c585c9a9835f0a479ceea36fb52",
@@ -30,9 +30,15 @@
         },
         "excludedNewFiles": 158,
         "evalPoolSize": 589,
-        "tuningHalfSize": 588
+        "tuningHalfSize": 588,
+        "evaluatedTasks": 40,
+        "tasksDroppedEmptyGold": 0,
+        "tasksWithPartialGoldDrop": 0,
+        "droppedGoldSymlink": 0,
+        "droppedGoldGitlink": 0,
+        "droppedGoldMissing": 0
       },
-      "datasetHash": "a06a553c"
+      "datasetHash": "c3560bd8"
     },
     "zod": {
       "pinnedCommit": "afdac65e0f80c0ccf9e8909da97c411567908b57",
@@ -62,9 +68,15 @@
         },
         "excludedNewFiles": 70,
         "evalPoolSize": 243,
-        "tuningHalfSize": 243
+        "tuningHalfSize": 243,
+        "evaluatedTasks": 40,
+        "tasksDroppedEmptyGold": 0,
+        "tasksWithPartialGoldDrop": 0,
+        "droppedGoldSymlink": 0,
+        "droppedGoldGitlink": 0,
+        "droppedGoldMissing": 0
       },
-      "datasetHash": "6dc4682a"
+      "datasetHash": "55fc75e0"
     },
     "undici": {
       "pinnedCommit": "1f452240899a1bbbfa7cbd64ade03ec11c7cef2c",
@@ -94,9 +106,15 @@
         },
         "excludedNewFiles": 305,
         "evalPoolSize": 724,
-        "tuningHalfSize": 723
+        "tuningHalfSize": 723,
+        "evaluatedTasks": 40,
+        "tasksDroppedEmptyGold": 0,
+        "tasksWithPartialGoldDrop": 0,
+        "droppedGoldSymlink": 0,
+        "droppedGoldGitlink": 0,
+        "droppedGoldMissing": 0
       },
-      "datasetHash": "0d7fb32f"
+      "datasetHash": "f9f3d95b"
     },
     "axios": {
       "pinnedCommit": "e6b79d9cef796ca3a903bb83e51d4752b019fd67",
@@ -126,9 +144,15 @@
         },
         "excludedNewFiles": 83,
         "evalPoolSize": 265,
-        "tuningHalfSize": 264
+        "tuningHalfSize": 264,
+        "evaluatedTasks": 40,
+        "tasksDroppedEmptyGold": 0,
+        "tasksWithPartialGoldDrop": 0,
+        "droppedGoldSymlink": 0,
+        "droppedGoldGitlink": 0,
+        "droppedGoldMissing": 0
       },
-      "datasetHash": "83c4320a"
+      "datasetHash": "03e8f314"
     },
     "fastify": {
       "pinnedCommit": "ce41dc0fbb4ed75e9a42f3972ac896333f6a7396",
@@ -157,9 +181,15 @@
         },
         "excludedNewFiles": 114,
         "evalPoolSize": 342,
-        "tuningHalfSize": 341
+        "tuningHalfSize": 341,
+        "evaluatedTasks": 40,
+        "tasksDroppedEmptyGold": 0,
+        "tasksWithPartialGoldDrop": 0,
+        "droppedGoldSymlink": 0,
+        "droppedGoldGitlink": 0,
+        "droppedGoldMissing": 0
       },
-      "datasetHash": "0dc61788"
+      "datasetHash": "bc01e73e"
     }
   },
   "tasks": [
@@ -175,6 +205,7 @@
         "src/jsx/hooks/index.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1709526062,
       "subject": "fix (jsx/dom): keep ref.current value during lifecycle. (#2307)"
     },
@@ -189,6 +220,7 @@
         "src/utils/url.ts"
       ],
       "excludedNewFiles": 3,
+      "excludedModeFiles": [],
       "committerTime": 1710751223,
       "subject": "perf(utils/url): use `slice` + `indexOf` for `getPath()` (#2376)"
     },
@@ -204,6 +236,7 @@
         "src/jsx/index.test.tsx"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1710938550,
       "subject": "fix(jsx): escape attribute value for \"style\" (#2390)"
     },
@@ -224,6 +257,7 @@
         "src/jsx/streaming.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1711096173,
       "subject": "fix(jsx): allow null, undefined, and boolean as children (#2394)"
     },
@@ -237,6 +271,7 @@
         "src/request.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1716543343,
       "subject": "refactor(request): show user-friendly type for `c.req.param()` (#2780)"
     },
@@ -251,6 +286,7 @@
         "src/middleware/body-limit/index.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1716917735,
       "subject": "fix(middleware/body-limit): set default duplex option for readable stream (#2837)"
     },
@@ -264,6 +300,7 @@
         "src/jsx/utils.ts"
       ],
       "excludedNewFiles": 1,
+      "excludedModeFiles": [],
       "committerTime": 1716991346,
       "subject": "fix(jsx/dom): Fixed to not give \"px\" for certain properties, even if numeric value is given (#2845)"
     },
@@ -277,6 +314,7 @@
         "src/adapter/aws-lambda/handler.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1716992078,
       "subject": "refactor(aws-lambda): remove unused setHeadersToResult (#2828)"
     },
@@ -290,6 +328,7 @@
         "src/adapter/deno/websocket.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1717318591,
       "subject": "fix(websocket): the onopen event cannot be triggered during delayed operations in deno (#2864)"
     },
@@ -304,6 +343,7 @@
         "src/types.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1717678104,
       "subject": "fix(types): add `_` prefix to `TypedResponse` properties (#2917)"
     },
@@ -319,6 +359,7 @@
         "src/utils/types.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1717679373,
       "subject": "fix(types): `SimplifyDeepArray` should now actually be \"deep\" (#2920)"
     },
@@ -332,6 +373,7 @@
         "src/request.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1718031103,
       "subject": "refactor(request): shorten `parseBody` and remove unnecessary check (#2947)"
     },
@@ -346,6 +388,7 @@
         "src/jsx/dom/client.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1718160991,
       "subject": "feat(jsx/dom): export createRoot and hydrateRoot from jsx/dom/client as default (#2929)"
     },
@@ -363,6 +406,7 @@
         "src/jsx/index.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1718161395,
       "subject": "feat(jsx/dom): Improve compatibility React (useCallback, React.StrictMode) (#2944)"
     },
@@ -377,6 +421,7 @@
         "src/types.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1720078720,
       "subject": "fix(types): infer `path` when chaining after `use` (#3087)"
     },
@@ -391,6 +436,7 @@
         "package.json"
       ],
       "excludedNewFiles": 2,
+      "excludedModeFiles": [],
       "committerTime": 1720864150,
       "subject": "feat(middleware/combine): Introduce combine middleware (#2941)"
     },
@@ -404,6 +450,7 @@
         "src/jsx/intrinsic-elements.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1721137085,
       "subject": "feat(jsx): add global attributes to interface definition (#3142)"
     },
@@ -417,6 +464,7 @@
         "build.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1726062213,
       "subject": "fix(build): improve addExtension esbuild plugin (#3405)"
     },
@@ -430,6 +478,7 @@
         "src/jsx/hooks/index.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1727079517,
       "subject": "fix(types): useSyncExternalStore type (#3437)"
     },
@@ -443,6 +492,7 @@
         "src/context.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1735119215,
       "subject": "refactor(context): remove lint errors (#3769)"
     },
@@ -457,6 +507,7 @@
         "src/helper/adapter/index.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1737882692,
       "subject": "fix(helper/adapter): `env` should set `c` type correctly (#3856)"
     },
@@ -471,6 +522,7 @@
         "src/context.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1750112452,
       "subject": "fix: reduce Context code (#4100)"
     },
@@ -484,6 +536,7 @@
         "src/router/trie-router/node.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1750112488,
       "subject": "perf(trie-router): improve performance and reduce file size (#4217)"
     },
@@ -498,6 +551,7 @@
         "src/router/reg-exp-router/prepared-router.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1760317888,
       "subject": "refactor:  internal structure of `PreparedRegExpRouter` for optimization and added tests (#4456)"
     },
@@ -512,6 +566,7 @@
         "src/middleware/cors/index.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1761324502,
       "subject": "Merge commit from fork"
     },
@@ -527,6 +582,7 @@
         "src/adapter/bun/server.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1764153227,
       "subject": "fix(adapter/bun): fix TypeError: null is not an object (#4429) (#4538)"
     },
@@ -540,6 +596,7 @@
         "src/hono-base.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1766630402,
       "subject": "refactor(hono-base): add type annotations (#4591)"
     },
@@ -554,6 +611,7 @@
         "src/client/types.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1769043046,
       "subject": "fix(client): exclude $all from ClientRequest type (#4611)"
     },
@@ -567,6 +625,7 @@
         "src/request/constants.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1769438166,
       "subject": "refactor: use `unique symbol` for more accurate typing. (#4651)"
     },
@@ -583,6 +642,7 @@
         "src/utils/ipaddr.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1779190391,
       "subject": "Merge commit from fork"
     },
@@ -600,6 +660,7 @@
         "vitest.config.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1779440282,
       "subject": "chore: update vitest to v4 and cleanups (#4952)"
     },
@@ -614,6 +675,7 @@
         "src/middleware/serve-static/index.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1782803917,
       "subject": "fix(serve-static): treat empty string content as found (#5062)"
     },
@@ -627,6 +689,7 @@
         "src/adapter/aws-lambda/handler.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1784329317,
       "subject": "refactor(aws-lambada): remove FIXME in `@ts-expect-error` (#5130)"
     },
@@ -640,6 +703,7 @@
         "src/context.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1785791072,
       "subject": "perf(context): skip Headers creation when there are no headers to merge (#5122)"
     },
@@ -655,6 +719,7 @@
         "src/utils/url.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1785791072,
       "subject": "perf(urls): refactor `tryDecodeURIComponent` (#5158)"
     },
@@ -669,6 +734,7 @@
         "src/middleware/cache/index.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1785791072,
       "subject": "feat(cache): add first-class support for QUERY requests (#5119)"
     },
@@ -682,6 +748,7 @@
         "src/request.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1785791072,
       "subject": "perf(request): probe the body cache without allocating (#5176)"
     },
@@ -696,6 +763,7 @@
         "src/middleware/etag/index.test.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1786324829,
       "subject": "fix(etag): stabilize digest across stream chunks (#5205)"
     },
@@ -710,6 +778,7 @@
         "src/request.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1787469418,
       "subject": "fix(request): serialize cached JSON body in cloneRawRequest (#5288)"
     },
@@ -724,6 +793,7 @@
         "src/middleware/serve-static/index.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1791879490,
       "subject": "fix(serve-static): only serve GET and HEAD requests (#5514)"
     },
@@ -738,6 +808,7 @@
         "src/helpers/util.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1715105668,
       "subject": "Fix #3437: extendShape erases JSDoc property documentation (#3463)"
     },
@@ -754,6 +825,7 @@
         "src/types.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1733797089,
       "subject": "Allow creation of discriminated unions with a readonly array of options (#3535)"
     },
@@ -772,6 +844,7 @@
         "src/types.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1733810569,
       "subject": "feat: Add JWT string validator (#3893)"
     },
@@ -790,6 +863,7 @@
         "yarn.lock"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1733871479,
       "subject": "Bump min TS version to 5.0"
     },
@@ -806,6 +880,7 @@
         "play.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1748391567,
       "subject": "Fix default & prefault object handling (#4539)"
     },
@@ -819,6 +894,7 @@
         "packages/zod/src/v4/core/schemas.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1748855689,
       "subject": "rm `console.dir` from `$ZodDiscriminatedUnion` (#4593)"
     },
@@ -833,6 +909,7 @@
         "play.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1748998145,
       "subject": "Add output type generic test"
     },
@@ -849,6 +926,7 @@
         "play.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1749168043,
       "subject": "Fix json (#4630)"
     },
@@ -865,6 +943,7 @@
         "packages/zod/src/v4/mini/tests/recursive-types.test.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1749171438,
       "subject": "zod mini internals (#4631)"
     },
@@ -879,6 +958,7 @@
         "packages/zod/src/v4/core/registries.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1749525414,
       "subject": "v4: Preserve function types in `.meta()` (#4636)"
     },
@@ -894,6 +974,7 @@
         "play.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1749627374,
       "subject": "Loose signature for index signature shapes"
     },
@@ -908,6 +989,7 @@
         "play.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1749668712,
       "subject": "Drop | undefined from json schema types"
     },
@@ -925,6 +1007,7 @@
         "play.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1749673554,
       "subject": "Allow hours-only offsets. Normalize. (#4676)"
     },
@@ -942,6 +1025,7 @@
         "play.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1751579516,
       "subject": "Fix optionality of schemas (#4769)"
     },
@@ -957,6 +1041,7 @@
         "play.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1752014997,
       "subject": "Fix treeifyError type for branded primitives. Add test. Closes #4840 (#4843)"
     },
@@ -971,6 +1056,7 @@
         "play.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1752106605,
       "subject": "Support format in z.templateLiteral"
     },
@@ -990,6 +1076,7 @@
         "play.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1753409539,
       "subject": "v4.0.10 (#4978)"
     },
@@ -1006,6 +1093,7 @@
         "pnpm-lock.yaml"
       ],
       "excludedNewFiles": 2,
+      "excludedModeFiles": [],
       "committerTime": 1753777089,
       "subject": "Implement `llms-full.txt` (#5004)"
     },
@@ -1021,6 +1109,7 @@
         "play.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1753859023,
       "subject": "Avoid infinite loops in defineLazy. Fixes #4994."
     },
@@ -1036,6 +1125,7 @@
         "packages/zod/src/v4/core/schemas.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1757567958,
       "subject": "More fixes (#5223)"
     },
@@ -1049,6 +1139,7 @@
         "packages/zod/src/v4/core/schemas.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1760544850,
       "subject": "reflect the specified regex correctly in error (#5338)"
     },
@@ -1063,6 +1154,7 @@
         "packages/zod/src/v4/core/schemas.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1765854988,
       "subject": "fix(implementasync): Inferred type should always be a promise (#5476)"
     },
@@ -1077,6 +1169,7 @@
         "packages/zod/src/v4/core/checks.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1765855038,
       "subject": "Fix numeric formats error messages to be inclusive (#5485)"
     },
@@ -1091,6 +1184,7 @@
         "packages/zod/src/v4/locales/uz.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1769371448,
       "subject": "feat: add map support to Uzbek locale (#5599)"
     },
@@ -1105,6 +1199,7 @@
         "packages/docs/components/silver.tsx"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1771165170,
       "subject": "add Sanity as silver sponsor and Mintlify as bronze sponsor"
     },
@@ -1119,6 +1214,7 @@
         "packages/zod/src/v4/classic/tests/transform.test.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1777306026,
       "subject": "fix: add missing addIssue to transform context (#5699)"
     },
@@ -1136,6 +1232,7 @@
         "packages/zod/src/v4/mini/schemas.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1777333824,
       "subject": "feat: allow 'when' parameter in .superRefine (#5741)"
     },
@@ -1152,6 +1249,7 @@
         "packages/zod/src/v4/locales/en.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1777334065,
       "subject": "fix: add options to invalid discriminator errors (#5723)"
     },
@@ -1165,6 +1263,7 @@
         "packages/docs/components/ecosystem.tsx"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1777334735,
       "subject": "Update Hey API description (#5748)"
     },
@@ -1179,6 +1278,7 @@
         "packages/zod/src/v4/classic/tests/from-json-schema.test.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1777343102,
       "subject": "fix(fromJSONSchema): normalize input via JSON round-trip"
     },
@@ -1193,6 +1293,7 @@
         "packages/zod/src/v4/core/schemas.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1777504129,
       "subject": "fix(v4): reject tuple holes before required defaults (#5900)"
     },
@@ -1206,6 +1307,7 @@
         "packages/docs/components/heading.tsx"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1777517343,
       "subject": "fix(docs): heading anchor links now include the hash so it doesnt scoll all the way up, follows navbar logic (#5791)"
     },
@@ -1219,6 +1321,7 @@
         "packages/docs/components/gold.tsx"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1777835956,
       "subject": "docs: prune lapsed gold sponsors and rebalance logo sizing"
     },
@@ -1232,6 +1335,7 @@
         "packages/docs/components/ecosystem.tsx"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1786558097,
       "subject": "docs(ecosystem): Add `@chrock-studio/overload` and `@chrock-studio/zod-utils` (#6040)"
     },
@@ -1245,6 +1349,7 @@
         "packages/docs/components/ecosystem.tsx"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1786582975,
       "subject": "docs: add zod-form-action to ecosystem (#6314)"
     },
@@ -1260,6 +1365,7 @@
         "packages/zod/src/v4/core/schemas.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1786644518,
       "subject": "fix(v4): preserve z.preprocess input narrowing (#5967)"
     },
@@ -1274,6 +1380,7 @@
         "packages/zod/src/v4/core/json-schema-processors.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1786915492,
       "subject": "fix(json-schema): keep preprocess object properties required in input mode (#6133)"
     },
@@ -1289,6 +1396,7 @@
         "packages/zod/src/v4/locales/index.ts"
       ],
       "excludedNewFiles": 1,
+      "excludedModeFiles": [],
       "committerTime": 1786921271,
       "subject": "Add Central Kurdish (ckb) locale (#6078)"
     },
@@ -1303,6 +1411,7 @@
         "packages/zod/src/v4/classic/tests/from-json-schema.test.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1786928562,
       "subject": "fix(from-json-schema): drop redundant inclusive bound for draft-04 exclusive ranges (#6022)"
     },
@@ -1316,6 +1425,7 @@
         "packages/docs/components/ecosystem.tsx"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1787792013,
       "subject": "docs: add fullproduct.dev to v4 ecosystem page (#6001)"
     },
@@ -1331,6 +1441,7 @@
         "lib/fetch/symbols.js"
       ],
       "excludedNewFiles": 1,
+      "excludedModeFiles": [],
       "committerTime": 1681878817,
       "subject": "fix: mock fetch headers shouldn't be an array  (#2080)"
     },
@@ -1346,6 +1457,7 @@
         "lib/fetch/util.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1692282295,
       "subject": "better stack trace for body.json (#2215)"
     },
@@ -1359,6 +1471,7 @@
         "lib/client.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1695103124,
       "subject": "fix undici when node is built with --without-ssl (#2272)"
     },
@@ -1373,6 +1486,7 @@
         "package.json"
       ],
       "excludedNewFiles": 4,
+      "excludedModeFiles": [],
       "committerTime": 1695243762,
       "subject": "Add publish types script (#2273)"
     },
@@ -1390,6 +1504,7 @@
         "lib/llhttp/llhttp.wasm"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1709140044,
       "subject": "chore: remove no-simd wasm of llhttp (#2871)"
     },
@@ -1403,6 +1518,7 @@
         "lib/web/fetch/file.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1709494073,
       "subject": "fetch: use EOL of os-module (#2915)"
     },
@@ -1416,6 +1532,7 @@
         "lib/api/util.js"
       ],
       "excludedNewFiles": 1,
+      "excludedModeFiles": [],
       "committerTime": 1710092380,
       "subject": "perf: improve getResolveErrorBodyCallback (#2940)"
     },
@@ -1431,6 +1548,7 @@
         "test/client-request.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1710141232,
       "subject": "perf: dump immediatly if known size exceeds limit (#2882)"
     },
@@ -1449,6 +1567,7 @@
         "test/fetch/request-inspect-custom.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1710490106,
       "subject": "Cleanup format (#2959)"
     },
@@ -1463,6 +1582,7 @@
         "test/request-timeout.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1712742850,
       "subject": "fix: defer errors with setImmediate (#3081)"
     },
@@ -1476,6 +1596,7 @@
         "lib/handler/decorator-handler.js"
       ],
       "excludedNewFiles": 1,
+      "excludedModeFiles": [],
       "committerTime": 1712748574,
       "subject": "improve DecoratorHandler (#3079)"
     },
@@ -1491,6 +1612,7 @@
         "test/node-fetch/main.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1713628673,
       "subject": "fetch: Change wording of \"Body is unusable\" error (#3105)"
     },
@@ -1506,6 +1628,7 @@
         "test/http2.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1713712917,
       "subject": "fix(H2-#3140): abort requets upon GOAWAY (#3143)"
     },
@@ -1523,6 +1646,7 @@
         "test/util.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1713816674,
       "subject": "fix: tweak keep-alive timeout implementation (#3145)"
     },
@@ -1536,6 +1660,7 @@
         "lib/web/websocket/receiver.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1715641356,
       "subject": "Cleanup websocket (#3257)"
     },
@@ -1553,6 +1678,7 @@
         "lib/web/websocket/websocket.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1720407358,
       "subject": "separate whatwg websocket logic from rfc 6455 (#3396)"
     },
@@ -1567,6 +1693,7 @@
         "build/wasm.js"
       ],
       "excludedNewFiles": 1,
+      "excludedModeFiles": [],
       "committerTime": 1722265378,
       "subject": "fix: restore externalized Node.js dep compatibility (#3421)"
     },
@@ -1580,6 +1707,7 @@
         "lib/core/diagnostics.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1726238173,
       "subject": "diagnostics-channel: use not deprecated subscribe fn (#3600)"
     },
@@ -1595,6 +1723,7 @@
         "lib/web/websocket/websocket.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1727478560,
       "subject": "prefer fail over close the websocket connection in error cases (#3651)"
     },
@@ -1609,6 +1738,7 @@
         "lib/dispatcher/client-h2.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1732818150,
       "subject": "Mark http/2 support as stable (#3893)"
     },
@@ -1622,6 +1752,7 @@
         "lib/web/fetch/body.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1737018805,
       "subject": "Merge commit from fork"
     },
@@ -1636,6 +1767,7 @@
         "test/interceptors/dump-interceptor.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1753948670,
       "subject": "fix(inteceptor/dump): handle preemptive network errors (#4354)"
     },
@@ -1652,6 +1784,7 @@
         "types/eventsource.d.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1754930580,
       "subject": "feat: EventSource can be configured with reconnectionTime (#4260)"
     },
@@ -1665,6 +1798,7 @@
         "lib/web/fetch/formdata-parser.js"
       ],
       "excludedNewFiles": 1,
+      "excludedModeFiles": [],
       "committerTime": 1762697560,
       "subject": "fix fd parsing unquoted attribute values (#4662)"
     },
@@ -1680,6 +1814,7 @@
         "test/cache/cache.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1768859572,
       "subject": "fix(cache): regenerate stream from source when cache.match is called after GC (#4713)"
     },
@@ -1694,6 +1829,7 @@
         "test/fetch/401-statuscode-no-infinite-loop.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1769372405,
       "subject": "return response when receiving 401 instead of network error (#4769)"
     },
@@ -1707,6 +1843,7 @@
         "lib/web/fetch/index.js"
       ],
       "excludedNewFiles": 1,
+      "excludedModeFiles": [],
       "committerTime": 1771499251,
       "subject": "fix: prevent AbortController GC when redirect is 'error' (#4750)"
     },
@@ -1720,6 +1857,7 @@
         "lib/dispatcher/client-h2.js"
       ],
       "excludedNewFiles": 1,
+      "excludedModeFiles": [],
       "committerTime": 1772642243,
       "subject": "fix(h2): ignore late data frames after request completion (#4845)"
     },
@@ -1733,6 +1871,7 @@
         "lib/core/symbols.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1773090191,
       "subject": "fix: remove unused kSocketPath symbol"
     },
@@ -1749,6 +1888,7 @@
         "test/socks5-proxy-agent.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1781256323,
       "subject": "fix: honor requestTls when proxy is SOCKS5"
     },
@@ -1767,6 +1907,7 @@
         "types/client.d.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1781272585,
       "subject": "websocket: limit the number of fragments in a message"
     },
@@ -1787,6 +1928,7 @@
         "types/proxy-agent.d.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1783159141,
       "subject": "fix: auto-detect HTTP proxy tunneling (#5116)"
     },
@@ -1801,6 +1943,7 @@
         "test/cookie/cookies.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1787144153,
       "subject": "fix: accept a negative Set-Cookie Max-Age attribute (#5571)"
     },
@@ -1815,6 +1958,7 @@
         "test/websocket/opening-handshake.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1788441376,
       "subject": "fix(websocket): fail instead of hanging on a non-200 extended CONNECT (#5751)"
     },
@@ -1829,6 +1973,7 @@
         "test/interceptors/retry.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1788510860,
       "subject": "fix(retry): validate resumed response framing"
     },
@@ -1843,6 +1988,7 @@
         "test/websocket/permessage-deflate-limit.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1788510860,
       "subject": "fix(websocket): destroy inflater after decompression limit"
     },
@@ -1857,6 +2003,7 @@
         "test/env-http-proxy-agent.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1789326784,
       "subject": "fix(env-http-proxy-agent): NO_PROXY wildcard semantics (#5777)"
     },
@@ -1870,6 +2017,7 @@
         "lib/handler/deduplication-handler.js"
       ],
       "excludedNewFiles": 1,
+      "excludedModeFiles": [],
       "committerTime": 1789469578,
       "subject": "fix(deduplicate): settle requests when composed with retry (#5817)"
     },
@@ -1886,6 +2034,7 @@
         "test/interceptors/redirect.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1790242527,
       "subject": "fix(redirect): fix throwOnMaxRedirect edge (#5879)"
     },
@@ -1900,6 +2049,7 @@
         "test/fetch/encoding.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1791993864,
       "subject": "fix(fetch): abort excessive content encoding responses"
     },
@@ -1913,6 +2063,7 @@
         "lib/platform/browser/index.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1659373092,
       "subject": "feat: brower platform add `data` protocol. (#4804)"
     },
@@ -1927,6 +2078,7 @@
         "rollup.config.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1665130765,
       "subject": "fix: issue with exports not working correctly in common js scenarios"
     },
@@ -1942,6 +2094,7 @@
         "test/unit/adapters/http.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1665690920,
       "subject": "fix: restore proxy config backwards compatibility with 0.x (#5097)"
     },
@@ -1959,6 +2112,7 @@
         "test/typescript/axios.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1665691930,
       "subject": "feat: added custom params serializer support; (#5113)"
     },
@@ -1974,6 +2128,7 @@
         "package.json"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1671472379,
       "subject": "chore(ci): fix version bump script by adding `bump` argument for target version;"
     },
@@ -1989,6 +2144,7 @@
         "test/unit/adapters/http.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1677095431,
       "subject": "fix(http): fixed regression bug when handling synchronous errors inside the adapter; (#5564)"
     },
@@ -2005,6 +2161,7 @@
         "test/unit/adapters/http.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1680713076,
       "subject": "fix(params): re-added the ability to set the function as `paramsSerializer` config; (#5633)"
     },
@@ -2018,6 +2175,7 @@
         "lib/adapters/xhr.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1682457697,
       "subject": "fix(formdata): add `multipart/form-data` content type for FormData payload on custom client environments; (#5678)"
     },
@@ -2031,6 +2189,7 @@
         "lib/core/mergeConfig.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1682458486,
       "subject": "perf(merge-config): optimize mergeConfig performance by avoiding duplicate key visits; (#5679)"
     },
@@ -2044,6 +2203,7 @@
         "lib/defaults/index.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1693071073,
       "subject": "fix(adapter): make adapter loading error more clear by using platform-specific adapters explicitly (#5837)"
     },
@@ -2063,6 +2223,7 @@
         "test/specs/instance.spec.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1693071745,
       "subject": "feat: export getAdapter function (#5324)"
     },
@@ -2077,6 +2238,7 @@
         "lib/defaults/index.js"
       ],
       "excludedNewFiles": 1,
+      "excludedModeFiles": [],
       "committerTime": 1695746605,
       "subject": "fix(adapters): improved adapters loading logic to have clear error messages; (#5919)"
     },
@@ -2094,6 +2256,7 @@
         "test/unit/adapters/http.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1697983953,
       "subject": "fix(dns): fixed lookup function decorator to work properly in node v20; (#6011)"
     },
@@ -2108,6 +2271,7 @@
         "test/unit/adapters/http.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1704412087,
       "subject": "fix(dns): fixed lookup error handling; (#6175)"
     },
@@ -2122,6 +2286,7 @@
         "test/unit/adapters/fetch.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1715106406,
       "subject": "fix(fetch): treat fetch-related TypeError as an AxiosError.ERR_NETWORK error; (#6380)"
     },
@@ -2135,6 +2300,7 @@
         "lib/adapters/fetch.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1716044461,
       "subject": "fix(fetch): capitalize HTTP method names; (#6395)"
     },
@@ -2149,6 +2315,7 @@
         "test/unit/regression/SNYK-JS-AXIOS-7361793.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1724415794,
       "subject": "fix(adapter): fix undefined reference to hasBrowserEnv (#6572)"
     },
@@ -2163,6 +2330,7 @@
         "test/unit/adapters/http.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1725140845,
       "subject": "fix(http): fixed support for IPv6 literal strings in url (#5731)"
     },
@@ -2176,6 +2344,7 @@
         "lib/adapters/http.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1731006722,
       "subject": "fix(http): fixed proxy-from-env module import (#5222)"
     },
@@ -2189,6 +2358,7 @@
         "lib/helpers/formDataToStream.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1745522388,
       "subject": "fix(http): send minimal end multipart boundary (#6661)"
     },
@@ -2203,6 +2373,7 @@
         "test/specs/helpers/buildURL.spec.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1754073887,
       "subject": "fix(params): removing '[' and ']' from URL encode exclude characters (#3316) (#5715)"
     },
@@ -2216,6 +2387,7 @@
         "lib/adapters/http.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1762209790,
       "subject": "perf(http): fix early loop exit; (#7202)"
     },
@@ -2230,6 +2402,7 @@
         "test/unit/adapters/http.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1762211315,
       "subject": "fix(http): fix 'socket hang up' bug for keep-alive requests when using timeouts; (#7206)"
     },
@@ -2250,6 +2423,7 @@
         "tests/smoke/esm/package.json"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1773508206,
       "subject": "fix: proxy from env v2 fix (#7499)"
     },
@@ -2265,6 +2439,7 @@
         "bin/sponsors.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1774867975,
       "subject": "feat: update sponsors script and how this works for more consistency (#10582)"
     },
@@ -2283,6 +2458,7 @@
         "tests/unit/axiosHeaders.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1775476914,
       "subject": "fix: unrestricted cloud metadata exfiltration via header injection chain (#10660)"
     },
@@ -2298,6 +2474,7 @@
         "tests/unit/adapters/http.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1776516999,
       "subject": "fix: header security issues (#10749)"
     },
@@ -2311,6 +2488,7 @@
         "lib/defaults/index.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1776518082,
       "subject": "fix(security): ignore inherited parseReviver and related config reads"
     },
@@ -2324,6 +2502,7 @@
         "lib/adapters/http.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1776518107,
       "subject": "fix(security): guard http adapter config reads against prototype pollution"
     },
@@ -2338,6 +2517,7 @@
         "tests/unit/adapters/http.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1776519942,
       "subject": "fix: enforce max body length when max redirects is 0 (#10753)"
     },
@@ -2352,6 +2532,7 @@
         "scripts/update-readme-sponsors.mjs"
       ],
       "excludedNewFiles": 2,
+      "excludedModeFiles": [],
       "committerTime": 1777735136,
       "subject": "chore: ai readiness (#10835)"
     },
@@ -2366,6 +2547,7 @@
         "tests/unit/helpers/formDataToJSON.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1777923062,
       "subject": "fix(security): defense-in-depth against already-polluted Object.prototype in formDataToJSON (#7413)"
     },
@@ -2379,6 +2561,7 @@
         "lib/adapters/http.js"
       ],
       "excludedNewFiles": 2,
+      "excludedModeFiles": [],
       "committerTime": 1779472786,
       "subject": "refactor(http): extract Http2Sessions into its own module (#10861)"
     },
@@ -2394,6 +2577,7 @@
         "tests/unit/adapters/http.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1781634192,
       "subject": "fix(http): accept path-only url when socketPath is set (#6611) (#10930)"
     },
@@ -2409,6 +2593,7 @@
         "tests/unit/helpers/parseHeaders.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1782755966,
       "subject": "fix: preserve empty duplicate header values (#11036)"
     },
@@ -2424,6 +2609,7 @@
         "tests/unit/axiosHeaders.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1782757638,
       "subject": "fix: return set-cookie values consistently (#11037)"
     },
@@ -2440,6 +2626,7 @@
         "tests/unit/core/mergeConfig.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1782930452,
       "subject": "feat(core): support symbol keys in mergeConfig (#11043)"
     },
@@ -2458,6 +2645,7 @@
         "tests/unit/estimateDataURLDecodedBytes.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1784033174,
       "subject": "fix(helpers): correct data: URL base64 size estimate for maxContentLength guard (#11061)"
     },
@@ -2477,6 +2665,7 @@
         "tests/unit/axios.test.js"
       ],
       "excludedNewFiles": 1,
+      "excludedModeFiles": [],
       "committerTime": 1786644885,
       "subject": "fix: core methodList, HTTP adapter errors, and add tests (#11096)"
     },
@@ -2494,6 +2683,7 @@
         "tests/unit/axios.test.js"
       ],
       "excludedNewFiles": 3,
+      "excludedModeFiles": [],
       "committerTime": 1791825970,
       "subject": "fix(core)!: keep literal request headers named after a method (#11156)"
     },
@@ -2508,6 +2698,7 @@
         "test/internals/reply.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1609835675,
       "subject": "add support for running preSerialization hooks for custom reply serializers (#2773)"
     },
@@ -2521,6 +2712,7 @@
         "lib/contentTypeParser.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1615221656,
       "subject": "Added a comment about lru.default (#2921)"
     },
@@ -2536,6 +2728,7 @@
         "test/schema-special-usage.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1615911168,
       "subject": "fix regression: schema duplicate (#2925)"
     },
@@ -2550,6 +2743,7 @@
         "test/schema-serialization.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1616248752,
       "subject": "fix: catch errors thrown by serializers in the default error handler (#2942)"
     },
@@ -2567,6 +2761,7 @@
         "package.json"
       ],
       "excludedNewFiles": 2,
+      "excludedModeFiles": [],
       "committerTime": 1641336513,
       "subject": "upgrade fast-json-stringify with ajv8 (#3280)"
     },
@@ -2584,6 +2779,7 @@
         "test/versioned-routes.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1642407784,
       "subject": "fix: accept-version on default route (#3630)"
     },
@@ -2598,6 +2794,7 @@
         "test/schema-serialization.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1643747391,
       "subject": "Fix: Serialization errors will be send to errorHandler (#3674)"
     },
@@ -2612,6 +2809,7 @@
         "test/404s.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1644140599,
       "subject": "fix: calling reply.callNotFound uncaught exception (#3661)"
     },
@@ -2630,6 +2828,7 @@
         "test/logger.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1645016636,
       "subject": "Tests should pass on a host with only a single network interface (#3703)"
     },
@@ -2644,6 +2843,7 @@
         "test/reply-trailers.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1648892191,
       "subject": "chore: remove content-length when Transfer-Encoding is added (#3814)"
     },
@@ -2658,6 +2858,7 @@
         "package.json"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1649787412,
       "subject": "Bumped v4.0.0-rc.1"
     },
@@ -2672,6 +2873,7 @@
         "package.json"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1653297723,
       "subject": "Bumped v4.0.0-rc.3"
     },
@@ -2686,6 +2888,7 @@
         "test/schema-feature.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1653596038,
       "subject": "improve schema.response validation error message (#3935)"
     },
@@ -2701,6 +2904,7 @@
         "test/plugin.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1653914543,
       "subject": "Make the root pluginName 'fastify' (#3946)"
     },
@@ -2715,6 +2919,7 @@
         "lib/route.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1655730584,
       "subject": "refactor: use object as internal route args (#4054)"
     },
@@ -2729,6 +2934,7 @@
         "test/request-error.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1657642062,
       "subject": "fix: default clientError replies on reused connection (#4101) (#4133)"
     },
@@ -2746,6 +2952,7 @@
         "test/internals/request.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1658224705,
       "subject": "refactor: rename `request.validate` to `request.validateInput` (#4139)"
     },
@@ -2762,6 +2969,7 @@
         "test/internals/hooks.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1667237647,
       "subject": "fix: Improve error message for hooks check (#4387)"
     },
@@ -2775,6 +2983,7 @@
         "lib/contentTypeParser.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1671871339,
       "subject": "perf: only check for isEssence once in RegExp for  content-type-parser (#4481)"
     },
@@ -2790,6 +2999,7 @@
         "test/route-hooks.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1686224876,
       "subject": "fix: body reader to use statusCode from stream error, if available (#4787)"
     },
@@ -2803,6 +3013,7 @@
         "fastify.js"
       ],
       "excludedNewFiles": 1,
+      "excludedModeFiles": [],
       "committerTime": 1688019783,
       "subject": "fix: return 431 status code on HTTP header overflow error (#4856)"
     },
@@ -2818,6 +3029,7 @@
         "lib/reply.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1697007365,
       "subject": "docs: remove thenable promisesaplus spec references (#5081)"
     },
@@ -2833,6 +3045,7 @@
         "test/constrained-routes.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1697021060,
       "subject": "fix: HEAD route search (#5078)"
     },
@@ -2847,6 +3060,7 @@
         "test/listen.1.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1716316415,
       "subject": "feat: log all available addresses if listening host is 0.0.0.0 (#5476)"
     },
@@ -2861,6 +3075,7 @@
         "package.json"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1719569578,
       "subject": "Bumped v5.0.0-alpha.3"
     },
@@ -2880,6 +3095,7 @@
         "test/types/schema.test-d.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1720531718,
       "subject": "feat: support different body schema per content type (#5545)"
     },
@@ -2895,6 +3111,7 @@
         "lib/logger.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1728997521,
       "subject": "chore: update Testing guide to use node:test (#5738)"
     },
@@ -2908,6 +3125,7 @@
         "lib/validation.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1729363966,
       "subject": "refactor(lib/validation): replace regexp `.exec()` with `.test()` (#5750)"
     },
@@ -2921,6 +3139,7 @@
         "lib/validation.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1729366462,
       "subject": "refactor(lib/validation): remove redundant regex quantifier (#5751)"
     },
@@ -2937,6 +3156,7 @@
         "types/instance.d.ts"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1758838331,
       "subject": "fix: handle non FastifyErrors in custom handler properly, set type of error-parameter for setErrorHandler and errorHandler to unknown, but configurable via generic TError (#6308)"
     },
@@ -2950,6 +3170,7 @@
         "lib/reply.js"
       ],
       "excludedNewFiles": 1,
+      "excludedModeFiles": [],
       "committerTime": 1758916599,
       "subject": "fix: error throwing in reply (#6299)"
     },
@@ -2963,6 +3184,7 @@
         "lib/content-type.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1772873056,
       "subject": "fix: anchor keyValuePairsReg to prevent quadratic backtracking (#6558)"
     },
@@ -2978,6 +3200,7 @@
         "test/http2/plain.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1780838387,
       "subject": "fix: chunk large HTTP/2 buffer replies (#6746)"
     },
@@ -2996,6 +3219,7 @@
         "test/genReqId.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1783241099,
       "subject": "perf: reduce per-request overhead in the request lifecycle (#6831)"
     },
@@ -3011,6 +3235,7 @@
         "test/trust-proxy.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1783243222,
       "subject": "fix: derive request.port from request.host (#6680)"
     },
@@ -3025,6 +3250,7 @@
         "test/schema-serialization.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1784383893,
       "subject": "perf: reuse cached content types for response serialization (#6854)"
     },
@@ -3039,6 +3265,7 @@
         "test/content-parser.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1786171070,
       "subject": "fix: reset lastIndex before testing global/sticky content-type RegExp parsers (#6846)"
     },
@@ -3054,6 +3281,7 @@
         "test/internals/reply.test.js"
       ],
       "excludedNewFiles": 1,
+      "excludedModeFiles": [],
       "committerTime": 1786635122,
       "subject": "feat: add `Reply.prototype.mediaType` (#6932)"
     },
@@ -3070,6 +3298,7 @@
         "test/schema-validation.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1788454438,
       "subject": "fix(validation): normalize header names in every schema subschema"
     },
@@ -3084,6 +3313,7 @@
         "test/reply-trailers.test.js"
       ],
       "excludedNewFiles": 0,
+      "excludedModeFiles": [],
       "committerTime": 1791966519,
       "subject": "fix(reply): send stream trailers after the stream actually finishes (#6953)"
     }

@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import type { MinedCommit } from "./gitminer";
-import { buildDataset, datasetHash, type DatasetTask } from "./dataset";
+import type { LsTreeEntry, MinedCommit } from "./gitminer";
+import { applyModeGoldFilter, buildDataset, datasetHash, type DatasetTask } from "./dataset";
 
-function mined(over: Partial<MinedCommit> & { sha: string; files: MinedCommit["files"] }): MinedCommit {
+function mined(
+  over: Partial<MinedCommit> & { sha: string; files: MinedCommit["files"] },
+): MinedCommit {
   const n = over.sha.length;
   return {
     sha: over.sha,
@@ -22,9 +24,22 @@ const mod = (status: string, path: string) => ({ status, prePath: path, postPath
 describe("buildDataset", () => {
   it("captures per-reason rejection counts and accepted tasks", () => {
     const minedCommits = [
-      mined({ sha: "a1", subject: "fix: handle empty session id cases", files: [mod("M", "src/q.ts")] }),
-      mined({ sha: "a2", subject: "docs: fix spelling and grammar in readme quickly", files: [mod("M", "README.md")] }),
-      mined({ sha: "mer", parents: ["p1", "p2"], subject: "merge thing", files: [mod("M", "src/x.ts")] }),
+      mined({
+        sha: "a1",
+        subject: "fix: handle empty session id cases",
+        files: [mod("M", "src/q.ts")],
+      }),
+      mined({
+        sha: "a2",
+        subject: "docs: fix spelling and grammar in readme quickly",
+        files: [mod("M", "README.md")],
+      }),
+      mined({
+        sha: "mer",
+        parents: ["p1", "p2"],
+        subject: "merge thing",
+        files: [mod("M", "src/x.ts")],
+      }),
       mined({ sha: "bot", authorName: "dependabot[bot]", files: [mod("M", "src/y.ts")] }),
       mined({ sha: "few", subject: "short", body: "", files: [mod("M", "src/z.ts")] }),
     ];
@@ -47,9 +62,24 @@ describe("buildDataset", () => {
     const sameSubject = "fix: handle empty session id gracefully";
     const t0 = 1_700_000_000;
     const list = [
-      mined({ sha: "late1", committerTime: t0 + 10, subject: sameSubject, files: [mod("M", "src/a.ts")] }),
-      mined({ sha: "mid1", committerTime: t0 + 5, subject: sameSubject, files: [mod("M", "src/b.ts")] }),
-      mined({ sha: "early1", committerTime: t0, subject: sameSubject, files: [mod("M", "src/a.ts")] }),
+      mined({
+        sha: "late1",
+        committerTime: t0 + 10,
+        subject: sameSubject,
+        files: [mod("M", "src/a.ts")],
+      }),
+      mined({
+        sha: "mid1",
+        committerTime: t0 + 5,
+        subject: sameSubject,
+        files: [mod("M", "src/b.ts")],
+      }),
+      mined({
+        sha: "early1",
+        committerTime: t0,
+        subject: sameSubject,
+        files: [mod("M", "src/a.ts")],
+      }),
     ];
     const { tasks, stats } = buildDataset("rep", list, 1, 1);
     expect(stats.duplicateTaskTextDropped).toBe(2);
@@ -101,10 +131,104 @@ describe("buildDataset", () => {
       task: "fix: something",
       gold: ["src/a.ts"],
       excludedNewFiles: 0,
+      excludedModeFiles: [],
       committerTime: 1700000000,
       subject: "fix: something",
     };
     expect(datasetHash([t])).toBe(datasetHash([{ ...t }]));
     expect(datasetHash([t])).not.toBe(datasetHash([{ ...t, gold: ["src/other.ts"] }]));
+    expect(datasetHash([t])).not.toBe(datasetHash([{ ...t, excludedModeFiles: ["README.md"] }]));
+  });
+});
+
+describe("applyModeGoldFilter", () => {
+  const entry = (mode: string, path: string): LsTreeEntry => ({
+    mode,
+    type: mode === "160000" ? "commit" : "blob",
+    sha: "f" + path.length,
+    path,
+  });
+  const tree = [
+    entry("100644", "src/a.ts"),
+    entry("100755", "run.sh"),
+    entry("120000", "README.md"),
+    entry("160000", "vendored/sub"),
+  ];
+  const lookup = () => tree;
+
+  const task = (id: string, gold: string[], parentSha = "p1"): DatasetTask => ({
+    id,
+    repoId: "rep",
+    sha: id.split(":")[1]!,
+    parentSha,
+    task: "fix: something",
+    gold,
+    excludedNewFiles: 0,
+    excludedModeFiles: [],
+    committerTime: 1700000000,
+    subject: "fix: something",
+  });
+
+  it("keeps regular-file gold and drops symlink/gitlink gold with counts", () => {
+    const { tasks, stats } = applyModeGoldFilter(
+      [task("rep:1", ["src/a.ts", "README.md", "vendored/sub", "run.sh"])],
+      lookup,
+    );
+    expect(tasks).toHaveLength(1);
+    expect(tasks[0]!.gold).toEqual(["run.sh", "src/a.ts"]);
+    expect(tasks[0]!.excludedModeFiles).toEqual(["README.md", "vendored/sub"]);
+    expect(stats.evaluatedTasks).toBe(1);
+    expect(stats.tasksWithPartialGoldDrop).toBe(1);
+    expect(stats.droppedGoldSymlink).toBe(1);
+    expect(stats.droppedGoldGitlink).toBe(1);
+    expect(stats.tasksDroppedEmptyGold).toBe(0);
+  });
+
+  it("excludes tasks whose effective gold is empty, counted per reason", () => {
+    const { tasks, stats } = applyModeGoldFilter(
+      [task("rep:2", ["README.md"]), task("rep:3", ["vendored/sub", "README.md"])],
+      lookup,
+    );
+    expect(tasks).toHaveLength(0);
+    expect(stats.tasksDroppedEmptyGold).toBe(2);
+    expect(stats.evaluatedTasks).toBe(0);
+    expect(stats.droppedGoldSymlink).toBe(2);
+    expect(stats.droppedGoldGitlink).toBe(1);
+  });
+
+  it("counts gold paths absent from the parent tree as missing (0 expected in practice)", () => {
+    const { stats } = applyModeGoldFilter([task("rep:4", ["src/a.ts", "ghost.md"])], lookup);
+    expect(stats.droppedGoldMissing).toBe(1);
+    expect(stats.evaluatedTasks).toBe(1);
+    // A MISSING TS/JS path is equally refused — the hard stop is about the
+    // file being dropped, whichever bucket would absorb it.
+    expect(() => applyModeGoldFilter([task("rep:4b", ["ghost.ts"])], lookup)).toThrow(
+      /refusing to drop TS\/JS gold/,
+    );
+  });
+
+  it("hard-stops when a TS/JS gold file would be dropped by mode", () => {
+    const symlinkedSource = [entry("100644", "src/a.ts"), entry("120000", "src/link.ts")];
+    expect(() =>
+      applyModeGoldFilter([task("rep:5", ["src/a.ts", "src/link.ts"])], () => symlinkedSource),
+    ).toThrow(/refusing to drop TS\/JS gold/);
+  });
+
+  it("caches per-parent lookups and preserves task order", () => {
+    let calls = 0;
+    const counting = (parentSha: string) => {
+      calls++;
+      return parentSha === "p1" ? tree : [entry("100644", "src/b.ts")];
+    };
+    const { tasks } = applyModeGoldFilter(
+      [
+        task("rep:6", ["src/a.ts"]),
+        task("rep:7", ["src/b.ts"], "p2"),
+        task("rep:8", ["src/a.ts"], "p1"),
+      ],
+      counting,
+    );
+    expect(tasks.map((t) => t.id)).toEqual(["rep:6", "rep:7", "rep:8"]);
+    expect(calls).toBe(2);
   });
 });

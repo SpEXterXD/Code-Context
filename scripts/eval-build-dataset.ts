@@ -6,7 +6,9 @@
  *   2. verifies the pinned commit exists,
  *   3. mines all non-merge commits with rename detection,
  *   4. runs the pure filter/dedup/sample pipeline (scripts/eval/dataset.ts),
- *   5. writes one deterministic JSON dataset to docs/eval/dataset.json.
+ *   5. restricts gold to parent-tree regular files by git mode
+ *      (symlinks/gitlinks excluded; identical dataset on every OS),
+ *   6. writes one deterministic JSON dataset to docs/eval/dataset.json.
  *
  * The output is byte-stable for the same repos.json + code: no timestamps
  * or machine data are included (those live in results.json instead).
@@ -18,8 +20,14 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import process from "node:process";
 
-import { buildDataset, datasetHash, type DatasetStats } from "./eval/dataset";
-import { ensureClone, mineCommits, verifyPinnedCommit } from "./eval/gitminer";
+import { applyModeGoldFilter, buildDataset, datasetHash, type DatasetStats } from "./eval/dataset";
+import {
+  ensureClone,
+  lsTree,
+  mineCommits,
+  verifyPinnedCommit,
+  type LsTreeEntry,
+} from "./eval/gitminer";
 import { isSourcePath as isSourcePathLike } from "./eval/lib";
 
 interface RepoSpec {
@@ -52,14 +60,12 @@ function readArgs(): { tasksPerRepo: number } {
 
 /** Count of production TS/JS source files at the pinned snapshot (reporting only). */
 function countSourceFiles(clonePath: string, pinnedCommit: string): number {
-  const out = execFileSync(
-    "git",
-    ["-C", clonePath, "ls-tree", "-r", "--name-only", pinnedCommit],
-    { encoding: "utf8", timeout: 60000, stdio: "pipe" },
-  );
-  return out
-    .split(/\r?\n/)
-    .filter((line) => line.length > 0 && isSourcePathLike(line)).length;
+  const out = execFileSync("git", ["-C", clonePath, "ls-tree", "-r", "--name-only", pinnedCommit], {
+    encoding: "utf8",
+    timeout: 60000,
+    stdio: "pipe",
+  });
+  return out.split(/\r?\n/).filter((line) => line.length > 0 && isSourcePathLike(line)).length;
 }
 
 async function main(): Promise<void> {
@@ -92,17 +98,35 @@ async function main(): Promise<void> {
     console.log(`[${repo.id}] mining history (source files at pin: ${sourceFilesAtPin})…`);
     const mined = mineCommits(clonePath);
     const built = buildDataset(repo.id, mined, tasksPerRepo, config.seed);
+    // Effective gold: parent-tree regular files only. Symlinks and gitlinks
+    // are excluded from gold (and from every indexed snapshot) by git tree
+    // MODE, so the dataset is identical on Windows, macOS and Linux.
+    const treeCache = new Map<string, LsTreeEntry[]>();
+    const filtered = applyModeGoldFilter(built.tasks, (parentSha) => {
+      let entries = treeCache.get(parentSha);
+      if (!entries) {
+        entries = lsTree(clonePath, parentSha);
+        treeCache.set(parentSha, entries);
+      }
+      return entries;
+    });
+    const stats: DatasetStats = { ...built.stats, ...filtered.stats };
     perRepo[repo.id] = {
       pinnedCommit: repo.pinnedCommit,
       license: repo.license,
       note: repo.note,
       sourceFilesAtPin,
-      stats: built.stats,
-      datasetHash: datasetHash(built.tasks),
+      stats,
+      datasetHash: datasetHash(filtered.tasks),
     };
-    allTasks.push(...built.tasks);
+    allTasks.push(...filtered.tasks);
     console.log(
-      `[${repo.id}] mined=${built.stats.mined} accepted=${built.stats.accepted} sampled=${built.stats.sampled}`,
+      `[${repo.id}] mined=${stats.mined} accepted=${stats.accepted} sampled=${stats.sampled}` +
+        ` evaluated=${stats.evaluatedTasks}` +
+        ` (empty-gold dropped=${stats.tasksDroppedEmptyGold}` +
+        `, partial-gold tasks=${stats.tasksWithPartialGoldDrop}` +
+        `, gold files dropped: symlink=${stats.droppedGoldSymlink}` +
+        ` gitlink=${stats.droppedGoldGitlink} missing=${stats.droppedGoldMissing})`,
     );
   }
 
@@ -115,7 +139,9 @@ async function main(): Promise<void> {
   };
   fs.mkdirSync(path.dirname(OUT_JSON), { recursive: true });
   fs.writeFileSync(OUT_JSON, `${JSON.stringify(dataset, null, 2)}\n`);
-  console.log(`dataset written: ${OUT_JSON} (${allTasks.length} tasks, hash ${dataset.datasetHash})`);
+  console.log(
+    `dataset written: ${OUT_JSON} (${allTasks.length} tasks, hash ${dataset.datasetHash})`,
+  );
 }
 
 main().catch((error) => {
