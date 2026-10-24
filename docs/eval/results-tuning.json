@@ -3,7 +3,7 @@
   "ablations": [],
   "evalSplitRunsIncludingThis": null,
   "seed": 20260918,
-  "occCommit": "82e75222bcaf14b10eb3f28aaad5ced637868399",
+  "occCommit": "342706a9dcf85cc811f52ce3fc152082e6c2bcea",
   "workingTreeClean": false,
   "datasetHash": "ec50ab4f",
   "tasks": 300,
@@ -13,98 +13,98 @@
       "overall": {
         "top1": {
           "n": 300,
-          "mean": 0.4533333333333333,
-          "ciLow": 0.39666666666666667,
-          "ciHigh": 0.51
+          "mean": 0.47333333333333333,
+          "ciLow": 0.41333333333333333,
+          "ciHigh": 0.5266666666666666
         },
         "recall5": {
           "n": 300,
-          "mean": 0.5160714285714285,
-          "ciLow": 0.47577777777777774,
-          "ciHigh": 0.5546666666666669
+          "mean": 0.5425158730158727,
+          "ciLow": 0.5023571428571432,
+          "ciHigh": 0.57984126984127
         },
         "recall10": {
           "n": 300,
-          "mean": 0.6537301587301588,
-          "ciLow": 0.6140079365079365,
-          "ciHigh": 0.6916349206349207
+          "mean": 0.675420634920635,
+          "ciLow": 0.6372619047619046,
+          "ciHigh": 0.7133571428571427
         },
         "allGoldAcc10": {
           "n": 300,
-          "mean": 0.42333333333333334,
-          "ciLow": 0.37,
-          "ciHigh": 0.48
+          "mean": 0.43666666666666665,
+          "ciLow": 0.38666666666666666,
+          "ciHigh": 0.49333333333333335
         },
         "mrr": {
           "n": 300,
-          "mean": 0.597019137539119,
-          "ciLow": 0.5520127043845166,
-          "ciHigh": 0.6429634196835319
+          "mean": 0.6209663158079067,
+          "ciLow": 0.576716695308268,
+          "ciHigh": 0.6648552407209688
         }
       },
       "perRepo": {
         "axios": {
           "top1": {
             "n": 60,
-            "mean": 0.45,
-            "ciLow": 0.3333333333333333,
-            "ciHigh": 0.5666666666666667
+            "mean": 0.48333333333333334,
+            "ciLow": 0.36666666666666664,
+            "ciHigh": 0.6
           },
           "recall5": {
             "n": 60,
-            "mean": 0.4611904761904761,
-            "ciLow": 0.36142857142857143,
-            "ciHigh": 0.5549206349206348
+            "mean": 0.5200793650793651,
+            "ciLow": 0.4195634920634921,
+            "ciHigh": 0.615436507936508
           },
           "recall10": {
             "n": 60,
-            "mean": 0.6336904761904762,
-            "ciLow": 0.5318253968253968,
-            "ciHigh": 0.7242063492063493
+            "mean": 0.6850793650793652,
+            "ciLow": 0.5885317460317461,
+            "ciHigh": 0.7720238095238096
           },
           "allGoldAcc10": {
             "n": 60,
-            "mean": 0.45,
-            "ciLow": 0.3333333333333333,
-            "ciHigh": 0.5666666666666667
+            "mean": 0.5,
+            "ciLow": 0.36666666666666664,
+            "ciHigh": 0.6166666666666667
           },
           "mrr": {
             "n": 60,
-            "mean": 0.5549098465245078,
-            "ciLow": 0.45483361177103393,
-            "ciHigh": 0.6545261437908497
+            "mean": 0.6040069223899148,
+            "ciLow": 0.5065579710144926,
+            "ciHigh": 0.7025241147741147
           }
         },
         "fastify": {
           "top1": {
             "n": 60,
             "mean": 0.38333333333333336,
-            "ciLow": 0.26666666666666666,
-            "ciHigh": 0.5166666666666667
+            "ciLow": 0.25,
+            "ciHigh": 0.5
           },
           "recall5": {
             "n": 60,
-            "mean": 0.5302380952380953,
-            "ciLow": 0.4446825396825397,
-            "ciHigh": 0.6213095238095239
+            "mean": 0.5210714285714286,
+            "ciLow": 0.4326984126984127,
+            "ciHigh": 0.6065476190476191
           },
           "recall10": {
             "n": 60,
-            "mean": 0.6534920634920632,
-            "ciLow": 0.5756746031746031,
-            "ciHigh": 0.7295238095238096
+            "mean": 0.6432142857142856,
+            "ciLow": 0.5653968253968255,
+            "ciHigh": 0.7226587301587302
           },
           "allGoldAcc10": {
             "n": 60,
-            "mean": 0.36666666666666664,
-            "ciLow": 0.25,
-            "ciHigh": 0.48333333333333334
+            "mean": 0.35,
+            "ciLow": 0.23333333333333334,
+            "ciHigh": 0.4666666666666667
           },
           "mrr": {
             "n": 60,
-            "mean": 0.5792610313662947,
-            "ciLow": 0.4852746765904662,
-            "ciHigh": 0.6746854510012404
+            "mean": 0.5820573322875955,
+            "ciLow": 0.4887797619047618,
+            "ciHigh": 0.6723088023088023
           }
         },
         "hono": {
@@ -116,135 +116,135 @@
           },
           "recall5": {
             "n": 60,
-            "mean": 0.5002777777777778,
-            "ciLow": 0.40444444444444444,
-            "ciHigh": 0.5958333333333333
+            "mean": 0.5211111111111111,
+            "ciLow": 0.42861111111111116,
+            "ciHigh": 0.6152777777777778
           },
           "recall10": {
             "n": 60,
-            "mean": 0.6769444444444442,
-            "ciLow": 0.5855555555555555,
-            "ciHigh": 0.7655555555555555
+            "mean": 0.6805555555555554,
+            "ciLow": 0.5963888888888887,
+            "ciHigh": 0.766388888888889
           },
           "allGoldAcc10": {
             "n": 60,
-            "mean": 0.48333333333333334,
-            "ciLow": 0.36666666666666664,
-            "ciHigh": 0.6
+            "mean": 0.4666666666666667,
+            "ciLow": 0.35,
+            "ciHigh": 0.5833333333333334
           },
           "mrr": {
             "n": 60,
-            "mean": 0.506685648896817,
-            "ciLow": 0.41416702595056243,
-            "ciHigh": 0.6021428571428572
+            "mean": 0.514575998075998,
+            "ciLow": 0.42311556036556025,
+            "ciHigh": 0.6101142376142377
           }
         },
         "undici": {
           "top1": {
             "n": 60,
-            "mean": 0.4666666666666667,
-            "ciLow": 0.3333333333333333,
-            "ciHigh": 0.5833333333333334
+            "mean": 0.48333333333333334,
+            "ciLow": 0.35,
+            "ciHigh": 0.6
           },
           "recall5": {
             "n": 60,
-            "mean": 0.5602777777777778,
-            "ciLow": 0.4597222222222222,
-            "ciHigh": 0.6494444444444445
+            "mean": 0.6108333333333335,
+            "ciLow": 0.5127777777777777,
+            "ciHigh": 0.7019444444444445
           },
           "recall10": {
             "n": 60,
-            "mean": 0.6908333333333333,
-            "ciLow": 0.5944444444444446,
-            "ciHigh": 0.7819444444444447
+            "mean": 0.7469444444444444,
+            "ciLow": 0.6577777777777778,
+            "ciHigh": 0.8283333333333335
           },
           "allGoldAcc10": {
             "n": 60,
-            "mean": 0.5333333333333333,
-            "ciLow": 0.4,
-            "ciHigh": 0.65
+            "mean": 0.5666666666666667,
+            "ciLow": 0.45,
+            "ciHigh": 0.6833333333333333
           },
           "mrr": {
             "n": 60,
-            "mean": 0.5844654153882628,
-            "ciLow": 0.48465230129765513,
-            "ciHigh": 0.6801937774401542
+            "mean": 0.6192007959829969,
+            "ciLow": 0.5175767854150206,
+            "ciHigh": 0.7124267040149395
           }
         },
         "zod": {
           "top1": {
             "n": 60,
-            "mean": 0.65,
-            "ciLow": 0.5333333333333333,
-            "ciHigh": 0.7666666666666667
+            "mean": 0.7,
+            "ciLow": 0.5833333333333334,
+            "ciHigh": 0.8166666666666667
           },
           "recall5": {
             "n": 60,
-            "mean": 0.5283730158730159,
-            "ciLow": 0.45369047619047626,
-            "ciHigh": 0.6005952380952381
+            "mean": 0.5394841269841272,
+            "ciLow": 0.4655952380952382,
+            "ciHigh": 0.6144841269841268
           },
           "recall10": {
             "n": 60,
-            "mean": 0.6136904761904762,
-            "ciLow": 0.5383333333333333,
-            "ciHigh": 0.6900793650793652
+            "mean": 0.6213095238095239,
+            "ciLow": 0.5426190476190477,
+            "ciHigh": 0.6980555555555555
           },
           "allGoldAcc10": {
             "n": 60,
-            "mean": 0.2833333333333333,
-            "ciLow": 0.16666666666666666,
-            "ciHigh": 0.4
+            "mean": 0.3,
+            "ciLow": 0.18333333333333332,
+            "ciHigh": 0.4166666666666667
           },
           "mrr": {
             "n": 60,
-            "mean": 0.7597737455197132,
-            "ciLow": 0.6636626344086023,
-            "ciHigh": 0.8469444444444444
+            "mean": 0.7849905303030303,
+            "ciLow": 0.692354797979798,
+            "ciHigh": 0.8702020202020203
           }
         }
       },
       "overallSourceOnly": {
         "top1": {
           "n": 300,
-          "mean": 0.4533333333333333,
-          "ciLow": 0.39666666666666667,
-          "ciHigh": 0.51
+          "mean": 0.47333333333333333,
+          "ciLow": 0.41333333333333333,
+          "ciHigh": 0.5266666666666666
         },
         "recall5": {
           "n": 300,
-          "mean": 0.5194285714285715,
-          "ciLow": 0.47926984126984146,
-          "ciHigh": 0.5578968253968253
+          "mean": 0.5458730158730156,
+          "ciLow": 0.5056349206349205,
+          "ciHigh": 0.5830555555555553
         },
         "recall10": {
           "n": 300,
-          "mean": 0.6575793650793652,
-          "ciLow": 0.6179126984126984,
-          "ciHigh": 0.6948412698412699
+          "mean": 0.6797460317460319,
+          "ciLow": 0.6418809523809524,
+          "ciHigh": 0.7181190476190475
         },
         "allGoldAcc10": {
           "n": 300,
-          "mean": 0.43,
-          "ciLow": 0.37666666666666665,
-          "ciHigh": 0.4866666666666667
+          "mean": 0.44333333333333336,
+          "ciLow": 0.3933333333333333,
+          "ciHigh": 0.49666666666666665
         },
         "mrr": {
           "n": 300,
-          "mean": 0.597019137539119,
-          "ciLow": 0.5520127043845166,
-          "ciHigh": 0.6429634196835319
+          "mean": 0.6209663158079067,
+          "ciLow": 0.576716695308268,
+          "ciHigh": 0.6648552407209688
         }
       },
       "packageRecall": {
         "n": 300,
-        "mean": 0.6020436507936511,
-        "ciLow": 0.5622182539682542,
-        "ciHigh": 0.6415277777777779
+        "mean": 0.608543650793651,
+        "ciLow": 0.569392857142857,
+        "ciHigh": 0.6483492063492065
       },
       "packageStats": {
-        "meanTokens": 25174.133333333335,
-        "meanFilesIncluded": 14.986666666666666
+        "meanTokens": 25696.166666666668,
+        "meanFilesIncluded": 15.146666666666667
       }
     },
     "filename": {
@@ -992,88 +992,88 @@
     "full": {
       "top1": {
         "n": 300,
-        "meanDiff": 0.16,
-        "ciLow": 0.08666666666666667,
-        "ciHigh": 0.23,
+        "meanDiff": 0.18,
+        "ciLow": 0.11333333333333333,
+        "ciHigh": 0.24666666666666667,
         "excludesZero": true
       },
       "recall5": {
         "n": 300,
-        "meanDiff": 0.08886904761904763,
-        "ciLow": 0.04655158730158732,
-        "ciHigh": 0.13646031746031748,
+        "meanDiff": 0.11531349206349209,
+        "ciLow": 0.07582936507936504,
+        "ciHigh": 0.16211111111111112,
         "excludesZero": true
       },
       "recall10": {
         "n": 300,
-        "meanDiff": 0.06204761904761906,
-        "ciLow": 0.020269841269841292,
-        "ciHigh": 0.10250793650793655,
+        "meanDiff": 0.08373809523809525,
+        "ciLow": 0.043111111111111114,
+        "ciHigh": 0.12277777777777776,
         "excludesZero": true
       },
       "allGoldAcc10": {
         "n": 300,
-        "meanDiff": 0.05,
-        "ciLow": 0,
-        "ciHigh": 0.10333333333333333,
-        "excludesZero": false
+        "meanDiff": 0.06333333333333334,
+        "ciLow": 0.016666666666666666,
+        "ciHigh": 0.11333333333333333,
+        "excludesZero": true
       },
       "mrr": {
         "n": 300,
-        "meanDiff": 0.13734040017931812,
-        "ciLow": 0.08705692288323165,
-        "ciHigh": 0.1878871817717142,
+        "meanDiff": 0.16128757844810598,
+        "ciLow": 0.11147110383090805,
+        "ciHigh": 0.21059770932721994,
         "excludesZero": true
       },
       "packageRecall": {
         "n": 300,
-        "meanDiff": 0.06759523809523807,
-        "ciLow": 0.019412698412698413,
-        "ciHigh": 0.11869047619047621,
+        "meanDiff": 0.07409523809523806,
+        "ciLow": 0.02918253968253969,
+        "ciHigh": 0.12553968253968256,
         "excludesZero": true
       }
     },
     "sourceOnly": {
       "top1": {
         "n": 300,
-        "meanDiff": 0.16333333333333333,
-        "ciLow": 0.09333333333333334,
-        "ciHigh": 0.23,
+        "meanDiff": 0.18333333333333332,
+        "ciLow": 0.11333333333333333,
+        "ciHigh": 0.24666666666666667,
         "excludesZero": true
       },
       "recall5": {
         "n": 300,
-        "meanDiff": 0.09079761904761906,
-        "ciLow": 0.0484404761904762,
-        "ciHigh": 0.135734126984127,
+        "meanDiff": 0.11724206349206352,
+        "ciLow": 0.07411507936507938,
+        "ciHigh": 0.16016269841269842,
         "excludesZero": true
       },
       "recall10": {
         "n": 300,
-        "meanDiff": 0.06314285714285715,
-        "ciLow": 0.014166666666666666,
-        "ciHigh": 0.10761904761904761,
+        "meanDiff": 0.08530952380952382,
+        "ciLow": 0.04197619047619047,
+        "ciHigh": 0.12708730158730155,
         "excludesZero": true
       },
       "allGoldAcc10": {
         "n": 300,
-        "meanDiff": 0.05333333333333334,
-        "ciLow": 0,
-        "ciHigh": 0.10333333333333333,
-        "excludesZero": false
+        "meanDiff": 0.06666666666666667,
+        "ciLow": 0.016666666666666666,
+        "ciHigh": 0.11666666666666667,
+        "excludesZero": true
       },
       "mrr": {
         "n": 300,
-        "meanDiff": 0.13900706684598477,
-        "ciLow": 0.08682128966589302,
-        "ciHigh": 0.19277081205364743,
+        "meanDiff": 0.16295424511477263,
+        "ciLow": 0.11306163923819211,
+        "ciHigh": 0.21125135753620197,
         "excludesZero": true
       },
       "packageRecall": {
         "n": 300,
-        "meanDiff": 0.0683253968253968,
-        "ciLow": 0.01876984126984127,
-        "ciHigh": 0.12134126984126989,
+        "meanDiff": 0.07554761904761903,
+        "ciLow": 0.02619841269841271,
+        "ciHigh": 0.1256190476190476,
         "excludesZero": true
       }
     }
@@ -1087,7 +1087,7 @@
           {
             "path": "examples/server.js",
             "type": "source",
-            "occRank": 54,
+            "occRank": 45,
             "bm25Rank": 10,
             "inOccCandidates": true
           }
@@ -1100,14 +1100,14 @@
           {
             "path": "README.md",
             "type": "docs",
-            "occRank": null,
+            "occRank": 48,
             "bm25Rank": 7,
-            "inOccCandidates": false
+            "inOccCandidates": true
           },
           {
             "path": "examples/upload/index.html",
             "type": "other",
-            "occRank": 50,
+            "occRank": 43,
             "bm25Rank": 1,
             "inOccCandidates": true
           }
@@ -1120,7 +1120,7 @@
           {
             "path": "README.md",
             "type": "docs",
-            "occRank": 34,
+            "occRank": 30,
             "bm25Rank": 2,
             "inOccCandidates": true
           }
@@ -1133,20 +1133,7 @@
           {
             "path": "Gruntfile.js",
             "type": "source",
-            "occRank": 23,
-            "bm25Rank": 1,
-            "inOccCandidates": true
-          }
-        ]
-      },
-      {
-        "id": "axios:f40de498e6af",
-        "repoId": "axios",
-        "missing": [
-          {
-            "path": "karma.conf.js",
-            "type": "source",
-            "occRank": 11,
+            "occRank": 13,
             "bm25Rank": 1,
             "inOccCandidates": true
           }
@@ -1159,14 +1146,14 @@
           {
             "path": "docs/Server.md",
             "type": "docs",
-            "occRank": null,
+            "occRank": 34,
             "bm25Rank": 1,
-            "inOccCandidates": false
+            "inOccCandidates": true
           },
           {
             "path": "test/route-prefix.test.js",
             "type": "test",
-            "occRank": 24,
+            "occRank": 26,
             "bm25Rank": 3,
             "inOccCandidates": true
           }
@@ -1179,7 +1166,7 @@
           {
             "path": "package.json",
             "type": "ci-config",
-            "occRank": 21,
+            "occRank": 20,
             "bm25Rank": 7,
             "inOccCandidates": true
           }
@@ -1192,7 +1179,7 @@
           {
             "path": "package.json",
             "type": "ci-config",
-            "occRank": 16,
+            "occRank": 29,
             "bm25Rank": 4,
             "inOccCandidates": true
           }
@@ -1218,14 +1205,14 @@
           {
             "path": "deno_dist/jsx/dom/index.ts",
             "type": "source",
-            "occRank": 12,
+            "occRank": 14,
             "bm25Rank": 7,
             "inOccCandidates": true
           },
           {
             "path": "deno_dist/jsx/hooks/index.ts",
             "type": "source",
-            "occRank": 18,
+            "occRank": 16,
             "bm25Rank": 4,
             "inOccCandidates": true
           },
@@ -1246,7 +1233,7 @@
           {
             "path": "src/jsx/hooks/index.ts",
             "type": "source",
-            "occRank": 19,
+            "occRank": 15,
             "bm25Rank": 3,
             "inOccCandidates": true
           }
@@ -1266,14 +1253,14 @@
           {
             "path": "src/context.test.ts",
             "type": "test",
-            "occRank": 34,
+            "occRank": 37,
             "bm25Rank": 6,
             "inOccCandidates": true
           },
           {
             "path": "src/middleware/pretty-json/index.ts",
             "type": "source",
-            "occRank": 32,
+            "occRank": 38,
             "bm25Rank": 8,
             "inOccCandidates": true
           }
@@ -1286,28 +1273,8 @@
           {
             "path": "deno_test/middleware.test.tsx",
             "type": "test",
-            "occRank": 17,
+            "occRank": 14,
             "bm25Rank": 6,
-            "inOccCandidates": true
-          }
-        ]
-      },
-      {
-        "id": "hono:9ef8f8528d0c",
-        "repoId": "hono",
-        "missing": [
-          {
-            "path": "src/router/reg-exp-router/router.ts",
-            "type": "source",
-            "occRank": 40,
-            "bm25Rank": 5,
-            "inOccCandidates": true
-          },
-          {
-            "path": "src/utils/url.ts",
-            "type": "source",
-            "occRank": 36,
-            "bm25Rank": 2,
             "inOccCandidates": true
           }
         ]
@@ -1317,16 +1284,9 @@
         "repoId": "undici",
         "missing": [
           {
-            "path": "lib/fetch/body.js",
-            "type": "source",
-            "occRank": 17,
-            "bm25Rank": 4,
-            "inOccCandidates": true
-          },
-          {
             "path": "test/client-fetch.js",
             "type": "test",
-            "occRank": 51,
+            "occRank": 50,
             "bm25Rank": 3,
             "inOccCandidates": true
           }
@@ -1352,22 +1312,9 @@
           {
             "path": "test/client.js",
             "type": "test",
-            "occRank": 14,
+            "occRank": 11,
             "bm25Rank": 7,
             "inOccCandidates": true
-          }
-        ]
-      },
-      {
-        "id": "undici:9efbfb7fce41",
-        "repoId": "undici",
-        "missing": [
-          {
-            "path": "lib/client.js",
-            "type": "source",
-            "occRank": null,
-            "bm25Rank": 6,
-            "inOccCandidates": false
           }
         ]
       },
@@ -1378,15 +1325,8 @@
           {
             "path": "lib/fetch/body.js",
             "type": "source",
-            "occRank": 38,
+            "occRank": 19,
             "bm25Rank": 1,
-            "inOccCandidates": true
-          },
-          {
-            "path": "test/fetch/client-fetch.js",
-            "type": "test",
-            "occRank": 37,
-            "bm25Rank": 2,
             "inOccCandidates": true
           }
         ]
@@ -1451,16 +1391,16 @@
           {
             "path": "deno/lib/__tests__/string.test.ts",
             "type": "test",
-            "occRank": null,
+            "occRank": 13,
             "bm25Rank": 2,
-            "inOccCandidates": false
+            "inOccCandidates": true
           },
           {
             "path": "src/__tests__/string.test.ts",
             "type": "test",
-            "occRank": null,
+            "occRank": 12,
             "bm25Rank": 1,
-            "inOccCandidates": false
+            "inOccCandidates": true
           }
         ]
       },
@@ -1471,28 +1411,15 @@
           {
             "path": "deno/lib/__tests__/discriminatedUnions.test.ts",
             "type": "test",
-            "occRank": 68,
+            "occRank": 69,
             "bm25Rank": 9,
             "inOccCandidates": true
           },
           {
             "path": "src/__tests__/discriminatedUnions.test.ts",
             "type": "test",
-            "occRank": 69,
+            "occRank": 68,
             "bm25Rank": 8,
-            "inOccCandidates": true
-          }
-        ]
-      },
-      {
-        "id": "zod:ab8a37191fa2",
-        "repoId": "zod",
-        "missing": [
-          {
-            "path": "README.md",
-            "type": "docs",
-            "occRank": 12,
-            "bm25Rank": 2,
             "inOccCandidates": true
           }
         ]
@@ -1512,17 +1439,17 @@
       }
     ],
     "summary": {
-      "tasks": 25,
-      "missingFiles": 40,
+      "tasks": 21,
+      "missingFiles": 33,
       "byType": {
         "ci-config": 4,
-        "docs": 7,
+        "docs": 6,
         "other": 1,
-        "source": 16,
-        "test": 12
+        "source": 11,
+        "test": 11
       },
-      "notInOccCandidates": 9,
-      "occRankMedian": 24,
+      "notInOccCandidates": 4,
+      "occRankMedian": 26,
       "bm25RankMedian": 4
     }
   },
@@ -1558,27 +1485,26 @@
         "recall10": 0
       },
       {
-        "id": "hono:a104bf0010ba",
+        "id": "hono:6830e7b99c65",
         "repoId": "hono",
-        "subject": "fix(netlify): fix import paths (#1304)",
-        "task": "fix(netlify): fix import paths",
+        "subject": "fix(client): `c.json()` supports `undefined`/`null` response (#1794)",
+        "task": "fix(client): `c.json()` supports `undefined`/`null` response * fix(client): `c.json()` supports `undefined`/`null` response * denoify",
         "gold": [
-          "deno_dist/adapter/netlify/handler.ts",
-          "deno_dist/adapter/netlify/mod.ts",
-          "src/adapter/netlify/handler.ts",
-          "src/adapter/netlify/mod.ts"
+          "deno_dist/types.ts",
+          "src/types.test.ts",
+          "src/types.ts"
         ],
         "topRanked": [
-          "src/utils/url.ts",
-          "deno_dist/utils/url.ts",
-          "deno_dist/hono-base.ts",
-          "src/hono-base.ts",
-          "src/utils/url.test.ts",
-          "src/hono.test.ts",
-          "deno_dist/router/reg-exp-router/router.ts",
-          "src/router/reg-exp-router/router.ts",
-          "src/types.test.ts",
-          "src/adapter/aws-lambda/handler.ts"
+          "src/adapter/lambda-edge/handler.ts",
+          "deno_dist/client/types.ts",
+          "src/client/types.ts",
+          "deno_dist/context.ts",
+          "src/context.ts",
+          "src/adapter/aws-lambda/types.ts",
+          "deno_dist/jsx/intrinsic-elements.ts",
+          "deno_dist/client/client.ts",
+          "src/jsx/intrinsic-elements.ts",
+          "src/client/client.ts"
         ],
         "mrr": 0,
         "recall10": 0
@@ -1593,8 +1519,8 @@
           "src/types.ts"
         ],
         "topRanked": [
-          "deno/lib/__tests__/error.test.ts",
           "src/__tests__/error.test.ts",
+          "deno/lib/__tests__/error.test.ts",
           "deno/lib/ZodError.ts",
           "deno/lib/__tests__/anyunknown.test.ts",
           "deno/lib/__tests__/array.test.ts",
@@ -1618,9 +1544,9 @@
           "deno/lib/mod.ts"
         ],
         "topRanked": [
+          "package.json",
           "deno/lib/types.ts",
           "src/types.ts",
-          "package.json",
           "configs/babel-jest.config.json",
           "configs/ts-jest.config.json",
           "configs/jest.config.json",
@@ -1633,15 +1559,26 @@
         "recall10": 0
       },
       {
-        "id": "undici:9efbfb7fce41",
-        "repoId": "undici",
-        "subject": "fix: removed no longer relevant note",
-        "task": "fix: removed no longer relevant note",
+        "id": "axios:13c948e661f4",
+        "repoId": "axios",
+        "subject": "Remove 'includes' API, fix CI build failure (#2574)",
+        "task": "Remove 'includes' API, fix CI build failure * Remove 'includes' API, fix CI build failure",
         "gold": [
-          "lib/client.js"
+          "lib/utils.js"
         ],
-        "topRanked": [],
-        "mrr": 0,
+        "topRanked": [
+          "lib/helpers/buildURL.js",
+          "lib/core/buildFullPath.js",
+          "lib/adapters/xhr.js",
+          "lib/adapters/http.js",
+          "test/specs/core/buildFullPath.spec.js",
+          "test/specs/helpers/buildURL.spec.js",
+          "lib/core/Axios.js",
+          "lib/helpers/cookies.js",
+          "lib/helpers/parseHeaders.js",
+          "lib/helpers/isURLSameOrigin.js"
+        ],
+        "mrr": 0.02,
         "recall10": 0
       }
     ],
@@ -1681,14 +1618,14 @@
         "topRanked": [
           "lib/validation.js",
           "lib/decorate.js",
+          "test/internals/handleRequest.test.js",
           "lib/pluginUtils.js",
           "fastify.js",
-          "test/internals/handleRequest.test.js",
-          "lib/reply.js",
           "lib/contentTypeParser.js",
+          "lib/reply.js",
           "lib/handleRequest.js",
-          "test/internals/plugin.test.js",
-          "lib/wrapThenable.js"
+          "lib/wrapThenable.js",
+          "lib/logger.js"
         ],
         "mrr": 1,
         "recall10": 1
@@ -1706,37 +1643,14 @@
         "topRanked": [
           "fastify.js",
           "docs/Server.md",
-          "lib/logger.js",
           "lib/reply.js",
+          "lib/logger.js",
           "test/internals/handleRequest.test.js",
           "test/internals/contentTypeParser.test.js",
-          "test/logger.test.js",
-          "docs/Reply.md",
+          "lib/handleRequest.js",
           "lib/wrapThenable.js",
-          "lib/handleRequest.js"
-        ],
-        "mrr": 1,
-        "recall10": 1
-      },
-      {
-        "id": "fastify:015480adf8b4",
-        "repoId": "fastify",
-        "subject": "Added deprecation warning for genReqId option in logger (#1166)",
-        "task": "Added deprecation warning for genReqId option in logger",
-        "gold": [
-          "fastify.js"
-        ],
-        "topRanked": [
-          "fastify.js",
-          "docs/Server.md",
-          "lib/logger.js",
-          "test/logger.test.js",
-          "lib/reply.js",
-          "test/internals/logger.test.js",
-          "lib/validation.js",
-          "test/internals/handleRequest.test.js",
           "lib/request.js",
-          "test/genReqId.test.js"
+          "lib/hookRunner.js"
         ],
         "mrr": 1,
         "recall10": 1
@@ -1761,6 +1675,30 @@
           "lib/reply.js",
           "lib/handleRequest.js",
           "lib/validation.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      },
+      {
+        "id": "fastify:bb34a7a56189",
+        "repoId": "fastify",
+        "subject": "update reply.js and testing doc",
+        "task": "update reply.js and testing doc",
+        "gold": [
+          "docs/Testing.md",
+          "lib/reply.js"
+        ],
+        "topRanked": [
+          "docs/Testing.md",
+          "fastify.d.ts",
+          "lib/handleRequest.js",
+          "test/internals/handleRequest.test.js",
+          "fastify.js",
+          "lib/reply.js",
+          "lib/decorate.js",
+          "lib/validation.js",
+          "test/internals/reply.test.js",
+          "lib/hooks.js"
         ],
         "mrr": 1,
         "recall10": 1
@@ -1796,7 +1734,7 @@
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 1
       },
       "sourceOnly": {
@@ -1804,7 +1742,7 @@
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 1
       }
     },
@@ -1853,18 +1791,18 @@
       "goldFiles": 1,
       "full": {
         "top1": 0,
-        "recall5": 0,
+        "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.16666666666666666,
+        "mrr": 0.25,
         "packageRecall": 1
       },
       "sourceOnly": {
         "top1": 0,
-        "recall5": 0,
+        "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.16666666666666666,
+        "mrr": 0.25,
         "packageRecall": 1
       }
     },
@@ -1896,7 +1834,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.02127659574468085,
+        "mrr": 0.02,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -1904,7 +1842,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.02127659574468085,
+        "mrr": 0.02,
         "packageRecall": 0
       }
     },
@@ -1936,7 +1874,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.08333333333333333,
+        "mrr": 0.043478260869565216,
         "packageRecall": 0.6666666666666666
       },
       "sourceOnly": {
@@ -1944,7 +1882,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.08333333333333333,
+        "mrr": 0.043478260869565216,
         "packageRecall": 0.6666666666666666
       }
     },
@@ -1953,7 +1891,7 @@
       "goldFiles": 5,
       "full": {
         "top1": 1,
-        "recall5": 0.4,
+        "recall5": 0.6,
         "recall10": 0.6,
         "allGoldAcc10": 0,
         "mrr": 1,
@@ -1961,7 +1899,7 @@
       },
       "sourceOnly": {
         "top1": 1,
-        "recall5": 0.4,
+        "recall5": 0.6,
         "recall10": 0.6,
         "allGoldAcc10": 0,
         "mrr": 1,
@@ -2016,7 +1954,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0,
+        "mrr": 0.022222222222222223,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -2024,7 +1962,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0,
+        "mrr": 0.022222222222222223,
         "packageRecall": 0
       }
     },
@@ -2053,19 +1991,19 @@
       "goldFiles": 1,
       "full": {
         "top1": 0,
-        "recall5": 0,
-        "recall10": 0,
-        "allGoldAcc10": 0,
-        "mrr": 0.029411764705882353,
-        "packageRecall": 0
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
       },
       "sourceOnly": {
         "top1": 0,
-        "recall5": 0,
-        "recall10": 0,
-        "allGoldAcc10": 0,
-        "mrr": 0.029411764705882353,
-        "packageRecall": 0
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
       }
     },
     {
@@ -2074,18 +2012,18 @@
       "full": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 0.5,
+        "recall10": 0.25,
         "allGoldAcc10": 0,
-        "mrr": 0.14285714285714285,
-        "packageRecall": 1
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.25
       },
       "sourceOnly": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 0.5,
+        "recall10": 0.25,
         "allGoldAcc10": 0,
-        "mrr": 0.14285714285714285,
-        "packageRecall": 1
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.25
       }
     },
     {
@@ -2136,7 +2074,7 @@
         "recall5": 0,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.14285714285714285,
+        "mrr": 0.16666666666666666,
         "packageRecall": 1
       },
       "sourceOnly": {
@@ -2144,7 +2082,7 @@
         "recall5": 0,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.14285714285714285,
+        "mrr": 0.16666666666666666,
         "packageRecall": 1
       }
     },
@@ -2216,7 +2154,7 @@
         "recall5": 0,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.16666666666666666,
+        "mrr": 0.14285714285714285,
         "packageRecall": 1
       },
       "sourceOnly": {
@@ -2224,7 +2162,7 @@
         "recall5": 0,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.16666666666666666,
+        "mrr": 0.14285714285714285,
         "packageRecall": 1
       }
     },
@@ -2257,7 +2195,7 @@
         "recall10": 0.5,
         "allGoldAcc10": 0,
         "mrr": 1,
-        "packageRecall": 0.75
+        "packageRecall": 0.5
       },
       "sourceOnly": {
         "top1": 1,
@@ -2265,7 +2203,7 @@
         "recall10": 0.5,
         "allGoldAcc10": 0,
         "mrr": 1,
-        "packageRecall": 0.75
+        "packageRecall": 0.5
       }
     },
     {
@@ -2336,7 +2274,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.07692307692307693,
+        "mrr": 0.08333333333333333,
         "packageRecall": 1
       },
       "sourceOnly": {
@@ -2344,7 +2282,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.07692307692307693,
+        "mrr": 0.08333333333333333,
         "packageRecall": 1
       }
     },
@@ -2436,7 +2374,7 @@
         "recall5": 0.5,
         "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 0.5
       },
       "sourceOnly": {
@@ -2444,7 +2382,7 @@
         "recall5": 0.5,
         "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 0.5
       }
     },
@@ -2516,7 +2454,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.041666666666666664,
+        "mrr": 0.04,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -2524,7 +2462,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.041666666666666664,
+        "mrr": 0.04,
         "packageRecall": 0
       }
     },
@@ -2593,18 +2531,18 @@
       "goldFiles": 3,
       "full": {
         "top1": 0,
-        "recall5": 0,
+        "recall5": 0.3333333333333333,
         "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
-        "mrr": 0.14285714285714285,
+        "mrr": 0.5,
         "packageRecall": 1
       },
       "sourceOnly": {
         "top1": 0,
-        "recall5": 0,
+        "recall5": 0.3333333333333333,
         "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
-        "mrr": 0.14285714285714285,
+        "mrr": 0.5,
         "packageRecall": 1
       }
     },
@@ -2636,7 +2574,7 @@
         "recall5": 0,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.14285714285714285,
+        "mrr": 0.16666666666666666,
         "packageRecall": 1
       },
       "sourceOnly": {
@@ -2644,7 +2582,7 @@
         "recall5": 0,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.14285714285714285,
+        "mrr": 0.16666666666666666,
         "packageRecall": 1
       }
     },
@@ -2657,7 +2595,7 @@
         "recall10": 0.5,
         "allGoldAcc10": 0,
         "mrr": 0.5,
-        "packageRecall": 0.5
+        "packageRecall": 1
       },
       "sourceOnly": {
         "top1": 0,
@@ -2665,7 +2603,7 @@
         "recall10": 0.5,
         "allGoldAcc10": 0,
         "mrr": 0.5,
-        "packageRecall": 0.5
+        "packageRecall": 1
       }
     },
     {
@@ -2674,18 +2612,18 @@
       "full": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 0,
+        "recall10": 0.3333333333333333,
         "allGoldAcc10": 0,
-        "mrr": 0,
-        "packageRecall": 0
+        "mrr": 0.1111111111111111,
+        "packageRecall": 0.3333333333333333
       },
       "sourceOnly": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 0,
+        "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0,
-        "packageRecall": 0
+        "mrr": 0.1111111111111111,
+        "packageRecall": 0.5
       }
     },
     {
@@ -2756,7 +2694,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.043478260869565216,
+        "mrr": 0.07692307692307693,
         "packageRecall": 1
       },
       "sourceOnly": {
@@ -2764,7 +2702,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.043478260869565216,
+        "mrr": 0.07692307692307693,
         "packageRecall": 1
       }
     },
@@ -2796,16 +2734,16 @@
         "recall5": 0,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.14285714285714285,
-        "packageRecall": 0.5
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0
       },
       "sourceOnly": {
         "top1": 0,
         "recall5": 0,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.14285714285714285,
-        "packageRecall": 0.5
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0
       }
     },
     {
@@ -2832,19 +2770,19 @@
       "id": "axios:ea673057aa92",
       "goldFiles": 1,
       "full": {
-        "top1": 0,
+        "top1": 1,
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.5,
+        "mrr": 1,
         "packageRecall": 1
       },
       "sourceOnly": {
-        "top1": 0,
+        "top1": 1,
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.5,
+        "mrr": 1,
         "packageRecall": 1
       }
     },
@@ -2854,18 +2792,18 @@
       "full": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 0,
-        "allGoldAcc10": 0,
-        "mrr": 0.034482758620689655,
-        "packageRecall": 0
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.125,
+        "packageRecall": 1
       },
       "sourceOnly": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 0,
-        "allGoldAcc10": 0,
-        "mrr": 0.034482758620689655,
-        "packageRecall": 0
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.125,
+        "packageRecall": 1
       }
     },
     {
@@ -2912,19 +2850,19 @@
       "id": "axios:f40de498e6af",
       "goldFiles": 1,
       "full": {
-        "top1": 0,
-        "recall5": 0,
-        "recall10": 0,
-        "allGoldAcc10": 0,
-        "mrr": 0.09090909090909091,
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
         "packageRecall": 1
       },
       "sourceOnly": {
-        "top1": 0,
-        "recall5": 0,
-        "recall10": 0,
-        "allGoldAcc10": 0,
-        "mrr": 0.09090909090909091,
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
         "packageRecall": 1
       }
     },
@@ -2972,19 +2910,19 @@
       "id": "fastify:015480adf8b4",
       "goldFiles": 1,
       "full": {
-        "top1": 1,
+        "top1": 0,
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 1,
+        "mrr": 0.5,
         "packageRecall": 1
       },
       "sourceOnly": {
-        "top1": 1,
+        "top1": 0,
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 1,
+        "mrr": 0.5,
         "packageRecall": 1
       }
     },
@@ -2992,19 +2930,19 @@
       "id": "fastify:09becaf37ea4",
       "goldFiles": 6,
       "full": {
-        "top1": 0,
+        "top1": 1,
         "recall5": 0.16666666666666666,
         "recall10": 0.3333333333333333,
         "allGoldAcc10": 0,
-        "mrr": 0.5,
+        "mrr": 1,
         "packageRecall": 0.5
       },
       "sourceOnly": {
-        "top1": 0,
+        "top1": 1,
         "recall5": 0.16666666666666666,
         "recall10": 0.3333333333333333,
         "allGoldAcc10": 0,
-        "mrr": 0.5,
+        "mrr": 1,
         "packageRecall": 0.5
       }
     },
@@ -3076,7 +3014,7 @@
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 1
       },
       "sourceOnly": {
@@ -3084,7 +3022,7 @@
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 1
       }
     },
@@ -3096,7 +3034,7 @@
         "recall5": 0.16666666666666666,
         "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 0.3333333333333333
       },
       "sourceOnly": {
@@ -3104,7 +3042,7 @@
         "recall5": 0.16666666666666666,
         "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 0.3333333333333333
       }
     },
@@ -3116,7 +3054,7 @@
         "recall5": 0.5,
         "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.25,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -3124,7 +3062,7 @@
         "recall5": 0.5,
         "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.25,
         "packageRecall": 0
       }
     },
@@ -3172,20 +3110,20 @@
       "id": "fastify:29a87363f2db",
       "goldFiles": 2,
       "full": {
-        "top1": 1,
+        "top1": 0,
         "recall5": 0.5,
-        "recall10": 1,
-        "allGoldAcc10": 1,
-        "mrr": 1,
-        "packageRecall": 1
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
       },
       "sourceOnly": {
-        "top1": 1,
+        "top1": 0,
         "recall5": 0.5,
-        "recall10": 1,
-        "allGoldAcc10": 1,
-        "mrr": 1,
-        "packageRecall": 1
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
       }
     },
     {
@@ -3196,7 +3134,7 @@
         "recall5": 0,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.16666666666666666,
+        "mrr": 0.1,
         "packageRecall": 1
       },
       "sourceOnly": {
@@ -3204,7 +3142,7 @@
         "recall5": 0,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.16666666666666666,
+        "mrr": 0.1,
         "packageRecall": 1
       }
     },
@@ -3254,18 +3192,18 @@
       "full": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
         "mrr": 0.16666666666666666,
-        "packageRecall": 0.3333333333333333
+        "packageRecall": 0
       },
       "sourceOnly": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
         "mrr": 0.16666666666666666,
-        "packageRecall": 0.3333333333333333
+        "packageRecall": 0
       }
     },
     {
@@ -3294,7 +3232,7 @@
       "full": {
         "top1": 1,
         "recall5": 0.6,
-        "recall10": 0.8,
+        "recall10": 0.6,
         "allGoldAcc10": 0,
         "mrr": 1,
         "packageRecall": 0.6
@@ -3302,7 +3240,7 @@
       "sourceOnly": {
         "top1": 1,
         "recall5": 0.6,
-        "recall10": 0.8,
+        "recall10": 0.6,
         "allGoldAcc10": 0,
         "mrr": 1,
         "packageRecall": 0.6
@@ -3373,18 +3311,18 @@
       "goldFiles": 5,
       "full": {
         "top1": 0,
-        "recall5": 0,
+        "recall5": 0.2,
         "recall10": 0.4,
         "allGoldAcc10": 0,
-        "mrr": 0.16666666666666666,
+        "mrr": 0.2,
         "packageRecall": 0.4
       },
       "sourceOnly": {
         "top1": 0,
-        "recall5": 0,
+        "recall5": 0.2,
         "recall10": 0.4,
         "allGoldAcc10": 0,
-        "mrr": 0.16666666666666666,
+        "mrr": 0.2,
         "packageRecall": 0.4
       }
     },
@@ -3396,7 +3334,7 @@
         "recall5": 0.3333333333333333,
         "recall10": 0.3333333333333333,
         "allGoldAcc10": 0,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 0.3333333333333333
       },
       "sourceOnly": {
@@ -3404,7 +3342,7 @@
         "recall5": 0.3333333333333333,
         "recall10": 0.3333333333333333,
         "allGoldAcc10": 0,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 0.3333333333333333
       }
     },
@@ -3456,7 +3394,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.05555555555555555,
+        "mrr": 0.0625,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -3464,7 +3402,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.05555555555555555,
+        "mrr": 0.0625,
         "packageRecall": 0
       }
     },
@@ -3494,7 +3432,7 @@
       "full": {
         "top1": 0,
         "recall5": 0.25,
-        "recall10": 0.5,
+        "recall10": 0.75,
         "allGoldAcc10": 0,
         "mrr": 0.2,
         "packageRecall": 0.5
@@ -3502,7 +3440,7 @@
       "sourceOnly": {
         "top1": 0,
         "recall5": 0.25,
-        "recall10": 0.5,
+        "recall10": 0.75,
         "allGoldAcc10": 0,
         "mrr": 0.2,
         "packageRecall": 0.5
@@ -3793,7 +3731,7 @@
       "goldFiles": 4,
       "full": {
         "top1": 1,
-        "recall5": 0.75,
+        "recall5": 0.5,
         "recall10": 0.75,
         "allGoldAcc10": 0,
         "mrr": 1,
@@ -3801,7 +3739,7 @@
       },
       "sourceOnly": {
         "top1": 1,
-        "recall5": 0.75,
+        "recall5": 0.5,
         "recall10": 0.75,
         "allGoldAcc10": 0,
         "mrr": 1,
@@ -3853,19 +3791,19 @@
       "goldFiles": 4,
       "full": {
         "top1": 0,
-        "recall5": 0.5,
-        "recall10": 0.5,
+        "recall5": 0,
+        "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.5,
-        "packageRecall": 0.75
+        "mrr": 0.07692307692307693,
+        "packageRecall": 0
       },
       "sourceOnly": {
         "top1": 0,
-        "recall5": 0.5,
-        "recall10": 0.5,
+        "recall5": 0,
+        "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.5,
-        "packageRecall": 0.75
+        "mrr": 0.07692307692307693,
+        "packageRecall": 0
       }
     },
     {
@@ -3876,7 +3814,7 @@
         "recall5": 0,
         "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.1111111111111111,
+        "mrr": 0.14285714285714285,
         "packageRecall": 0.5
       },
       "sourceOnly": {
@@ -3884,7 +3822,7 @@
         "recall5": 0,
         "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.1111111111111111,
+        "mrr": 0.14285714285714285,
         "packageRecall": 0.5
       }
     },
@@ -4016,7 +3954,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.045454545454545456,
+        "mrr": 0.047619047619047616,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -4024,7 +3962,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.045454545454545456,
+        "mrr": 0.047619047619047616,
         "packageRecall": 0
       }
     },
@@ -4056,7 +3994,7 @@
         "recall5": 0.5,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.25,
+        "mrr": 0.3333333333333333,
         "packageRecall": 1
       },
       "sourceOnly": {
@@ -4064,7 +4002,7 @@
         "recall5": 0.5,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.25,
+        "mrr": 0.3333333333333333,
         "packageRecall": 1
       }
     },
@@ -4096,7 +4034,7 @@
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.25,
+        "mrr": 0.3333333333333333,
         "packageRecall": 1
       },
       "sourceOnly": {
@@ -4104,7 +4042,7 @@
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.25,
+        "mrr": 0.3333333333333333,
         "packageRecall": 1
       }
     },
@@ -4112,19 +4050,19 @@
       "id": "fastify:e524d4cce575",
       "goldFiles": 1,
       "full": {
-        "top1": 0,
+        "top1": 1,
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.5,
+        "mrr": 1,
         "packageRecall": 1
       },
       "sourceOnly": {
-        "top1": 0,
+        "top1": 1,
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.5,
+        "mrr": 1,
         "packageRecall": 1
       }
     },
@@ -4172,19 +4110,19 @@
       "id": "hono:04a8818e07c5",
       "goldFiles": 2,
       "full": {
-        "top1": 0,
+        "top1": 1,
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.5,
+        "mrr": 1,
         "packageRecall": 0.5
       },
       "sourceOnly": {
-        "top1": 0,
+        "top1": 1,
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.5,
+        "mrr": 1,
         "packageRecall": 0.5
       }
     },
@@ -4273,7 +4211,7 @@
       "goldFiles": 6,
       "full": {
         "top1": 0,
-        "recall5": 0.3333333333333333,
+        "recall5": 0.5,
         "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
         "mrr": 0.3333333333333333,
@@ -4281,7 +4219,7 @@
       },
       "sourceOnly": {
         "top1": 0,
-        "recall5": 0.3333333333333333,
+        "recall5": 0.5,
         "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
         "mrr": 0.3333333333333333,
@@ -4396,7 +4334,7 @@
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -4404,7 +4342,7 @@
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 0
       }
     },
@@ -4432,19 +4370,19 @@
       "id": "hono:3def9b12c058",
       "goldFiles": 5,
       "full": {
-        "top1": 1,
+        "top1": 0,
         "recall5": 0.2,
-        "recall10": 1,
-        "allGoldAcc10": 1,
-        "mrr": 1,
+        "recall10": 0.8,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
         "packageRecall": 0.8
       },
       "sourceOnly": {
-        "top1": 1,
+        "top1": 0,
         "recall5": 0.2,
-        "recall10": 1,
-        "allGoldAcc10": 1,
-        "mrr": 1,
+        "recall10": 0.8,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
         "packageRecall": 0.8
       }
     },
@@ -4536,7 +4474,7 @@
         "recall5": 0,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.125,
+        "mrr": 0.1111111111111111,
         "packageRecall": 0.5
       },
       "sourceOnly": {
@@ -4544,7 +4482,7 @@
         "recall5": 0,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.125,
+        "mrr": 0.1111111111111111,
         "packageRecall": 0.5
       }
     },
@@ -4616,7 +4554,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.020833333333333332,
+        "mrr": 0,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -4624,7 +4562,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.020833333333333332,
+        "mrr": 0,
         "packageRecall": 0
       }
     },
@@ -4636,7 +4574,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.0625,
+        "mrr": 0.05555555555555555,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -4644,7 +4582,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.0625,
+        "mrr": 0.05555555555555555,
         "packageRecall": 0
       }
     },
@@ -4656,7 +4594,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.041666666666666664,
+        "mrr": 0.04,
         "packageRecall": 0.3333333333333333
       },
       "sourceOnly": {
@@ -4664,7 +4602,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.041666666666666664,
+        "mrr": 0.04,
         "packageRecall": 0.3333333333333333
       }
     },
@@ -4753,7 +4691,7 @@
       "goldFiles": 3,
       "full": {
         "top1": 0,
-        "recall5": 0.3333333333333333,
+        "recall5": 0.6666666666666666,
         "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
         "mrr": 0.25,
@@ -4761,7 +4699,7 @@
       },
       "sourceOnly": {
         "top1": 0,
-        "recall5": 0.3333333333333333,
+        "recall5": 0.6666666666666666,
         "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
         "mrr": 0.25,
@@ -4776,7 +4714,7 @@
         "recall5": 0.4,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.25,
+        "mrr": 0.3333333333333333,
         "packageRecall": 0.6
       },
       "sourceOnly": {
@@ -4784,7 +4722,7 @@
         "recall5": 0.4,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.25,
+        "mrr": 0.3333333333333333,
         "packageRecall": 0.6
       }
     },
@@ -4813,19 +4751,19 @@
       "goldFiles": 2,
       "full": {
         "top1": 0,
-        "recall5": 0,
-        "recall10": 0,
-        "allGoldAcc10": 0,
-        "mrr": 0.027777777777777776,
-        "packageRecall": 0
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.2,
+        "packageRecall": 1
       },
       "sourceOnly": {
         "top1": 0,
-        "recall5": 0,
-        "recall10": 0,
-        "allGoldAcc10": 0,
-        "mrr": 0.027777777777777776,
-        "packageRecall": 0
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.2,
+        "packageRecall": 1
       }
     },
     {
@@ -4833,19 +4771,19 @@
       "goldFiles": 4,
       "full": {
         "top1": 0,
-        "recall5": 0,
-        "recall10": 0,
+        "recall5": 0.25,
+        "recall10": 0.25,
         "allGoldAcc10": 0,
-        "mrr": 0,
-        "packageRecall": 0
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.25
       },
       "sourceOnly": {
         "top1": 0,
-        "recall5": 0,
-        "recall10": 0,
+        "recall5": 0.25,
+        "recall10": 0.25,
         "allGoldAcc10": 0,
-        "mrr": 0,
-        "packageRecall": 0
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.25
       }
     },
     {
@@ -5073,18 +5011,18 @@
       "goldFiles": 3,
       "full": {
         "top1": 0,
-        "recall5": 0.6666666666666666,
+        "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.5,
+        "mrr": 0.3333333333333333,
         "packageRecall": 0.6666666666666666
       },
       "sourceOnly": {
         "top1": 0,
-        "recall5": 0.6666666666666666,
+        "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.5,
+        "mrr": 0.3333333333333333,
         "packageRecall": 0.6666666666666666
       }
     },
@@ -5116,7 +5054,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.024390243902439025,
+        "mrr": 0.025,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -5124,7 +5062,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.024390243902439025,
+        "mrr": 0.025,
         "packageRecall": 0
       }
     },
@@ -5234,17 +5172,17 @@
       "full": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 1,
-        "allGoldAcc10": 1,
-        "mrr": 0.16666666666666666,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.1111111111111111,
         "packageRecall": 1
       },
       "sourceOnly": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 1,
-        "allGoldAcc10": 1,
-        "mrr": 0.16666666666666666,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.1111111111111111,
         "packageRecall": 1
       }
     },
@@ -5256,7 +5194,7 @@
         "recall5": 0,
         "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.1111111111111111,
+        "mrr": 0.125,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -5264,7 +5202,7 @@
         "recall5": 0,
         "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.1111111111111111,
+        "mrr": 0.125,
         "packageRecall": 0
       }
     },
@@ -5276,7 +5214,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.02631578947368421,
+        "mrr": 0.02857142857142857,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -5284,7 +5222,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.02631578947368421,
+        "mrr": 0.02857142857142857,
         "packageRecall": 0
       }
     },
@@ -5353,18 +5291,18 @@
       "goldFiles": 3,
       "full": {
         "top1": 0,
-        "recall5": 0.3333333333333333,
-        "recall10": 0.6666666666666666,
+        "recall5": 0,
+        "recall10": 0.3333333333333333,
         "allGoldAcc10": 0,
-        "mrr": 0.2,
+        "mrr": 0.16666666666666666,
         "packageRecall": 0.3333333333333333
       },
       "sourceOnly": {
         "top1": 0,
-        "recall5": 0.3333333333333333,
-        "recall10": 0.6666666666666666,
+        "recall5": 0,
+        "recall10": 0.3333333333333333,
         "allGoldAcc10": 0,
-        "mrr": 0.2,
+        "mrr": 0.16666666666666666,
         "packageRecall": 0.3333333333333333
       }
     },
@@ -5396,7 +5334,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.06666666666666667,
+        "mrr": 0.0625,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -5404,7 +5342,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.06666666666666667,
+        "mrr": 0.0625,
         "packageRecall": 0
       }
     },
@@ -5414,17 +5352,17 @@
       "full": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 0,
+        "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.058823529411764705,
+        "mrr": 0.1111111111111111,
         "packageRecall": 0
       },
       "sourceOnly": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 0,
+        "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.058823529411764705,
+        "mrr": 0.1111111111111111,
         "packageRecall": 0
       }
     },
@@ -5473,19 +5411,19 @@
       "goldFiles": 4,
       "full": {
         "top1": 1,
-        "recall5": 0.25,
+        "recall5": 0.5,
         "recall10": 0.5,
         "allGoldAcc10": 0,
         "mrr": 1,
-        "packageRecall": 0.5
+        "packageRecall": 0.75
       },
       "sourceOnly": {
         "top1": 1,
-        "recall5": 0.25,
+        "recall5": 0.5,
         "recall10": 0.5,
         "allGoldAcc10": 0,
         "mrr": 1,
-        "packageRecall": 0.5
+        "packageRecall": 0.75
       }
     },
     {
@@ -5497,7 +5435,7 @@
         "recall10": 0.5,
         "allGoldAcc10": 0,
         "mrr": 1,
-        "packageRecall": 1
+        "packageRecall": 0.5
       },
       "sourceOnly": {
         "top1": 1,
@@ -5505,7 +5443,7 @@
         "recall10": 0.5,
         "allGoldAcc10": 0,
         "mrr": 1,
-        "packageRecall": 1
+        "packageRecall": 0.5
       }
     },
     {
@@ -5514,17 +5452,17 @@
       "full": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 0,
-        "allGoldAcc10": 0,
-        "mrr": 0.037037037037037035,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1,
         "packageRecall": 0
       },
       "sourceOnly": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 0,
-        "allGoldAcc10": 0,
-        "mrr": 0.037037037037037035,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1,
         "packageRecall": 0
       }
     },
@@ -5553,7 +5491,7 @@
       "goldFiles": 5,
       "full": {
         "top1": 0,
-        "recall5": 0.2,
+        "recall5": 0.4,
         "recall10": 0.6,
         "allGoldAcc10": 0,
         "mrr": 0.3333333333333333,
@@ -5561,7 +5499,7 @@
       },
       "sourceOnly": {
         "top1": 0,
-        "recall5": 0.2,
+        "recall5": 0.4,
         "recall10": 0.6,
         "allGoldAcc10": 0,
         "mrr": 0.3333333333333333,
@@ -5592,19 +5530,19 @@
       "id": "undici:31ee8f61508e",
       "goldFiles": 1,
       "full": {
-        "top1": 1,
+        "top1": 0,
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 1,
+        "mrr": 0.5,
         "packageRecall": 1
       },
       "sourceOnly": {
-        "top1": 1,
+        "top1": 0,
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 1,
+        "mrr": 0.5,
         "packageRecall": 1
       }
     },
@@ -5656,7 +5594,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.043478260869565216,
+        "mrr": 0.047619047619047616,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -5664,7 +5602,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.043478260869565216,
+        "mrr": 0.047619047619047616,
         "packageRecall": 0
       }
     },
@@ -5756,7 +5694,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.043478260869565216,
+        "mrr": 0.04,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -5764,7 +5702,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.043478260869565216,
+        "mrr": 0.04,
         "packageRecall": 0
       }
     },
@@ -5776,7 +5714,7 @@
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 1
       },
       "sourceOnly": {
@@ -5784,7 +5722,7 @@
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 1
       }
     },
@@ -5813,7 +5751,7 @@
       "goldFiles": 2,
       "full": {
         "top1": 1,
-        "recall5": 0.5,
+        "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
         "mrr": 1,
@@ -5821,7 +5759,7 @@
       },
       "sourceOnly": {
         "top1": 1,
-        "recall5": 0.5,
+        "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
         "mrr": 1,
@@ -5833,18 +5771,18 @@
       "goldFiles": 1,
       "full": {
         "top1": 0,
-        "recall5": 0,
+        "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.16666666666666666,
+        "mrr": 0.3333333333333333,
         "packageRecall": 1
       },
       "sourceOnly": {
         "top1": 0,
-        "recall5": 0,
+        "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.16666666666666666,
+        "mrr": 0.3333333333333333,
         "packageRecall": 1
       }
     },
@@ -5896,7 +5834,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.08333333333333333,
+        "mrr": 0.07692307692307693,
         "packageRecall": 0.3333333333333333
       },
       "sourceOnly": {
@@ -5904,7 +5842,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.08333333333333333,
+        "mrr": 0.07692307692307693,
         "packageRecall": 0.3333333333333333
       }
     },
@@ -6012,20 +5950,20 @@
       "id": "undici:71d125332612",
       "goldFiles": 3,
       "full": {
-        "top1": 0,
-        "recall5": 0,
-        "recall10": 0,
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
-        "mrr": 0,
-        "packageRecall": 0
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
       },
       "sourceOnly": {
-        "top1": 0,
-        "recall5": 0,
-        "recall10": 0,
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
-        "mrr": 0,
-        "packageRecall": 0
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
       }
     },
     {
@@ -6034,7 +5972,7 @@
       "full": {
         "top1": 0,
         "recall5": 0.4,
-        "recall10": 0.6,
+        "recall10": 0.8,
         "allGoldAcc10": 0,
         "mrr": 0.5,
         "packageRecall": 0.8
@@ -6042,7 +5980,7 @@
       "sourceOnly": {
         "top1": 0,
         "recall5": 0.4,
-        "recall10": 0.6,
+        "recall10": 0.8,
         "allGoldAcc10": 0,
         "mrr": 0.5,
         "packageRecall": 0.8
@@ -6076,7 +6014,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.030303030303030304,
+        "mrr": 0.034482758620689655,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -6084,7 +6022,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.030303030303030304,
+        "mrr": 0.034482758620689655,
         "packageRecall": 0
       }
     },
@@ -6114,7 +6052,7 @@
       "full": {
         "top1": 0,
         "recall5": 0.5,
-        "recall10": 0.75,
+        "recall10": 0.5,
         "allGoldAcc10": 0,
         "mrr": 0.5,
         "packageRecall": 0.75
@@ -6122,7 +6060,7 @@
       "sourceOnly": {
         "top1": 0,
         "recall5": 0.5,
-        "recall10": 0.75,
+        "recall10": 0.5,
         "allGoldAcc10": 0,
         "mrr": 0.5,
         "packageRecall": 0.75
@@ -6157,7 +6095,7 @@
         "recall10": 0.5,
         "allGoldAcc10": 0,
         "mrr": 1,
-        "packageRecall": 1
+        "packageRecall": 0.5
       },
       "sourceOnly": {
         "top1": 1,
@@ -6165,7 +6103,7 @@
         "recall10": 0.5,
         "allGoldAcc10": 0,
         "mrr": 1,
-        "packageRecall": 1
+        "packageRecall": 0.5
       }
     },
     {
@@ -6192,20 +6130,20 @@
       "id": "undici:9efbfb7fce41",
       "goldFiles": 1,
       "full": {
-        "top1": 0,
-        "recall5": 0,
-        "recall10": 0,
-        "allGoldAcc10": 0,
-        "mrr": 0,
-        "packageRecall": 0
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
       },
       "sourceOnly": {
-        "top1": 0,
-        "recall5": 0,
-        "recall10": 0,
-        "allGoldAcc10": 0,
-        "mrr": 0,
-        "packageRecall": 0
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
       }
     },
     {
@@ -6253,7 +6191,7 @@
       "goldFiles": 4,
       "full": {
         "top1": 1,
-        "recall5": 0.5,
+        "recall5": 0.25,
         "recall10": 0.75,
         "allGoldAcc10": 0,
         "mrr": 1,
@@ -6261,7 +6199,7 @@
       },
       "sourceOnly": {
         "top1": 1,
-        "recall5": 0.5,
+        "recall5": 0.25,
         "recall10": 0.75,
         "allGoldAcc10": 0,
         "mrr": 1,
@@ -6294,17 +6232,17 @@
       "full": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 0,
+        "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.02702702702702703,
+        "mrr": 0.16666666666666666,
         "packageRecall": 0
       },
       "sourceOnly": {
         "top1": 0,
         "recall5": 0,
-        "recall10": 0,
+        "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.02702702702702703,
+        "mrr": 0.16666666666666666,
         "packageRecall": 0
       }
     },
@@ -6414,7 +6352,7 @@
       "full": {
         "top1": 1,
         "recall5": 0.5,
-        "recall10": 0.75,
+        "recall10": 0.5,
         "allGoldAcc10": 0,
         "mrr": 1,
         "packageRecall": 0.5
@@ -6422,7 +6360,7 @@
       "sourceOnly": {
         "top1": 1,
         "recall5": 0.5,
-        "recall10": 0.75,
+        "recall10": 0.5,
         "allGoldAcc10": 0,
         "mrr": 1,
         "packageRecall": 0.5
@@ -6496,7 +6434,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.027777777777777776,
+        "mrr": 0.029411764705882353,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -6504,7 +6442,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.027777777777777776,
+        "mrr": 0.029411764705882353,
         "packageRecall": 0
       }
     },
@@ -6576,7 +6514,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.0625,
+        "mrr": 0.045454545454545456,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -6584,7 +6522,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.0625,
+        "mrr": 0.045454545454545456,
         "packageRecall": 0
       }
     },
@@ -6636,7 +6574,7 @@
         "recall5": 0.5,
         "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.2,
         "packageRecall": 0.5
       },
       "sourceOnly": {
@@ -6644,7 +6582,7 @@
         "recall5": 0.5,
         "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.2,
         "packageRecall": 0.5
       }
     },
@@ -6652,19 +6590,19 @@
       "id": "zod:18c8ddb12200",
       "goldFiles": 6,
       "full": {
-        "top1": 0,
+        "top1": 1,
         "recall5": 0.16666666666666666,
         "recall10": 0.3333333333333333,
         "allGoldAcc10": 0,
-        "mrr": 0.5,
+        "mrr": 1,
         "packageRecall": 0.3333333333333333
       },
       "sourceOnly": {
-        "top1": 0,
+        "top1": 1,
         "recall5": 0.16666666666666666,
         "recall10": 0.3333333333333333,
         "allGoldAcc10": 0,
-        "mrr": 0.5,
+        "mrr": 1,
         "packageRecall": 0.3333333333333333
       }
     },
@@ -6674,7 +6612,7 @@
       "full": {
         "top1": 1,
         "recall5": 0.2857142857142857,
-        "recall10": 0.5714285714285714,
+        "recall10": 0.42857142857142855,
         "allGoldAcc10": 0,
         "mrr": 1,
         "packageRecall": 0.2857142857142857
@@ -6682,7 +6620,7 @@
       "sourceOnly": {
         "top1": 1,
         "recall5": 0.3333333333333333,
-        "recall10": 0.6666666666666666,
+        "recall10": 0.5,
         "allGoldAcc10": 0,
         "mrr": 1,
         "packageRecall": 0.3333333333333333
@@ -6757,7 +6695,7 @@
         "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
         "mrr": 1,
-        "packageRecall": 0.5
+        "packageRecall": 0.3333333333333333
       },
       "sourceOnly": {
         "top1": 1,
@@ -6765,7 +6703,7 @@
         "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
         "mrr": 1,
-        "packageRecall": 0.5
+        "packageRecall": 0.3333333333333333
       }
     },
     {
@@ -6837,7 +6775,7 @@
         "recall10": 0.8,
         "allGoldAcc10": 0,
         "mrr": 1,
-        "packageRecall": 0.4
+        "packageRecall": 0.6
       },
       "sourceOnly": {
         "top1": 1,
@@ -6845,7 +6783,7 @@
         "recall10": 1,
         "allGoldAcc10": 1,
         "mrr": 1,
-        "packageRecall": 0.5
+        "packageRecall": 0.75
       }
     },
     {
@@ -6874,7 +6812,7 @@
       "full": {
         "top1": 1,
         "recall5": 0.4,
-        "recall10": 0.6,
+        "recall10": 0.4,
         "allGoldAcc10": 0,
         "mrr": 1,
         "packageRecall": 0.4
@@ -6882,7 +6820,7 @@
       "sourceOnly": {
         "top1": 1,
         "recall5": 0.4,
-        "recall10": 0.6,
+        "recall10": 0.4,
         "allGoldAcc10": 0,
         "mrr": 1,
         "packageRecall": 0.4
@@ -6894,7 +6832,7 @@
       "full": {
         "top1": 1,
         "recall5": 0.4,
-        "recall10": 0.4,
+        "recall10": 0.8,
         "allGoldAcc10": 0,
         "mrr": 1,
         "packageRecall": 0.4
@@ -6902,7 +6840,7 @@
       "sourceOnly": {
         "top1": 1,
         "recall5": 0.4,
-        "recall10": 0.4,
+        "recall10": 0.8,
         "allGoldAcc10": 0,
         "mrr": 1,
         "packageRecall": 0.4
@@ -6933,7 +6871,7 @@
       "goldFiles": 6,
       "full": {
         "top1": 1,
-        "recall5": 0.5,
+        "recall5": 0.6666666666666666,
         "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
         "mrr": 1,
@@ -6941,7 +6879,7 @@
       },
       "sourceOnly": {
         "top1": 1,
-        "recall5": 0.5,
+        "recall5": 0.6666666666666666,
         "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
         "mrr": 1,
@@ -7014,7 +6952,7 @@
       "full": {
         "top1": 1,
         "recall5": 0.4,
-        "recall10": 0.6,
+        "recall10": 0.8,
         "allGoldAcc10": 0,
         "mrr": 1,
         "packageRecall": 0
@@ -7022,7 +6960,7 @@
       "sourceOnly": {
         "top1": 1,
         "recall5": 0.4,
-        "recall10": 0.6,
+        "recall10": 0.8,
         "allGoldAcc10": 0,
         "mrr": 1,
         "packageRecall": 0
@@ -7032,19 +6970,19 @@
       "id": "zod:501639482160",
       "goldFiles": 3,
       "full": {
-        "top1": 0,
+        "top1": 1,
         "recall5": 0.6666666666666666,
         "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
-        "mrr": 0.3333333333333333,
+        "mrr": 1,
         "packageRecall": 0.3333333333333333
       },
       "sourceOnly": {
-        "top1": 0,
+        "top1": 1,
         "recall5": 0.6666666666666666,
         "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
-        "mrr": 0.3333333333333333,
+        "mrr": 1,
         "packageRecall": 0.3333333333333333
       }
     },
@@ -7072,19 +7010,19 @@
       "id": "zod:5b256763621f",
       "goldFiles": 1,
       "full": {
-        "top1": 0,
+        "top1": 1,
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.5,
+        "mrr": 1,
         "packageRecall": 1
       },
       "sourceOnly": {
-        "top1": 0,
+        "top1": 1,
         "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
-        "mrr": 0.5,
+        "mrr": 1,
         "packageRecall": 1
       }
     },
@@ -7096,7 +7034,7 @@
         "recall5": 0.5,
         "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.5,
+        "mrr": 0.3333333333333333,
         "packageRecall": 0.5
       },
       "sourceOnly": {
@@ -7104,7 +7042,7 @@
         "recall5": 0.5,
         "recall10": 0.5,
         "allGoldAcc10": 0,
-        "mrr": 0.5,
+        "mrr": 0.3333333333333333,
         "packageRecall": 0.5
       }
     },
@@ -7413,7 +7351,7 @@
       "goldFiles": 2,
       "full": {
         "top1": 0,
-        "recall5": 0.5,
+        "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
         "mrr": 0.5,
@@ -7421,7 +7359,7 @@
       },
       "sourceOnly": {
         "top1": 0,
-        "recall5": 0.5,
+        "recall5": 1,
         "recall10": 1,
         "allGoldAcc10": 1,
         "mrr": 0.5,
@@ -7436,7 +7374,7 @@
         "recall5": 0.3333333333333333,
         "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 0.6666666666666666
       },
       "sourceOnly": {
@@ -7444,7 +7382,7 @@
         "recall5": 0.3333333333333333,
         "recall10": 0.6666666666666666,
         "allGoldAcc10": 0,
-        "mrr": 0.3333333333333333,
+        "mrr": 0.5,
         "packageRecall": 0.6666666666666666
       }
     },
@@ -7454,16 +7392,16 @@
       "full": {
         "top1": 1,
         "recall5": 0.6,
-        "recall10": 0.8,
-        "allGoldAcc10": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
         "mrr": 1,
         "packageRecall": 0.6
       },
       "sourceOnly": {
         "top1": 1,
         "recall5": 0.6,
-        "recall10": 0.8,
-        "allGoldAcc10": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
         "mrr": 1,
         "packageRecall": 0.6
       }
@@ -7536,7 +7474,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.025,
+        "mrr": 0.022727272727272728,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -7544,7 +7482,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.025,
+        "mrr": 0.022727272727272728,
         "packageRecall": 0
       }
     },
@@ -7756,7 +7694,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.03225806451612903,
+        "mrr": 0.03125,
         "packageRecall": 0
       },
       "sourceOnly": {
@@ -7764,16 +7702,16 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.03225806451612903,
+        "mrr": 0.03125,
         "packageRecall": 0
       }
     }
   ],
   "timingMs": {
-    "snapshotMs": 106871.88789999994,
-    "indexMs": 378837.4823000001,
-    "occMs": 45764.52700000045,
-    "baselinesMs": 74586.24369999953
+    "snapshotMs": 110976.13670000005,
+    "indexMs": 418664.7180999997,
+    "occMs": 52974.39270000046,
+    "baselinesMs": 79467.30020000045
   },
   "environment": {
     "node": "v24.15.0",
