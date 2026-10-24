@@ -180,6 +180,9 @@ npm run eval:build-dataset   # once, needs network; writes docs/eval/dataset.jso
 npm run eval:retrieval               # writes docs/eval/results.json + results.md
 npm run eval:retrieval -- --repos hono,zod   # subset run
 npm run eval:retrieval -- --split tuning     # tuning half -> results-tuning.{json,md}
+npm run eval:retrieval -- --split tuning --ablate fusion   # A/B a named M3 change
+npm run eval:compare -- <old.json> <new.json> # paired old-vs-new bootstrap
+npm run eval:diagnose                       # stage-loss diagnostics (tuning split)
 npm run eval:fsmonitor-repro        # reproduction of the core.fsmonitor risk
 ```
 
@@ -190,3 +193,41 @@ The fsmonitor reproduction (`scripts/eval/fsmonitor-repro.ts`) creates a
 throwaway repo whose `.git/config` points `core.fsmonitor` at a marker-writing
 script, then runs OCC's exact `git log` invocation plus `git status` and
 `git diff --name-only`, each with and without `-c core.fsmonitor=false`.
+
+## M3 retrieval improvements (E1 + E2)
+
+M3 datasets are larger than M2's: **100 tasks/repo eval (n=500)** and
+**60 tasks/repo tuning (n=300)**, dataset hash `7d7187b6`. The M2 n=200
+results are NOT comparable. Full eval-split runs are budgeted: results.json
+records `evalSplitRunsIncludingThis`, and only runs that COMPLETE consume a
+slot (a crashed run measures nothing).
+
+Two ablatable scoring changes were accepted on the tuning split (paired
+bootstrap vs the ablated configuration, same commit):
+
+- **E2 — content-score fusion** (`M3_CONTENT_FUSION` in
+  `src/retrieval/hybridRetriever.ts`): Step-0 diagnostics showed the dominant
+  gold loss was ranking — content-matching files buried under graph-structural
+  bonuses. The final score gains `weight × contentScore` (weight 2.0), so a
+  0.25+ content match outranks a graph-only neighbor while exact-symbol
+  leaders keep their lead. Tuning: AllGold@10 **+0.033 [0.013, 0.053]**,
+  package recall **+0.007 [0.002, 0.015]**, Recall@10 +0.026*, Top-1/MRR
+  n.s. (no regression).
+- **E1 — body lexical field** (`M3_BODY_FIELD` in
+  `src/retrieval/invertedIndex.ts`, `extractBodyTokens` in
+  `src/parser/bodyTokens.ts`): comments/strings/prose become a searchable
+  field (weight 0.5, below every structured field) with BM25F-style length
+  normalization against a FIXED 2000-token reference (incremental and full
+  rebuilds score identically); STORE_SCHEMA_VERSION 2 (older stores rebuild
+  once). Cost: index time +15%, store size unchanged at 0.1MB resolution,
+  startup unchanged. Tuning (vs E2-only): Recall@5 +0.026*, Recall@10
+  +0.022*, MRR +0.024*, Top-1 +0.020 n.s., AllGold@10 +0.013 n.s., package
+  recall +0.006 n.s. Cumulatively with E2 vs pre-M3: AllGold@10
+  **+0.047 [0.020, 0.077]**, Recall@10 +0.048*, no Top-1/MRR regression.
+
+Ablate with `--ablate fusion` / `--ablate body` (recorded in results.json);
+`npm run eval:compare -- old.json new.json` runs the paired bootstrap over
+the per-task values both results files record. E3 (test-file boost: only
+29/155 test-gold files carry a `tests` edge) and E4 (diversity) were
+skipped — see the milestone report for the evidence-based justification.
+

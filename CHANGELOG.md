@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+### Added (M3: retrieval improvements, measured)
+
+- **E2 — content-score fusion** (`M3_CONTENT_FUSION`, ablatable): the final
+  retrieval score gains `2.0 × contentScore`, lifting content-matching files
+  above graph-only structural noise (Step-0 diagnostics showed ranking, not
+  candidate generation or packaging, was the dominant gold loss). Tuning
+  split paired A/B (n=300): AllGold@10 +0.033 [0.013,0.053], package recall
+  +0.007 [0.002,0.015], Recall@10 +0.026 [0.013,0.040]; Top-1/MRR not
+  significantly changed. Demo-project retrievalEval Top-1 pins unchanged.
+- **E1 — body lexical field** (`M3_BODY_FIELD`, ablatable): comments, string
+  literals and prose are indexed as a searchable field (weight 0.5, BM25F
+  tf normalization against a fixed 2000-token reference length; top 192
+  terms per file, tf capped). `STORE_SCHEMA_VERSION` 2 (existing stores
+  rebuild once). Cost: index time +15%, store size unchanged at 0.1MB
+  resolution, startup unchanged. Tuning paired A/B vs E2-only: Recall@5
+  +0.026*, Recall@10 +0.022*, MRR +0.024*, no metric regressed.
+- M3 eval-harness upgrades: datasets enlarged to 100 tasks/repo (eval,
+  n=500) and 60/repo (tuning, n=300; old M2 n=200 results are not
+  comparable); `--ablate <name>` disables named scoring constants for a run
+  (recorded in results.json); per-task OCC metrics in results.json plus
+  `npm run eval:compare` for paired old-vs-new bootstrap testing; full
+  eval-split runs are counted in results.json
+  (`evalSplitRunsIncludingThis`); per-task checkpoint/resume for long runs;
+  dataset mining is bounded by the pinned commit so rebuilds on fresh
+  clones reproduce the dataset exactly (hash `7d7187b6`); partial
+  (blob:none promisor) cache clones are refused loudly (a lazy-fetch
+  network hiccup crashed a full run mid-fastify; axios re-pinned via the
+  `v1.x` branch after upstream deleted `dev`); `npm run eval:diagnose`
+  produces the per-gold-file stage-loss table with field-overlap, test-gold
+  and candidate-cap probes.
+
 ### Added (M2: retrieval evaluation harness)
 
 - Dev-time retrieval evaluation harness (`npm run eval:build-dataset`,
