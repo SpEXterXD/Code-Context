@@ -1,0 +1,7782 @@
+{
+  "split": "holdout",
+  "ablations": [],
+  "holdoutDefinition": "unsampled eval-half tasks: the (tasksPerRepo + holdoutTasksPerRepo) draw of the SAME seeded sample stream minus the committed eval sample (containment asserted); disjoint from the eval sample by filter and from the tuning half by construction. Intended post-pin commits were unavailable: upstreams advanced only 0/0/1/1/6 non-merge commits past the pins as of 2026-10-25.",
+  "pairedOccM3bVsM3": {
+    "full": {
+      "top1": {
+        "n": 300,
+        "meanDiff": 0,
+        "ciLow": 0,
+        "ciHigh": 0,
+        "excludesZero": false
+      },
+      "recall5": {
+        "n": 300,
+        "meanDiff": 0,
+        "ciLow": 0,
+        "ciHigh": 0,
+        "excludesZero": false
+      },
+      "recall10": {
+        "n": 300,
+        "meanDiff": 0,
+        "ciLow": 0,
+        "ciHigh": 0,
+        "excludesZero": false
+      },
+      "allGoldAcc10": {
+        "n": 300,
+        "meanDiff": 0,
+        "ciLow": 0,
+        "ciHigh": 0,
+        "excludesZero": false
+      },
+      "mrr": {
+        "n": 300,
+        "meanDiff": 0,
+        "ciLow": 0,
+        "ciHigh": 0,
+        "excludesZero": false
+      },
+      "packageRecall": {
+        "n": 300,
+        "meanDiff": 0.08590079365079366,
+        "ciLow": 0.058361111111111134,
+        "ciHigh": 0.11334920634920632,
+        "excludesZero": true
+      }
+    },
+    "sourceOnly": {
+      "top1": {
+        "n": 300,
+        "meanDiff": 0,
+        "ciLow": 0,
+        "ciHigh": 0,
+        "excludesZero": false
+      },
+      "recall5": {
+        "n": 300,
+        "meanDiff": 0,
+        "ciLow": 0,
+        "ciHigh": 0,
+        "excludesZero": false
+      },
+      "recall10": {
+        "n": 300,
+        "meanDiff": 0,
+        "ciLow": 0,
+        "ciHigh": 0,
+        "excludesZero": false
+      },
+      "allGoldAcc10": {
+        "n": 300,
+        "meanDiff": 0,
+        "ciLow": 0,
+        "ciHigh": 0,
+        "excludesZero": false
+      },
+      "mrr": {
+        "n": 300,
+        "meanDiff": 0,
+        "ciLow": 0,
+        "ciHigh": 0,
+        "excludesZero": false
+      },
+      "packageRecall": {
+        "n": 300,
+        "meanDiff": 0.08705158730158734,
+        "ciLow": 0.05694444444444445,
+        "ciHigh": 0.11438888888888887,
+        "excludesZero": true
+      }
+    }
+  },
+  "evalSplitRunsIncludingThis": null,
+  "seed": 20260918,
+  "occCommit": "c0df0ba79d24797b2702635a291cb75d0d8209c9",
+  "workingTreeClean": true,
+  "datasetHash": "7da65d58",
+  "tasks": 300,
+  "skippedTasks": [],
+  "systems": {
+    "occ": {
+      "overall": {
+        "top1": {
+          "n": 300,
+          "mean": 0.30333333333333334,
+          "ciLow": 0.25,
+          "ciHigh": 0.35333333333333333
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.43774603174603177,
+          "ciLow": 0.39841269841269855,
+          "ciHigh": 0.4760396825396826
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.5601428571428573,
+          "ciLow": 0.5176349206349206,
+          "ciHigh": 0.5979642857142854
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.32666666666666666,
+          "ciLow": 0.27,
+          "ciHigh": 0.37666666666666665
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.4831802767537272,
+          "ciLow": 0.43927180196228116,
+          "ciHigh": 0.5242644906089173
+        }
+      },
+      "perRepo": {
+        "axios": {
+          "top1": {
+            "n": 60,
+            "mean": 0.35,
+            "ciLow": 0.23333333333333334,
+            "ciHigh": 0.48333333333333334
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.5519047619047619,
+            "ciLow": 0.4515079365079364,
+            "ciHigh": 0.6509126984126984
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.6800198412698412,
+            "ciLow": 0.5866865079365079,
+            "ciHigh": 0.7658531746031745
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.45,
+            "ciLow": 0.31666666666666665,
+            "ciHigh": 0.5833333333333334
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.5438392255892256,
+            "ciLow": 0.4536249398749398,
+            "ciHigh": 0.6358940596440595
+          }
+        },
+        "fastify": {
+          "top1": {
+            "n": 60,
+            "mean": 0.23333333333333334,
+            "ciLow": 0.13333333333333333,
+            "ciHigh": 0.35
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.3524603174603175,
+            "ciLow": 0.2784920634920635,
+            "ciHigh": 0.42916666666666653
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.46337301587301594,
+            "ciLow": 0.3816666666666666,
+            "ciHigh": 0.5438492063492064
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.16666666666666666,
+            "ciLow": 0.08333333333333333,
+            "ciHigh": 0.26666666666666666
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.44958495556340694,
+            "ciLow": 0.3629838167736718,
+            "ciHigh": 0.5399275986959055
+          }
+        },
+        "hono": {
+          "top1": {
+            "n": 60,
+            "mean": 0.2833333333333333,
+            "ciLow": 0.16666666666666666,
+            "ciHigh": 0.4
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.5318253968253969,
+            "ciLow": 0.438095238095238,
+            "ciHigh": 0.6144444444444443
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.6586309523809523,
+            "ciLow": 0.5706944444444446,
+            "ciHigh": 0.7419642857142855
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.4166666666666667,
+            "ciLow": 0.2833333333333333,
+            "ciHigh": 0.5333333333333333
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.4913455988455988,
+            "ciLow": 0.40612554112554106,
+            "ciHigh": 0.5896031746031746
+          }
+        },
+        "undici": {
+          "top1": {
+            "n": 60,
+            "mean": 0.25,
+            "ciLow": 0.13333333333333333,
+            "ciHigh": 0.36666666666666664
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.3484722222222222,
+            "ciLow": 0.2541666666666667,
+            "ciHigh": 0.43819444444444433
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.4455555555555554,
+            "ciLow": 0.34861111111111115,
+            "ciHigh": 0.5433333333333332
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.2833333333333333,
+            "ciLow": 0.16666666666666666,
+            "ciHigh": 0.4
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.39883846562200237,
+            "ciLow": 0.29685113497613497,
+            "ciHigh": 0.4905763342348708
+          }
+        },
+        "zod": {
+          "top1": {
+            "n": 60,
+            "mean": 0.4,
+            "ciLow": 0.2833333333333333,
+            "ciHigh": 0.5166666666666667
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.40406746031746027,
+            "ciLow": 0.3133928571428572,
+            "ciHigh": 0.5000396825396826
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.5531349206349206,
+            "ciLow": 0.45924603174603174,
+            "ciHigh": 0.6433333333333332
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.31666666666666665,
+            "ciLow": 0.2,
+            "ciHigh": 0.43333333333333335
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.5322931381484013,
+            "ciLow": 0.43818539404065715,
+            "ciHigh": 0.6330489417989418
+          }
+        }
+      },
+      "overallSourceOnly": {
+        "top1": {
+          "n": 300,
+          "mean": 0.3,
+          "ciLow": 0.24666666666666667,
+          "ciHigh": 0.35
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.44161111111111107,
+          "ciLow": 0.40106349206349207,
+          "ciHigh": 0.4807341269841271
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.5637460317460318,
+          "ciLow": 0.5202698412698415,
+          "ciHigh": 0.6015595238095237
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.33,
+          "ciLow": 0.2733333333333333,
+          "ciHigh": 0.38
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.4790136100870606,
+          "ciLow": 0.43469894835297207,
+          "ciHigh": 0.5207748228154024
+        }
+      },
+      "packageRecall": {
+        "n": 300,
+        "mean": 0.457952380952381,
+        "ciLow": 0.414361111111111,
+        "ciHigh": 0.5008214285714289
+      },
+      "packageStats": {
+        "meanTokens": 27403.066666666666,
+        "meanFilesIncluded": 7.933333333333334
+      }
+    },
+    "filename": {
+      "overall": {
+        "top1": {
+          "n": 300,
+          "mean": 0.20333333333333334,
+          "ciLow": 0.16,
+          "ciHigh": 0.25
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.27881746031746024,
+          "ciLow": 0.2372936507936508,
+          "ciHigh": 0.3196904761904763
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.3794484126984128,
+          "ciLow": 0.33354761904761915,
+          "ciHigh": 0.4256547619047619
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.25666666666666665,
+          "ciLow": 0.21,
+          "ciHigh": 0.30666666666666664
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.30732577302498804,
+          "ciLow": 0.264025326120703,
+          "ciHigh": 0.3467683374120762
+        }
+      },
+      "perRepo": {
+        "axios": {
+          "top1": {
+            "n": 60,
+            "mean": 0.2,
+            "ciLow": 0.1,
+            "ciHigh": 0.3
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.3074206349206349,
+            "ciLow": 0.1980952380952381,
+            "ciHigh": 0.4218253968253968
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.42567460317460326,
+            "ciLow": 0.31984126984126987,
+            "ciHigh": 0.5387301587301587
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.31666666666666665,
+            "ciLow": 0.2,
+            "ciHigh": 0.43333333333333335
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.31434568745095065,
+            "ciLow": 0.21825471823498135,
+            "ciHigh": 0.4100067941317941
+          }
+        },
+        "fastify": {
+          "top1": {
+            "n": 60,
+            "mean": 0.15,
+            "ciLow": 0.06666666666666667,
+            "ciHigh": 0.25
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.211547619047619,
+            "ciLow": 0.1415873015873016,
+            "ciHigh": 0.2852777777777778
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.3404761904761904,
+            "ciLow": 0.2555555555555556,
+            "ciHigh": 0.43277777777777776
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.18333333333333332,
+            "ciLow": 0.1,
+            "ciHigh": 0.2833333333333333
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.2779235498095147,
+            "ciLow": 0.1940862840862841,
+            "ciHigh": 0.3686615845168476
+          }
+        },
+        "hono": {
+          "top1": {
+            "n": 60,
+            "mean": 0.36666666666666664,
+            "ciLow": 0.25,
+            "ciHigh": 0.48333333333333334
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.4984126984126984,
+            "ciLow": 0.38293650793650796,
+            "ciHigh": 0.6078571428571428
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.6634126984126986,
+            "ciLow": 0.5510714285714288,
+            "ciHigh": 0.7608333333333331
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.5,
+            "ciLow": 0.38333333333333336,
+            "ciHigh": 0.6333333333333333
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.5006466442543087,
+            "ciLow": 0.39842126546642986,
+            "ciHigh": 0.6017939814814814
+          }
+        },
+        "undici": {
+          "top1": {
+            "n": 60,
+            "mean": 0.1,
+            "ciLow": 0.03333333333333333,
+            "ciHigh": 0.18333333333333332
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.14305555555555555,
+            "ciLow": 0.07083333333333333,
+            "ciHigh": 0.22916666666666669
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.18819444444444444,
+            "ciLow": 0.10763888888888888,
+            "ciHigh": 0.2819444444444444
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.11666666666666667,
+            "ciLow": 0.03333333333333333,
+            "ciHigh": 0.2
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.15602601596998147,
+            "ciLow": 0.08753592831179038,
+            "ciHigh": 0.24144602683395788
+          }
+        },
+        "zod": {
+          "top1": {
+            "n": 60,
+            "mean": 0.2,
+            "ciLow": 0.1,
+            "ciHigh": 0.3
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.23365079365079364,
+            "ciLow": 0.1490873015873016,
+            "ciHigh": 0.32507936507936513
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.27948412698412695,
+            "ciLow": 0.19242063492063494,
+            "ciHigh": 0.37492063492063493
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.16666666666666666,
+            "ciLow": 0.08333333333333333,
+            "ciHigh": 0.26666666666666666
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.2876869676401838,
+            "ciLow": 0.19394931876835206,
+            "ciHigh": 0.3870011824761378
+          }
+        }
+      },
+      "overallSourceOnly": {
+        "top1": {
+          "n": 300,
+          "mean": 0.19666666666666666,
+          "ciLow": 0.15333333333333332,
+          "ciHigh": 0.24
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.278063492063492,
+          "ciLow": 0.2357857142857142,
+          "ciHigh": 0.3207777777777778
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.3765515873015873,
+          "ciLow": 0.3322936507936509,
+          "ciHigh": 0.42403968253968266
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.25666666666666665,
+          "ciLow": 0.21,
+          "ciHigh": 0.30666666666666664
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.3005224762533415,
+          "ciLow": 0.2586301500445931,
+          "ciHigh": 0.3396181235696264
+        }
+      },
+      "packageRecall": {
+        "n": 300,
+        "mean": 0.3352500000000001,
+        "ciLow": 0.2941825396825398,
+        "ciHigh": 0.37865079365079346
+      }
+    },
+    "bm25": {
+      "overall": {
+        "top1": {
+          "n": 300,
+          "mean": 0.2,
+          "ciLow": 0.15666666666666668,
+          "ciHigh": 0.24333333333333335
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.30456746031746035,
+          "ciLow": 0.26294444444444454,
+          "ciHigh": 0.3441349206349205
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.4662698412698413,
+          "ciLow": 0.41894841269841276,
+          "ciHigh": 0.5114285714285716
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.2733333333333333,
+          "ciLow": 0.22,
+          "ciHigh": 0.3233333333333333
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.344914069177521,
+          "ciLow": 0.3082274876856211,
+          "ciHigh": 0.382714506314708
+        }
+      },
+      "perRepo": {
+        "axios": {
+          "top1": {
+            "n": 60,
+            "mean": 0.11666666666666667,
+            "ciLow": 0.03333333333333333,
+            "ciHigh": 0.2
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.22376984126984129,
+            "ciLow": 0.14035714285714285,
+            "ciHigh": 0.31388888888888894
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.4358531746031746,
+            "ciLow": 0.3312698412698412,
+            "ciHigh": 0.5444444444444444
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.3,
+            "ciLow": 0.2,
+            "ciHigh": 0.4166666666666667
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.2534159045726383,
+            "ciLow": 0.18135810298310298,
+            "ciHigh": 0.3265669761525024
+          }
+        },
+        "fastify": {
+          "top1": {
+            "n": 60,
+            "mean": 0.16666666666666666,
+            "ciLow": 0.08333333333333333,
+            "ciHigh": 0.26666666666666666
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.24634920634920637,
+            "ciLow": 0.18587301587301586,
+            "ciHigh": 0.31805555555555554
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.4455555555555556,
+            "ciLow": 0.3543650793650794,
+            "ciHigh": 0.536904761904762
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.16666666666666666,
+            "ciLow": 0.08333333333333333,
+            "ciHigh": 0.26666666666666666
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.33843996452819664,
+            "ciLow": 0.2581085980417067,
+            "ciHigh": 0.42908158732366075
+          }
+        },
+        "hono": {
+          "top1": {
+            "n": 60,
+            "mean": 0.48333333333333334,
+            "ciLow": 0.35,
+            "ciHigh": 0.6166666666666667
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.5176785714285713,
+            "ciLow": 0.4174999999999999,
+            "ciHigh": 0.6190674603174601
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.6330952380952382,
+            "ciLow": 0.5402777777777779,
+            "ciHigh": 0.7194444444444444
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.4166666666666667,
+            "ciLow": 0.3,
+            "ciHigh": 0.5333333333333333
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.5877427183677184,
+            "ciLow": 0.48217983405483394,
+            "ciHigh": 0.6981746031746033
+          }
+        },
+        "undici": {
+          "top1": {
+            "n": 60,
+            "mean": 0.18333333333333332,
+            "ciLow": 0.1,
+            "ciHigh": 0.2833333333333333
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.32638888888888895,
+            "ciLow": 0.2263888888888889,
+            "ciHigh": 0.4291666666666666
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.43263888888888885,
+            "ciLow": 0.3284722222222222,
+            "ciHigh": 0.5347222222222221
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.26666666666666666,
+            "ciLow": 0.15,
+            "ciHigh": 0.36666666666666664
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.32569276541399306,
+            "ciLow": 0.2407228361058284,
+            "ciHigh": 0.4107813425326213
+          }
+        },
+        "zod": {
+          "top1": {
+            "n": 60,
+            "mean": 0.05,
+            "ciLow": 0,
+            "ciHigh": 0.11666666666666667
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.20865079365079364,
+            "ciLow": 0.13365079365079366,
+            "ciHigh": 0.2898809523809523
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.3842063492063492,
+            "ciLow": 0.2824206349206349,
+            "ciHigh": 0.48932539682539683
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.21666666666666667,
+            "ciLow": 0.11666666666666667,
+            "ciHigh": 0.3333333333333333
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.21927899300505801,
+            "ciLow": 0.16322510098005616,
+            "ciHigh": 0.2791142327171738
+          }
+        }
+      },
+      "overallSourceOnly": {
+        "top1": {
+          "n": 300,
+          "mean": 0.18666666666666668,
+          "ciLow": 0.14333333333333334,
+          "ciHigh": 0.23
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.30224206349206345,
+          "ciLow": 0.26054761904761903,
+          "ciHigh": 0.34042460317460327
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.46199999999999997,
+          "ciLow": 0.4134007936507936,
+          "ciHigh": 0.5065555555555556
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.27666666666666667,
+          "ciLow": 0.22333333333333333,
+          "ciHigh": 0.32666666666666666
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.3284079664839183,
+          "ciLow": 0.29164124321557,
+          "ciHigh": 0.3668164111463417
+        }
+      },
+      "packageRecall": {
+        "n": 300,
+        "mean": 0.4118253968253968,
+        "ciLow": 0.36703571428571424,
+        "ciHigh": 0.4584722222222223
+      }
+    },
+    "random": {
+      "overall": {
+        "top1": {
+          "n": 300,
+          "mean": 0,
+          "ciLow": 0,
+          "ciHigh": 0
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.004583333333333333,
+          "ciLow": 0.0004166666666666667,
+          "ciHigh": 0.010416666666666666
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.01513888888888889,
+          "ciLow": 0.005277777777777778,
+          "ciHigh": 0.027638888888888893
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.006666666666666667,
+          "ciLow": 0,
+          "ciHigh": 0.016666666666666666
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.017029338429292468,
+          "ciLow": 0.012175620850663819,
+          "ciHigh": 0.02279225051455576
+        }
+      },
+      "perRepo": {
+        "axios": {
+          "top1": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.008333333333333333,
+            "ciLow": 0,
+            "ciHigh": 0.025
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.05000000000000001,
+            "ciLow": 0.008333333333333333,
+            "ciHigh": 0.10555555555555556
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.03333333333333333,
+            "ciLow": 0,
+            "ciHigh": 0.08333333333333333
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.026446983465977524,
+            "ciLow": 0.014761963928984302,
+            "ciHigh": 0.04112158653457464
+          }
+        },
+        "fastify": {
+          "top1": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.01111111111111111,
+            "ciLow": 0,
+            "ciHigh": 0.027777777777777776
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.017047946725634724,
+            "ciLow": 0.009927657334594164,
+            "ciHigh": 0.025642671709503195
+          }
+        },
+        "hono": {
+          "top1": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.012972153351048921,
+            "ciLow": 0.007349969114958597,
+            "ciHigh": 0.018544669136444213
+          }
+        },
+        "undici": {
+          "top1": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.0031475245184922605,
+            "ciLow": 0.00042735042735042735,
+            "ciHigh": 0.006829237071172555
+          }
+        },
+        "zod": {
+          "top1": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.014583333333333334,
+            "ciLow": 0,
+            "ciHigh": 0.035416666666666666
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.014583333333333334,
+            "ciLow": 0,
+            "ciHigh": 0.035416666666666666
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.025532084085308923,
+            "ciLow": 0.008009844960275994,
+            "ciHigh": 0.04860637949959389
+          }
+        }
+      },
+      "overallSourceOnly": {
+        "top1": {
+          "n": 300,
+          "mean": 0,
+          "ciLow": 0,
+          "ciHigh": 0
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.004583333333333333,
+          "ciLow": 0.0004166666666666667,
+          "ciHigh": 0.010416666666666666
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.01513888888888889,
+          "ciLow": 0.005277777777777778,
+          "ciHigh": 0.027638888888888893
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.006666666666666667,
+          "ciLow": 0,
+          "ciHigh": 0.016666666666666666
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.01695358085353489,
+          "ciLow": 0.012063107338014216,
+          "ciHigh": 0.02278744910176164
+        }
+      },
+      "packageRecall": {
+        "n": 300,
+        "mean": 0.014583333333333334,
+        "ciLow": 0.005694444444444444,
+        "ciHigh": 0.027083333333333334
+      }
+    }
+  },
+  "goldSliceStats": {
+    "full": {
+      "goldFiles": 817,
+      "tasks": 300
+    },
+    "sourceOnly": {
+      "goldFiles": 790,
+      "tasks": 300,
+      "tasksExcludedEmpty": 0
+    },
+    "perRepo": {
+      "axios": {
+        "fullFiles": 154,
+        "sourceFiles": 147,
+        "sourceTasks": 60
+      },
+      "fastify": {
+        "fullFiles": 180,
+        "sourceFiles": 180,
+        "sourceTasks": 60
+      },
+      "hono": {
+        "fullFiles": 152,
+        "sourceFiles": 144,
+        "sourceTasks": 60
+      },
+      "undici": {
+        "fullFiles": 154,
+        "sourceFiles": 152,
+        "sourceTasks": 60
+      },
+      "zod": {
+        "fullFiles": 177,
+        "sourceFiles": 167,
+        "sourceTasks": 60
+      }
+    }
+  },
+  "pairedBootstrap": {
+    "full": {
+      "top1": {
+        "n": 300,
+        "meanDiff": 0.10333333333333333,
+        "ciLow": 0.04,
+        "ciHigh": 0.17,
+        "excludesZero": true
+      },
+      "recall5": {
+        "n": 300,
+        "meanDiff": 0.13317857142857145,
+        "ciLow": 0.08303571428571423,
+        "ciHigh": 0.1840793650793651,
+        "excludesZero": true
+      },
+      "recall10": {
+        "n": 300,
+        "meanDiff": 0.09387301587301586,
+        "ciLow": 0.04429761904761907,
+        "ciHigh": 0.1425634920634921,
+        "excludesZero": true
+      },
+      "allGoldAcc10": {
+        "n": 300,
+        "meanDiff": 0.05333333333333334,
+        "ciLow": 0.0033333333333333335,
+        "ciHigh": 0.11,
+        "excludesZero": true
+      },
+      "mrr": {
+        "n": 300,
+        "meanDiff": 0.1382662075762061,
+        "ciLow": 0.08614966004206775,
+        "ciHigh": 0.18919190135667954,
+        "excludesZero": true
+      },
+      "packageRecall": {
+        "n": 300,
+        "meanDiff": 0.04612698412698413,
+        "ciLow": -0.004257936507936509,
+        "ciHigh": 0.10049206349206347,
+        "excludesZero": false
+      }
+    },
+    "sourceOnly": {
+      "top1": {
+        "n": 300,
+        "meanDiff": 0.11333333333333333,
+        "ciLow": 0.04666666666666667,
+        "ciHigh": 0.17666666666666667,
+        "excludesZero": true
+      },
+      "recall5": {
+        "n": 300,
+        "meanDiff": 0.13936904761904764,
+        "ciLow": 0.08774603174603174,
+        "ciHigh": 0.18822619047619044,
+        "excludesZero": true
+      },
+      "recall10": {
+        "n": 300,
+        "meanDiff": 0.10174603174603174,
+        "ciLow": 0.05821031746031746,
+        "ciHigh": 0.1467460317460317,
+        "excludesZero": true
+      },
+      "allGoldAcc10": {
+        "n": 300,
+        "meanDiff": 0.05333333333333334,
+        "ciLow": 0.0033333333333333335,
+        "ciHigh": 0.10333333333333333,
+        "excludesZero": true
+      },
+      "mrr": {
+        "n": 300,
+        "meanDiff": 0.15060564360314213,
+        "ciLow": 0.09862046637078486,
+        "ciHigh": 0.2002167790625734,
+        "excludesZero": true
+      },
+      "packageRecall": {
+        "n": 300,
+        "meanDiff": 0.05300793650793651,
+        "ciLow": -0.003496031746031753,
+        "ciHigh": 0.10285714285714286,
+        "excludesZero": false
+      }
+    }
+  },
+  "allGoldGap": {
+    "tasks": [
+      {
+        "id": "axios:3772c8fe7411",
+        "repoId": "axios",
+        "missing": [
+          {
+            "path": "lib/platform/browser/index.js",
+            "type": "source",
+            "occRank": null,
+            "bm25Rank": 8,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "axios:640458daaf09",
+        "repoId": "axios",
+        "missing": [
+          {
+            "path": "tests/browser/cancel.browser.test.js",
+            "type": "test",
+            "occRank": 16,
+            "bm25Rank": 5,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "axios:c19f7bf770f9",
+        "repoId": "axios",
+        "missing": [
+          {
+            "path": "lib/adapters/http.js",
+            "type": "source",
+            "occRank": 11,
+            "bm25Rank": 10,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:183576d342e8",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "test/reply-trailers.test.js",
+            "type": "test",
+            "occRank": 23,
+            "bm25Rank": 4,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:4723c1b228f4",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "test/content-parser.test.js",
+            "type": "test",
+            "occRank": 21,
+            "bm25Rank": 6,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:50d1e586a0c3",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "test/listen.test.js",
+            "type": "test",
+            "occRank": 20,
+            "bm25Rank": 7,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:80414553e045",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "docs/Validation-and-Serialization.md",
+            "type": "docs",
+            "occRank": 50,
+            "bm25Rank": 10,
+            "inOccCandidates": true
+          },
+          {
+            "path": "test/validation-error-handling.test.js",
+            "type": "test",
+            "occRank": 46,
+            "bm25Rank": 8,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:b52b4c276def",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "fastify.js",
+            "type": "source",
+            "occRank": 11,
+            "bm25Rank": 9,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:c89945df8b6e",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "test/web-api.test.js",
+            "type": "test",
+            "occRank": 55,
+            "bm25Rank": 8,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "hono:0d86899d28e1",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "src/adapter/aws-lambda/handler.test.ts",
+            "type": "test",
+            "occRank": 15,
+            "bm25Rank": 2,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "hono:2d532abaed26",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "src/test-utils/setup-vitest.ts",
+            "type": "source",
+            "occRank": null,
+            "bm25Rank": 1,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "hono:45ba3bf9e3df",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "src/utils/jwt/jwt.test.ts",
+            "type": "test",
+            "occRank": 13,
+            "bm25Rank": 5,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "hono:c78932d745cd",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "src/utils/ipaddr.test.ts",
+            "type": "test",
+            "occRank": null,
+            "bm25Rank": 4,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "hono:fc8fb0f730d9",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "src/middleware/cors/index.test.ts",
+            "type": "test",
+            "occRank": 34,
+            "bm25Rank": 2,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "undici:14757d5ed207",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "README.md",
+            "type": "docs",
+            "occRank": 80,
+            "bm25Rank": 2,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "undici:65e097fea6ad",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "test/fetch/util.js",
+            "type": "test",
+            "occRank": 54,
+            "bm25Rank": 5,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "undici:86936d968791",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "CONTRIBUTING.md",
+            "type": "docs",
+            "occRank": null,
+            "bm25Rank": 3,
+            "inOccCandidates": false
+          },
+          {
+            "path": "build/wasm.js",
+            "type": "source",
+            "occRank": null,
+            "bm25Rank": 1,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "undici:e041de359221",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "lib/fetch/index.js",
+            "type": "source",
+            "occRank": 39,
+            "bm25Rank": 6,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "undici:f182ff12d522",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "lib/dispatcher/client-h1.js",
+            "type": "source",
+            "occRank": 26,
+            "bm25Rank": 3,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "zod:6887ff34fb9b",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "packages/docs/components/ecosystem.tsx",
+            "type": "source",
+            "occRank": 19,
+            "bm25Rank": 3,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "zod:74458e9ccec6",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "packages/docs/components/ecosystem-v3.tsx",
+            "type": "source",
+            "occRank": 57,
+            "bm25Rank": 1,
+            "inOccCandidates": true
+          },
+          {
+            "path": "packages/docs/components/ecosystem.tsx",
+            "type": "source",
+            "occRank": 56,
+            "bm25Rank": 2,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "zod:8b723d417326",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "deno/lib/README.md",
+            "type": "docs",
+            "occRank": null,
+            "bm25Rank": 2,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "zod:b748b914d9a0",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "packages/docs/components/ecosystem.tsx",
+            "type": "source",
+            "occRank": 11,
+            "bm25Rank": 10,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "zod:fa338a3b885e",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "packages/zod/src/v4/classic/tests/to-json-schema.test.ts",
+            "type": "test",
+            "occRank": null,
+            "bm25Rank": 7,
+            "inOccCandidates": false
+          }
+        ]
+      }
+    ],
+    "summary": {
+      "tasks": 24,
+      "missingFiles": 27,
+      "byType": {
+        "docs": 4,
+        "source": 11,
+        "test": 12
+      },
+      "notInOccCandidates": 7,
+      "occRankMedian": 23,
+      "bm25RankMedian": 5
+    }
+  },
+  "caseStudies": {
+    "worst": [
+      {
+        "id": "hono:2d532abaed26",
+        "repoId": "hono",
+        "subject": "test: stub `crypto` if not exist (#2445)",
+        "task": "test: stub `crypto` if not exist",
+        "gold": [
+          "src/test-utils/setup-vitest.ts"
+        ],
+        "topRanked": [
+          "deno_dist/jsx/intrinsic-elements.ts",
+          "src/jsx/intrinsic-elements.ts",
+          "runtime_tests/lambda/index.test.ts",
+          "deno_dist/utils/crypto.ts",
+          "src/utils/crypto.ts",
+          "src/utils/jwt/jws.ts",
+          "src/utils/crypto.test.ts",
+          "src/utils/buffer.test.ts",
+          "src/middleware/cache/index.ts",
+          "src/helper/testing/index.ts"
+        ],
+        "mrr": 0,
+        "recall10": 0
+      },
+      {
+        "id": "hono:fc9cc6da28de",
+        "repoId": "hono",
+        "subject": "feat(powered-by): optional server name (#3492)",
+        "task": "feat(powered-by): optional server name * refactor(powered-by): optional server name * style(powered-by): format * test(powered-by): test new config * Update index.test.ts",
+        "gold": [
+          "src/middleware/powered-by/index.test.ts",
+          "src/middleware/powered-by/index.ts"
+        ],
+        "topRanked": [
+          "src/helper/css/index.ts",
+          "src/jsx/dom/render.ts",
+          "src/jsx/dom/css.ts",
+          "src/jsx/intrinsic-element/components.ts",
+          "src/jsx/dom/intrinsic-element/components.ts",
+          "src/jsx/intrinsic-elements.ts",
+          "src/jsx/dom/server.ts",
+          "src/helper/css/common.ts",
+          "src/types.test.ts",
+          "src/jsx/hooks/index.ts"
+        ],
+        "mrr": 0,
+        "recall10": 0
+      },
+      {
+        "id": "hono:7735f2f03c90",
+        "repoId": "hono",
+        "subject": "fix(vercel): remove `requestContext` (#3549)",
+        "task": "fix(vercel): remove `requestContext`",
+        "gold": [
+          "src/adapter/vercel/handler.test.ts",
+          "src/adapter/vercel/handler.ts"
+        ],
+        "topRanked": [
+          "src/context.ts",
+          "src/middleware/jsx-renderer/index.ts",
+          "src/jsx/dom/render.ts",
+          "src/client/client.test.ts",
+          "src/middleware/request-id/request-id.ts",
+          "src/adapter/aws-lambda/handler.ts",
+          "src/jsx/context.ts",
+          "src/middleware/secure-headers/index.test.ts",
+          "src/types.test.ts",
+          "src/middleware/request-id/index.ts"
+        ],
+        "mrr": 0,
+        "recall10": 0
+      },
+      {
+        "id": "hono:31d6e6c20994",
+        "repoId": "hono",
+        "subject": "feat(helper/proxy): introduce proxy helper (#3589)",
+        "task": "feat(helper/proxy): introduce proxy helper * feat(helper/proxy): introduce proxy helper * chore(helper/proxy): expose proxy helper * test(helper/proxy): fix test name * fix(helper/proxy): return Content-Range header as it is * refactor(helper/proxy): return the original content-length if the response is uncompressed * feat(middleware): enable to pass `...c.req` to init options * refactor(middleware/proxy): rename `proxyFetch` to `proxy` * docs(helper/proxy): update example * docs(helper/proxy): fix typo * refactor(helper/proxy): also accept HonoRequest instance as request init * fix(helper/proxy): remove hop-by-hop headers * refactor(helper/proxy): build request init from request * fix(helper/proxy): fix type error * test(helper/proxy): add test for modify header * fix(helper/proxy): It is generally the Set-Cookie that should be removed from the response header ---------",
+        "gold": [
+          "jsr.json",
+          "package.json"
+        ],
+        "topRanked": [
+          "src/request.ts",
+          "src/types.test.ts",
+          "src/jsx/dom/render.ts",
+          "src/middleware/secure-headers/secure-headers.ts",
+          "src/client/types.ts",
+          "src/jsx/intrinsic-elements.ts",
+          "src/context.ts",
+          "src/adapter/lambda-edge/handler.ts",
+          "src/helper/accepts/accepts.ts",
+          "src/jsx/dom/index.test.tsx"
+        ],
+        "mrr": 0,
+        "recall10": 0
+      },
+      {
+        "id": "hono:46ec30012654",
+        "repoId": "hono",
+        "subject": "chore: improve private field removal (#4513)",
+        "task": "chore: improve private field removal * chore: improve private field removal * test: add test for removePrivateFields * chore: format code",
+        "gold": [
+          "build/build.ts",
+          "build/remove-private-fields-worker.test.ts",
+          "build/remove-private-fields-worker.ts",
+          "build/remove-private-fields.ts",
+          "bun.lock",
+          "package.json"
+        ],
+        "topRanked": [
+          "src/jsx/intrinsic-elements.ts",
+          "src/middleware/jwk/keys.test.json",
+          "benchmarks/http-server/benchmark.ts",
+          "runtime-tests/lambda/index.test.ts",
+          "src/types.test.ts",
+          "src/validator/validator.test.ts",
+          "src/types.ts",
+          "src/utils/jwt/jwt.test.ts",
+          "src/client/utils.ts",
+          "src/jsx/dom/render.ts"
+        ],
+        "mrr": 0,
+        "recall10": 0
+      }
+    ],
+    "best": [
+      {
+        "id": "fastify:0d945819bebc",
+        "repoId": "fastify",
+        "subject": "perf: use a FIFO cache for parsed content-types (#7071)",
+        "task": "perf: use a FIFO cache for parsed content-types As we do for the [content-type parsers]( I propose using a FifoMap here The content-type cache holds far fewer distinct values than its 100 slots in the common case, so eviction order rarely matters and bumping entries on every hit is a performance penalty (albeit small) that we pay for no reason at all as far as I can tell",
+        "gold": [
+          "lib/content-type.js"
+        ],
+        "topRanked": [
+          "lib/content-type.js",
+          "test/internals/plugin.test.js",
+          "lib/reply.js",
+          "docs/Reference/TypeScript.md",
+          "lib/request.js",
+          "lib/route.js",
+          "test/internals/reply.test.js",
+          "fastify.js",
+          "lib/content-type-parser.js",
+          "lib/handle-request.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      },
+      {
+        "id": "fastify:39f35f9a0596",
+        "repoId": "fastify",
+        "subject": "fix: fix typo of deprecation warning FSTDEP022 (#6313)",
+        "task": "fix: fix typo of deprecation warning FSTDEP022",
+        "gold": [
+          "lib/warnings.js"
+        ],
+        "topRanked": [
+          "lib/warnings.js",
+          "docs/Reference/Warnings.md",
+          "test/helper.js",
+          "test/options.error-handler.test.js",
+          "test/options.test.js",
+          "test/patch.error-handler.test.js",
+          "test/patch.test.js",
+          "test/put.error-handler.test.js",
+          "test/put.test.js",
+          "test/input-validation.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      },
+      {
+        "id": "fastify:ed4f4c1e2abe",
+        "repoId": "fastify",
+        "subject": "improve: dont cache unnecessary content types (#4134)",
+        "task": "improve: dont cache unnecessary content types",
+        "gold": [
+          "lib/contentTypeParser.js",
+          "test/content-parser.test.js"
+        ],
+        "topRanked": [
+          "lib/contentTypeParser.js",
+          "lib/reply.js",
+          "test/internals/contentTypeParser.test.js",
+          "fastify.js",
+          "lib/handleRequest.js",
+          "lib/pluginOverride.js",
+          "lib/pluginUtils.js",
+          "types/content-type-parser.d.ts",
+          "test/content-parser.test.js",
+          "test/internals/handleRequest.test.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      },
+      {
+        "id": "axios:ad68e1a484b5",
+        "repoId": "axios",
+        "subject": "fix(http): honor timeout during connect without redirects (#10819)",
+        "task": "fix(http): honor timeout during connect without redirects * fix(http): honor connect timeout without redirects * fix(http): consolidate native timeout cleanup ---------",
+        "gold": [
+          "lib/adapters/http.js",
+          "tests/unit/adapters/http.test.js"
+        ],
+        "topRanked": [
+          "tests/unit/adapters/http.test.js",
+          "lib/adapters/http.js",
+          "tests/setup/server.js",
+          "tests/unit/adapters/fetch.test.js",
+          "tests/browser/cancel.browser.test.js",
+          "lib/adapters/xhr.js",
+          "lib/helpers/HttpStatusCode.js",
+          "lib/core/Axios.js",
+          "lib/core/mergeConfig.js",
+          "lib/helpers/resolveConfig.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      },
+      {
+        "id": "axios:f7a4ee21d5d6",
+        "repoId": "axios",
+        "subject": "fix(http): closing detached http2 session on timeout (#7457)",
+        "task": "fix(http): closing detached http2 session on timeout",
+        "gold": [
+          "lib/adapters/http.js",
+          "test/unit/adapters/http.js"
+        ],
+        "topRanked": [
+          "lib/adapters/http.js",
+          "tests/unit/adapters/http.test.js",
+          "test/unit/adapters/http.js",
+          "tests/setup/server.js",
+          "test/helpers/server.js",
+          "index.d.cts",
+          "index.d.ts",
+          "README.md",
+          "lib/helpers/HttpStatusCode.js",
+          "tests/unit/adapters/fetch.test.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      }
+    ]
+  },
+  "perTask": [
+    {
+      "id": "axios:0912bde937c9",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.125,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.125,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "axios:0a8d6e19da5b",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:0f50af8e076b",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:123f354b920f",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:1260ded634ec",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.02,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.02,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "axios:1728aa1b15b8",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "axios:1b1f9ccdc15f",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.6666666666666666
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "axios:1c6a86dd2c06",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "axios:28c721588c7a",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "axios:2a9763426e43",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "axios:34b71f0a1c55",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:3772c8fe7411",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "axios:3dde8fce50d5",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:3e6b4e1f311b",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.4,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.2
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.25
+      }
+    },
+    {
+      "id": "axios:467025bdb743",
+      "goldFiles": 7,
+      "full": {
+        "top1": 1,
+        "recall5": 0.42857142857142855,
+        "recall10": 0.5714285714285714,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.7142857142857143
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "axios:4c89f2519652",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.25,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.25,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:5266af945405",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.25,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.25,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:550d885eb90f",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:5945e40bb171",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:5e2ffa2209c0",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:5e7ad38fb0f8",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "axios:640458daaf09",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "axios:7144f10dc51a",
+      "goldFiles": 6,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.6666666666666666
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.4,
+        "recall10": 0.8,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.8
+      }
+    },
+    {
+      "id": "axios:74f59eac8829",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:7d45ab2e2ad6",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "axios:8651bf17d499",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "axios:9041c7d272a7",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:926347315405",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:945435fc5146",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:94e1543576ae",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "axios:a092bae50d18",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "axios:a1938ff073fc",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "axios:a6dfa72010db",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.047619047619047616,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.047619047619047616,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "axios:a93b1c90d919",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 0.6666666666666666
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "axios:ad68e1a484b5",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "axios:b0ebf9fcacba",
+      "goldFiles": 6,
+      "full": {
+        "top1": 1,
+        "recall5": 0.16666666666666666,
+        "recall10": 0.16666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.16666666666666666,
+        "recall10": 0.16666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "axios:b3e327dcc927",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:ba3e59380796",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.25,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.25,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:bcd5581d208c",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:c008e57fe4ef",
+      "goldFiles": 6,
+      "full": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "axios:c19f7bf770f9",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.09090909090909091,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.09090909090909091,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:c959ff29013a",
+      "goldFiles": 7,
+      "full": {
+        "top1": 0,
+        "recall5": 0.2857142857142857,
+        "recall10": 0.5714285714285714,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5714285714285714
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.2857142857142857,
+        "recall10": 0.5714285714285714,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5714285714285714
+      }
+    },
+    {
+      "id": "axios:caa00a90b524",
+      "goldFiles": 6,
+      "full": {
+        "top1": 1,
+        "recall5": 0.16666666666666666,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.16666666666666666,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "axios:cac6cfa6f6ed",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1111111111111111,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1111111111111111,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "axios:cf78825e1229",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:d000fbfd0722",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:d1d359da3477",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "axios:d4f7df4b304a",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:d676df772244",
+      "goldFiles": 8,
+      "full": {
+        "top1": 0,
+        "recall5": 0.25,
+        "recall10": 0.375,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.375
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.25,
+        "recall10": 0.375,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.375
+      }
+    },
+    {
+      "id": "axios:d8b4ca0ea5f2",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0.25,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.25
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.25,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.25
+      }
+    },
+    {
+      "id": "axios:df956d18febc",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:e0a120620e37",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:e1f8ae627c2f",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "axios:e2a1e280f6df",
+      "goldFiles": 5,
+      "full": {
+        "top1": 1,
+        "recall5": 0.4,
+        "recall10": 0.8,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.8
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.75,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.75
+      }
+    },
+    {
+      "id": "axios:e5540dcafe42",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "axios:ea87ebfe6d16",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "axios:f10c2e0de7fd",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:f1c17be4a988",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "axios:f2547d0e030e",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "axios:f7a4ee21d5d6",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "fastify:0439dd128b97",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "fastify:0d945819bebc",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "fastify:10fd294dc78b",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.03333333333333333,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.03333333333333333,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "fastify:183576d342e8",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "fastify:1b588a0bfe9c",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.08333333333333333,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.08333333333333333,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "fastify:21d070a2145d",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "fastify:253506e0d573",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "fastify:35c32375731c",
+      "goldFiles": 5,
+      "full": {
+        "top1": 1,
+        "recall5": 0.2,
+        "recall10": 0.6,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.2
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.2,
+        "recall10": 0.6,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.2
+      }
+    },
+    {
+      "id": "fastify:38fc063ecd3f",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "fastify:39f35f9a0596",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "fastify:3a52ca662a8e",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.25,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.25,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "fastify:3ca649315e81",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "fastify:3feacfb1d7ef",
+      "goldFiles": 5,
+      "full": {
+        "top1": 1,
+        "recall5": 0.2,
+        "recall10": 0.6,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.2,
+        "recall10": 0.6,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6
+      }
+    },
+    {
+      "id": "fastify:46a6d1fe6d3f",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "fastify:4723c1b228f4",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "fastify:498b17cae350",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.02857142857142857,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.02857142857142857,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "fastify:4ac15542e730",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0.4,
+        "recall10": 0.4,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.4
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.4,
+        "recall10": 0.4,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.4
+      }
+    },
+    {
+      "id": "fastify:4b4b711ec4d9",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "fastify:4bf4af639505",
+      "goldFiles": 6,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.16666666666666666
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.16666666666666666
+      }
+    },
+    {
+      "id": "fastify:4cc3a6966d48",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0.2,
+        "recall10": 0.2,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.2
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.2,
+        "recall10": 0.2,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.2
+      }
+    },
+    {
+      "id": "fastify:50d1e586a0c3",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.125,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.125,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "fastify:58dfb001fba9",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.037037037037037035,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.037037037037037035,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "fastify:5d90c61e179b",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.04,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.04,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "fastify:5dfec548f890",
+      "goldFiles": 7,
+      "full": {
+        "top1": 0,
+        "recall5": 0.2857142857142857,
+        "recall10": 0.42857142857142855,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.42857142857142855
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.2857142857142857,
+        "recall10": 0.42857142857142855,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.42857142857142855
+      }
+    },
+    {
+      "id": "fastify:61a8419d97a1",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "fastify:62d2cc96f792",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "fastify:69dcea15adbf",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0.6,
+        "recall10": 0.6,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.6
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.6,
+        "recall10": 0.6,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.6
+      }
+    },
+    {
+      "id": "fastify:6b9b09318397",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "fastify:6cadcaf70acd",
+      "goldFiles": 4,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "fastify:7264c8892a11",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0.4,
+        "recall10": 0.8,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.4
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.4,
+        "recall10": 0.8,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.4
+      }
+    },
+    {
+      "id": "fastify:7417d3797eac",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "fastify:80414553e045",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0.25,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.25
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.25,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.25
+      }
+    },
+    {
+      "id": "fastify:82b29412179e",
+      "goldFiles": 4,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.75
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.75
+      }
+    },
+    {
+      "id": "fastify:8b9c07b645a8",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "fastify:8ebe376185eb",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "fastify:8f9f3677d7bd",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.05263157894736842,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.05263157894736842,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "fastify:96909edeaa45",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "fastify:a1c9cee01055",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "fastify:ac02014a1254",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.6666666666666666
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "fastify:afe82a8857be",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0.25,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 0.25
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.25,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 0.25
+      }
+    },
+    {
+      "id": "fastify:b493fced6b7b",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "fastify:b52b4c276def",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.09090909090909091,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.09090909090909091,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "fastify:bcc41ac9d573",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "fastify:c035a185d1f1",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.037037037037037035,
+        "packageRecall": 0.2
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.037037037037037035,
+        "packageRecall": 0.2
+      }
+    },
+    {
+      "id": "fastify:c277b9f0ec27",
+      "goldFiles": 7,
+      "full": {
+        "top1": 0,
+        "recall5": 0.42857142857142855,
+        "recall10": 0.8571428571428571,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.2857142857142857
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.42857142857142855,
+        "recall10": 0.8571428571428571,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.2857142857142857
+      }
+    },
+    {
+      "id": "fastify:c4cb3a87cdbd",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.047619047619047616,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.047619047619047616,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "fastify:c5f4a17b1342",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.09090909090909091,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.09090909090909091,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "fastify:c89945df8b6e",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "fastify:ca1aa699383f",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.02,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.02,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "fastify:d338dca5ab24",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "fastify:d4a9851e370b",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.043478260869565216,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.043478260869565216,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "fastify:d8165ef18baa",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0.2,
+        "recall10": 0.6,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.2
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.2,
+        "recall10": 0.6,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.2
+      }
+    },
+    {
+      "id": "fastify:e4d4a213045a",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "fastify:ed4f4c1e2abe",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "fastify:eff4e38c76fd",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "fastify:f26de5d22256",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.2,
+        "allGoldAcc10": 0,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.2,
+        "allGoldAcc10": 0,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "fastify:f665c43612f2",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "fastify:f6ee35587345",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0.4,
+        "recall10": 0.6,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.6
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.4,
+        "recall10": 0.6,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.6
+      }
+    },
+    {
+      "id": "fastify:fa432f0a1a8c",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "fastify:ffcffb2fe055",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "hono:0432f81c376a",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "hono:04e5897b7d37",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "hono:0d06c44b9e46",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "hono:0d86899d28e1",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:0e4dfe587d74",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:1549c70f42d0",
+      "goldFiles": 4,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.75,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.75,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "hono:18324b8b6c66",
+      "goldFiles": 8,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.625,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.375
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.625,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.375
+      }
+    },
+    {
+      "id": "hono:1a32ef4d9df7",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "hono:1c70d2d40eb8",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "hono:1d30cecc4f68",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "hono:224ec367f391",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "hono:2d452f2bd24b",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:2d532abaed26",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:31d6e6c20994",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:36f508eb39d2",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "hono:37c3809c6cd4",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.2,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.2,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:402eb3abe561",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:40f7f599ef77",
+      "goldFiles": 5,
+      "full": {
+        "top1": 1,
+        "recall5": 0.4,
+        "recall10": 0.4,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.4
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.4,
+        "recall10": 0.4,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.4
+      }
+    },
+    {
+      "id": "hono:41718966819c",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "hono:434973582302",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:45ba3bf9e3df",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:46ec30012654",
+      "goldFiles": 6,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:524296e43fa4",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "hono:545203f0594d",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "hono:54cf3fb3622e",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "hono:568f87258de2",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "hono:65edaf277a2d",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:752449b28f7c",
+      "goldFiles": 7,
+      "full": {
+        "top1": 0,
+        "recall5": 0.14285714285714285,
+        "recall10": 0.14285714285714285,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.14285714285714285
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:7735f2f03c90",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:78171ee0f3c0",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "hono:7cf7432216ec",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.25,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.25,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "hono:827cf60459ae",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "hono:84d607fa594c",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "hono:87963713c5db",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "hono:8fe1951d37a6",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:97ffa62afd75",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "hono:9822548bf75a",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "hono:991a57bc00ce",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "hono:a62289bf3aac",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "hono:ae595de8ae05",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "hono:af7cd016beb9",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "hono:bcd290a64c0b",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "hono:bf37828d6df5",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:c03f24536833",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "hono:c50be25c9ef6",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "hono:c78932d745cd",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "hono:c8f6a866c09a",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.022727272727272728,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.022727272727272728,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:cceee36ce9bd",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.6666666666666666
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "hono:d1722e3e56a9",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "hono:d29982cc40c3",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "hono:de7827ee279c",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.09090909090909091,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.09090909090909091,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:e513fe7c461a",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.09090909090909091,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.09090909090909091,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:ebc7e4bf4f95",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "hono:ec3648d0c32e",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0.2,
+        "recall10": 0.6,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.2
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.2,
+        "recall10": 0.6,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.2
+      }
+    },
+    {
+      "id": "hono:f1a7267948cc",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "hono:fbae33719021",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "hono:fbd2ff1ea0b0",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.2,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.2,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:fc8fb0f730d9",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:fc9cc6da28de",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "hono:ff7522fdccef",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:0016bdd2ba0f",
+      "goldFiles": 4,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "undici:001caecf3d6d",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:0abea110907b",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.07692307692307693,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.07692307692307693,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:0d6ecc571095",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:0daba937990d",
+      "goldFiles": 8,
+      "full": {
+        "top1": 0,
+        "recall5": 0.375,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.375
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.375,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.375
+      }
+    },
+    {
+      "id": "undici:0e64cd6dd31e",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:14757d5ed207",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.1,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.1,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:1573f693db99",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:1e32c0645398",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:2022b6038200",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.07142857142857142,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.07142857142857142,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:20fd58cb11dd",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:216ec7b94b47",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0.25,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.25
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.25,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.25
+      }
+    },
+    {
+      "id": "undici:2971280f3167",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "undici:2d5cbdfcf091",
+      "goldFiles": 6,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.045454545454545456,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.045454545454545456,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:402446852bd6",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:55ad16fa0461",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "undici:5b7f372de01f",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "undici:5c904dd78f2d",
+      "goldFiles": 6,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.16666666666666666
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.16666666666666666
+      }
+    },
+    {
+      "id": "undici:62278d539965",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "undici:65e097fea6ad",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "undici:65eea9be3d14",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.0625,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.0625,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:662d0ea671fe",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1111111111111111,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1111111111111111,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:67e714d0d558",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "undici:68f3fba6b340",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "undici:69c26b94021b",
+      "goldFiles": 6,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.16666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.16666666666666666
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.16666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.16666666666666666
+      }
+    },
+    {
+      "id": "undici:70f2871ff863",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.024390243902439025,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.024390243902439025,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:7146587b95ba",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:74a2299eb448",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "undici:773ba01efb8e",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1111111111111111,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1111111111111111,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:7bcb80c0a225",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:81e3d84ed617",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.06666666666666667,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.06666666666666667,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:86936d968791",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:8e025d1cf5a4",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:92e38fc0d53b",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.047619047619047616,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.047619047619047616,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:9b78a44eb21c",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.2,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.2,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "undici:a4879b4663f1",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0.25,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.25
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.25,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.25
+      }
+    },
+    {
+      "id": "undici:a6dac3149c50",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.09090909090909091,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.09090909090909091,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:a8d280c68d19",
+      "goldFiles": 4,
+      "full": {
+        "top1": 1,
+        "recall5": 0.25,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.25,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "undici:ab3b0f295c1c",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0.2,
+        "recall10": 0.4,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.2,
+        "recall10": 0.4,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:ac5394b86205",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "undici:af78c983b7da",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:b39c77d71620",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.07692307692307693,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.07692307692307693,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:bc304ff07e82",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:c740cbb90950",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.022727272727272728,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.022727272727272728,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:cd28ddcfbb1a",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:cda5f94f87c0",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:d7707ee8fd5d",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.07142857142857142,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.07142857142857142,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:dd85997e951f",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "undici:e041de359221",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.02564102564102564,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.02564102564102564,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:e257e9f8fb42",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.07142857142857142,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.07142857142857142,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:e461407c63e1",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:e529cabb88e3",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "undici:edb3d64cbfb0",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:eedbe2da1107",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0.25,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.25
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.25,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.25
+      }
+    },
+    {
+      "id": "undici:f182ff12d522",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.038461538461538464,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.038461538461538464,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:f7986284fa81",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:f851f315db1f",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:fcc1e39bc277",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.05,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.05,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "undici:fe21269033ee",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "undici:feef62bfe0b4",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.022727272727272728,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.022727272727272728,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:002e01ad0fcc",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "zod:0313553db1bc",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.125,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.125,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:06666fe222b6",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "zod:0b109c37c6b0",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1111111111111111,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1111111111111111,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:0ba0f348f677",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "zod:107a6b7c3f18",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "zod:162fe298f0ec",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "zod:1780c67e9cfe",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "zod:18b4ff99a019",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "zod:195e86962b51",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:27daef75eed6",
+      "goldFiles": 4,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "zod:28f39a6d97ce",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:292c894a5fd2",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "zod:303f1e9612e8",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "zod:362eb33093e9",
+      "goldFiles": 6,
+      "full": {
+        "top1": 0,
+        "recall5": 0.16666666666666666,
+        "recall10": 0.16666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 0.16666666666666666
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.16666666666666666,
+        "recall10": 0.16666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.2,
+        "packageRecall": 0.16666666666666666
+      }
+    },
+    {
+      "id": "zod:377cd9d7e4fa",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:37ac1ba0d694",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:3a818de145dc",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "zod:4bbed1b1c73e",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0.6,
+        "recall10": 0.8,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.2
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.6,
+        "recall10": 0.8,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.2
+      }
+    },
+    {
+      "id": "zod:4e7a3ef180f6",
+      "goldFiles": 7,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.14285714285714285,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.14285714285714285
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.16666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0.16666666666666666
+      }
+    },
+    {
+      "id": "zod:518f15ddada3",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "zod:592de8de6e9c",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:603dbe8dba62",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.16666666666666666,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:66bda7491a1b",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "zod:6887ff34fb9b",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.05263157894736842,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.05263157894736842,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:6be478b98c6a",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "zod:6e968a3b49cb",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "zod:6fd3b39ab659",
+      "goldFiles": 4,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.75,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.75,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "zod:74458e9ccec6",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:7afe790d0f45",
+      "goldFiles": 5,
+      "full": {
+        "top1": 1,
+        "recall5": 0.6,
+        "recall10": 0.6,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.6,
+        "recall10": 0.6,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6
+      }
+    },
+    {
+      "id": "zod:80cfd3a14cb5",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "zod:88cf94414486",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "zod:8b723d417326",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.6666666666666666
+      }
+    },
+    {
+      "id": "zod:8e4739fadbd7",
+      "goldFiles": 6,
+      "full": {
+        "top1": 1,
+        "recall5": 0.16666666666666666,
+        "recall10": 0.16666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.16666666666666666
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.16666666666666666,
+        "recall10": 0.16666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.16666666666666666
+      }
+    },
+    {
+      "id": "zod:907e5f2e4bbe",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.3333333333333333,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.5,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "zod:912678231620",
+      "goldFiles": 8,
+      "full": {
+        "top1": 0,
+        "recall5": 0.125,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.125
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.125,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0.125
+      }
+    },
+    {
+      "id": "zod:91a7d0d1e0d3",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "zod:92b2c98becb1",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0.4,
+        "recall10": 0.4,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.4
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.4,
+        "recall10": 0.4,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.4
+      }
+    },
+    {
+      "id": "zod:9548f1198b0b",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:ae68f62fddc4",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "zod:b2ed20cd7033",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "zod:b748b914d9a0",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.09090909090909091,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0.09090909090909091,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:b7b081d5cfd6",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "zod:b97e218c4dd3",
+      "goldFiles": 1,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "zod:b999b4bf3404",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:ba98071c77c2",
+      "goldFiles": 7,
+      "full": {
+        "top1": 1,
+        "recall5": 0.2857142857142857,
+        "recall10": 0.42857142857142855,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:bfdfe5ce6a23",
+      "goldFiles": 4,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "zod:c54b123e399a",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1111111111111111,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1111111111111111,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:c5d9e7ce3b21",
+      "goldFiles": 4,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.14285714285714285,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:c5f349b6c4e7",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1111111111111111,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1111111111111111,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "zod:c7805073fef5",
+      "goldFiles": 2,
+      "full": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 1,
+        "packageRecall": 1
+      }
+    },
+    {
+      "id": "zod:d44253d64985",
+      "goldFiles": 4,
+      "full": {
+        "top1": 1,
+        "recall5": 0.25,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.25
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.25,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.25
+      }
+    },
+    {
+      "id": "zod:d589186c20c3",
+      "goldFiles": 5,
+      "full": {
+        "top1": 0,
+        "recall5": 0.4,
+        "recall10": 0.4,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.4
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.5,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "zod:ddadfb8334c2",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 0,
+        "allGoldAcc10": 0,
+        "mrr": 0,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:dea32d52a574",
+      "goldFiles": 1,
+      "full": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.1,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:e5d24c38af59",
+      "goldFiles": 3,
+      "full": {
+        "top1": 0,
+        "recall5": 0.6666666666666666,
+        "recall10": 0.6666666666666666,
+        "allGoldAcc10": 0,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 1,
+        "recall10": 1,
+        "allGoldAcc10": 1,
+        "mrr": 0.3333333333333333,
+        "packageRecall": 0.5
+      }
+    },
+    {
+      "id": "zod:f75d85294df2",
+      "goldFiles": 3,
+      "full": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "zod:f778e02a8184",
+      "goldFiles": 4,
+      "full": {
+        "top1": 1,
+        "recall5": 0.25,
+        "recall10": 0.25,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.25
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.3333333333333333,
+        "recall10": 0.3333333333333333,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0.3333333333333333
+      }
+    },
+    {
+      "id": "zod:fa338a3b885e",
+      "goldFiles": 2,
+      "full": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 0,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 0.25,
+        "packageRecall": 0
+      }
+    },
+    {
+      "id": "zod:fa4a37404966",
+      "goldFiles": 4,
+      "full": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0
+      },
+      "sourceOnly": {
+        "top1": 1,
+        "recall5": 0.5,
+        "recall10": 0.5,
+        "allGoldAcc10": 0,
+        "mrr": 1,
+        "packageRecall": 0
+      }
+    }
+  ],
+  "timingMs": {
+    "snapshotMs": 333651.26259999967,
+    "indexMs": 1801397.3100000003,
+    "occMs": 65606.03889999868,
+    "baselinesMs": 301993.6324000014
+  },
+  "environment": {
+    "node": "v24.15.0",
+    "platform": "win32 10.0.26300",
+    "cpu": "AMD Ryzen 7 4800H with Radeon Graphics         ",
+    "totalMemGB": 15.4
+  }
+}
