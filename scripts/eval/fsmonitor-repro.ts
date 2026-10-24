@@ -16,6 +16,8 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import process from "node:process";
 
+import { safeGit } from "../../src/git/safeGit";
+
 const ROOT = path.resolve(import.meta.dirname ?? process.cwd(), "..", "..");
 const DIR = path.join(ROOT, ".eval-cache", "fsmonitor-repro");
 const VICTIM = path.join(DIR, "victim");
@@ -59,7 +61,7 @@ function runOnce(label: string, args: string[], mitigated: boolean): CommandResu
   };
 }
 
-function main(): void {
+async function main(): Promise<void> {
   fs.rmSync(DIR, { recursive: true, force: true });
   fs.mkdirSync(DIR, { recursive: true });
 
@@ -105,6 +107,27 @@ function main(): void {
   for (const c of commands) {
     rows.push(runOnce(`${c.label} + mitigation`, c.args, true));
   }
+  // M3-hardening: the SAME commands through OCC's production helper
+  // (src/git/safeGit.ts) — the exact path the extension uses.
+  for (const c of commands) {
+    fs.rmSync(MARKER, { force: true });
+    let helperOk = false;
+    let helperErr = "";
+    try {
+      await safeGit({ cwd: VICTIM, args: c.args, timeoutMs: 15000 });
+      helperOk = true;
+    } catch (error) {
+      helperErr = (error as Error).message.slice(0, 80);
+    }
+    rows.push({
+      label: `${c.label} + safeGit helper (production path)`,
+      args: [],
+      mitigated: true,
+      exit: helperOk ? 0 : "ERR",
+      markerAppeared: fs.existsSync(MARKER),
+      stderr: helperErr,
+    });
+  }
 
   for (const r of rows) {
     console.log(
@@ -112,8 +135,8 @@ function main(): void {
     );
   }
   console.log(
-    "\nMitigation column: same commands prefixed with -c core.fsmonitor=false; marker must never appear there.",
+    "\nMitigation columns: '-c core.fsmonitor=false' prefixed commands and the safeGit helper (which also disables hooks, gc, pager and the ext:: transport); the marker must never appear there. Raw git without flags still writes it for status/diff, proving the repro is valid.",
   );
 }
 
-main();
+void main();

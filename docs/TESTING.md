@@ -4,7 +4,7 @@ Run everything with `npm test` (Vitest, no VS Code required). Run one suite
 with `npx vitest run src/path/to/suite.test.ts`. `npm run ci` adds
 typecheck, lint, format check, compile, and packaging.
 
-Current counts: **23 suites, 244 tests**, all passing. Counts in this file
+Current counts: **24 suites, 256 tests**, all passing. Counts in this file
 were captured from a full run; update them together with the suite table
 when adding tests. `scripts/check-docs-sync.ts` verifies these numbers
 against a real `vitest run` and fails CI on drift.
@@ -29,6 +29,7 @@ against a real `vitest run` and fails CI on drift.
 | `extension/commands.test.ts` (10) | Command wiring | registration of all commands; right-click Uri vs. active-editor fallback; folder scoping through the UI layer; copy without preview; generate with preview; confirmation toast contents; outside-workspace abort; clipboard failure surfaces as error; palette (no-arg) behavior unchanged; copied payload equals directly built payload |
 | `extension/main.test.ts` (27) | Activation audit | real `activate()` against a mocked `vscode`: config wiring, command registration, preview scheme registration, status bar and tree view updates, watcher-driven create/change/delete/rename indexing, events outside the workspace root ignored, background warm-up cancellation, dispose paths; search depth follows the configured `maxGraphDepth` (F13) |
 | `clipboard/clipboard.test.ts` (6) | Clipboard abstraction | exact copy, simulated failure, empty payload, 2 MB payload, Unicode preservation, no VS Code dependency |
+| `git/safeGit.test.ts` (9) | Git hardening (M3) | child_process import guard (safeGit.ts is the only spawn point in src/); exact hardening flag set with empty hooks dir; async execFile run and SafeGitError rejection; recency prefetch from a real temp repo with cache-only reads and per-workspace isolation; fail-soft on git failure; recency-log parsing (newest-first, posix normalization) |
 | `extension/watcherService.test.ts` (5) | Watcher debounce | fake-timer determinism: single event flushes at the window edge; bursts coalesce to the latest paths; continuous save streams still flush within one window (F6 starvation regression); a new flush is scheduled after a completed one; create/delete routing |
 | `property/invariants.test.ts` (3) | Invariants (seeded PRNG) | 60-step random create/edit/delete/rename keeps index consistent with disk with no stale records; unchanged files never re-parsed across repeated runs; ignored paths never indexed |
 | `eval/lib.test.ts` (19) | Eval harness filters | task-text cleaning (trailers, URLs, issue refs, cherry-picks); word counting; path classification (test/source/lockfile/docs/CI + OCC-fully-parsed slice extensions); bot authors; version-bump/format/revert/docs-only/lockfile-only rejection reasons; gold localizability (new files excluded); time-split sampling determinism incl. disjoint tuning-half sampling |
