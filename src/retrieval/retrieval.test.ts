@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { analyzeQuery } from "./queryAnalyzer";
 import { InvertedIndex } from "./invertedIndex";
-import { HybridRetriever } from "./hybridRetriever";
+import { HybridRetriever, M3_CONTENT_FUSION } from "./hybridRetriever";
 import { GitMetadata } from "../git/gitMetadata";
 import { RelationshipGraph } from "../domain/graph";
 import type { FileEntry } from "../domain/model";
@@ -184,5 +184,73 @@ describe("HybridRetriever ranking + explanations", () => {
     const result = retriever.retrieve("f0", { maxGraphDepth: 2 });
     expect(result.ranked.some((r) => r.path === "d2/f2.ts")).toBe(true);
     expect(result.ranked.some((r) => r.path === "d3/f3.ts")).toBe(false);
+  });
+
+  describe("M3 content-score fusion (E2, ablatable)", () => {
+    function fusionFixture(): { retriever: HybridRetriever; paths: [string, string, string] } {
+      const seed = entryWith("src/seed.ts", { symbols: ["gizmo"] });
+      // Graph-proximate but content-free: only the imports edge fires (0.5).
+      const neighbor = entryWith("src/neighbor.ts", {});
+      neighbor.internalRelations = [
+        {
+          source: "file:src/neighbor.ts",
+          target: "file:src/seed.ts",
+          kind: "imports",
+          provenance: "STATIC_EXACT",
+        },
+      ];
+      // Content-matching but graph-disconnected: io-field import of "gizmo"
+      // scores 0.2 at baseline (below the 0.5 structural bonus) and 0.6 fused.
+      const lexical = entryWith("other/panel.ts", {});
+      lexical.imports = [
+        { sourceText: "./gizmo", importedNames: ["gizmo"], startLine: 1, isExternal: false },
+      ];
+      return {
+        retriever: makeRetriever([seed, neighbor, lexical]),
+        paths: ["src/seed.ts", "src/neighbor.ts", "other/panel.ts"],
+      };
+    }
+    const rankOf = (r: ReturnType<HybridRetriever["retrieve"]>, path: string): number =>
+      r.ranked.findIndex((x) => x.path === path);
+
+    it("lifts a content-matching file above a graph-only neighbor", () => {
+      const wasEnabled = M3_CONTENT_FUSION.enabled;
+      try {
+        const { retriever, paths } = fusionFixture();
+        M3_CONTENT_FUSION.enabled = false;
+        const baseline = retriever.retrieve("gizmo", { maxGraphDepth: 2 });
+        M3_CONTENT_FUSION.enabled = true;
+        const fused = retriever.retrieve("gizmo", { maxGraphDepth: 2 });
+        // Baseline: graph proximity (imports seed) outranks the lexical match.
+        expect(rankOf(baseline, paths[2])).toBeGreaterThan(rankOf(baseline, paths[1]));
+        // Fused: the content bonus flips the order; the exact-symbol seed stays Top-1.
+        expect(rankOf(fused, paths[2])).toBeLessThan(rankOf(fused, paths[1]));
+        expect(fused.ranked[0]?.path).toBe(paths[0]);
+        expect(baseline.ranked[0]?.path).toBe(paths[0]);
+      } finally {
+        M3_CONTENT_FUSION.enabled = wasEnabled;
+      }
+    });
+
+    it("ablates exactly: disabled reproduces the pre-M3 signal-sum scores", () => {
+      const wasEnabled = M3_CONTENT_FUSION.enabled;
+      try {
+        const { retriever } = fusionFixture();
+        M3_CONTENT_FUSION.enabled = false;
+        const baseline = retriever.retrieve("gizmo", { maxGraphDepth: 2 });
+        for (const r of baseline.ranked) {
+          const sum = r.signals.reduce((a, s) => a + s.weight, 0);
+          expect(r.score).toBeCloseTo(sum, 10);
+        }
+        M3_CONTENT_FUSION.enabled = true;
+        const fused = retriever.retrieve("gizmo", { maxGraphDepth: 2 });
+        const byPath = new Map(fused.ranked.map((r) => [r.path, r.score] as const));
+        for (const r of baseline.ranked) {
+          expect(byPath.get(r.path)!).toBeGreaterThanOrEqual(r.score);
+        }
+      } finally {
+        M3_CONTENT_FUSION.enabled = wasEnabled;
+      }
+    });
   });
 });
