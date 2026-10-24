@@ -42,8 +42,29 @@ export function tokenize(text: string): string[] {
 
 /** Stopwords dropped when a "word count" is measured for the task filter. */
 const STOPWORDS = new Set([
-  "the", "a", "an", "and", "or", "of", "to", "in", "on", "for", "with", "is",
-  "are", "be", "not", "this", "that", "it", "as", "at", "by", "from", "into",
+  "the",
+  "a",
+  "an",
+  "and",
+  "or",
+  "of",
+  "to",
+  "in",
+  "on",
+  "for",
+  "with",
+  "is",
+  "are",
+  "be",
+  "not",
+  "this",
+  "that",
+  "it",
+  "as",
+  "at",
+  "by",
+  "from",
+  "into",
 ]);
 
 export function contentWords(text: string): string[] {
@@ -89,9 +110,7 @@ export function cleanTaskText(subject: string, body: string): string {
 
 export function wordCount(text: string): number {
   // "(v2)" / "v2" style decorations are not real task words.
-  const cleaned = text
-    .replace(/\bv\d+\b/gi, " ")
-    .replace(/\(\s*v\d+\s*\)/gi, " ");
+  const cleaned = text.replace(/\bv\d+\b/gi, " ").replace(/\(\s*v\d+\s*\)/gi, " ");
   return contentWords(cleaned).length;
 }
 
@@ -99,14 +118,17 @@ export function wordCount(text: string): number {
 // Path classification
 // ---------------------------------------------------------------------------
 
-const TEST_FILE_RE = /(^|\/)(__tests__|tests?|spec|specs|e2e)(\/|$)|\.((test|spec|e2e)\.[cm]?[jt]sx?|test|spec)$/i;
+const TEST_FILE_RE =
+  /(^|\/)(__tests__|tests?|spec|specs|e2e)(\/|$)|\.((test|spec|e2e)\.[cm]?[jt]sx?|test|spec)$/i;
 const SRC_EXT_RE = /\.[cm]?[jt]sx?$/i;
 
 /** Meaningful lower-case tokens of a path (identifiers split). */
 export function pathTokens(p: string): string[] {
   const normalized = p.replace(/\\/g, "/");
   const withoutExt = normalized.replace(/\.[a-z0-9]+$/i, "");
-  return tokenize(withoutExt.replace(/(^|\/)(packages?|libs?|modules?|ts|js|src|lib)($|\/|$)/g, " "));
+  return tokenize(
+    withoutExt.replace(/(^|\/)(packages?|libs?|modules?|ts|js|src|lib)($|\/|$)/g, " "),
+  );
 }
 
 export function isTestPath(p: string): boolean {
@@ -195,7 +217,8 @@ export function isBotAuthor(name: string, email: string): boolean {
 
 const VERSION_BUMP_SUBJECT =
   /^(?:chore|build|release|dev)?\s*[(:]?\s*(?:release|v\d|bump(?:\s+(?:version|deps))?|prepare\s+(?:release|for\s+release)|\d+\.\d+\.\d+)/i;
-const FORMAT_SUBJECT = /\b(?:format(?:ting)?|prettier|lint(?:ing)?|eslint|style:? reformat|clang-format|code style)\b/i;
+const FORMAT_SUBJECT =
+  /\b(?:format(?:ting)?|prettier|lint(?:ing)?|eslint|style:? reformat|clang-format|code style)\b/i;
 const REVERT_SUBJECT = /^(?:revert\b|this reverts commit )/i;
 
 export interface CommitCandidateInput {
@@ -219,9 +242,12 @@ export interface FilterReason {
  * Applies the dataset inclusion rule to one commit. Pure: same input ⇒ same
  * verdict, so identical repo+rules always mine the same dataset.
  */
-export function filterCommit(c: CommitCandidateInput): FilterReason & { task: string | null; gold?: string[]; excludedNewFiles?: number } {
+export function filterCommit(
+  c: CommitCandidateInput,
+): FilterReason & { task: string | null; gold?: string[]; excludedNewFiles?: number } {
   if (c.parentCount !== 1) return { ok: false, reason: "merge-commit", task: null };
-  if (isBotAuthor(c.authorName, c.authorEmail)) return { ok: false, reason: "bot-author", task: null };
+  if (isBotAuthor(c.authorName, c.authorEmail))
+    return { ok: false, reason: "bot-author", task: null };
 
   // Gold localizability is decided first so it takes priority over the task
   // text checks when a commit creates only new files.
@@ -236,8 +262,15 @@ export function filterCommit(c: CommitCandidateInput): FilterReason & { task: st
     const p = f.prePath.replace(/\\/g, "/");
     if (!gold.includes(p)) gold.push(p);
   }
-  if (c.files.every((f) => f.status.startsWith("R"))) return { ok: false, reason: "pure-rename", task: null };
-  if (gold.length === 0) return { ok: false, task: null, reason: "no-localizable-gold", excludedNewFiles: excludedNewFiles };
+  if (c.files.every((f) => f.status.startsWith("R")))
+    return { ok: false, reason: "pure-rename", task: null };
+  if (gold.length === 0)
+    return {
+      ok: false,
+      task: null,
+      reason: "no-localizable-gold",
+      excludedNewFiles: excludedNewFiles,
+    };
   if (c.files.length > 8) return { ok: false, reason: "file-count", task: null };
 
   const task = cleanTaskText(c.subject, c.body);
@@ -249,7 +282,9 @@ export function filterCommit(c: CommitCandidateInput): FilterReason & { task: st
   if (VERSION_BUMP_SUBJECT.test(c.subject) || /^(?:release|bump)\b/i.test(c.subject)) {
     const onlyVersionArtifacts = c.files.every((f) => {
       const lower = f.postPath.toLowerCase();
-      return lower.endsWith("package.json") || lower.endsWith("tsconfig.json") || isLockFilePath(lower);
+      return (
+        lower.endsWith("package.json") || lower.endsWith("tsconfig.json") || isLockFilePath(lower)
+      );
     });
     if (onlyVersionArtifacts) return { ok: false, reason: "version-bump", task: null };
   }
@@ -305,8 +340,14 @@ export interface CommitMeta {
  * seeded PRNG. Same candidate list + seed ⇒ same sample, always. Returned
  * commits are sorted by committerTime then sha for total determinism.
  */
-export function sampleEvalCommits<T extends CommitMeta>(candidates: T[], count: number, seed: number): { evalPool: T[]; tuningHalf: T[]; sampled: T[] } {
-  const sorted = [...candidates].sort((a, b) => a.committerTime - b.committerTime || (a.sha < b.sha ? -1 : 1));
+export function sampleEvalCommits<T extends CommitMeta>(
+  candidates: T[],
+  count: number,
+  seed: number,
+): { evalPool: T[]; tuningHalf: T[]; sampled: T[] } {
+  const sorted = [...candidates].sort(
+    (a, b) => a.committerTime - b.committerTime || (a.sha < b.sha ? -1 : 1),
+  );
   const splitIndex = Math.floor(sorted.length / 2);
   const tuningHalf = sorted.slice(0, splitIndex);
   const evalPool = sorted.slice(splitIndex);

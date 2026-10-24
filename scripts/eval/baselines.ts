@@ -91,8 +91,7 @@ export function bm25Baseline(snapshot: Snapshot, task: string): RankedFile[] {
       const dfT = df.get(term) ?? 0;
       const idf = Math.log(1 + (N - dfT + 0.5) / (dfT + 0.5));
       const norm =
-        (f * (BM25_K1 + 1)) /
-        (f + BM25_K1 * (1 - BM25_B + BM25_B * (len / (avgLen || 1))));
+        (f * (BM25_K1 + 1)) / (f + BM25_K1 * (1 - BM25_B + BM25_B * (len / (avgLen || 1))));
       score += idf * norm;
     }
     // Small deterministic tie-break for exact score ties.

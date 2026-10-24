@@ -2,6 +2,41 @@
 
 ## Unreleased
 
+### Added (M2: retrieval evaluation harness)
+
+- Dev-time retrieval evaluation harness (`npm run eval:build-dataset`,
+  `npm run eval:retrieval`; scripts under `scripts/eval/`, see
+  docs/eval/README.md). It mines (task, gold-files) pairs from pinned
+  public-repo histories (hono, zod, undici, axios, fastify; 200 tasks),
+  materializes each task's **parent-commit** snapshot into a git-ignored
+  scratch dir with git plumbing only (`read-tree` into a temporary
+  `GIT_INDEX_FILE` → `update-index --force-remove` → `checkout-index -a`;
+  no tar), runs the OCC pipeline headlessly through `OccApplication`
+  (no vscode import), and scores file localization (Top-1, Recall@5/10,
+  strict AllGold Acc@10, MRR) against the filename-overlap,
+  BM25-over-contents, and seeded-random baselines with seeded 95% bootstrap
+  CIs. Dataset and results are deterministic for a given commit
+  (timings/environment are quarantined into separate sections; results.json
+  records the OCC commit hash and that the working tree was clean at run
+  start). Dataset builder filters, stream parsers, ls-tree mode parsing,
+  mode-based gold filtering, metrics, and baselines are unit tested as pure
+  functions; the dataset hash is verified before every run.
+- The snapshot file universe is decided by `git ls-tree -r <parent>` modes on
+  every platform: only regular files (100644/100755) are materialized and
+  indexed; symlinks (120000) and gitlinks/submodules (160000) are excluded
+  from the snapshot AND from gold, with `core.symlinks=false
+  core.autocrlf=false core.eol=lf` forced so file bytes are identical across
+  Windows/macOS/Linux. Gold dropped by mode is counted per repo (empty-gold
+  tasks are excluded from the dataset and reported); a TS/JS gold file that
+  would be dropped aborts the build instead of being silently absorbed.
+  Baselines read file contents up to 1 MiB — OCC's own scanner limit — so
+  all four systems rank the same file universe.
+- `docs/eval/README.md` documents the methodology, metric conventions
+  (citing SWE-bench, LocAgent, CommitBench, and the SWE-bench
+  future-history-leak mitigation), dataset funnel statistics, and known
+  limitations (commit message as a noisy task proxy, gold-set bias, filtered
+  task slice). docs/eval/{dataset,results}.json are generated artifacts.
+
 ### Fixed
 
 - Search (`OCC: Search Codebase`) now follows the configured

@@ -18,14 +18,24 @@ import {
   type TouchedFile,
 } from "./lib";
 
-function touched(status: TouchedFile["status"], pre: string, post = pre, renameScore?: number): TouchedFile {
+function touched(
+  status: TouchedFile["status"],
+  pre: string,
+  post = pre,
+  renameScore?: number,
+): TouchedFile {
   return { status, prePath: pre, postPath: post, renameScore };
 }
 
 describe("tokenize / pathTokens", () => {
   it("splits camelCase, kebab, snake and dotted identifiers into lowercase tokens", () => {
     expect(tokenize("parseJSONArray_v2")).toEqual(["parse", "json", "array", "v2"]);
-    expect(pathTokens("src/router/middleware/rateLimit.ts")).toEqual(["router", "middleware", "rate", "limit"]);
+    expect(pathTokens("src/router/middleware/rateLimit.ts")).toEqual([
+      "router",
+      "middleware",
+      "rate",
+      "limit",
+    ]);
   });
 });
 
@@ -90,7 +100,10 @@ describe("filterCommit", () => {
   };
 
   it("accepts a normal 2-file fix with source gold, excluding new files from gold", () => {
-    const result = filterCommit({ ...base, files: [touched("M", "src/auth.ts"), touched("A", "src/auth/new.ts")] });
+    const result = filterCommit({
+      ...base,
+      files: [touched("M", "src/auth.ts"), touched("A", "src/auth/new.ts")],
+    });
     expect(result.ok).toBe(true);
     expect(result.gold).toEqual(["src/auth.ts"]);
     expect(result.excludedNewFiles).toBe(1);
@@ -106,7 +119,9 @@ describe("filterCommit", () => {
   });
 
   it("rejects merges, bots, tiny/huge task text, wrong file counts", () => {
-    expect(filterCommit({ ...base, parentCount: 2, files: [touched("M", "a.ts")] }).reason).toBe("merge-commit");
+    expect(filterCommit({ ...base, parentCount: 2, files: [touched("M", "a.ts")] }).reason).toBe(
+      "merge-commit",
+    );
     expect(
       filterCommit({ ...base, authorName: "Renovate Bot", files: [touched("M", "a.ts")] }).reason,
     ).toBe("bot-author");
@@ -119,17 +134,21 @@ describe("filterCommit", () => {
     ).toBe("task-too-long");
     expect(filterCommit({ ...base, files: [] }).reason).toBe("file-count");
     expect(
-      filterCommit({ ...base, files: Array.from({ length: 9 }, (_, i) => touched("M", `s${i}.ts`)) }).reason,
-      ("file-count" as unknown),
+      filterCommit({
+        ...base,
+        files: Array.from({ length: 9 }, (_, i) => touched("M", `s${i}.ts`)),
+      }).reason,
+      "file-count" as unknown,
     ).toBe("file-count");
   });
 
   it("rejects pure renames, reverts, version bumps, lock/docs-only and no-source commits", () => {
+    expect(filterCommit({ ...base, files: [touched("R100", "a.ts", "b.ts", 100)] }).reason).toBe(
+      "pure-rename",
+    );
     expect(
-      filterCommit({ ...base, files: [touched("R100", "a.ts", "b.ts", 100)] }).reason,
-    ).toBe("pure-rename");
-    expect(
-      filterCommit({ ...base, subject: "Revert previous change", files: [touched("M", "a.ts")] }).reason,
+      filterCommit({ ...base, subject: "Revert previous change", files: [touched("M", "a.ts")] })
+        .reason,
     ).toBe("revert");
     expect(
       filterCommit({
@@ -138,11 +157,12 @@ describe("filterCommit", () => {
         files: [touched("M", "package.json"), touched("M", "package-lock.json")],
       }).reason,
     ).toBe("version-bump");
+    expect(filterCommit({ ...base, files: [touched("M", "package-lock.json")] }).reason).toBe(
+      "lockfile-only",
+    );
     expect(
-      filterCommit({ ...base, files: [touched("M", "package-lock.json")] }).reason,
-    ).toBe("lockfile-only");
-    expect(
-      filterCommit({ ...base, subject: "docs: update guide", files: [touched("M", "GUIDE.md")] }).reason,
+      filterCommit({ ...base, subject: "docs: update guide", files: [touched("M", "GUIDE.md")] })
+        .reason,
     ).toBe("docs-only");
     expect(
       filterCommit({ ...base, files: [touched("M", ".github/workflows/ci.yml")] }).reason,

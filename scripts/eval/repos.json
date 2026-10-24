@@ -1,5 +1,4 @@
 {
-  "$schema": "./repos.schema.json",
   "seed": 20260918,
   "tasksPerRepo": 40,
   "repos": [

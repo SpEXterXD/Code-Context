@@ -44,7 +44,10 @@ describe("taskMetrics / aggregateRuns", () => {
   it("computes the whole family for one task", () => {
     const m = taskMetrics(rank(["g.ts", "a.ts", "b.ts", "c.ts", "d.ts"]), ["g.ts", "b.ts"]);
     expect(m).toEqual({ top1: 1, recall5: 1, recall10: 1, allGoldAcc10: 1, mrr: 1 });
-    const m2 = taskMetrics(rank(["a.ts", "b.ts", "c.ts", "d.ts", "e.ts", "f.ts"]), ["g.ts", "e.ts"]);
+    const m2 = taskMetrics(rank(["a.ts", "b.ts", "c.ts", "d.ts", "e.ts", "f.ts"]), [
+      "g.ts",
+      "e.ts",
+    ]);
     expect(m2.top1).toBe(0);
     expect(m2.recall5).toBe(0.5);
     expect(m2.recall10).toBe(0.5);
@@ -52,7 +55,7 @@ describe("taskMetrics / aggregateRuns", () => {
     expect(m2.mrr).toBe(0.2);
   });
 
-   it("aggregates means deterministically", () => {
+  it("aggregates means deterministically", () => {
     const vals = [
       { top1: 1, recall5: 1, recall10: 1, allGoldAcc10: 1, mrr: 1 },
       { top1: 0, recall5: 0.5, recall10: 1, allGoldAcc10: 0, mrr: 0.5 },

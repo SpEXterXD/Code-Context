@@ -123,7 +123,10 @@ export function summarize(values: number[], seed: number): MetricSummary {
  * Computes the full metric family for one ranked list against gold.
  * Returns the raw per-task values so the harness can also report worst/best.
  */
-export function taskMetrics(ranked: RankedFile[], gold: string[]): {
+export function taskMetrics(
+  ranked: RankedFile[],
+  gold: string[],
+): {
   top1: number;
   recall5: number;
   recall10: number;
@@ -140,12 +143,30 @@ export function taskMetrics(ranked: RankedFile[], gold: string[]): {
 }
 
 /** Aggregates per-task metric values into the reportable summaries. */
-export function aggregateRuns(perTask: Array<ReturnType<typeof taskMetrics>>, seed: number): RunMetrics {
+export function aggregateRuns(
+  perTask: Array<ReturnType<typeof taskMetrics>>,
+  seed: number,
+): RunMetrics {
   return {
-    top1: summarize(perTask.map((m) => m.top1), seed),
-    recall5: summarize(perTask.map((m) => m.recall5), seed),
-    recall10: summarize(perTask.map((m) => m.recall10), seed),
-    allGoldAcc10: summarize(perTask.map((m) => m.allGoldAcc10), seed),
-    mrr: summarize(perTask.map((m) => m.mrr), seed),
+    top1: summarize(
+      perTask.map((m) => m.top1),
+      seed,
+    ),
+    recall5: summarize(
+      perTask.map((m) => m.recall5),
+      seed,
+    ),
+    recall10: summarize(
+      perTask.map((m) => m.recall10),
+      seed,
+    ),
+    allGoldAcc10: summarize(
+      perTask.map((m) => m.allGoldAcc10),
+      seed,
+    ),
+    mrr: summarize(
+      perTask.map((m) => m.mrr),
+      seed,
+    ),
   };
 }

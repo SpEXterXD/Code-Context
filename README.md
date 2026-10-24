@@ -193,7 +193,7 @@ npm run lint
 # Check code formatting with Prettier
 npm run format:check
 
-# Run test suite with Vitest (18 suites, 183 tests)
+# Run test suite with Vitest (23 suites, 229 tests)
 npm test
 
 # Verify documentation synchronization with test reports
@@ -208,7 +208,7 @@ npm run bench
 
 ### Testing Suite
 
-The codebase maintains rigorous automated test coverage across 17 test suites and 169 unit/integration/property tests:
+The codebase maintains rigorous automated test coverage across 23 test suites and 229 unit/integration/property tests:
 - **Unit Tests**: AST parsers, inverted index, relevance scoring, tokenizer, secret redaction, and ignore rules.
 - **Integration Tests**: End-to-end context assembly pipeline, budget degradation ladder, and sharded index store crash recovery.
 - **Property-Based Invariants**: Deterministic PRNG stress tests verifying index consistency under randomized file edits, renames, and deletions.
@@ -221,7 +221,7 @@ The codebase maintains rigorous automated test coverage across 17 test suites an
 - [Architecture & Layering](docs/ARCHITECTURE.md)
 - [Security Model & Threat Boundaries](docs/SECURITY.md)
 - [User Guide & Workflows](docs/USER_GUIDE.md)
-- [Testing Guide & Metrics](docs/TESTING.md) (18 suites, 183 tests)
+- [Testing Guide & Metrics](docs/TESTING.md) (23 suites, 229 tests)
 - [Contributing Guidelines](docs/CONTRIBUTING.md)
 - [Technical Limitations](docs/LIMITATIONS.md)
 - [Architectural Decision Records (ADRs)](docs/adr/)
