@@ -226,6 +226,7 @@ async function main(): Promise<void> {
   );
 
   const records: GoldRecord[] = [];
+  const skippedTasks: Array<{ task: string; phase: string; error: string }> = [];
   const perTask: Array<{
     task: string;
     rankedRecall8: number;
@@ -261,7 +262,17 @@ async function main(): Promise<void> {
         }
       }
 
-      const context = app.buildContext("task", { taskText: t.task });
+      let context: ReturnType<OccApplication["buildContext"]>;
+      try {
+        context = app.buildContext("task", { taskText: t.task });
+      } catch (error) {
+        // e.g. CONTEXT_BUDGET_UNREACHABLE when static sections alone exceed
+        // the budget on very large snapshots — record and move on.
+        skippedTasks.push({ task: t.id, phase: "build", error: (error as Error).message });
+        console.error(`  ${t.id}: SKIPPED (${(error as Error).message.slice(0, 90)})`);
+        fs.rmSync(snapDir, { recursive: true, force: true });
+        continue;
+      }
       const ranked = context.retrieval?.ranked ?? [];
       const rankOf = new Map(ranked.map((r, i) => [r.path, i + 1] as const));
       const signalsOf = new Map(ranked.map((r) => [r.path, r.signals.map((s) => s.kind)] as const));
@@ -280,7 +291,13 @@ async function main(): Promise<void> {
         maxFiles: BIG_CAP_MAX_FILES,
       });
       appBig.initialize();
-      const bigContext = appBig.buildContext("task", { taskText: t.task });
+      let bigContext: ReturnType<OccApplication["buildContext"]>;
+      try {
+        bigContext = appBig.buildContext("task", { taskText: t.task });
+      } catch (error) {
+        bigContext = context; // cap probe unavailable; fall back to normal ranking
+        skippedTasks.push({ task: t.id, phase: "build-bigcap", error: (error as Error).message });
+      }
       const bigRanked = bigContext.retrieval?.ranked ?? [];
       const bigRankOf = new Map(bigRanked.map((r, i) => [r.path, i + 1] as const));
 
@@ -399,6 +416,7 @@ async function main(): Promise<void> {
     occCommit: occHeadCommit(),
     workingTreeClean: occWorkingTreeClean(),
     tasks: tasks.length,
+    skippedTasks,
     goldFiles: records.length,
     stageLoss,
     recall: {

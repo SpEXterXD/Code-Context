@@ -145,6 +145,8 @@ interface ResultsFile {
   workingTreeClean: boolean;
   datasetHash: string;
   tasks: number;
+  /** Tasks where buildContext threw (e.g. budget-unreachable) and were skipped. */
+  skippedTasks: Array<{ task: string; error: string }>;
   systems: Record<SystemName, SystemSummary>;
   goldSliceStats: GoldSliceStats;
   /** Seeded PAIRED bootstrap over per-task differences (OCC − BM25). */
@@ -259,6 +261,7 @@ async function run(): Promise<void> {
   const ranks = new Map<SystemName, Map<string, RankedFile[]>>(SYSTEMS.map((s) => [s, new Map()]));
   const occPackageStats: Array<{ tokens: number; files: number }> = [];
   const timingMs = { snapshotMs: 0, indexMs: 0, occMs: 0, baselinesMs: 0 };
+  const skippedTasks: Array<{ task: string; error: string }> = [];
   /** OCC's UNTRUNCATED candidate ranking per task (path order), for the gap analysis. */
   const fullRankedByTask = new Map<string, string[]>();
   /** Files actually included in OCC's generated package, parsed from the payload. */
@@ -296,7 +299,18 @@ async function run(): Promise<void> {
       }
 
       const occStart = performance.now();
-      const context = app.buildContext("task", { taskText: t.task });
+      let context: ReturnType<OccApplication["buildContext"]>;
+      try {
+        context = app.buildContext("task", { taskText: t.task });
+      } catch (error) {
+        // e.g. CONTEXT_BUDGET_UNREACHABLE when static sections alone exceed
+        // the budget on very large snapshots — skip the task, never crash
+        // the whole run.
+        skippedTasks.push({ task: t.id, error: (error as Error).message });
+        console.error(`  ${repoId} ${t.id}: SKIPPED (${(error as Error).message.slice(0, 90)})`);
+        fs.rmSync(snapDir, { recursive: true, force: true });
+        continue;
+      }
       const rankedAll = context.retrieval?.ranked ?? [];
       const occRanking = rankedAll
         .slice(0, RETRIEVE_LIMIT)
@@ -530,6 +544,7 @@ async function run(): Promise<void> {
     workingTreeClean: occWorkingTreeClean(),
     datasetHash: dataset.datasetHash,
     tasks: tasks.length,
+    skippedTasks,
     systems,
     goldSliceStats,
     pairedBootstrap,
