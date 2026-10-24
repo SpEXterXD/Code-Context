@@ -1,0 +1,416 @@
+{
+  "split": "tuning",
+  "weight": 0.6,
+  "occCommit": "d1dd5327235909a49007253ebba2e2660de9efe0",
+  "workingTreeClean": false,
+  "tasksScored": 8,
+  "arms": {},
+  "fullSlice": {
+    "unseeded": {
+      "mean": {
+        "top1": 0.125,
+        "recall8": 0.25,
+        "recall10": 0.5625,
+        "mrr": 0.2429863418235511,
+        "packageRecall": 0.5
+      },
+      "pairedVsUnseeded": {}
+    },
+    "seeded": {
+      "mean": {
+        "top1": 0.125,
+        "recall8": 0.375,
+        "recall10": 0.6875,
+        "mrr": 0.27281746031746035,
+        "packageRecall": 0.625
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": 0,
+          "ciHigh": 0.375,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": 0,
+          "ciHigh": 0.375,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 8,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "bm25names": {
+      "mean": {
+        "top1": 0.25,
+        "recall8": 0.10416666666666666,
+        "recall10": 0.4583333333333333,
+        "mrr": 0.30566709326507757,
+        "packageRecall": 0.4166666666666667
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 8,
+          "meanDiff": -0.08333333333333334,
+          "ciLow": -0.5,
+          "ciHigh": 0.2916666666666667,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 8,
+          "meanDiff": -0.10416666666666667,
+          "ciLow": -0.5,
+          "ciHigh": 0.29166666666666663,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": -0.375,
+          "ciHigh": 0.5,
+          "excludesZero": false
+        }
+      }
+    },
+    "decoy-samedir": {
+      "mean": {
+        "top1": 0.125,
+        "recall8": 0.375,
+        "recall10": 0.8125,
+        "mrr": 0.28000992063492064,
+        "packageRecall": 0.625
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": 0,
+          "ciHigh": 0.375,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 8,
+          "meanDiff": 0.25,
+          "ciLow": 0,
+          "ciHigh": 0.5,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 8,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "mixed": {
+      "mean": {
+        "top1": 0.125,
+        "recall8": 0.375,
+        "recall10": 0.6875,
+        "mrr": 0.2694444444444445,
+        "packageRecall": 0.625
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": 0,
+          "ciHigh": 0.375,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": 0,
+          "ciHigh": 0.375,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 8,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "random-decoy": {
+      "mean": {
+        "top1": 0.125,
+        "recall8": 0.375,
+        "recall10": 0.5625,
+        "mrr": 0.2859027777777778,
+        "packageRecall": 0.5
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 8,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 8,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 8,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "realdiff": {
+      "mean": {
+        "top1": 0.125,
+        "recall8": 0.375,
+        "recall10": 0.6875,
+        "mrr": 0.27281746031746035,
+        "packageRecall": 0.625
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": 0,
+          "ciHigh": 0.375,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": 0,
+          "ciHigh": 0.375,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 8,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    }
+  },
+  "sourceOnlySlice": {
+    "unseeded": {
+      "mean": {
+        "top1": 0.125,
+        "recall8": 0.25,
+        "recall10": 0.5625,
+        "mrr": 0.2429863418235511,
+        "packageRecall": 0.5
+      },
+      "pairedVsUnseeded": {}
+    },
+    "seeded": {
+      "mean": {
+        "top1": 0.125,
+        "recall8": 0.375,
+        "recall10": 0.6875,
+        "mrr": 0.27281746031746035,
+        "packageRecall": 0.625
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": 0,
+          "ciHigh": 0.375,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": 0,
+          "ciHigh": 0.375,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 8,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "bm25names": {
+      "mean": {
+        "top1": 0.25,
+        "recall8": 0.10416666666666666,
+        "recall10": 0.4583333333333333,
+        "mrr": 0.30566709326507757,
+        "packageRecall": 0.4166666666666667
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 8,
+          "meanDiff": -0.08333333333333334,
+          "ciLow": -0.5,
+          "ciHigh": 0.33333333333333337,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 8,
+          "meanDiff": -0.10416666666666667,
+          "ciLow": -0.5,
+          "ciHigh": 0.2708333333333333,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": -0.25,
+          "ciHigh": 0.5,
+          "excludesZero": false
+        }
+      }
+    },
+    "decoy-samedir": {
+      "mean": {
+        "top1": 0.125,
+        "recall8": 0.375,
+        "recall10": 0.8125,
+        "mrr": 0.28000992063492064,
+        "packageRecall": 0.625
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": 0,
+          "ciHigh": 0.375,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 8,
+          "meanDiff": 0.25,
+          "ciLow": 0,
+          "ciHigh": 0.625,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 8,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "mixed": {
+      "mean": {
+        "top1": 0.125,
+        "recall8": 0.375,
+        "recall10": 0.6875,
+        "mrr": 0.2694444444444445,
+        "packageRecall": 0.625
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": 0,
+          "ciHigh": 0.375,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": 0,
+          "ciHigh": 0.375,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 8,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "random-decoy": {
+      "mean": {
+        "top1": 0.125,
+        "recall8": 0.375,
+        "recall10": 0.5625,
+        "mrr": 0.2859027777777778,
+        "packageRecall": 0.5
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 8,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 8,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 8,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "realdiff": {
+      "mean": {
+        "top1": 0.125,
+        "recall8": 0.375,
+        "recall10": 0.6875,
+        "mrr": 0.27281746031746035,
+        "packageRecall": 0.625
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": 0,
+          "ciHigh": 0.375,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 8,
+          "meanDiff": 0.125,
+          "ciLow": 0,
+          "ciHigh": 0.375,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 8,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    }
+  }
+}

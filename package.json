@@ -343,7 +343,8 @@
     "eval:fsmonitor-repro": "tsx scripts/eval/fsmonitor-repro.ts",
     "eval:diagnose": "tsx scripts/eval/eval-diagnose.ts",
     "eval:compare": "tsx scripts/eval/eval-compare.ts",
-    "eval:seed-hazard-repro": "tsx scripts/eval/seed-hazard-repro.ts"
+    "eval:seed-hazard-repro": "tsx scripts/eval/seed-hazard-repro.ts",
+    "eval:seeds-sim": "tsx scripts/eval-seeds-sim.ts"
   },
   "dependencies": {
     "typescript": "^5.5.4"

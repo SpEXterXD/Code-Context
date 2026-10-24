@@ -234,12 +234,26 @@ export class HybridRetriever {
         .reduce((a, s) => a + s.weight, 0);
     };
     const seedCount = Math.min(5, Math.max(1, analysis.terms.length > 0 ? 5 : 1));
-    const seeds = [...contributions.keys()]
+    const contentSeeds = [...contributions.keys()]
       .map((path) => ({ path, score: contentScore(path) }))
       .filter((s) => s.score > 0)
       .sort((a, b) => b.score - a.score || compareStrings(a.path, b.path))
       .slice(0, seedCount)
       .map((s) => s.path);
+    // M4: DIFF_TOUCHED seed hints are traversal seeds FIRST — the developer's
+    // current changes are the strongest intent signal, and their graph
+    // neighbors are exactly what change-aware retrieval should surface.
+    const hintPaths = M4_SEED_WEIGHTS.enabled
+      ? [
+          ...new Set(
+            (options.seedHints ?? []).filter((h) => h.kind === "DIFF_TOUCHED").map((h) => h.path),
+          ),
+        ].filter((p) => this.entriesRef.has(p))
+      : [];
+    const seeds = [...new Set([...hintPaths, ...contentSeeds])].slice(
+      0,
+      Math.max(seedCount, hintPaths.length),
+    );
 
     // Aggregate structural contributions per (kind, counterpart) to avoid
     // inflating scores with many parallel edges.
