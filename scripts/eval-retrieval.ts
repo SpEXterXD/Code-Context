@@ -32,23 +32,13 @@ import process from "node:process";
 
 import { OccApplication } from "../src/application/contextService";
 import { CancellationSource } from "../src/shared/cancellation";
+import { M3_CONTENT_FUSION } from "../src/retrieval/hybridRetriever";
+import { M3_BODY_FIELD } from "../src/retrieval/invertedIndex";
+import { M3B_RANK_PRIORITY } from "../src/context/contextBuilder";
 
-import { bm25Baseline, filenameBaseline, randomBaseline, type Snapshot } from "./eval/baselines";
-import {
-  applyModeGoldFilter,
-  buildDataset,
-  datasetHash,
-  type DatasetStats,
-  type DatasetTask,
-} from "./eval/dataset";
-import {
-  cloneDirFor,
-  lsTree,
-  materializeSnapshot,
-  mineCommits,
-  verifyPinnedCommit,
-  type LsTreeEntry,
-} from "./eval/gitminer";
+import { bm25Baseline, filenameBaseline, randomBaseline } from "./eval/baselines";
+import type { DatasetTask } from "./eval/dataset";
+import { cloneDirFor, materializeSnapshot, verifyPinnedCommit } from "./eval/gitminer";
 import {
   aggregateRuns,
   pairedDiffCi,
@@ -69,23 +59,28 @@ import {
   isSourcePath,
   isTestPath,
 } from "./eval/lib";
+import {
+  buildHoldoutDataset,
+  buildTuningDataset,
+  loadEvalDataset,
+  loadReposFile,
+  readSnapshot,
+  type DatasetFile,
+  type RepoEntry,
+  type ReposFile,
+} from "./eval/splitLoader";
 
 const ROOT = path.resolve(import.meta.dirname ?? path.join(process.cwd(), "scripts"), "..");
-const REPOS_JSON = path.join(ROOT, "scripts", "eval", "repos.json");
-const DATASET_JSON = path.join(ROOT, "docs", "eval", "dataset.json");
 const RESULTS_JSON = path.join(ROOT, "docs", "eval", "results.json");
 const RESULTS_MD = path.join(ROOT, "docs", "eval", "results.md");
 const TUNING_RESULTS_JSON = path.join(ROOT, "docs", "eval", "results-tuning.json");
 const TUNING_RESULTS_MD = path.join(ROOT, "docs", "eval", "results-tuning.md");
+const HOLDOUT_RESULTS_JSON = path.join(ROOT, "docs", "eval", "results-holdout.json");
+const HOLDOUT_RESULTS_MD = path.join(ROOT, "docs", "eval", "results-holdout.md");
 const SCRATCH_ROOT = path.join(ROOT, ".eval-cache", "scratch");
 
 const SEED = 20260918;
 const RETRIEVE_LIMIT = 50;
-// Baselines read file contents up to OCC's own scanner limit (1 MiB,
-// src/workspace/workspaceScanner.ts) so every system ranks the same file
-// universe; larger files exist in gold but are invisible to all systems
-// equally rather than to the baselines only.
-const MAX_SNAPSHOT_FILE_BYTES = 1024 * 1024;
 
 type SystemName = "occ" | "filename" | "bm25" | "random";
 const SYSTEMS: SystemName[] = ["occ", "filename", "bm25", "random"];
@@ -100,36 +95,6 @@ const PAIRED_METRIC_KEYS: PairedMetricKey[] = [
   "mrr",
   "packageRecall",
 ];
-
-interface ReposFile {
-  seed: number;
-  tasksPerRepo: number;
-  repos: {
-    id: string;
-    url: string;
-    defaultBranch: string;
-    pinnedCommit: string;
-    license: string;
-    note: string;
-  }[];
-}
-
-interface RepoEntry {
-  pinnedCommit: string;
-  license: string;
-  note: string;
-  sourceFilesAtPin: number;
-  stats: DatasetStats;
-  datasetHash: string;
-}
-
-interface DatasetFile {
-  seed: number;
-  tasksPerRepo: number;
-  datasetHash: string;
-  repos: Record<string, RepoEntry>;
-  tasks: DatasetTask[];
-}
 
 interface SystemSummary {
   overall: RunMetrics;
@@ -178,7 +143,18 @@ interface CaseStudy {
 
 interface ResultsFile {
   /** Which half of the time split this run measured. */
-  split: "eval" | "tuning";
+  split: "eval" | "tuning" | "holdout";
+  /** Named scoring constants disabled for this run (--ablate), if any. */
+  ablations: string[];
+  /** Holdout only: how the holdout was constructed and why. */
+  holdoutDefinition?: string;
+  /** Holdout only: paired OCC(M3b) − OCC(M3, P1 ablated in-process) diffs. */
+  pairedOccM3bVsM3?: Record<GoldSlice, Record<PairedMetricKey, PairedDiff>>;
+  /**
+   * M3 eval-run budget: how many full eval-split runs (including this one)
+   * have happened on this machine across the milestone. null for tuning.
+   */
+  evalSplitRunsIncludingThis: number | null;
   seed: number;
   /** OCC commit the run was executed from (captured at run start). */
   occCommit: string;
@@ -186,6 +162,8 @@ interface ResultsFile {
   workingTreeClean: boolean;
   datasetHash: string;
   tasks: number;
+  /** Tasks where buildContext threw (e.g. budget-unreachable) and were skipped. */
+  skippedTasks: Array<{ task: string; error: string }>;
   systems: Record<SystemName, SystemSummary>;
   goldSliceStats: GoldSliceStats;
   /** Seeded PAIRED bootstrap over per-task differences (OCC − BM25). */
@@ -203,6 +181,30 @@ interface ResultsFile {
     };
   };
   caseStudies: { worst: CaseStudy[]; best: CaseStudy[] };
+  /**
+   * OCC per-task metric values (full + source-only slices), enabling paired
+   * old-vs-new comparisons across runs (metrics.pairedDiffCi on aligned ids).
+   */
+  perTask: Array<{
+    id: string;
+    goldFiles: number;
+    full: {
+      top1: number;
+      recall5: number;
+      recall10: number;
+      allGoldAcc10: number;
+      mrr: number;
+      packageRecall: number;
+    };
+    sourceOnly: {
+      top1: number;
+      recall5: number;
+      recall10: number;
+      allGoldAcc10: number;
+      mrr: number;
+      packageRecall: number;
+    };
+  }>;
   timingMs: { snapshotMs: number; indexMs: number; occMs: number; baselinesMs: number };
   environment: { node: string; platform: string; cpu: string; totalMemGB: number };
 }
@@ -213,40 +215,15 @@ function argReposFilter(): string[] | undefined {
   return value ? value.split(",").filter((s) => s.length > 0) : undefined;
 }
 
-function argSplit(): "eval" | "tuning" {
+function argSplit(): "eval" | "tuning" | "holdout" {
   const i = process.argv.indexOf("--split");
   const value = i >= 0 ? process.argv[i + 1] : undefined;
-  if (value === "tuning") return "tuning";
+  if (value === "tuning" || value === "holdout") return value;
   if (value !== undefined && value !== "eval") {
-    console.error(`--split must be "eval" or "tuning" (got ${value})`);
+    console.error(`--split must be "eval", "tuning" or "holdout" (got ${value})`);
     process.exit(1);
   }
   return "eval";
-}
-
-/** Reads every text file of the snapshot dir into an in-memory map. */
-function readSnapshot(dir: string): Snapshot {
-  const out: Snapshot = new Map();
-  const stack = [dir];
-  while (stack.length > 0) {
-    const cur = stack.pop()!;
-    for (const name of fs.readdirSync(cur, { withFileTypes: true })) {
-      const full = path.join(cur, name.name);
-      if (name.isDirectory()) {
-        stack.push(full);
-        continue;
-      }
-      if (!name.isFile()) continue;
-      const rel = path.relative(dir, full).replace(/\\/g, "/");
-      try {
-        if (fs.statSync(full).size > MAX_SNAPSHOT_FILE_BYTES) continue;
-        out.set(rel, fs.readFileSync(full, "utf8"));
-      } catch {
-        /* unreadable file is simply not a snapshot candidate */
-      }
-    }
-  }
-  return out;
 }
 
 function occHeadCommit(): string {
@@ -270,70 +247,122 @@ function occWorkingTreeClean(): boolean {
 }
 
 /**
- * Builds the TUNING dataset in memory: mines each pinned clone, samples the
- * earlier half of the time split (buildDataset split="tuning"), applies the
- * same mode gold filter. Never reads or writes docs/eval/dataset.json.
+ * M3 budget guard: counts FULL eval-split runs in a git-ignored counter file
+ * so results.json can prove how many eval runs happened in the milestone
+ * (tuning runs are unlimited and never counted).
  */
-function buildTuningDataset(repos: ReposFile, wanted: string[] | undefined): DatasetFile {
-  const perRepo: Record<string, RepoEntry> = {};
-  const allTasks: DatasetTask[] = [];
-  for (const repo of repos.repos) {
-    if (wanted && !wanted.includes(repo.id)) continue;
-    const clonePath = cloneDirFor(repo.id);
-    try {
-      verifyPinnedCommit(clonePath, repo.pinnedCommit);
-    } catch (error) {
-      console.error(`[${repo.id}] ${(error as Error).message}`);
+const EVAL_RUN_COUNTER = path.join(ROOT, ".eval-cache", "eval-split-runs.json");
+function nextEvalRunIndex(): number {
+  let n = 0;
+  try {
+    n = (JSON.parse(fs.readFileSync(EVAL_RUN_COUNTER, "utf8")) as { count?: number }).count ?? 0;
+  } catch {
+    /* fresh counter */
+  }
+  n += 1;
+  fs.mkdirSync(path.dirname(EVAL_RUN_COUNTER), { recursive: true });
+  fs.writeFileSync(EVAL_RUN_COUNTER, `${JSON.stringify({ count: n })}\n`);
+  return n;
+}
+
+/**
+ * M3 ablation registry: named scoring changes can be switched off for a run
+ * via `--ablate <name>` (repeatable). The harness flips the exported named
+ * constant (the extension default stays on) and records the ablation in
+ * results.json so A/B comparisons are provably configured.
+ */
+const ABLATIONS: Record<string, { label: string; apply: () => void }> = {
+  fusion: {
+    label: "M3_CONTENT_FUSION (E2 content-score fusion) disabled",
+    apply: () => {
+      M3_CONTENT_FUSION.enabled = false;
+    },
+  },
+  body: {
+    label: "M3_BODY_FIELD (E1 body lexical field) disabled",
+    apply: () => {
+      M3_BODY_FIELD.enabled = false;
+    },
+  },
+  rankPriority: {
+    label: "M3B_RANK_PRIORITY (M3b/P1 rank-priority content slots) disabled",
+    apply: () => {
+      M3B_RANK_PRIORITY.enabled = false;
+    },
+  },
+};
+
+function argAblations(): string[] {
+  const out: string[] = [];
+  for (
+    let i = process.argv.indexOf("--ablate");
+    i !== -1;
+    i = process.argv.indexOf("--ablate", i + 1)
+  ) {
+    const name = process.argv[i + 1];
+    if (!name || !ABLATIONS[name]) {
+      console.error(`--ablate must be one of: ${Object.keys(ABLATIONS).join(", ")}`);
       process.exit(1);
     }
-    const built = buildDataset(
-      repo.id,
-      mineCommits(clonePath),
-      repos.tasksPerRepo,
-      repos.seed,
-      "tuning",
-    );
-    const treeCache = new Map<string, LsTreeEntry[]>();
-    const filtered = applyModeGoldFilter(built.tasks, (parentSha) => {
-      let entries = treeCache.get(parentSha);
-      if (!entries) {
-        entries = lsTree(clonePath, parentSha);
-        treeCache.set(parentSha, entries);
-      }
-      return entries;
-    });
-    const stats: DatasetStats = { ...built.stats, ...filtered.stats };
-    perRepo[repo.id] = {
-      pinnedCommit: repo.pinnedCommit,
-      license: repo.license,
-      note: repo.note,
-      sourceFilesAtPin: 0,
-      stats,
-      datasetHash: datasetHash(filtered.tasks),
-    };
-    allTasks.push(...filtered.tasks);
-    console.log(
-      `[${repo.id}] TUNING half: sampled=${stats.sampled} evaluated=${stats.evaluatedTasks}` +
-        ` (empty-gold dropped=${stats.tasksDroppedEmptyGold}, partial-gold tasks=${stats.tasksWithPartialGoldDrop})`,
-    );
+    out.push(name);
   }
-  return {
-    seed: repos.seed,
-    tasksPerRepo: repos.tasksPerRepo,
-    datasetHash: datasetHash(allTasks),
-    repos: perRepo,
-    tasks: allTasks,
-  };
+  return out;
 }
 
 async function run(): Promise<void> {
   const split = argSplit();
-  const outJson = split === "tuning" ? TUNING_RESULTS_JSON : RESULTS_JSON;
-  const outMd = split === "tuning" ? TUNING_RESULTS_MD : RESULTS_MD;
-  const repos = JSON.parse(fs.readFileSync(REPOS_JSON, "utf8")) as ReposFile;
+  const ablations = argAblations();
+  if (split === "holdout" && ablations.length > 0) {
+    console.error("--ablate is not allowed on the holdout (single-shot final confirmation)");
+    process.exit(1);
+  }
+  for (const name of ablations) {
+    ABLATIONS[name]!.apply();
+    console.log(`ABLATION active: ${name} — ${ABLATIONS[name]!.label}`);
+  }
+  const outJson =
+    split === "tuning"
+      ? TUNING_RESULTS_JSON
+      : split === "holdout"
+        ? HOLDOUT_RESULTS_JSON
+        : RESULTS_JSON;
+  const outMd =
+    split === "tuning" ? TUNING_RESULTS_MD : split === "holdout" ? HOLDOUT_RESULTS_MD : RESULTS_MD;
+  const repos = loadReposFile();
   const filter = argReposFilter();
   let dataset: DatasetFile;
-  if (split === "tuning") {
+  if (split === "holdout") {
+    // Run-once guard: the holdout is the final confirmation and must never
+    // be re-run or peeked at twice.
+    const guard = path.join(ROOT, ".eval-cache", "holdout-runs.json");
+    let runs = 0;
+    try {
+      runs = (JSON.parse(fs.readFileSync(guard, "utf8")) as { count?: number }).count ?? 0;
+    } catch {
+      /* fresh */
+    }
+    if (runs >= 1) {
+      console.error("HOLDOUT ALREADY RUN — refusing a second run (see results-holdout.json).");
+      process.exit(1);
+    }
+    fs.mkdirSync(path.dirname(guard), { recursive: true });
+    fs.writeFileSync(
+      guard,
+      `${JSON.stringify({ count: runs + 1, at: new Date().toISOString() })}\n`,
+    );
+    console.log(
+      "======================================================================\n" +
+        " HOLDOUT RUN (single shot) — unsampled eval-half tasks; also computes\n" +
+        " the paired OCC(M3b) vs OCC(M3, P1 ablated in-process) comparison.\n" +
+        "======================================================================",
+    );
+    try {
+      dataset = buildHoldoutDataset(repos, filter);
+    } catch (error) {
+      console.error((error as Error).message);
+      process.exit(1);
+    }
+  } else if (split === "tuning") {
     console.log(
       "======================================================================\n" +
         " TUNING SPLIT RUN — writes docs/eval/results-tuning.* only;\n" +
@@ -342,17 +371,10 @@ async function run(): Promise<void> {
     );
     dataset = buildTuningDataset(repos, filter);
   } else {
-    if (!fs.existsSync(DATASET_JSON)) {
-      console.error(
-        `Missing ${path.relative(ROOT, DATASET_JSON)} — build it first: npm run eval:build-dataset (needs network once).`,
-      );
-      process.exit(1);
-    }
-    dataset = JSON.parse(fs.readFileSync(DATASET_JSON, "utf8")) as DatasetFile;
-    if (dataset.datasetHash !== datasetHash(dataset.tasks)) {
-      console.error(
-        `Dataset hash mismatch in ${path.relative(ROOT, DATASET_JSON)} — it was edited or built with different code. Re-run eval:build-dataset.`,
-      );
+    try {
+      dataset = loadEvalDataset();
+    } catch (error) {
+      console.error((error as Error).message);
       process.exit(1);
     }
   }
@@ -389,29 +411,85 @@ async function run(): Promise<void> {
   const ranks = new Map<SystemName, Map<string, RankedFile[]>>(SYSTEMS.map((s) => [s, new Map()]));
   const occPackageStats: Array<{ tokens: number; files: number }> = [];
   const timingMs = { snapshotMs: 0, indexMs: 0, occMs: 0, baselinesMs: 0 };
+  const skippedTasks: Array<{ task: string; error: string }> = [];
   /** OCC's UNTRUNCATED candidate ranking per task (path order), for the gap analysis. */
   const fullRankedByTask = new Map<string, string[]>();
   /** Files actually included in OCC's generated package, parsed from the payload. */
   const packageFilesByTask = new Map<string, string[]>();
+  /** Holdout only: per-task metrics of the M3 configuration (P1 ablated
+   *  in-process right after the M3b build) for the paired comparison. */
+  const perTaskM3: Array<{
+    id: string;
+    goldFiles: number;
+    full: Record<PairedMetricKey, number>;
+    sourceOnly: Record<PairedMetricKey, number>;
+  }> = [];
+
+  // Per-task checkpoint: an interrupted run (crash, stall, network) resumes
+  // from the JSONL instead of repeating hours of snapshots and indexing.
+  interface TaskCheckpoint {
+    task: string;
+    ranks?: Record<SystemName, RankedFile[]>;
+    fullRanked?: string[];
+    packageFiles?: string[];
+    packageStats?: { tokens: number; files: number };
+    timing?: { snapshotMs: number; indexMs: number; occMs: number; baselinesMs: number };
+    skipped?: { task: string; error: string };
+    perTaskM3?: (typeof perTaskM3)[number];
+  }
+  const checkpointFile = path.join(ROOT, ".eval-cache", `results-${split}.records.jsonl`);
+  const doneTasks = new Set<string>();
+  const doneM3 = new Map<string, (typeof perTaskM3)[number]>();
+  if (fs.existsSync(checkpointFile)) {
+    for (const line of fs.readFileSync(checkpointFile, "utf8").split(/\r?\n/)) {
+      if (line.trim().length === 0) continue;
+      const c = JSON.parse(line) as TaskCheckpoint;
+      doneTasks.add(c.task);
+      if (c.skipped) skippedTasks.push(c.skipped);
+      if (c.ranks) for (const s of SYSTEMS) ranks.get(s)!.set(c.task, c.ranks[s] ?? []);
+      if (c.fullRanked) fullRankedByTask.set(c.task, c.fullRanked);
+      if (c.packageFiles) packageFilesByTask.set(c.task, c.packageFiles);
+      if (c.packageStats) occPackageStats.push(c.packageStats);
+      if (c.perTaskM3) doneM3.set(c.task, c.perTaskM3);
+      if (c.timing) {
+        timingMs.snapshotMs += c.timing.snapshotMs;
+        timingMs.indexMs += c.timing.indexMs;
+        timingMs.occMs += c.timing.occMs;
+        timingMs.baselinesMs += c.timing.baselinesMs;
+      }
+    }
+    console.log(`resuming: ${doneTasks.size} tasks already checkpointed`);
+    for (const entry of doneM3.values()) perTaskM3.push(entry);
+  }
+  const checkpoint = (c: TaskCheckpoint): void => {
+    fs.mkdirSync(path.dirname(checkpointFile), { recursive: true });
+    fs.appendFileSync(checkpointFile, `${JSON.stringify(c)}\n`);
+  };
 
   for (const repoId of repoIds) {
     for (const t of tasks.filter((x) => x.repoId === repoId)) {
+      if (doneTasks.has(t.id)) continue;
+      let dTiming = { snapshotMs: 0, indexMs: 0, occMs: 0, baselinesMs: 0 };
       const clonePath = cloneDirFor(repoId);
       const snapshotStart = performance.now();
       // Task ids contain ':' (e.g. "axios:d17d9a66"); Windows paths reject it.
       const snapKey = `${repoId}-${t.sha.slice(0, 12)}`;
       materializeSnapshot(clonePath, t.parentSha, SCRATCH_ROOT, snapKey);
-      timingMs.snapshotMs += performance.now() - snapshotStart;
+      dTiming.snapshotMs = performance.now() - snapshotStart;
 
       const indexStart = performance.now();
       const snapDir = path.join(SCRATCH_ROOT, snapKey);
       const app = new OccApplication(snapDir, path.join(SCRATCH_ROOT, "store"));
       app.initialize();
       const indexResult = await app.indexing.indexWorkspace(CancellationSource.never());
-      timingMs.indexMs += performance.now() - indexStart;
+      dTiming.indexMs = performance.now() - indexStart;
+      timingMs.snapshotMs += dTiming.snapshotMs;
+      timingMs.indexMs += dTiming.indexMs;
       if (indexResult.cancelled || app.indexing.getEntries().size === 0) {
         console.error(`  ${repoId} ${t.id}: indexing produced no entries — skipping task`);
         fs.rmSync(snapDir, { recursive: true, force: true });
+        checkpoint({ task: t.id, timing: dTiming, skipped: { task: t.id, error: "no entries" } });
+        skippedTasks.push({ task: t.id, error: "no entries" });
         continue;
       }
 
@@ -426,7 +504,20 @@ async function run(): Promise<void> {
       }
 
       const occStart = performance.now();
-      const context = app.buildContext("task", { taskText: t.task });
+      let context: ReturnType<OccApplication["buildContext"]>;
+      try {
+        context = app.buildContext("task", { taskText: t.task });
+      } catch (error) {
+        // e.g. CONTEXT_BUDGET_UNREACHABLE when static sections alone exceed
+        // the budget on very large snapshots — skip the task, never crash
+        // the whole run.
+        const skipped = { task: t.id, error: (error as Error).message };
+        skippedTasks.push(skipped);
+        console.error(`  ${repoId} ${t.id}: SKIPPED (${skipped.error.slice(0, 90)})`);
+        fs.rmSync(snapDir, { recursive: true, force: true });
+        checkpoint({ task: t.id, timing: dTiming, skipped });
+        continue;
+      }
       const rankedAll = context.retrieval?.ranked ?? [];
       const occRanking = rankedAll
         .slice(0, RETRIEVE_LIMIT)
@@ -442,8 +533,10 @@ async function run(): Promise<void> {
       packageFilesByTask.set(t.id, [
         ...new Set([...context.payload.matchAll(/^### FILE: (.+)$/gm)].map((m) => m[1]!)),
       ]);
-      occPackageStats.push({ tokens: context.estimatedTokens, files: context.filesIncluded });
-      timingMs.occMs += performance.now() - occStart;
+      const pkgStats = { tokens: context.estimatedTokens, files: context.filesIncluded };
+      occPackageStats.push(pkgStats);
+      dTiming.occMs = performance.now() - occStart;
+      timingMs.occMs += dTiming.occMs;
 
       const blStart = performance.now();
       const snapshot = readSnapshot(snapDir);
@@ -452,9 +545,58 @@ async function run(): Promise<void> {
       ranks
         .get("random")!
         .set(t.id, randomBaseline(snapshot, t.task, SEED).slice(0, RETRIEVE_LIMIT));
-      timingMs.baselinesMs += performance.now() - blStart;
+      dTiming.baselinesMs = performance.now() - blStart;
+      timingMs.baselinesMs += dTiming.baselinesMs;
+
+      // Holdout only: same index, same task, M3 configuration (P1 ablated
+      // in-process) — captured per task so the final confirmation is PAIRED
+      // within the single allowed holdout run.
+      let m3Entry: (typeof perTaskM3)[number] | undefined;
+      if (split === "holdout") {
+        M3B_RANK_PRIORITY.enabled = false;
+        try {
+          const ctxM3 = app.buildContext("task", { taskText: t.task });
+          const rankedM3 = (ctxM3.retrieval?.ranked ?? []).slice(0, RETRIEVE_LIMIT);
+          const pkgM3 = new Set(
+            [...ctxM3.payload.matchAll(/^### FILE: (.+)$/gm)].map((m) => m[1]!),
+          );
+          const pkgRecall = (gold: string[]): number =>
+            gold.length === 0 ? 0 : gold.filter((g) => pkgM3.has(g)).length / gold.length;
+          const full = taskMetrics(rankedM3, t.gold);
+          const srcGold = t.gold.filter(isOccParsedPath);
+          const src =
+            srcGold.length > 0
+              ? taskMetrics(rankedM3, srcGold)
+              : { top1: 0, recall5: 0, recall10: 0, allGoldAcc10: 0, mrr: 0 };
+          m3Entry = {
+            id: t.id,
+            goldFiles: t.gold.length,
+            full: { ...full, packageRecall: pkgRecall(t.gold) },
+            sourceOnly: { ...src, packageRecall: pkgRecall(srcGold) },
+          };
+          perTaskM3.push(m3Entry);
+        } catch (error) {
+          console.error(
+            `  ${t.id}: M3-side build skipped (${(error as Error).message.slice(0, 70)})`,
+          );
+        } finally {
+          M3B_RANK_PRIORITY.enabled = true;
+        }
+      }
 
       fs.rmSync(snapDir, { recursive: true, force: true });
+      checkpoint({
+        task: t.id,
+        ranks: Object.fromEntries(SYSTEMS.map((s) => [s, ranks.get(s)!.get(t.id) ?? []])) as Record<
+          SystemName,
+          RankedFile[]
+        >,
+        fullRanked: fullRankedByTask.get(t.id) ?? [],
+        packageFiles: packageFilesByTask.get(t.id) ?? [],
+        packageStats: pkgStats,
+        timing: dTiming,
+        perTaskM3: m3Entry,
+      });
       console.log(
         `  ${repoId} ${t.id}: rerank ${occRanking.length} files (snapshot had ${snapshot.size})`,
       );
@@ -653,18 +795,71 @@ async function run(): Promise<void> {
     best: sortedCases.slice(-5).map(toCase).reverse(),
   };
 
+  // Eval-run budget is consumed only by runs that COMPLETE (a crashed run
+  // measures nothing and must not burn one of the two allowed eval runs).
+  const evalRunIndex = split === "eval" ? nextEvalRunIndex() : null;
+  const occRankingOf = (id: string): RankedFile[] => ranks.get("occ")!.get(id) ?? [];
+  const perTask = [...tasks]
+    .sort((a, b) => (a.id < b.id ? -1 : 1))
+    .map((t) => {
+      const gold = goldOf("full")(t);
+      const srcGold = goldOf("sourceOnly")(t);
+      const f = taskMetrics(occRankingOf(t.id), gold);
+      const s =
+        srcGold.length > 0
+          ? taskMetrics(occRankingOf(t.id), srcGold)
+          : { top1: 0, recall5: 0, recall10: 0, allGoldAcc10: 0, mrr: 0 };
+      return {
+        id: t.id,
+        goldFiles: gold.length,
+        full: { ...f, packageRecall: packageRecallValue("occ", t, gold) },
+        sourceOnly: {
+          ...s,
+          packageRecall: srcGold.length > 0 ? packageRecallValue("occ", t, srcGold) : 0,
+        },
+      };
+    });
+
+  // Holdout: paired OCC(M3b) vs OCC(M3, P1 ablated in-process) bootstrap.
+  let pairedOccM3bVsM3: ResultsFile["pairedOccM3bVsM3"];
+  if (split === "holdout") {
+    const m3ById = new Map(perTaskM3.map((m) => [m.id, m] as const));
+    const joined = perTask.filter((p) => m3ById.has(p.id));
+    pairedOccM3bVsM3 = {} as NonNullable<ResultsFile["pairedOccM3bVsM3"]>;
+    for (const slice of ["full", "sourceOnly"] as GoldSlice[]) {
+      const row = {} as Record<PairedMetricKey, PairedDiff>;
+      for (const key of PAIRED_METRIC_KEYS) {
+        row[key] = pairedDiffCi(
+          joined.map((p) => p[slice][key]),
+          joined.map((p) => m3ById.get(p.id)![slice][key]),
+          SEED + hashString(`m3b:${slice}:${key}`),
+        );
+      }
+      pairedOccM3bVsM3[slice] = row;
+    }
+  }
+
   const results: ResultsFile = {
     split,
+    ablations,
+    holdoutDefinition:
+      split === "holdout"
+        ? "unsampled eval-half tasks: the (tasksPerRepo + holdoutTasksPerRepo) draw of the SAME seeded sample stream minus the committed eval sample (containment asserted); disjoint from the eval sample by filter and from the tuning half by construction. Intended post-pin commits were unavailable: upstreams advanced only 0/0/1/1/6 non-merge commits past the pins as of 2026-10-25."
+        : undefined,
+    pairedOccM3bVsM3,
+    evalSplitRunsIncludingThis: evalRunIndex,
     seed: SEED,
     occCommit: occHeadCommit(),
     workingTreeClean: occWorkingTreeClean(),
     datasetHash: dataset.datasetHash,
     tasks: tasks.length,
+    skippedTasks,
     systems,
     goldSliceStats,
     pairedBootstrap,
     allGoldGap,
     caseStudies,
+    perTask,
     timingMs,
     environment: {
       node: process.version,
@@ -676,6 +871,7 @@ async function run(): Promise<void> {
 
   fs.mkdirSync(path.dirname(outJson), { recursive: true });
   fs.writeFileSync(outJson, `${JSON.stringify(results, null, 2)}\n`);
+  fs.rmSync(checkpointFile, { force: true }); // complete: a fresh run starts clean
   writeResultsMd(results, dataset, outMd);
   console.log(`results written: ${path.relative(ROOT, outJson)} + ${path.relative(ROOT, outMd)}`);
 }
@@ -697,11 +893,11 @@ function fmt(s: { mean: number; ciLow: number; ciHigh: number }): string {
 function writeResultsMd(results: ResultsFile, dataset: DatasetFile, outPath: string): void {
   const lines: string[] = [];
   lines.push(
-    `# Retrieval Evaluation Results${results.split === "tuning" ? " — TUNING SPLIT" : ""}`,
+    `# Retrieval Evaluation Results${results.split === "tuning" ? " — TUNING SPLIT" : results.split === "holdout" ? " — HOLDOUT (single shot)" : ""}`,
   );
   lines.push("");
   lines.push(
-    `Dataset hash \`${results.datasetHash}\` · ${results.tasks} tasks · seed ${results.seed} · split **${results.split}** · OCC commit \`${results.occCommit.slice(0, 12)}\` · working tree clean at run start: ${results.workingTreeClean ? "yes" : "NO"}`,
+    `Dataset hash \`${results.datasetHash}\` · ${results.tasks} tasks · seed ${results.seed} · split **${results.split}**${results.evalSplitRunsIncludingThis ? ` · eval-split run #${results.evalSplitRunsIncludingThis} this milestone` : ""} · OCC commit \`${results.occCommit.slice(0, 12)}\` · working tree clean at run start: ${results.workingTreeClean ? "yes" : "NO"}`,
   );
   lines.push("");
   lines.push("## Overall (mean [95% bootstrap CI], per task)");
@@ -760,6 +956,23 @@ function writeResultsMd(results: ResultsFile, dataset: DatasetFile, outPath: str
       );
     }
     lines.push("");
+  }
+  if (results.pairedOccM3bVsM3) {
+    lines.push("## Paired bootstrap: OCC(M3b) − OCC(M3, P1 ablated in-process)");
+    lines.push("");
+    for (const slice of ["full", "sourceOnly"] as GoldSlice[]) {
+      lines.push(`### ${slice === "full" ? "Full gold" : "Source-only slice"}`);
+      lines.push("");
+      lines.push("| Metric | Mean diff (M3b − M3) [95% CI] | Excludes 0 |");
+      lines.push("|---|---|---|");
+      for (const key of PAIRED_METRIC_KEYS) {
+        const d = results.pairedOccM3bVsM3[slice][key];
+        lines.push(
+          `| ${key} | ${d.meanDiff.toFixed(3)} [${d.ciLow.toFixed(3)}, ${d.ciHigh.toFixed(3)}] | ${d.excludesZero ? "**yes**" : "no"} |`,
+        );
+      }
+      lines.push("");
+    }
   }
   lines.push("## All-gold gap analysis (BM25 all-gold in top 10, OCC not)");
   lines.push("");

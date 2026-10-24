@@ -50,12 +50,11 @@ const ROOT = path.resolve(import.meta.dirname ?? path.join(process.cwd(), "scrip
 const REPOS_JSON = path.join(ROOT, "scripts", "eval", "repos.json");
 const OUT_JSON = path.join(ROOT, "docs", "eval", "dataset.json");
 
-function readArgs(): { tasksPerRepo: number } {
+function readArgs(): { tasksPerRepo?: number } {
   const argv = process.argv.slice(2);
-  let tasksPerRepo = 40;
   const i = argv.indexOf("--tasks");
-  if (i >= 0 && argv[i + 1]) tasksPerRepo = parseInt(argv[i + 1]!, 10) || 40;
-  return { tasksPerRepo };
+  if (i >= 0 && argv[i + 1]) return { tasksPerRepo: parseInt(argv[i + 1]!, 10) || undefined };
+  return {};
 }
 
 /** Count of production TS/JS source files at the pinned snapshot (reporting only). */
@@ -69,8 +68,10 @@ function countSourceFiles(clonePath: string, pinnedCommit: string): number {
 }
 
 async function main(): Promise<void> {
-  const { tasksPerRepo } = readArgs();
+  const args = readArgs();
   const config = JSON.parse(fs.readFileSync(REPOS_JSON, "utf8")) as ReposConfig;
+  // Default sample size lives in repos.json (single source of truth).
+  const tasksPerRepo = args.tasksPerRepo ?? config.tasksPerRepo;
   const perRepo: Record<
     string,
     {
@@ -96,7 +97,7 @@ async function main(): Promise<void> {
     }
     const sourceFilesAtPin = countSourceFiles(clonePath, repo.pinnedCommit);
     console.log(`[${repo.id}] mining history (source files at pin: ${sourceFilesAtPin})…`);
-    const mined = mineCommits(clonePath);
+    const mined = mineCommits(clonePath, repo.pinnedCommit);
     const built = buildDataset(repo.id, mined, tasksPerRepo, config.seed);
     // Effective gold: parent-tree regular files only. Symlinks and gitlinks
     // are excluded from gold (and from every indexed snapshot) by git tree

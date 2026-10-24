@@ -109,6 +109,22 @@ const TIER_ORDER_SIGNAL_WEIGHT: Record<string, number> = {
 };
 
 /**
+ * M3b/P1 (ablatable) — rank-priority content slots. Inclusion order is
+ * normally tier-then-score; under tight content budgets that lets tier-
+ * boosted files ranked 9–30 consume slots before top-ranked gold, which is
+ * then demoted to metadata (Step-0 eval split: 129 top-8 gold files lost,
+ * packages contained only 4.27 of the top-8 on average while OCC's ranking
+ * itself beat BM25). With this enabled, the first `topN` retrieval-ranked
+ * eligible files claim content slots in rank order before tier-ordered
+ * extras. Pure ordering: budgets, ledger, tiers, and WHY reasons are
+ * unchanged. Disable to restore tier-first ordering exactly.
+ */
+export const M3B_RANK_PRIORITY = {
+  enabled: true,
+  topN: 6,
+};
+
+/**
  * Builds a complete context package for a mode:
  * retrieve → tier → security screen → budgeted truncation ladder → format.
  *
@@ -127,7 +143,23 @@ export class ContextBuilder {
 
     // Security screen BEFORE budgeting: blocked files never consume budget.
     const security = this.screenCandidates(candidates);
-    const eligible = candidates.filter((c) => !security.blockedFiles.has(c.path));
+    const eligibleAll = candidates.filter((c) => !security.blockedFiles.has(c.path));
+    // M3b/P1: the top-N retrieval-ranked eligible files take content slots in
+    // rank order first; everything else keeps the tier-then-score order.
+    let eligible = eligibleAll;
+    if (M3B_RANK_PRIORITY.enabled && retrieval.ranked.length > 0) {
+      const rankOf = new Map(retrieval.ranked.map((r, i) => [r.path, i + 1] as const));
+      const byRank = eligibleAll
+        .filter((c) => {
+          const r = rankOf.get(c.path);
+          return r !== undefined && r <= M3B_RANK_PRIORITY.topN;
+        })
+        .sort((a, b) => rankOf.get(a.path)! - rankOf.get(b.path)!);
+      if (byRank.length > 0) {
+        const prioritized = new Set(byRank.map((c) => c.path));
+        eligible = [...byRank, ...eligibleAll.filter((c) => !prioritized.has(c.path))];
+      }
+    }
 
     // Reserve budget for static sections (tree/architecture/why overhead);
     // the exact guarantee comes from the degrade loop below.

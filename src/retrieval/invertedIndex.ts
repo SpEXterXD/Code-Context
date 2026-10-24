@@ -18,6 +18,29 @@ export const FIELD_WEIGHTS = {
 const MAX_TF_PER_FIELD = 10;
 
 /**
+ * M3/E1 (ablatable) — body/comment/string-literal text field with BM25F-style
+ * per-field length normalization. Plain BM25 over file contents beats OCC's
+ * field-only index on recall-side metrics (M2 baseline); this adds the same
+ * signal with a field weight below every structured field. Length is
+ * normalized against a FIXED reference (not a corpus average) so incremental
+ * updates and full rebuilds produce identical values. Disable and reindex to
+ * ablate (entries keep bodyTokens; the index simply ignores them).
+ */
+export const M3_BODY_FIELD = {
+  enabled: true,
+  weight: 0.5,
+  k1: 1.2,
+  b: 0.75,
+  referenceLength: 2000,
+};
+
+function bodyTfNorm(tf: number, bodyLength: number): number {
+  const { k1, b, referenceLength } = M3_BODY_FIELD;
+  const len = Math.min(bodyLength, referenceLength * 2);
+  return (tf * (k1 + 1)) / (tf + k1 * (1 - b + (b * len) / referenceLength));
+}
+
+/**
  * Incremental inverted index over indexed files. Maintained in memory from
  * persisted entries; `applyEntry`/`removeFile` keep it in sync with the
  * index manager so no full rebuild is ever needed after startup.
@@ -77,6 +100,16 @@ export class InvertedIndex {
         // Sublinear tf damping (1 + ln tf): standard IR practice.
         const contribution = weight * (1 + Math.log(Math.min(count, MAX_TF_PER_FIELD)));
         terms.set(term, (terms.get(term) ?? 0) + contribution);
+      }
+    }
+
+    // M3/E1: body field with per-field BM25F length normalization.
+    if (M3_BODY_FIELD.enabled && entry.bodyTokens && entry.bodyTokens.length > 0) {
+      const len = entry.bodyLength ?? M3_BODY_FIELD.referenceLength;
+      for (const { term: raw, tf } of entry.bodyTokens) {
+        const term = canonicalTerm(raw);
+        if (!term) continue;
+        terms.set(term, (terms.get(term) ?? 0) + M3_BODY_FIELD.weight * bodyTfNorm(tf, len));
       }
     }
 

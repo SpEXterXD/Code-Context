@@ -17,6 +17,28 @@ import {
 } from "./relevanceScorer";
 import type { GitMetadata } from "../git/gitMetadata";
 
+/**
+ * M3/E2 (ablatable) — content-score fusion into the final ranking.
+ *
+ * Step-0 diagnostics showed the dominant gold loss is RANKING: files whose
+ * indexed fields match the query (content signals: lexical/exact/file-name)
+ * get buried below graph-structural bonuses (0.42–0.7 per edge) — deep
+ * inside the returned list or evicted from the candidate slice entirely —
+ * while the package is filled from the top. Content raw scores are
+ * tf-idf-normalized (≈0.1–1.0) and therefore an order of magnitude smaller
+ * than structural totals, so the fusion multiplies content by 2.0: a file
+ * whose content score is ≥0.25 outranks a graph-only neighbor. The exact-
+ * symbol leader also gains its (larger) bonus, so Top-1 ordering among
+ * content-strong files is preserved. Set `enabled: false` to restore the
+ * pre-M3 scoring exactly (regression-tested).
+ */
+export const M3_CONTENT_FUSION = {
+  enabled: true,
+  /** Content multiplier: 2.0 puts a 0.25+ content match on par with one
+   * direct-dependency structural bonus (0.7 × 0.6 ≈ 0.42). */
+  weight: 2.0,
+};
+
 export interface RetrievalOptions {
   limit?: number;
   /** Hard depth limit for graph expansion around seed files. */
@@ -322,11 +344,11 @@ export class HybridRetriever {
     }
 
     const ranked: ScoredFile[] = [...contributions.entries()]
-      .map(([path, signals]) => ({
-        path,
-        score: signals.reduce((a, s) => a + s.weight, 0),
-        signals,
-      }))
+      .map(([path, signals]) => {
+        const raw = signals.reduce((a, s) => a + s.weight, 0);
+        const bonus = M3_CONTENT_FUSION.enabled ? M3_CONTENT_FUSION.weight * contentScore(path) : 0;
+        return { path, score: raw + bonus, signals };
+      })
       .filter((s) => s.score > 0)
       .sort((a, b) => b.score - a.score || compareStrings(a.path, b.path))
       .slice(0, limit);

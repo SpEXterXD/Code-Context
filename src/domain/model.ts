@@ -101,6 +101,14 @@ export interface FileEntry {
   fileSummary?: string;
   /** Unique source identifiers (capped) harvested by the parser, for lexical search. */
   identifiers?: string[];
+  /**
+   * M3/E1: top body/comment/string tokens by term frequency (capped,
+   * stopword-free, deterministically sorted) for lexical search. Absent on
+   * pre-M3 entries (schema drift triggers a reindex).
+   */
+  bodyTokens?: Array<{ term: string; tf: number }>;
+  /** Total body token count before capping (BM25F length normalization). */
+  bodyLength?: number;
   /** Relationships between symbols within this file (extends/implements/calls). */
   internalRelations: Relationship[];
 }

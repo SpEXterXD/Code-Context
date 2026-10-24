@@ -1,6 +1,7 @@
 {
   "seed": 20260918,
-  "tasksPerRepo": 40,
+  "tasksPerRepo": 100,
+  "tuningTasksPerRepo": 60,
   "repos": [
     {
       "id": "hono",
@@ -29,7 +30,7 @@
     {
       "id": "axios",
       "url": "https://github.com/axios/axios.git",
-      "defaultBranch": "dev",
+      "defaultBranch": "v1.x",
       "pinnedCommit": "e6b79d9cef796ca3a903bb83e51d4752b019fd67",
       "license": "MIT",
       "note": "96 JS source files under lib/. Long-running history with focused bug-fix commits (pinned on the v1.x branch, HEAD 2026-10-21)."

@@ -4,6 +4,36 @@ import { TypeScriptParser } from "./typescriptParser";
 import { JsonParser } from "./jsonParser";
 import { MarkdownParser } from "./markdownParser";
 import { createDefaultParserRegistry } from "./parserRegistry";
+import { extractBodyTokens } from "./bodyTokens";
+
+describe("extractBodyTokens (M3/E1 body field)", () => {
+  it("counts body terms, drops stopwords and single chars, splits identifiers", () => {
+    const body = extractBodyTokens(
+      "// Cache invalidation for the retry queue\ncacheInvalidation(); /* the the the */",
+      10,
+    );
+    const tf = new Map(body.terms.map((t) => [t.term, t.tf] as const));
+    expect(tf.get("cache")).toBe(2); // comment + identifier
+    expect(tf.get("invalidation")).toBe(2);
+    expect(tf.get("retry")).toBe(1);
+    expect(tf.get("queue")).toBe(1);
+    expect(tf.has("the")).toBe(false); // stopword
+    expect(body.total).toBe(6); // pre-cap count, stopwords excluded
+  });
+
+  it("caps tf, caps term count, and is deterministic", () => {
+    const content = "cache ".repeat(30) + "zzz";
+    const a = extractBodyTokens(content, 3);
+    const b = extractBodyTokens(content, 3);
+    expect(a.terms[0]).toEqual({ term: "cache", tf: 8 }); // tf capped
+    expect(a.terms).toHaveLength(2); // cache + zzz, within topN=3
+    expect(a.total).toBe(31); // total is PRE-cap
+    expect(a).toEqual(b);
+    const tiny = extractBodyTokens("a b cache", 3);
+    expect(tiny.terms).toEqual([{ term: "cache", tf: 1 }]);
+    expect(tiny.total).toBe(1);
+  });
+});
 
 describe("TypeScriptParser", () => {
   const parser = new TypeScriptParser();

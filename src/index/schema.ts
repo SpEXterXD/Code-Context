@@ -1,7 +1,9 @@
 import { sha256Hex, toPosixPath } from "../shared/ids";
 
 /** Bump on incompatible changes; see docs/adr/002-local-index-storage.md. */
-export const STORE_SCHEMA_VERSION = 1;
+// v2 (M3/E1): entries gained optional bodyTokens/bodyLength for the body
+// lexical field; older stores rebuild so every entry carries body terms.
+export const STORE_SCHEMA_VERSION = 2;
 
 export interface IndexManifest {
   schemaVersion: number;

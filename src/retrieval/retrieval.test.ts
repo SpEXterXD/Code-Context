@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { analyzeQuery } from "./queryAnalyzer";
-import { InvertedIndex } from "./invertedIndex";
-import { HybridRetriever } from "./hybridRetriever";
+import { InvertedIndex, M3_BODY_FIELD } from "./invertedIndex";
+import { HybridRetriever, M3_CONTENT_FUSION } from "./hybridRetriever";
 import { GitMetadata } from "../git/gitMetadata";
 import { RelationshipGraph } from "../domain/graph";
 import type { FileEntry } from "../domain/model";
@@ -75,6 +75,45 @@ describe("InvertedIndex", () => {
     index.removeFile("src/a.ts");
     expect(index.docsFor("ratelimiter")).toEqual(["src/b.ts"]);
     expect(index.idf("nonexistent")).toBe(0);
+  });
+
+  it("M3/E1: indexes body tokens with BM25F length normalization", () => {
+    const short = entryWith("src/short.ts", {});
+    short.bodyTokens = [{ term: "backtracking", tf: 3 }];
+    short.bodyLength = 200;
+    const long = entryWith("src/long.ts", {});
+    long.bodyTokens = [{ term: "backtracking", tf: 3 }];
+    long.bodyLength = 4000;
+    const index = new InvertedIndex();
+    index.applyEntry(short);
+    index.applyEntry(long);
+    expect(index.tf("backtracking", "src/short.ts")).toBeGreaterThan(0);
+    // Same tf, four times the reference length ⇒ smaller normalized tf.
+    expect(index.tf("backtracking", "src/short.ts")).toBeGreaterThan(
+      index.tf("backtracking", "src/long.ts"),
+    );
+    // Body weight (0.5) is below every structured field: a symbol match for
+    // the same term still dominates.
+    const sym = entryWith("src/sym.ts", { symbols: ["backtracking"] });
+    index.applyEntry(sym);
+    expect(index.tf("backtracking", "src/sym.ts")).toBeGreaterThan(
+      index.tf("backtracking", "src/short.ts"),
+    );
+  });
+
+  it("M3/E1 ablates: disabled body field indexes nothing from bodyTokens", () => {
+    const wasEnabled = M3_BODY_FIELD.enabled;
+    try {
+      const e = entryWith("src/x.ts", {});
+      e.bodyTokens = [{ term: "quantum", tf: 5 }];
+      e.bodyLength = 100;
+      M3_BODY_FIELD.enabled = false;
+      const index = new InvertedIndex();
+      index.applyEntry(e);
+      expect(index.tf("quantum", "src/x.ts")).toBe(0);
+    } finally {
+      M3_BODY_FIELD.enabled = wasEnabled;
+    }
   });
 });
 
@@ -184,5 +223,73 @@ describe("HybridRetriever ranking + explanations", () => {
     const result = retriever.retrieve("f0", { maxGraphDepth: 2 });
     expect(result.ranked.some((r) => r.path === "d2/f2.ts")).toBe(true);
     expect(result.ranked.some((r) => r.path === "d3/f3.ts")).toBe(false);
+  });
+
+  describe("M3 content-score fusion (E2, ablatable)", () => {
+    function fusionFixture(): { retriever: HybridRetriever; paths: [string, string, string] } {
+      const seed = entryWith("src/seed.ts", { symbols: ["gizmo"] });
+      // Graph-proximate but content-free: only the imports edge fires (0.5).
+      const neighbor = entryWith("src/neighbor.ts", {});
+      neighbor.internalRelations = [
+        {
+          source: "file:src/neighbor.ts",
+          target: "file:src/seed.ts",
+          kind: "imports",
+          provenance: "STATIC_EXACT",
+        },
+      ];
+      // Content-matching but graph-disconnected: io-field import of "gizmo"
+      // scores 0.2 at baseline (below the 0.5 structural bonus) and 0.6 fused.
+      const lexical = entryWith("other/panel.ts", {});
+      lexical.imports = [
+        { sourceText: "./gizmo", importedNames: ["gizmo"], startLine: 1, isExternal: false },
+      ];
+      return {
+        retriever: makeRetriever([seed, neighbor, lexical]),
+        paths: ["src/seed.ts", "src/neighbor.ts", "other/panel.ts"],
+      };
+    }
+    const rankOf = (r: ReturnType<HybridRetriever["retrieve"]>, path: string): number =>
+      r.ranked.findIndex((x) => x.path === path);
+
+    it("lifts a content-matching file above a graph-only neighbor", () => {
+      const wasEnabled = M3_CONTENT_FUSION.enabled;
+      try {
+        const { retriever, paths } = fusionFixture();
+        M3_CONTENT_FUSION.enabled = false;
+        const baseline = retriever.retrieve("gizmo", { maxGraphDepth: 2 });
+        M3_CONTENT_FUSION.enabled = true;
+        const fused = retriever.retrieve("gizmo", { maxGraphDepth: 2 });
+        // Baseline: graph proximity (imports seed) outranks the lexical match.
+        expect(rankOf(baseline, paths[2])).toBeGreaterThan(rankOf(baseline, paths[1]));
+        // Fused: the content bonus flips the order; the exact-symbol seed stays Top-1.
+        expect(rankOf(fused, paths[2])).toBeLessThan(rankOf(fused, paths[1]));
+        expect(fused.ranked[0]?.path).toBe(paths[0]);
+        expect(baseline.ranked[0]?.path).toBe(paths[0]);
+      } finally {
+        M3_CONTENT_FUSION.enabled = wasEnabled;
+      }
+    });
+
+    it("ablates exactly: disabled reproduces the pre-M3 signal-sum scores", () => {
+      const wasEnabled = M3_CONTENT_FUSION.enabled;
+      try {
+        const { retriever } = fusionFixture();
+        M3_CONTENT_FUSION.enabled = false;
+        const baseline = retriever.retrieve("gizmo", { maxGraphDepth: 2 });
+        for (const r of baseline.ranked) {
+          const sum = r.signals.reduce((a, s) => a + s.weight, 0);
+          expect(r.score).toBeCloseTo(sum, 10);
+        }
+        M3_CONTENT_FUSION.enabled = true;
+        const fused = retriever.retrieve("gizmo", { maxGraphDepth: 2 });
+        const byPath = new Map(fused.ranked.map((r) => [r.path, r.score] as const));
+        for (const r of baseline.ranked) {
+          expect(byPath.get(r.path)!).toBeGreaterThanOrEqual(r.score);
+        }
+      } finally {
+        M3_CONTENT_FUSION.enabled = wasEnabled;
+      }
+    });
   });
 });
