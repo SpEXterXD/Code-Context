@@ -34,6 +34,7 @@ code --install-extension offline-code-context-compiler-0.3.0.vsix
 ```
 
 Or within VS Code:
+
 1. Open the **Extensions** view (`Ctrl+Shift+X` or `Cmd+Shift+X`).
 2. Click the `...` menu in the top-right corner of the Extensions view.
 3. Select **Install from VSIX...** and choose `offline-code-context-compiler-0.3.0.vsix`.
@@ -70,25 +71,25 @@ npm run package
 
 ## Command Reference
 
-| Command ID | Title | Palette | Context Menu Access |
-|---|---|---|---|
-| `offlineCodeContext.indexWorkspace` | OCC: Index Workspace | Yes | — |
-| `offlineCodeContext.rebuildIndex` | OCC: Rebuild Index | Yes | — |
-| `offlineCodeContext.indexCurrentFile` | OCC: Index Current File | Yes | — |
-| `offlineCodeContext.showIndexStatus` | OCC: Show Index Status | Yes | Status Bar click |
-| `offlineCodeContext.searchCodebase` | OCC: Search Codebase | Yes | — |
-| `offlineCodeContext.generateProjectContext` | OCC: Generate Project Context | Yes | Explorer folder right-click |
-| `offlineCodeContext.copyProjectContextToClipboard` | OCC: Copy Project Context to Clipboard | Yes | Explorer folder right-click |
-| `offlineCodeContext.generateFileContext` | OCC: Generate File Context | Yes | Editor & Editor Tab right-click |
-| `offlineCodeContext.copyFileContextToClipboard` | OCC: Copy File Context to Clipboard | Yes | Editor & Editor Tab right-click |
-| `offlineCodeContext.generateTaskContext` | OCC: Generate Task Context | Yes | — |
-| `offlineCodeContext.generateSelectionContext` | OCC: Generate Selection Context | Yes | — |
-| `offlineCodeContext.previewContext` | OCC: Preview Context | Yes | — |
-| `offlineCodeContext.copyContext` | OCC: Copy Context to Clipboard | Yes | — |
-| `offlineCodeContext.securityScan` | OCC: Security Scan | Yes | — |
-| `offlineCodeContext.clearIndex` | OCC: Clear Local Index | Yes | — |
+| Command ID                                         | Title                                  | Palette | Context Menu Access             |
+| -------------------------------------------------- | -------------------------------------- | ------- | ------------------------------- |
+| `offlineCodeContext.indexWorkspace`                | OCC: Index Workspace                   | Yes     | —                               |
+| `offlineCodeContext.rebuildIndex`                  | OCC: Rebuild Index                     | Yes     | —                               |
+| `offlineCodeContext.indexCurrentFile`              | OCC: Index Current File                | Yes     | —                               |
+| `offlineCodeContext.showIndexStatus`               | OCC: Show Index Status                 | Yes     | Status Bar click                |
+| `offlineCodeContext.searchCodebase`                | OCC: Search Codebase                   | Yes     | —                               |
+| `offlineCodeContext.generateProjectContext`        | OCC: Generate Project Context          | Yes     | Explorer folder right-click     |
+| `offlineCodeContext.copyProjectContextToClipboard` | OCC: Copy Project Context to Clipboard | Yes     | Explorer folder right-click     |
+| `offlineCodeContext.generateFileContext`           | OCC: Generate File Context             | Yes     | Editor & Editor Tab right-click |
+| `offlineCodeContext.copyFileContextToClipboard`    | OCC: Copy File Context to Clipboard    | Yes     | Editor & Editor Tab right-click |
+| `offlineCodeContext.generateTaskContext`           | OCC: Generate Task Context             | Yes     | —                               |
+| `offlineCodeContext.generateSelectionContext`      | OCC: Generate Selection Context        | Yes     | —                               |
+| `offlineCodeContext.previewContext`                | OCC: Preview Context                   | Yes     | —                               |
+| `offlineCodeContext.copyContext`                   | OCC: Copy Context to Clipboard         | Yes     | —                               |
+| `offlineCodeContext.securityScan`                  | OCC: Security Scan                     | Yes     | —                               |
+| `offlineCodeContext.clearIndex`                    | OCC: Clear Local Index                 | Yes     | —                               |
 
-*Note*: Commands prefixed with `Generate` open the read-only preview editor. Commands prefixed with `Copy` write the payload directly to the clipboard and display a summary notification.
+_Note_: Commands prefixed with `Generate` open the read-only preview editor. Commands prefixed with `Copy` write the payload directly to the clipboard and display a summary notification.
 
 ---
 
@@ -96,22 +97,22 @@ npm run package
 
 Settings are configured under the `offlineCodeContext.*` namespace:
 
-| Setting | Type | Default | Description |
-|---|---|---|---|
-| `maxFiles` | `integer` | `40` | Maximum number of source files included in a single context package (1–500). |
-| `maxChars` | `integer` | `120000` | Maximum total character count for the generated context package (min: 1000). |
-| `maxLines` | `integer` | `3000` | Maximum total source lines included across all files (min: 10). |
-| `maxTokens` | `integer` | `30000` | Maximum estimated token budget (estimated as characters / 4). |
-| `maxCodeLinesPerFile` | `integer` | `400` | Line threshold per file before excerpts degrade to symbol declarations. |
-| `maxGraphDepth` | `integer` | `3` | Maximum traversal depth when following dependency and call graphs (1–10). |
-| `structureDepth` | `integer` | `4` | Maximum directory tree depth rendered in the project structure overview. |
-| `secretPolicy` | `string` | `"block"` | Policy for secret findings: `block` (exclude file), `warn` (redact and include), `allow` (include verbatim). |
-| `redactSecrets` | `boolean` | `true` | Deterministically redact detected credentials when `secretPolicy` is set to `warn`. |
-| `respectGitignore` | `boolean` | `true` | Honor `.gitignore` patterns during workspace file discovery. |
-| `enableGitRecency` | `boolean` | `false` | Apply a deterministic recency boost based on local git modification timestamps. |
-| `maxFileSizeBytes` | `integer` | `1048576` | Skip indexing files larger than this threshold (1 MiB default). |
-| `excludePatterns` | `array` | *(standard)* | Glob patterns excluded from indexing (`node_modules`, `dist`, `.git`, `.env*`, etc.). |
-| `statusBar` | `boolean` | `true` | Display current index status in the VS Code status bar. |
+| Setting               | Type      | Default      | Description                                                                                                  |
+| --------------------- | --------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
+| `maxFiles`            | `integer` | `40`         | Maximum number of source files included in a single context package (1–500).                                 |
+| `maxChars`            | `integer` | `120000`     | Maximum total character count for the generated context package (min: 1000).                                 |
+| `maxLines`            | `integer` | `3000`       | Maximum total source lines included across all files (min: 10).                                              |
+| `maxTokens`           | `integer` | `30000`      | Maximum estimated token budget (estimated as characters / 4).                                                |
+| `maxCodeLinesPerFile` | `integer` | `400`        | Line threshold per file before excerpts degrade to symbol declarations.                                      |
+| `maxGraphDepth`       | `integer` | `3`          | Maximum traversal depth when following dependency and call graphs (1–10).                                    |
+| `structureDepth`      | `integer` | `4`          | Maximum directory tree depth rendered in the project structure overview.                                     |
+| `secretPolicy`        | `string`  | `"block"`    | Policy for secret findings: `block` (exclude file), `warn` (redact and include), `allow` (include verbatim). |
+| `redactSecrets`       | `boolean` | `true`       | Deterministically redact detected credentials when `secretPolicy` is set to `warn`.                          |
+| `respectGitignore`    | `boolean` | `true`       | Honor `.gitignore` patterns during workspace file discovery.                                                 |
+| `enableGitRecency`    | `boolean` | `false`      | Apply a deterministic recency boost based on local git modification timestamps.                              |
+| `maxFileSizeBytes`    | `integer` | `1048576`    | Skip indexing files larger than this threshold (1 MiB default).                                              |
+| `excludePatterns`     | `array`   | _(standard)_ | Glob patterns excluded from indexing (`node_modules`, `dist`, `.git`, `.env*`, etc.).                        |
+| `statusBar`           | `boolean` | `true`       | Display current index status in the VS Code status bar.                                                      |
 
 ---
 
@@ -143,8 +144,10 @@ CONTEXT_VERSION: 1
 ### FILE: path/to/file.ts
 ### LINES: 1-45
 ```
+
 <original source lines, possibly truncated per symbol block>
-```
+
+````
 <one ```-fenced block per included line range; fences lengthen when the source itself contains backtick runs>
 
 ## CONTEXT METADATA
@@ -153,7 +156,7 @@ Estimated tokens: ~<n>
 Security findings: 0
 Truncation: <none | note>
 Budgets: maxFiles=<n>, maxChars=<n>, maxLines=<n>, maxTokens=<n> (token counts are estimates)
-```
+````
 
 Repository content is strictly encapsulated inside the delimited `## SOURCE` section to ensure separation between system instructions and repository text.
 
@@ -161,12 +164,52 @@ Repository content is strictly encapsulated inside the delimited `## SOURCE` sec
 
 ## Language Support
 
-| Language / Format | Analysis Level | Extracted Metadata |
-|---|---|---|
-| **TypeScript / JavaScript** (`.ts`, `.tsx`, `.js`, `.jsx`, `.mts`, `.cjs`) | Full AST Parsing | Classes, functions, interfaces, methods, imports, exports, call sites, inheritance, and test associations. |
-| **JSON / JSONC** (`.json`, `.jsonc`) | Structural Parsing | Top-level keys, nested structure, schemas, line locations. |
-| **Markdown** (`.md`) | Document Structure | Heading hierarchy, code-fence languages, and link targets. |
-| **Other Text Formats** | Metadata Only | Line counts, file size, content SHA-256 hash. |
+| Language / Format                                                          | Analysis Level     | Extracted Metadata                                                                                         |
+| -------------------------------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------- |
+| **TypeScript / JavaScript** (`.ts`, `.tsx`, `.js`, `.jsx`, `.mts`, `.cjs`) | Full AST Parsing   | Classes, functions, interfaces, methods, imports, exports, call sites, inheritance, and test associations. |
+| **JSON / JSONC** (`.json`, `.jsonc`)                                       | Structural Parsing | Top-level keys, nested structure, schemas, line locations.                                                 |
+| **Markdown** (`.md`)                                                       | Document Structure | Heading hierarchy, code-fence languages, and link targets.                                                 |
+| **Other Text Formats**                                                     | Metadata Only      | Line counts, file size, content SHA-256 hash.                                                              |
+
+---
+
+## Measured Context Quality
+
+OCC's retrieval is measured with a commit-mined benchmark (task text =
+commit message, gold = the files the commit touched), documented in
+[docs/eval/README.md](docs/eval/README.md). The current headline numbers
+come from a 300-task holdout (five TypeScript/JavaScript repositories:
+hono, zod, undici, axios, fastify), compared against a plain BM25-over-
+file-contents baseline with paired bootstrap 95% confidence intervals
+(all differences below are OCC − BM25 on per-task pairs):
+
+| Metric          | OCC   | BM25  | Paired difference [95% CI]                                            |
+| --------------- | ----- | ----- | --------------------------------------------------------------------- |
+| Top-1 hit rate  | 0.303 | 0.200 | **+0.103 [0.040, 0.170]**                                             |
+| Recall@5        | 0.438 | 0.305 | **+0.133 [0.083, 0.184]**                                             |
+| Recall@10       | 0.560 | 0.466 | **+0.094 [0.044, 0.143]**                                             |
+| All-gold Acc@10 | 0.327 | 0.273 | **+0.053 [0.003, 0.110]**                                             |
+| MRR             | 0.483 | 0.345 | **+0.138 [0.086, 0.189]**                                             |
+| Package recall  | 0.458 | 0.412 | +0.046 [−0.004, 0.100] — **statistical parity**, point estimate ahead |
+
+Read this table with its limits, stated plainly:
+
+- **Scope**: five TS/JS repositories only. No claim is made about other
+  languages (they get metadata-only indexing today).
+- **Tasks are commit messages**, a noisy proxy for real developer tasks;
+  scores are relative comparisons on this distribution, not production
+  predictions.
+- **The holdout is unsampled tasks from the same mined pool** (the
+  repositories had barely advanced past the benchmark pins, so a
+  post-pin holdout was not possible). It was never measured before the
+  single confirmation run.
+- Earlier (M3) measurements on the _eval_ split had OCC significantly
+  **behind** BM25 on package recall (−0.102); the rank-priority packaging
+  change added +0.086 [0.058, 0.113] on the holdout, closing the gap to
+  parity. History and all artifacts are in `docs/eval/`.
+- Token counts are `chars/4` estimates, not tokenizer-exact values.
+- Machine context: all measurements ran on one Windows 11 desktop (Ryzen 7
+  4800H, Node 24).
 
 ---
 
@@ -209,6 +252,7 @@ npm run bench
 ### Testing Suite
 
 The codebase maintains rigorous automated test coverage across 24 test suites and 256 unit/integration/property tests:
+
 - **Unit Tests**: AST parsers, inverted index, relevance scoring, tokenizer, secret redaction, and ignore rules.
 - **Integration Tests**: End-to-end context assembly pipeline, budget degradation ladder, and sharded index store crash recovery.
 - **Property-Based Invariants**: Deterministic PRNG stress tests verifying index consistency under randomized file edits, renames, and deletions.
