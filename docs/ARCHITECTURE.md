@@ -91,12 +91,20 @@ a single promise queue; watcher events are debounced and coalesced per path.
 `QueryAnalyzer` (words, identifier candidates, file hints, quoted phrases)
 feeds an `InvertedIndex` (field weights: symbol 3.0, path 2.0,
 imports/exports 2.0, summary 1.2, identifiers 0.8; sublinear tf; prefix
-matching of four or more characters at 0.7 weight). `HybridRetriever`
+matching of four or more characters at 0.7 weight; plus the M3 body field,
+weight 0.5, BM25F length normalization against a fixed reference).
+`HybridRetriever`
 combines exact symbol match, file-name match, lexical score, capped
 structural expansion (dependency 0.6, dependent 0.5, call 0.5, test 0.7,
 inheritance 0.6, same-directory 0.2, per-file total capped at 1.0), and
 optional git recency. Full formula and constants: ADR-004. Explanations are
 derived only from fired signals.
+
+Git is exercised exclusively through `src/git/safeGit.ts` (hardening flags
+and trust gating: docs/SECURITY.md); recency data is prefetched
+asynchronously and retrieval reads a cache — git never blocks or runs
+during retrieval. The external-package set on the relationship graph is
+maintained incrementally on edge add/remove (startup load is linear).
 
 ## Context generation (`context/`)
 

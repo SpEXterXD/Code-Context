@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+### Added (hardening)
+
+- **Startup load**: the external-package set on the relationship graph is
+  maintained incrementally on edge add/remove instead of being re-derived
+  from the whole graph per entry (O(N²) → O(N); it was 24% of the startup
+  profile). `initialize()` on a 5,001-entry store: median 8163 → 5465 ms
+  (3 runs, Windows reference machine). Equivalence to the old derivation is
+  fuzz-tested (400 seeded operations vs a full-derivation oracle). The
+  remaining startup cost is per-entry shard reads — designed, not
+  implemented, in ADR-005 (draft).
+- **Git hardening** (`src/git/safeGit.ts`, the single spawn point — guard-
+  tested): `execFile` with args arrays only; `core.fsmonitor=false`,
+  `core.hooksPath=<empty dir>` (no repo hook can run), `gc.auto=0`,
+  `core.pager=cat`, `protocol.ext.allow=never`, `GIT_OPTIONAL_LOCKS=0`,
+  `GIT_TERMINAL_PROMPT=0`, hard timeout on every call. Git recency is
+  prefetched asynchronously (never blocks the extension host, never runs
+  during retrieval) and gated on `vscode.workspace.isTrusted` — untrusted
+  workspaces show a status note and spawn no git;
+  `onDidGrantWorkspaceTrust` re-enables. `untrustedWorkspaces` capability
+  is now `"limited"` with a description. `npm run eval:fsmonitor-repro`
+  reproduces the repo-config RCE risk and shows raw git writes the marker
+  for status/diff while the helper never does. Retrieval behavior is
+  unchanged: a tuning-split run at the hardening commit reproduced every
+  committed tuning metric byte-identically (including per-task values).
+
 ### Added (M3b: packaging)
 
 - **P1 — rank-priority content slots** (`M3B_RANK_PRIORITY`, ablatable):
@@ -77,7 +102,7 @@
   every platform: only regular files (100644/100755) are materialized and
   indexed; symlinks (120000) and gitlinks/submodules (160000) are excluded
   from the snapshot AND from gold, with `core.symlinks=false
-  core.autocrlf=false core.eol=lf` forced so file bytes are identical across
+core.autocrlf=false core.eol=lf` forced so file bytes are identical across
   Windows/macOS/Linux. Gold dropped by mode is counted per repo (empty-gold
   tasks are excluded from the dataset and reported); a TS/JS gold file that
   would be dropped aborts the build instead of being silently absorbed.

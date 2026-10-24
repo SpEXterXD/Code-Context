@@ -42,11 +42,11 @@ budgeting). Three layers run in order:
 
 ## What BLOCK, WARN, and ALLOW mean
 
-| Policy | Effect on the package |
-|---|---|
-| `block` (default) | The file's source is withheld from `## SOURCE`. The file still appears in WHY with the reason, so nothing is silently dropped. |
-| `warn` | The source is included. With `redactSecrets: true` (default) every detected value is replaced by `[REDACTED:<kind>:<sha256-8>]`, which is not reversible. With redaction off, values stay and are listed as findings. |
-| `allow` | Findings are ignored. Explicit opt-in, not recommended. |
+| Policy            | Effect on the package                                                                                                                                                                                                 |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `block` (default) | The file's source is withheld from `## SOURCE`. The file still appears in WHY with the reason, so nothing is silently dropped.                                                                                        |
+| `warn`            | The source is included. With `redactSecrets: true` (default) every detected value is replaced by `[REDACTED:<kind>:<sha256-8>]`, which is not reversible. With redaction off, values stay and are listed as findings. |
+| `allow`           | Findings are ignored. Explicit opt-in, not recommended.                                                                                                                                                               |
 
 The final gate is fail-closed: before preview and copy, the exact payload is
 re-checked against every raw finding's value. Any leak throws a
@@ -74,6 +74,42 @@ vulnerability"), or contact the maintainers directly. Include the extension
 version, the affected command, and reproduction steps. Reports about secrets
 in your own scanned code are not extension vulnerabilities; see the
 limitations section below and `docs/LIMITATIONS.md`.
+
+## Git hardening and workspace trust
+
+OCC runs git for exactly one optional feature (the recency bonus, disabled
+by default). Because a repository's own configuration is attacker-
+controllable in an untrusted workspace, all git execution follows three
+rules:
+
+1. **Single spawn point.** Every git process is spawned by
+   `src/git/safeGit.ts` (a test fails the build if any other `src/` file
+   imports `child_process`). It uses `execFile` with an args array — never a
+   shell — so repo-controlled strings cannot inject shell syntax.
+2. **Repo configuration is inert.** Every invocation passes
+   `core.fsmonitor=false` (no repo-configured fsmonitor executable),
+   `core.hooksPath=<empty dir>` (no repo hook can be found),
+   `gc.auto=0`, `core.pager=cat`, and `protocol.ext.allow=never` (the
+   `ext::` transport, which can execute arbitrary commands, is refused),
+   plus `GIT_OPTIONAL_LOCKS=0` and `GIT_TERMINAL_PROMPT=0`, with a hard
+   timeout. `npm run eval:fsmonitor-repro` demonstrates this empirically: a
+   repo whose config points `core.fsmonitor` at a marker-writing script has
+   the marker written by raw `git status` / `git diff`, and never through
+   the helper.
+3. **Trust gate.** Git features run only when `vscode.workspace.isTrusted`
+   is true. In untrusted workspaces git is never spawned, the recency bonus
+   is off, and a status-bar note says so; the note clears and recency
+   enables when `onDidGrantWorkspaceTrust` fires. The domain layer has no
+   vscode dependency — the extension layer applies the veto
+   (`OccApplication.setGitRecencyAllowed`).
+
+Recency data is prefetched asynchronously (never during retrieval, never
+blocking the extension host); retrieval reads only the cached order and
+degrades to no-recency behavior when it is absent.
+
+The manifest declares `untrustedWorkspaces.supported: "limited"`: indexing
+and context generation are fully functional in restricted mode; only git
+metadata is disabled there.
 
 ## Local storage
 
