@@ -1,6 +1,7 @@
 {
+  "split": "eval",
   "seed": 20260918,
-  "occCommit": "c5b3e634af1decf37c5a3ab081fbf5b82d81847f",
+  "occCommit": "094fcbb8692a3c9b1ba728f79df3d1164bd644f3",
   "workingTreeClean": true,
   "datasetHash": "9b42dc9b",
   "tasks": 200,
@@ -199,6 +200,44 @@
             "ciHigh": 0.5732738095238095
           }
         }
+      },
+      "overallSourceOnly": {
+        "top1": {
+          "n": 200,
+          "mean": 0.305,
+          "ciLow": 0.24,
+          "ciHigh": 0.37
+        },
+        "recall5": {
+          "n": 200,
+          "mean": 0.3804166666666668,
+          "ciLow": 0.3308333333333336,
+          "ciHigh": 0.4297142857142858
+        },
+        "recall10": {
+          "n": 200,
+          "mean": 0.48893452380952385,
+          "ciLow": 0.4384642857142856,
+          "ciHigh": 0.5394880952380954
+        },
+        "allGoldAcc10": {
+          "n": 200,
+          "mean": 0.27,
+          "ciLow": 0.21,
+          "ciHigh": 0.335
+        },
+        "mrr": {
+          "n": 200,
+          "mean": 0.44898808764215353,
+          "ciLow": 0.39497212277600235,
+          "ciHigh": 0.5039054091048658
+        }
+      },
+      "packageRecall": {
+        "n": 200,
+        "mean": 0.35847619047619067,
+        "ciLow": 0.3100000000000001,
+        "ciHigh": 0.41036904761904763
       },
       "packageStats": {
         "meanTokens": 27360.9,
@@ -399,6 +438,44 @@
             "ciHigh": 0.45376602564102564
           }
         }
+      },
+      "overallSourceOnly": {
+        "top1": {
+          "n": 200,
+          "mean": 0.15,
+          "ciLow": 0.105,
+          "ciHigh": 0.2
+        },
+        "recall5": {
+          "n": 200,
+          "mean": 0.2740714285714286,
+          "ciLow": 0.2189166666666667,
+          "ciHigh": 0.3304761904761904
+        },
+        "recall10": {
+          "n": 200,
+          "mean": 0.3708214285714284,
+          "ciLow": 0.3120833333333334,
+          "ciHigh": 0.43248809523809534
+        },
+        "allGoldAcc10": {
+          "n": 200,
+          "mean": 0.275,
+          "ciLow": 0.215,
+          "ciHigh": 0.34
+        },
+        "mrr": {
+          "n": 200,
+          "mean": 0.25628826332051996,
+          "ciLow": 0.21056879923896743,
+          "ciHigh": 0.3050204008584387
+        }
+      },
+      "packageRecall": {
+        "n": 200,
+        "mean": 0.33992261904761906,
+        "ciLow": 0.2831309523809524,
+        "ciHigh": 0.39663690476190483
       }
     },
     "bm25": {
@@ -595,6 +672,44 @@
             "ciHigh": 0.34284097002031777
           }
         }
+      },
+      "overallSourceOnly": {
+        "top1": {
+          "n": 200,
+          "mean": 0.25,
+          "ciLow": 0.19,
+          "ciHigh": 0.31
+        },
+        "recall5": {
+          "n": 200,
+          "mean": 0.3548988095238095,
+          "ciLow": 0.29502976190476193,
+          "ciHigh": 0.4105595238095238
+        },
+        "recall10": {
+          "n": 200,
+          "mean": 0.47375595238095236,
+          "ciLow": 0.4152619047619047,
+          "ciHigh": 0.5273988095238095
+        },
+        "allGoldAcc10": {
+          "n": 200,
+          "mean": 0.31,
+          "ciLow": 0.245,
+          "ciHigh": 0.375
+        },
+        "mrr": {
+          "n": 200,
+          "mean": 0.38441998699747787,
+          "ciLow": 0.33071475583620275,
+          "ciHigh": 0.4377444921938885
+        }
+      },
+      "packageRecall": {
+        "n": 200,
+        "mean": 0.4373154761904762,
+        "ciLow": 0.3824880952380951,
+        "ciHigh": 0.4906488095238095
       }
     },
     "random": {
@@ -791,7 +906,601 @@
             "ciHigh": 0.03629453097028285
           }
         }
+      },
+      "overallSourceOnly": {
+        "top1": {
+          "n": 200,
+          "mean": 0,
+          "ciLow": 0,
+          "ciHigh": 0
+        },
+        "recall5": {
+          "n": 200,
+          "mean": 0.004958333333333334,
+          "ciLow": 0.000625,
+          "ciHigh": 0.010666666666666666
+        },
+        "recall10": {
+          "n": 200,
+          "mean": 0.006625,
+          "ciLow": 0.00125,
+          "ciHigh": 0.013291666666666667
+        },
+        "allGoldAcc10": {
+          "n": 200,
+          "mean": 0,
+          "ciLow": 0,
+          "ciHigh": 0
+        },
+        "mrr": {
+          "n": 200,
+          "mean": 0.014145959349492667,
+          "ciLow": 0.008765013971630525,
+          "ciHigh": 0.02092445685862804
+        }
+      },
+      "packageRecall": {
+        "n": 200,
+        "mean": 0.009125,
+        "ciLow": 0.0022916666666666667,
+        "ciHigh": 0.018250000000000002
       }
+    }
+  },
+  "goldSliceStats": {
+    "full": {
+      "goldFiles": 524,
+      "tasks": 200
+    },
+    "sourceOnly": {
+      "goldFiles": 508,
+      "tasks": 200,
+      "tasksExcludedEmpty": 0
+    },
+    "perRepo": {
+      "axios": {
+        "fullFiles": 114,
+        "sourceFiles": 110,
+        "sourceTasks": 40
+      },
+      "fastify": {
+        "fullFiles": 110,
+        "sourceFiles": 110,
+        "sourceTasks": 40
+      },
+      "hono": {
+        "fullFiles": 84,
+        "sourceFiles": 83,
+        "sourceTasks": 40
+      },
+      "undici": {
+        "fullFiles": 104,
+        "sourceFiles": 101,
+        "sourceTasks": 40
+      },
+      "zod": {
+        "fullFiles": 112,
+        "sourceFiles": 104,
+        "sourceTasks": 40
+      }
+    }
+  },
+  "pairedBootstrap": {
+    "full": {
+      "top1": {
+        "n": 200,
+        "meanDiff": 0.05,
+        "ciLow": -0.035,
+        "ciHigh": 0.13,
+        "excludesZero": false
+      },
+      "recall5": {
+        "n": 200,
+        "meanDiff": 0.011833333333333322,
+        "ciLow": -0.05645833333333334,
+        "ciHigh": 0.07770833333333332,
+        "excludesZero": false
+      },
+      "recall10": {
+        "n": 200,
+        "meanDiff": -0.0029107142857142765,
+        "ciLow": -0.06802976190476195,
+        "ciHigh": 0.0565892857142857,
+        "excludesZero": false
+      },
+      "allGoldAcc10": {
+        "n": 200,
+        "meanDiff": -0.055,
+        "ciLow": -0.12,
+        "ciHigh": 0.01,
+        "excludesZero": false
+      },
+      "mrr": {
+        "n": 200,
+        "meanDiff": 0.05347466630124147,
+        "ciLow": -0.013707013173954986,
+        "ciHigh": 0.12547209664719963,
+        "excludesZero": false
+      },
+      "packageRecall": {
+        "n": 200,
+        "meanDiff": -0.07883928571428571,
+        "ciLow": -0.14448809523809522,
+        "ciHigh": -0.014345238095238098,
+        "excludesZero": true
+      }
+    },
+    "sourceOnly": {
+      "top1": {
+        "n": 200,
+        "meanDiff": 0.055,
+        "ciLow": -0.035,
+        "ciHigh": 0.14,
+        "excludesZero": false
+      },
+      "recall5": {
+        "n": 200,
+        "meanDiff": 0.025517857142857144,
+        "ciLow": -0.038755952380952384,
+        "ciHigh": 0.09242857142857142,
+        "excludesZero": false
+      },
+      "recall10": {
+        "n": 200,
+        "meanDiff": 0.01517857142857143,
+        "ciLow": -0.04585714285714286,
+        "ciHigh": 0.07447619047619047,
+        "excludesZero": false
+      },
+      "allGoldAcc10": {
+        "n": 200,
+        "meanDiff": -0.04,
+        "ciLow": -0.11,
+        "ciHigh": 0.03,
+        "excludesZero": false
+      },
+      "mrr": {
+        "n": 200,
+        "meanDiff": 0.06456810064467583,
+        "ciLow": -0.010091554021896482,
+        "ciHigh": 0.13296806168456496,
+        "excludesZero": false
+      },
+      "packageRecall": {
+        "n": 200,
+        "meanDiff": -0.07226785714285713,
+        "ciLow": -0.13943452380952379,
+        "ciHigh": 0.00007142857142856895,
+        "excludesZero": false
+      }
+    }
+  },
+  "allGoldGap": {
+    "tasks": [
+      {
+        "id": "axios:70302b6c9008",
+        "repoId": "axios",
+        "missing": [
+          {
+            "path": "lib/defaults/index.js",
+            "type": "source",
+            "occRank": 55,
+            "bm25Rank": 8,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "axios:717f476b0f19",
+        "repoId": "axios",
+        "missing": [
+          {
+            "path": "README.md",
+            "type": "docs",
+            "occRank": 76,
+            "bm25Rank": 2,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:16a74e7cb2d1",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "test/content-parser.test.js",
+            "type": "test",
+            "occRank": 62,
+            "bm25Rank": 9,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:628870555055",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "test/404s.test.js",
+            "type": "test",
+            "occRank": 43,
+            "bm25Rank": 8,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:897360ad9a01",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "lib/contentTypeParser.js",
+            "type": "source",
+            "occRank": 26,
+            "bm25Rank": 1,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:ad2da127e78b",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "docs/Reference/Plugins.md",
+            "type": "docs",
+            "occRank": 36,
+            "bm25Rank": 7,
+            "inOccCandidates": true
+          },
+          {
+            "path": "docs/Reference/Reply.md",
+            "type": "docs",
+            "occRank": 11,
+            "bm25Rank": 3,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:edbb82035c6e",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "test/reply-trailers.test.js",
+            "type": "test",
+            "occRank": 48,
+            "bm25Rank": 1,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "hono:00f32b7c17e4",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "src/client/client.test.ts",
+            "type": "test",
+            "occRank": 17,
+            "bm25Rank": 6,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "hono:20d877167c8b",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "src/jsx/intrinsic-elements.ts",
+            "type": "source",
+            "occRank": 37,
+            "bm25Rank": 5,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "hono:879557f35fb7",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "src/jsx/index.test.tsx",
+            "type": "test",
+            "occRank": 20,
+            "bm25Rank": 5,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "hono:9cdfdf3c65af",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "src/context.test.ts",
+            "type": "test",
+            "occRank": 13,
+            "bm25Rank": 8,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "hono:d5e7da31132f",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "src/request.ts",
+            "type": "source",
+            "occRank": 23,
+            "bm25Rank": 3,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "hono:d9b8b4b73b4f",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "src/middleware/cors/index.test.ts",
+            "type": "test",
+            "occRank": 33,
+            "bm25Rank": 3,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "hono:ff715fca4bd5",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "src/router/reg-exp-router/prepared-router.test.ts",
+            "type": "test",
+            "occRank": 16,
+            "bm25Rank": 2,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "undici:0160a719063f",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "lib/handler/retry-handler.js",
+            "type": "source",
+            "occRank": 13,
+            "bm25Rank": 2,
+            "inOccCandidates": true
+          },
+          {
+            "path": "test/interceptors/retry.js",
+            "type": "test",
+            "occRank": null,
+            "bm25Rank": 5,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "undici:0712f7d6f3bc",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "test/env-http-proxy-agent.js",
+            "type": "test",
+            "occRank": 40,
+            "bm25Rank": 3,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "undici:07276c90545b",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "lib/core/symbols.js",
+            "type": "source",
+            "occRank": 14,
+            "bm25Rank": 10,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "undici:69825dc1483d",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "CONTRIBUTING.md",
+            "type": "docs",
+            "occRank": 55,
+            "bm25Rank": 1,
+            "inOccCandidates": true
+          },
+          {
+            "path": "build/wasm.js",
+            "type": "source",
+            "occRank": null,
+            "bm25Rank": 4,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "undici:7da8232df9fb",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "lib/api/util.js",
+            "type": "source",
+            "occRank": 12,
+            "bm25Rank": 3,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "undici:a4eaed1124ec",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "lib/web/fetch/index.js",
+            "type": "source",
+            "occRank": null,
+            "bm25Rank": 3,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "undici:ae18f0e7dade",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "lib/web/websocket/receiver.js",
+            "type": "source",
+            "occRank": null,
+            "bm25Rank": 3,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "undici:be564c1573f4",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "lib/web/fetch/index.js",
+            "type": "source",
+            "occRank": null,
+            "bm25Rank": 2,
+            "inOccCandidates": false
+          },
+          {
+            "path": "test/fetch/401-statuscode-no-infinite-loop.js",
+            "type": "test",
+            "occRank": null,
+            "bm25Rank": 4,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "undici:d0399c40f116",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "test/interceptors/dump-interceptor.js",
+            "type": "test",
+            "occRank": 72,
+            "bm25Rank": 3,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "zod:599c0e41dccb",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "packages/docs/components/ecosystem.tsx",
+            "type": "source",
+            "occRank": null,
+            "bm25Rank": 2,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "zod:6407bed5a229",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "deno/lib/__tests__/discriminated-unions.test.ts",
+            "type": "test",
+            "occRank": 27,
+            "bm25Rank": 8,
+            "inOccCandidates": true
+          },
+          {
+            "path": "src/__tests__/discriminated-unions.test.ts",
+            "type": "test",
+            "occRank": 28,
+            "bm25Rank": 7,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "zod:81d9fc6cf47d",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "packages/docs/components/ecosystem.tsx",
+            "type": "source",
+            "occRank": null,
+            "bm25Rank": 6,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "zod:cede2c63739a",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "packages/zod/src/v4/classic/tests/tuple.test.ts",
+            "type": "test",
+            "occRank": null,
+            "bm25Rank": 1,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "zod:d3da530deb71",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "packages/zod/src/v4/core/schemas.ts",
+            "type": "source",
+            "occRank": 54,
+            "bm25Rank": 5,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "zod:e06af5de314f",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "packages/docs/components/ecosystem.tsx",
+            "type": "source",
+            "occRank": null,
+            "bm25Rank": 6,
+            "inOccCandidates": false
+          }
+        ]
+      }
+    ],
+    "summary": {
+      "tasks": 29,
+      "missingFiles": 34,
+      "byType": {
+        "docs": 4,
+        "source": 15,
+        "test": 15
+      },
+      "notInOccCandidates": 10,
+      "occRankMedian": 28,
+      "bm25RankMedian": 3
     }
   },
   "caseStudies": {
@@ -1040,10 +1749,10 @@
     ]
   },
   "timingMs": {
-    "snapshotMs": 213494.78300000064,
-    "indexMs": 1092482.9626000002,
-    "occMs": 34119.8731999993,
-    "baselinesMs": 169620.85140000045
+    "snapshotMs": 398026.2404000019,
+    "indexMs": 1642526.1231,
+    "occMs": 57298.265100001605,
+    "baselinesMs": 264844.1422
   },
   "environment": {
     "node": "v24.15.0",

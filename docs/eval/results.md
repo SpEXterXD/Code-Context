@@ -1,6 +1,6 @@
 # Retrieval Evaluation Results
 
-Dataset hash `9b42dc9b` · 200 tasks · seed 20260918 · OCC commit `c5b3e634af1d` · working tree clean at run start: yes
+Dataset hash `9b42dc9b` · 200 tasks · seed 20260918 · split **eval** · OCC commit `094fcbb8692a` · working tree clean at run start: yes
 
 ## Overall (mean [95% bootstrap CI], per task)
 
@@ -12,6 +12,148 @@ Dataset hash `9b42dc9b` · 200 tasks · seed 20260918 · OCC commit `c5b3e634af1
 | random | 0.000 [0.000, 0.000] | 0.007 [0.002, 0.015] | 0.009 [0.002, 0.017] | 0.000 [0.000, 0.000] | 0.016 [0.010, 0.022] |
 
 OCC generated package: mean 27361 tokens, mean 8.0 files included per task.
+
+## Source-only gold slice (OCC-fully-parsed gold)
+
+Full gold: 524 gold files across 200 tasks. Source-only slice: 508 gold files across 200 tasks (0 tasks excluded for an empty slice).
+
+| System | Top-1 | Recall@5 | Recall@10 | AllGold Acc@10 | MRR |
+|---|---|---|---|---|---|
+| occ | 0.305 [0.240, 0.370] | 0.380 [0.331, 0.430] | 0.489 [0.438, 0.539] | 0.270 [0.210, 0.335] | 0.449 [0.395, 0.504] |
+| filename | 0.150 [0.105, 0.200] | 0.274 [0.219, 0.330] | 0.371 [0.312, 0.432] | 0.275 [0.215, 0.340] | 0.256 [0.211, 0.305] |
+| bm25 | 0.250 [0.190, 0.310] | 0.355 [0.295, 0.411] | 0.474 [0.415, 0.527] | 0.310 [0.245, 0.375] | 0.384 [0.331, 0.438] |
+| random | 0.000 [0.000, 0.000] | 0.005 [0.001, 0.011] | 0.007 [0.001, 0.013] | 0.000 [0.000, 0.000] | 0.014 [0.009, 0.021] |
+
+## Package recall (gold coverage of the delivered answer)
+
+OCC = fraction of gold files inside the generated package (parsed from its `### FILE:` headings); baselines = Recall@8, matching OCC's mean package size.
+
+| System | Package recall (mean [95% CI]) |
+|---|---|
+| occ | 0.358 [0.310, 0.410] |
+| filename | 0.340 [0.283, 0.397] |
+| bm25 | 0.437 [0.382, 0.491] |
+| random | 0.009 [0.002, 0.018] |
+
+## Paired bootstrap: OCC − BM25 per-task differences
+
+### Full gold
+
+| Metric | Mean diff (OCC − BM25) [95% CI] | Excludes 0 |
+|---|---|---|
+| top1 | 0.050 [-0.035, 0.130] | no |
+| recall5 | 0.012 [-0.056, 0.078] | no |
+| recall10 | -0.003 [-0.068, 0.057] | no |
+| allGoldAcc10 | -0.055 [-0.120, 0.010] | no |
+| mrr | 0.053 [-0.014, 0.125] | no |
+| packageRecall | -0.079 [-0.144, -0.014] | **yes** |
+
+### Source-only slice
+
+| Metric | Mean diff (OCC − BM25) [95% CI] | Excludes 0 |
+|---|---|---|
+| top1 | 0.055 [-0.035, 0.140] | no |
+| recall5 | 0.026 [-0.039, 0.092] | no |
+| recall10 | 0.015 [-0.046, 0.074] | no |
+| allGoldAcc10 | -0.040 [-0.110, 0.030] | no |
+| mrr | 0.065 [-0.010, 0.133] | no |
+| packageRecall | -0.072 [-0.139, 0.000] | no |
+
+## All-gold gap analysis (BM25 all-gold in top 10, OCC not)
+
+29 tasks, 34 missing gold files. Missing by type: docs=4, source=15, test=15. Not in OCC's candidate set at all: 10. Median OCC rank of missing files: 28; median BM25 rank: 3.
+
+- **axios:70302b6c9008**
+  - lib/defaults/index.js (source): OCC rank 55, BM25 rank 8
+
+- **axios:717f476b0f19**
+  - README.md (docs): OCC rank 76, BM25 rank 2
+
+- **fastify:16a74e7cb2d1**
+  - test/content-parser.test.js (test): OCC rank 62, BM25 rank 9
+
+- **fastify:628870555055**
+  - test/404s.test.js (test): OCC rank 43, BM25 rank 8
+
+- **fastify:897360ad9a01**
+  - lib/contentTypeParser.js (source): OCC rank 26, BM25 rank 1
+
+- **fastify:ad2da127e78b**
+  - docs/Reference/Plugins.md (docs): OCC rank 36, BM25 rank 7
+  - docs/Reference/Reply.md (docs): OCC rank 11, BM25 rank 3
+
+- **fastify:edbb82035c6e**
+  - test/reply-trailers.test.js (test): OCC rank 48, BM25 rank 1
+
+- **hono:00f32b7c17e4**
+  - src/client/client.test.ts (test): OCC rank 17, BM25 rank 6
+
+- **hono:20d877167c8b**
+  - src/jsx/intrinsic-elements.ts (source): OCC rank 37, BM25 rank 5
+
+- **hono:879557f35fb7**
+  - src/jsx/index.test.tsx (test): OCC rank 20, BM25 rank 5
+
+- **hono:9cdfdf3c65af**
+  - src/context.test.ts (test): OCC rank 13, BM25 rank 8
+
+- **hono:d5e7da31132f**
+  - src/request.ts (source): OCC rank 23, BM25 rank 3
+
+- **hono:d9b8b4b73b4f**
+  - src/middleware/cors/index.test.ts (test): OCC rank 33, BM25 rank 3
+
+- **hono:ff715fca4bd5**
+  - src/router/reg-exp-router/prepared-router.test.ts (test): OCC rank 16, BM25 rank 2
+
+- **undici:0160a719063f**
+  - lib/handler/retry-handler.js (source): OCC rank 13, BM25 rank 2
+  - test/interceptors/retry.js (test): OCC rank not in candidates, BM25 rank 5
+
+- **undici:0712f7d6f3bc**
+  - test/env-http-proxy-agent.js (test): OCC rank 40, BM25 rank 3
+
+- **undici:07276c90545b**
+  - lib/core/symbols.js (source): OCC rank 14, BM25 rank 10
+
+- **undici:69825dc1483d**
+  - CONTRIBUTING.md (docs): OCC rank 55, BM25 rank 1
+  - build/wasm.js (source): OCC rank not in candidates, BM25 rank 4
+
+- **undici:7da8232df9fb**
+  - lib/api/util.js (source): OCC rank 12, BM25 rank 3
+
+- **undici:a4eaed1124ec**
+  - lib/web/fetch/index.js (source): OCC rank not in candidates, BM25 rank 3
+
+- **undici:ae18f0e7dade**
+  - lib/web/websocket/receiver.js (source): OCC rank not in candidates, BM25 rank 3
+
+- **undici:be564c1573f4**
+  - lib/web/fetch/index.js (source): OCC rank not in candidates, BM25 rank 2
+  - test/fetch/401-statuscode-no-infinite-loop.js (test): OCC rank not in candidates, BM25 rank 4
+
+- **undici:d0399c40f116**
+  - test/interceptors/dump-interceptor.js (test): OCC rank 72, BM25 rank 3
+
+- **zod:599c0e41dccb**
+  - packages/docs/components/ecosystem.tsx (source): OCC rank not in candidates, BM25 rank 2
+
+- **zod:6407bed5a229**
+  - deno/lib/__tests__/discriminated-unions.test.ts (test): OCC rank 27, BM25 rank 8
+  - src/__tests__/discriminated-unions.test.ts (test): OCC rank 28, BM25 rank 7
+
+- **zod:81d9fc6cf47d**
+  - packages/docs/components/ecosystem.tsx (source): OCC rank not in candidates, BM25 rank 6
+
+- **zod:cede2c63739a**
+  - packages/zod/src/v4/classic/tests/tuple.test.ts (test): OCC rank not in candidates, BM25 rank 1
+
+- **zod:d3da530deb71**
+  - packages/zod/src/v4/core/schemas.ts (source): OCC rank 54, BM25 rank 5
+
+- **zod:e06af5de314f**
+  - packages/docs/components/ecosystem.tsx (source): OCC rank not in candidates, BM25 rank 6
 
 ## Per repository
 
@@ -130,4 +272,4 @@ Mined 2935, accepted 494, sampled 40, evaluated 40 (dropped for empty effective 
 
 {"node":"v24.15.0","platform":"win32 10.0.26300","cpu":"AMD Ryzen 7 4800H with Radeon Graphics         ","totalMemGB":15.4}
 
-timings (ms): {"snapshotMs":213494.78300000064,"indexMs":1092482.9626000002,"occMs":34119.8731999993,"baselinesMs":169620.85140000045}
+timings (ms): {"snapshotMs":398026.2404000019,"indexMs":1642526.1231,"occMs":57298.265100001605,"baselinesMs":264844.1422}
