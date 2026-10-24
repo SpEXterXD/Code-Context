@@ -2,6 +2,40 @@
 
 ## Unreleased
 
+### Added (M4: change-aware seeds)
+
+- **Working-tree change seeds** (`src/seeds/`, trust-gated, behind
+  `offlineCodeContext.changeSeeds`): staged/unstaged/untracked/renamed/
+  deleted paths are collected through the hardened `safeGit` helper
+  (`status --porcelain=v1 -z`; diffs with mandatory `--no-ext-diff
+  --no-textconv`), flood-controlled (cap 20, state-then-path order,
+  lockfile/generated exclusion, merge/rebase note), and become pinned
+  retrieval candidates with a `DIFF_TOUCHED` signal and a `CHANGE_SEED`
+  tier; seed paths also lead graph expansion, so their neighbors surface.
+  Diffs render as an optional `## CURRENT CHANGES` section (after
+  `## DEVELOPER TASK`, content-aware fences, `currentChangesMaxTokens`
+  budget, CONTEXT_VERSION unchanged) after the sensitive-path veto and the
+  same secret scan/redaction/leak gate as source files.
+- Optional, **untuned, off-by-default** seed sources behind settings:
+  open editor tabs + selection (`seedEditors`), diagnostics
+  (`seedDiagnostics`), clipboard stack-trace frames via
+  `OCC: Seed From Clipboard Stack Trace` (`seedStackTraces`; parser is
+  linear, 64 KB-capped, tested on Node/Python/Java/Go/TS formats).
+  All failures (no repo, untrusted workspace, timeout, huge diff) degrade
+  to unseeded behavior with a visible note.
+- `npm run eval:seed-hazard-repro` measures repo-configured git code
+  execution (`diff.external`, textconv, clean/smudge filters) raw vs
+  through safeGit: clean filters run even under `--no-ext-diff
+  --no-textconv` (no git flag can stop them) — documented in ADR-006;
+  the workspace-trust gate (untrusted = no git) is the control, with a
+  test that the collector is never invoked there.
+- Seed-simulation harness (`npm run eval:seeds-sim`): reveals ceil(k/2)
+  gold files as seeds on qualifying tuning tasks, strips the revealed
+  files from EVERY arm before scoring the hidden remainder (fairness,
+  unit-tested), and compares unseeded/seeded/BM25+names/same-dir-decoy/
+  mixed/random-decoy/real-diff arms with paired CIs; the real-diff arm
+  measures the token cost of shipping actual diff content.
+
 ### Added (hardening)
 
 - **Startup load**: the external-package set on the relationship graph is
