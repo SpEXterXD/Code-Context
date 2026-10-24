@@ -2,6 +2,60 @@
 
 ## Unreleased
 
+### Added (M2: retrieval evaluation harness)
+
+- Dev-time retrieval evaluation harness (`npm run eval:build-dataset`,
+  `npm run eval:retrieval`; scripts under `scripts/eval/`, see
+  docs/eval/README.md). It mines (task, gold-files) pairs from pinned
+  public-repo histories (hono, zod, undici, axios, fastify; 200 tasks),
+  materializes each task's **parent-commit** snapshot into a git-ignored
+  scratch dir with git plumbing only (`read-tree` into a temporary
+  `GIT_INDEX_FILE` → `update-index --force-remove` → `checkout-index -a`;
+  no tar), runs the OCC pipeline headlessly through `OccApplication`
+  (no vscode import), and scores file localization (Top-1, Recall@5/10,
+  strict AllGold Acc@10, MRR) against the filename-overlap,
+  BM25-over-contents, and seeded-random baselines with seeded 95% bootstrap
+  CIs. Dataset and results are deterministic for a given commit
+  (timings/environment are quarantined into separate sections; results.json
+  records the OCC commit hash and that the working tree was clean at run
+  start). Dataset builder filters, stream parsers, ls-tree mode parsing,
+  mode-based gold filtering, metrics, and baselines are unit tested as pure
+  functions; the dataset hash is verified before every run.
+- The snapshot file universe is decided by `git ls-tree -r <parent>` modes on
+  every platform: only regular files (100644/100755) are materialized and
+  indexed; symlinks (120000) and gitlinks/submodules (160000) are excluded
+  from the snapshot AND from gold, with `core.symlinks=false
+  core.autocrlf=false core.eol=lf` forced so file bytes are identical across
+  Windows/macOS/Linux. Gold dropped by mode is counted per repo (empty-gold
+  tasks are excluded from the dataset and reported); a TS/JS gold file that
+  would be dropped aborts the build instead of being silently absorbed.
+  Baselines read file contents up to 1 MiB — OCC's own scanner limit — so
+  all four systems rank the same file universe.
+- `docs/eval/README.md` documents the methodology, metric conventions
+  (citing SWE-bench, LocAgent, CommitBench, and the SWE-bench
+  future-history-leak mitigation), dataset funnel statistics, and known
+  limitations (commit message as a noisy task proxy, gold-set bias, filtered
+  task slice). docs/eval/{dataset,results}.json are generated artifacts.
+- Statistical addendum to the harness (analysis only; no retrieval/context/
+  security changes): seeded **paired bootstrap** over per-task differences
+  (OCC − BM25) for every metric, with "excludes 0" flags; per-metric 95%
+  CIs for all systems in results.md; **source-only gold slice** (gold
+  restricted to TS/JS/JSON/MD files the structured parsers fully parse)
+  with every metric reported on both slices and per-slice gold/task counts;
+  **package recall** (gold coverage of OCC's generated package, parsed from
+  its `### FILE:` headings; Recall@8 equivalent for baselines); and an
+  **all-gold gap analysis** listing, for tasks where BM25 placed all gold in
+  its top 10 and OCC did not, each missing file's OCC candidate rank (or
+  absence), BM25 rank, and file type.
+- `--split tuning` runs the harness on the EARLIER half of the time split
+  and writes `docs/eval/results-tuning.{json,md}` only, keeping tuning
+  experiments strictly separate from the eval-half results. Default remains
+  `--split eval`.
+- `npm run eval:fsmonitor-repro` reproduces the untrusted-workspace
+  `core.fsmonitor` risk on this machine: a repo-controlled config executes
+  an arbitrary script on `git status` / `git diff --name-only` (NOT on OCC's
+  exact `git log` invocation), and `-c core.fsmonitor=false` suppresses it.
+
 ### Fixed
 
 - Search (`OCC: Search Codebase`) now follows the configured

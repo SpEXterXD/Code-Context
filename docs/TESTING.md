@@ -4,7 +4,7 @@ Run everything with `npm test` (Vitest, no VS Code required). Run one suite
 with `npx vitest run src/path/to/suite.test.ts`. `npm run ci` adds
 typecheck, lint, format check, compile, and packaging.
 
-Current counts: **18 suites, 183 tests**, all passing. Counts in this file
+Current counts: **23 suites, 237 tests**, all passing. Counts in this file
 were captured from a full run; update them together with the suite table
 when adding tests. `scripts/check-docs-sync.ts` verifies these numbers
 against a real `vitest run` and fails CI on drift.
@@ -31,6 +31,11 @@ against a real `vitest run` and fails CI on drift.
 | `clipboard/clipboard.test.ts` (6) | Clipboard abstraction | exact copy, simulated failure, empty payload, 2 MB payload, Unicode preservation, no VS Code dependency |
 | `extension/watcherService.test.ts` (5) | Watcher debounce | fake-timer determinism: single event flushes at the window edge; bursts coalesce to the latest paths; continuous save streams still flush within one window (F6 starvation regression); a new flush is scheduled after a completed one; create/delete routing |
 | `property/invariants.test.ts` (3) | Invariants (seeded PRNG) | 60-step random create/edit/delete/rename keeps index consistent with disk with no stale records; unchanged files never re-parsed across repeated runs; ignored paths never indexed |
+| `eval/lib.test.ts` (19) | Eval harness filters | task-text cleaning (trailers, URLs, issue refs, cherry-picks); word counting; path classification (test/source/lockfile/docs/CI + OCC-fully-parsed slice extensions); bot authors; version-bump/format/revert/docs-only/lockfile-only rejection reasons; gold localizability (new files excluded); time-split sampling determinism incl. disjoint tuning-half sampling |
+| `eval/dataset.test.ts` (11) | Eval dataset assembly | per-reason rejection funnel; duplicate task-text dedupe keeping the earliest commit; seeded sample bounded and deterministic; tuning-half split samples the earlier half disjoint from the eval sample; sorted gold + excluded-new-file counts; dataset hash stability/mutation sensitivity; mode-based gold filter (symlink/gitlink/missing buckets, empty-gold task exclusion, TS/JS hard stop, per-parent tree caching) |
+| `eval/gitminer.test.ts` (6) | Eval git stream parsers | `log --format` metadata records; `--name-status` modify/add/delete/rename/copy with scores; malformed-line tolerance; `ls-tree -r -z` parsing of regular/symlink/gitlink entries with raw paths; regular-file mode classification |
+| `eval/metrics.test.ts` (11) | Eval metrics | Top-1/Recall@k/AllGold Acc@k/MRR arithmetic on fixed rankings; empty-gold vacuous cases; seeded bootstrap CI percentile bounds and determinism; paired-difference bootstrap (reproducibility, exact mean diff, constant-difference CI excluding zero, straddling differences, misaligned-input guard) |
+| `eval/baselines.test.ts` (7) | Eval baselines | filename-overlap ranking; BM25-over-contents ranking (saturation/IDF/length normalization); seeded random baseline determinism; identical inputs give identical rankings |
 
 ## How to run
 

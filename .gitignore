@@ -71,3 +71,6 @@ Desktop.ini
 .tmp/
 tmp/
 temp/
+
+# Eval harness clone cache
+.eval-cache/

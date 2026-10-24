@@ -1,0 +1,3321 @@
+{
+  "seed": 20260918,
+  "tasksPerRepo": 40,
+  "datasetHash": "9b42dc9b",
+  "repos": {
+    "hono": {
+      "pinnedCommit": "5ca49b0720755c585c9a9835f0a479ceea36fb52",
+      "license": "MIT",
+      "note": "285 TS source files (excluding tests, dist, tsfallback dirs). Active 2026 history with descriptive conventional-commit messages (verified: 2,889 commits, HEAD 2026-10-17).",
+      "sourceFilesAtPin": 292,
+      "stats": {
+        "mined": 2803,
+        "accepted": 1181,
+        "duplicateTaskTextDropped": 4,
+        "sampled": 40,
+        "rejectedByReason": {
+          "merge-commit": 1,
+          "task-too-short": 172,
+          "ci-only": 101,
+          "no-localizable-gold": 25,
+          "docs-only": 106,
+          "file-count": 191,
+          "lockfile-only": 22,
+          "no-source-file": 76,
+          "version-bump": 447,
+          "bot-author": 458,
+          "format-only": 7,
+          "revert": 10,
+          "task-too-long": 6
+        },
+        "excludedNewFiles": 158,
+        "evalPoolSize": 589,
+        "tuningHalfSize": 588,
+        "evaluatedTasks": 40,
+        "tasksDroppedEmptyGold": 0,
+        "tasksWithPartialGoldDrop": 0,
+        "droppedGoldSymlink": 0,
+        "droppedGoldGitlink": 0,
+        "droppedGoldMissing": 0
+      },
+      "datasetHash": "c3560bd8"
+    },
+    "zod": {
+      "pinnedCommit": "afdac65e0f80c0ccf9e8909da97c411567908b57",
+      "license": "MIT",
+      "note": "281 TS source files. Very active 2026 history with real feature/fix commits (HEAD 2026-10-19).",
+      "sourceFilesAtPin": 319,
+      "stats": {
+        "mined": 2935,
+        "accepted": 494,
+        "duplicateTaskTextDropped": 8,
+        "sampled": 40,
+        "rejectedByReason": {
+          "merge-commit": 2,
+          "file-count": 183,
+          "task-too-short": 587,
+          "docs-only": 488,
+          "version-bump": 188,
+          "ci-only": 128,
+          "no-localizable-gold": 49,
+          "bot-author": 565,
+          "no-source-file": 153,
+          "revert": 16,
+          "format-only": 44,
+          "lockfile-only": 30,
+          "pure-rename": 3,
+          "task-too-long": 5
+        },
+        "excludedNewFiles": 70,
+        "evalPoolSize": 243,
+        "tuningHalfSize": 243,
+        "evaluatedTasks": 40,
+        "tasksDroppedEmptyGold": 0,
+        "tasksWithPartialGoldDrop": 0,
+        "droppedGoldSymlink": 0,
+        "droppedGoldGitlink": 0,
+        "droppedGoldMissing": 0
+      },
+      "datasetHash": "55fc75e0"
+    },
+    "undici": {
+      "pinnedCommit": "1f452240899a1bbbfa7cbd64ade03ec11c7cef2c",
+      "license": "MIT",
+      "note": "179 TS/JS source files under lib/. High-signal fix commits for HTTP edge cases (HEAD 2026-10-21).",
+      "sourceFilesAtPin": 179,
+      "stats": {
+        "mined": 4353,
+        "accepted": 1449,
+        "duplicateTaskTextDropped": 2,
+        "sampled": 40,
+        "rejectedByReason": {
+          "merge-commit": 1,
+          "no-localizable-gold": 27,
+          "task-too-short": 672,
+          "no-source-file": 395,
+          "docs-only": 210,
+          "version-bump": 189,
+          "ci-only": 102,
+          "bot-author": 1101,
+          "format-only": 6,
+          "file-count": 166,
+          "revert": 21,
+          "task-too-long": 2,
+          "pure-rename": 10,
+          "lockfile-only": 2
+        },
+        "excludedNewFiles": 305,
+        "evalPoolSize": 724,
+        "tuningHalfSize": 723,
+        "evaluatedTasks": 40,
+        "tasksDroppedEmptyGold": 0,
+        "tasksWithPartialGoldDrop": 0,
+        "droppedGoldSymlink": 0,
+        "droppedGoldGitlink": 0,
+        "droppedGoldMissing": 0
+      },
+      "datasetHash": "f9f3d95b"
+    },
+    "axios": {
+      "pinnedCommit": "e6b79d9cef796ca3a903bb83e51d4752b019fd67",
+      "license": "MIT",
+      "note": "96 JS source files under lib/. Long-running history with focused bug-fix commits (pinned on the v1.x branch, HEAD 2026-10-21).",
+      "sourceFilesAtPin": 96,
+      "stats": {
+        "mined": 2036,
+        "accepted": 540,
+        "duplicateTaskTextDropped": 11,
+        "sampled": 40,
+        "rejectedByReason": {
+          "merge-commit": 1,
+          "no-localizable-gold": 42,
+          "no-source-file": 202,
+          "task-too-short": 178,
+          "docs-only": 321,
+          "file-count": 125,
+          "ci-only": 117,
+          "bot-author": 474,
+          "format-only": 5,
+          "revert": 12,
+          "pure-rename": 2,
+          "task-too-long": 1,
+          "lockfile-only": 14,
+          "version-bump": 2
+        },
+        "excludedNewFiles": 83,
+        "evalPoolSize": 265,
+        "tuningHalfSize": 264,
+        "evaluatedTasks": 40,
+        "tasksDroppedEmptyGold": 0,
+        "tasksWithPartialGoldDrop": 0,
+        "droppedGoldSymlink": 0,
+        "droppedGoldGitlink": 0,
+        "droppedGoldMissing": 0
+      },
+      "datasetHash": "03e8f314"
+    },
+    "fastify": {
+      "pinnedCommit": "ce41dc0fbb4ed75e9a42f3972ac896333f6a7396",
+      "license": "MIT",
+      "note": "57 JS/TS core source files plus typed TS files; a smaller but very-high-signal fix stream (HEAD 2026-10-21).",
+      "sourceFilesAtPin": 57,
+      "stats": {
+        "mined": 4474,
+        "accepted": 684,
+        "duplicateTaskTextDropped": 1,
+        "sampled": 40,
+        "rejectedByReason": {
+          "merge-commit": 1,
+          "no-localizable-gold": 51,
+          "task-too-short": 400,
+          "no-source-file": 704,
+          "ci-only": 237,
+          "file-count": 133,
+          "version-bump": 217,
+          "docs-only": 1010,
+          "pure-rename": 4,
+          "bot-author": 988,
+          "revert": 19,
+          "format-only": 21,
+          "task-too-long": 5
+        },
+        "excludedNewFiles": 114,
+        "evalPoolSize": 342,
+        "tuningHalfSize": 341,
+        "evaluatedTasks": 40,
+        "tasksDroppedEmptyGold": 0,
+        "tasksWithPartialGoldDrop": 0,
+        "droppedGoldSymlink": 0,
+        "droppedGoldGitlink": 0,
+        "droppedGoldMissing": 0
+      },
+      "datasetHash": "bc01e73e"
+    }
+  },
+  "tasks": [
+    {
+      "id": "hono:e8f81bf427d9",
+      "repoId": "hono",
+      "sha": "e8f81bf427d98987ea27c7e9dc57b365fb9e50ca",
+      "parentSha": "1511364e0b248cf8d4eed6df65a34e735145b0b3",
+      "task": "fix (jsx/dom): keep ref.current value during lifecycle. * fix (jsx/dom): keep ref.current value during lifecycle. * chore: denoify",
+      "gold": [
+        "deno_dist/jsx/hooks/index.ts",
+        "src/jsx/dom/index.test.tsx",
+        "src/jsx/hooks/index.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1709526062,
+      "subject": "fix (jsx/dom): keep ref.current value during lifecycle. (#2307)"
+    },
+    {
+      "id": "hono:e675d50046de",
+      "repoId": "hono",
+      "sha": "e675d50046deec9b676582f443c4b25fe2df8d7a",
+      "parentSha": "c2a21367e3eaf6b72be2e92e7aab6c6cf52d619b",
+      "task": "perf(utils/url): use `slice` + `indexOf` for `getPath()` * perf(utils/url): use `slice` + `indexOf` for `getPath()` * denoify",
+      "gold": [
+        "deno_dist/utils/url.ts",
+        "src/utils/url.ts"
+      ],
+      "excludedNewFiles": 3,
+      "excludedModeFiles": [],
+      "committerTime": 1710751223,
+      "subject": "perf(utils/url): use `slice` + `indexOf` for `getPath()` (#2376)"
+    },
+    {
+      "id": "hono:879557f35fb7",
+      "repoId": "hono",
+      "sha": "879557f35fb7ecf76ab582eea209b6a1fc7696dd",
+      "parentSha": "8e4293b21997aae346f755fb8c8e1d66d4809309",
+      "task": "fix(jsx): escape attribute value for \"style\"",
+      "gold": [
+        "deno_dist/jsx/base.ts",
+        "src/jsx/base.ts",
+        "src/jsx/index.test.tsx"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1710938550,
+      "subject": "fix(jsx): escape attribute value for \"style\" (#2390)"
+    },
+    {
+      "id": "hono:9b96662b8af3",
+      "repoId": "hono",
+      "sha": "9b96662b8af3732ae1fe80c2f53848aba1366e18",
+      "parentSha": "10ed77fe084e5426920037fa0e804e68191c6f7b",
+      "task": "fix(jsx): allow null, undefined, and boolean as children * fix(jsx): allow null, undefined, and boolean as children * fix(jsx): handle nullish and boolean children in Suspense and ErrorBoundary * chore: denoify",
+      "gold": [
+        "deno_dist/jsx/base.ts",
+        "deno_dist/jsx/components.ts",
+        "deno_dist/jsx/streaming.ts",
+        "src/jsx/base.ts",
+        "src/jsx/components.test.tsx",
+        "src/jsx/components.ts",
+        "src/jsx/streaming.test.tsx",
+        "src/jsx/streaming.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1711096173,
+      "subject": "fix(jsx): allow null, undefined, and boolean as children (#2394)"
+    },
+    {
+      "id": "hono:d5e7da31132f",
+      "repoId": "hono",
+      "sha": "d5e7da31132fb19d6107a46301369dc6bbea6579",
+      "parentSha": "22a6519c99d0d734ba4162a8378469019a6d32d3",
+      "task": "refactor(request): show user-friendly type for `c.req.param()` * refactor(request): show user-friendly type for `c.req.param()` * chore: denoify",
+      "gold": [
+        "src/request.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1716543343,
+      "subject": "refactor(request): show user-friendly type for `c.req.param()` (#2780)"
+    },
+    {
+      "id": "hono:0c7fb9a22106",
+      "repoId": "hono",
+      "sha": "0c7fb9a22106d815779ae1fbca4289883ca0c716",
+      "parentSha": "116867a921d030c900c7b3807c117edd1d37677e",
+      "task": "fix(middleware/body-limit): set default duplex option for readable stream * fix(middleware/body-limit): set default duplex option for readable stream * test: should return 200 response without user-defined duplex option * fix: revert and avoid ts-expect-error",
+      "gold": [
+        "src/middleware/body-limit/index.test.ts",
+        "src/middleware/body-limit/index.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1716917735,
+      "subject": "fix(middleware/body-limit): set default duplex option for readable stream (#2837)"
+    },
+    {
+      "id": "hono:645b4f21eb2c",
+      "repoId": "hono",
+      "sha": "645b4f21eb2c1b9545a1242c58e7684908e4edc6",
+      "parentSha": "a44d888bf05d3607baec2a3add629ccb823082f7",
+      "task": "fix(jsx/dom): Fixed to not give \"px\" for certain properties, even if numeric value is given",
+      "gold": [
+        "src/jsx/utils.ts"
+      ],
+      "excludedNewFiles": 1,
+      "excludedModeFiles": [],
+      "committerTime": 1716991346,
+      "subject": "fix(jsx/dom): Fixed to not give \"px\" for certain properties, even if numeric value is given (#2845)"
+    },
+    {
+      "id": "hono:0735e0cc5690",
+      "repoId": "hono",
+      "sha": "0735e0cc5690aef555cc251c9a5647dfc11adb34",
+      "parentSha": "645b4f21eb2c1b9545a1242c58e7684908e4edc6",
+      "task": "refactor(aws-lambda): remove unused setHeadersToResult",
+      "gold": [
+        "src/adapter/aws-lambda/handler.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1716992078,
+      "subject": "refactor(aws-lambda): remove unused setHeadersToResult (#2828)"
+    },
+    {
+      "id": "hono:320b945effeb",
+      "repoId": "hono",
+      "sha": "320b945effeb3b092df63df386de75434647cc75",
+      "parentSha": "80cbb44f504aa803f5e4b626fc7d0005071784cb",
+      "task": "fix(websocket): the onopen event cannot be triggered during delayed operations in deno * fix: The onopen event cannot be triggered during delayed operations * fix: The onopen event cannot be triggered during delayed operations * chore: delete test * chore: tidy",
+      "gold": [
+        "src/adapter/deno/websocket.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1717318591,
+      "subject": "fix(websocket): the onopen event cannot be triggered during delayed operations in deno (#2864)"
+    },
+    {
+      "id": "hono:731d7aebad58",
+      "repoId": "hono",
+      "sha": "731d7aebad5815145695ce855f9fce9b631a9671",
+      "parentSha": "cb55866ab8ca633ffb0ca00cb863e8aee951f7ae",
+      "task": "fix(types): add `_` prefix to `TypedResponse` properties",
+      "gold": [
+        "src/types.test.ts",
+        "src/types.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1717678104,
+      "subject": "fix(types): add `_` prefix to `TypedResponse` properties (#2917)"
+    },
+    {
+      "id": "hono:00f32b7c17e4",
+      "repoId": "hono",
+      "sha": "00f32b7c17e45c44037a604d29bce1d2157e5a63",
+      "parentSha": "731d7aebad5815145695ce855f9fce9b631a9671",
+      "task": "fix(types): `SimplifyDeepArray` should now actually be \"deep\" * fix(types): `SimplifyDeepArray` should now actually be \"deep\" Also now uses `Simplify` instead of inline declare the type * tests(types): extra tests for `Should have correct types - interfaces` * style: apply lint&style fixes * docs: rewording SimplifyDeepArray jsdoc * fix: type is possibly infinite * fix: mismatching implementation of interface * refactor: split JSONRespond return declaration to it's own type DRY-er code and fixes a weird type is possibly infinite yelling",
+      "gold": [
+        "src/client/client.test.ts",
+        "src/context.ts",
+        "src/utils/types.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1717679373,
+      "subject": "fix(types): `SimplifyDeepArray` should now actually be \"deep\" (#2920)"
+    },
+    {
+      "id": "hono:32ba5ba8360e",
+      "repoId": "hono",
+      "sha": "32ba5ba8360e0b8e1cb2b681af22469a9a3f7175",
+      "parentSha": "208d77b06d5bf970f4118a87007f22c6b37164d1",
+      "task": "refactor(request): shorten `parseBody` and remove unnecessary check * refactor(request): shorten `parseBody` and remove unnecessary check * refactored as ---------",
+      "gold": [
+        "src/request.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1718031103,
+      "subject": "refactor(request): shorten `parseBody` and remove unnecessary check (#2947)"
+    },
+    {
+      "id": "hono:668a07cb8a4e",
+      "repoId": "hono",
+      "sha": "668a07cb8a4e301d4d7d99a20e4681f808f15f21",
+      "parentSha": "75663ff16232d4b4395ce5a1baa3f4cb8d4ca958",
+      "task": "feat(jsx/dom): export createRoot and hydrateRoot from jsx/dom/client as default",
+      "gold": [
+        "src/jsx/dom/client.test.tsx",
+        "src/jsx/dom/client.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1718160991,
+      "subject": "feat(jsx/dom): export createRoot and hydrateRoot from jsx/dom/client as default (#2929)"
+    },
+    {
+      "id": "hono:9c21cc6f71a5",
+      "repoId": "hono",
+      "sha": "9c21cc6f71a50bcbf98a7effa3c974a7f1fa478e",
+      "parentSha": "c910923aea6f8e64678d44f82cf81e25721234d2",
+      "task": "feat(jsx/dom): Improve compatibility React (useCallback, React.StrictMode) * fix(jsx/hooks): fix useCallback type Fixed problem where callbacks that take arguments could not be specified Like React's useCallback * feat(jsx): export StrictMode as an alias of Fragment",
+      "gold": [
+        "src/jsx/dom/index.test.tsx",
+        "src/jsx/dom/index.ts",
+        "src/jsx/hooks/index.ts",
+        "src/jsx/index.test.tsx",
+        "src/jsx/index.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1718161395,
+      "subject": "feat(jsx/dom): Improve compatibility React (useCallback, React.StrictMode) (#2944)"
+    },
+    {
+      "id": "hono:7ba58664e775",
+      "repoId": "hono",
+      "sha": "7ba58664e775e90ebe2e8b1668ec3774b06a6c00",
+      "parentSha": "1e3e58bb45b3597531b2fe81937a90219fbaaf34",
+      "task": "fix(types): infer `path` when chaining after `use`",
+      "gold": [
+        "src/types.test.ts",
+        "src/types.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1720078720,
+      "subject": "fix(types): infer `path` when chaining after `use` (#3087)"
+    },
+    {
+      "id": "hono:9a6e52d734df",
+      "repoId": "hono",
+      "sha": "9a6e52d734df3f887d802dfc6d52b0bc07c736ee",
+      "parentSha": "e6d253d96fcbfb079ee6313d67d62c0fed84cb2d",
+      "task": "feat(middleware/combine): Introduce combine middleware * feat(middleware/predicate): Introduce predicate middleware * fix: apply `bun run format:fix` * refactor: rename middleware predicate -> combine",
+      "gold": [
+        "jsr.json",
+        "package.json"
+      ],
+      "excludedNewFiles": 2,
+      "excludedModeFiles": [],
+      "committerTime": 1720864150,
+      "subject": "feat(middleware/combine): Introduce combine middleware (#2941)"
+    },
+    {
+      "id": "hono:20d877167c8b",
+      "repoId": "hono",
+      "sha": "20d877167c8b275f0d1522e0063bf5e323b91f0a",
+      "parentSha": "024ec0ff8d7370f9b575a9ee6d97a0a7fac85ce3",
+      "task": "feat(jsx): add global attributes to interface definition",
+      "gold": [
+        "src/jsx/intrinsic-elements.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1721137085,
+      "subject": "feat(jsx): add global attributes to interface definition (#3142)"
+    },
+    {
+      "id": "hono:85c7dc6263dd",
+      "repoId": "hono",
+      "sha": "85c7dc6263dd1efec6e2a91f7b3f583109c16510",
+      "parentSha": "73ff6c0e82d66468e28ed439481220f56ab03882",
+      "task": "fix(build): improve addExtension esbuild plugin",
+      "gold": [
+        "build.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1726062213,
+      "subject": "fix(build): improve addExtension esbuild plugin (#3405)"
+    },
+    {
+      "id": "hono:ad0bba09642b",
+      "repoId": "hono",
+      "sha": "ad0bba09642b6c323084f265e771f802ae742200",
+      "parentSha": "4878fcf57cadaa89815c59d49341ea3353ee3db7",
+      "task": "fix(types): useSyncExternalStore type Align with react note: the parameter is not used in function body",
+      "gold": [
+        "src/jsx/hooks/index.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1727079517,
+      "subject": "fix(types): useSyncExternalStore type (#3437)"
+    },
+    {
+      "id": "hono:b1335f9fb296",
+      "repoId": "hono",
+      "sha": "b1335f9fb296cfa4b947367bbad0512c7739c5f5",
+      "parentSha": "bfd839a5f058de4a2b5e624b8a631c2cfd472e0b",
+      "task": "refactor(context): remove lint errors * refactor(context): remove lint errors * remove build errros",
+      "gold": [
+        "src/context.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1735119215,
+      "subject": "refactor(context): remove lint errors (#3769)"
+    },
+    {
+      "id": "hono:f5e9f3a2ee2e",
+      "repoId": "hono",
+      "sha": "f5e9f3a2ee2e10554d980550a20f6e51885bd921",
+      "parentSha": "d75e9ec60518d042e3e67416ab9f0555046c3168",
+      "task": "fix(helper/adapter): `env` should set `c` type correctly",
+      "gold": [
+        "src/helper/adapter/index.test.ts",
+        "src/helper/adapter/index.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1737882692,
+      "subject": "fix(helper/adapter): `env` should set `c` type correctly (#3856)"
+    },
+    {
+      "id": "hono:9cdfdf3c65af",
+      "repoId": "hono",
+      "sha": "9cdfdf3c65affaec4d3682d66fbd1cffeede975d",
+      "parentSha": "9e42fd1c9d895a655c4fb1ed82af9d2f2cb4abe7",
+      "task": "fix: reduce Context code * perf: reduce Context code * lint * format * update test * format the test * refactored * perf: make it faster * add optimized code * use `this.header` instead of `this.res.headers.*` * tweak * test: add some tests beased on * refactored * supports all tests * fix: handle headers with array values correctly * refactor: don't use `TEXT_HTML` variable * test: add the test when setting an emtpy array ---------",
+      "gold": [
+        "src/context.test.ts",
+        "src/context.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1750112452,
+      "subject": "fix: reduce Context code (#4100)"
+    },
+    {
+      "id": "hono:62e0aacef0d1",
+      "repoId": "hono",
+      "sha": "62e0aacef0d1bb0fc8cc52c27d4cbec1b72eb665",
+      "parentSha": "3df5bf9f16f32b82a6391c4ad0f3fd8b8fbdff4f",
+      "task": "perf(trie-router): improve performance and reduce file size",
+      "gold": [
+        "src/router/trie-router/node.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1750112488,
+      "subject": "perf(trie-router): improve performance and reduce file size (#4217)"
+    },
+    {
+      "id": "hono:ff715fca4bd5",
+      "repoId": "hono",
+      "sha": "ff715fca4bd50d6bf16ee8149f79a7394543604d",
+      "parentSha": "3b8642b13cf0e0ff38530c4a08545e6044e40758",
+      "task": "refactor: internal structure of `PreparedRegExpRouter` for optimization and added tests * refactor(reg-exp-router): it is difficult to use in JSON.stringify, so `undefined` is not used. * refactor(reg-exp-router): a safer and simpler way to embed regular expressions. * refactor(reg-exp-router): narrowed the scope of `all` variables. * refactor(reg-exp-router): use `for...in` instead of `Object.keys` * refactor(reg-exp-router): avoid creating temporary arrays `method === METHOD_NAME_ALL ? Object.keys(this.#matchers) : [method]` * refactor(reg-exp-router): skip adding wildcard routes to relocate map * test(reg-exp-router): add test cases for buildInitParams() and serializeInitParams()",
+      "gold": [
+        "src/router/reg-exp-router/prepared-router.test.ts",
+        "src/router/reg-exp-router/prepared-router.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1760317888,
+      "subject": "refactor:  internal structure of `PreparedRegExpRouter` for optimization and added tests (#4456)"
+    },
+    {
+      "id": "hono:d9b8b4b73b4f",
+      "repoId": "hono",
+      "sha": "d9b8b4b73b4f997994f2764013207365fe711282",
+      "parentSha": "52161170e83298fc3d13312bfceba3992916bfa2",
+      "task": "Merge commit from fork * fix(cors): Stop referencing the Vary header in response headers * test(cors): fix test cases",
+      "gold": [
+        "src/middleware/cors/index.test.ts",
+        "src/middleware/cors/index.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1761324502,
+      "subject": "Merge commit from fork"
+    },
+    {
+      "id": "hono:7d6d04ea4b0d",
+      "repoId": "hono",
+      "sha": "7d6d04ea4b0d0ecbe4240fad5ad5878925c5814a",
+      "parentSha": "342ff3b52dda2d655aa5c5b649557e9d6f247909",
+      "task": "fix(adapter/bun): fix TypeError: null is not an object * fix: TypeError: null is not an object * added some comments Fixes ---------",
+      "gold": [
+        "src/adapter/bun/conninfo.test.ts",
+        "src/adapter/bun/conninfo.ts",
+        "src/adapter/bun/server.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1764153227,
+      "subject": "fix(adapter/bun): fix TypeError: null is not an object (#4429) (#4538)"
+    },
+    {
+      "id": "hono:d8ea652ab9fb",
+      "repoId": "hono",
+      "sha": "d8ea652ab9fbe42e482bbcfb3764b378116b74b2",
+      "parentSha": "d454b31695474fb7f897509e09a5b898f6340476",
+      "task": "refactor(hono-base): add type annotations",
+      "gold": [
+        "src/hono-base.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1766630402,
+      "subject": "refactor(hono-base): add type annotations (#4591)"
+    },
+    {
+      "id": "hono:5d4e6aa897f0",
+      "repoId": "hono",
+      "sha": "5d4e6aa897f0d41f4ccc21519d4461bbd26b8a24",
+      "parentSha": "28452f06319ef12df94b826450f36486e286565d",
+      "task": "fix(client): exclude $all from ClientRequest type * fix(client): exclude $all from ClientRequest type The RPC client was incorrectly exposing `$all` as a valid method when using `app.all()`. Since HTTP has no \"ALL\" method, the client should not expose `$all` - users should use specific HTTP methods like `$get`, `$post`, etc. 🤖 Generated with [Claude Code]( * ci: apply automated fixes * fix(client): expand $all to standard HTTP methods in ClientRequest type Previously, routes defined with app.all() only excluded $all from the client type but didn't expose standard HTTP methods like $get, $post. This caused a mismatch where runtime behavior worked but types didn't. Now $all is expanded to all standard HTTP methods ($get, $post, $put, $delete, $options, $patch), matching the actual runtime behavior. * ci: apply automated fixes ---------",
+      "gold": [
+        "src/client/types.test.ts",
+        "src/client/types.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1769043046,
+      "subject": "fix(client): exclude $all from ClientRequest type (#4611)"
+    },
+    {
+      "id": "hono:a5be555b3163",
+      "repoId": "hono",
+      "sha": "a5be555b3163236909f5699f783bbd03e28ea226",
+      "parentSha": "bcc81b1fc0621c4131efe09e2cc1d48c501be06c",
+      "task": "refactor: use `unique symbol` for more accurate typing.",
+      "gold": [
+        "src/request/constants.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1769438166,
+      "subject": "refactor: use `unique symbol` for more accurate typing. (#4651)"
+    },
+    {
+      "id": "hono:c831020fb1fa",
+      "repoId": "hono",
+      "sha": "c831020fb1fa2e929d222f6c84e1abfe013e512b",
+      "parentSha": "905aedbc20661e0e2fa378783a7ec44a5c3df43d",
+      "task": "Merge commit from fork * fix(ip-restriction): match static IP rules numerically * fix: throw TypeError for invalid IP addresses in ipaddr utils * fix(ip-restriction): validate CIDR prefixes",
+      "gold": [
+        "src/middleware/ip-restriction/index.test.ts",
+        "src/middleware/ip-restriction/index.ts",
+        "src/utils/ipaddr.test.ts",
+        "src/utils/ipaddr.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1779190391,
+      "subject": "Merge commit from fork"
+    },
+    {
+      "id": "hono:cf6ef7056a59",
+      "repoId": "hono",
+      "sha": "cf6ef7056a59acdc5cd2eacdca201147885d3e54",
+      "parentSha": "a83ddb882e0c0b8c336050dba087bb2e1b12488e",
+      "task": "chore: update vitest to v4 and cleanups * chore: update vitest to v4 and cleanups * ci: apply automated fixes * fix: vitest jsx import ---------",
+      "gold": [
+        ".vitest.config/setup-vitest.ts",
+        "bun.lock",
+        "package.json",
+        "src/middleware/cache/index.test.ts",
+        "vitest.config.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1779440282,
+      "subject": "chore: update vitest to v4 and cleanups (#4952)"
+    },
+    {
+      "id": "hono:03a9416a13a6",
+      "repoId": "hono",
+      "sha": "03a9416a13a681028011e23841ba89d1dd6c9a62",
+      "parentSha": "97c6fe1f12298c715eb7b2da65b4b6e0d81682bb",
+      "task": "fix(serve-static): treat empty string content as found",
+      "gold": [
+        "src/middleware/serve-static/index.test.ts",
+        "src/middleware/serve-static/index.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1782803917,
+      "subject": "fix(serve-static): treat empty string content as found (#5062)"
+    },
+    {
+      "id": "hono:21b44b6db611",
+      "repoId": "hono",
+      "sha": "21b44b6db6118fc77fabb49832fc4cadd0ef8ec8",
+      "parentSha": "5f738971b57b54077b9932fb7b916cf8517534a7",
+      "task": "refactor(aws-lambada): remove FIXME in `@ts-expect-error`",
+      "gold": [
+        "src/adapter/aws-lambda/handler.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1784329317,
+      "subject": "refactor(aws-lambada): remove FIXME in `@ts-expect-error` (#5130)"
+    },
+    {
+      "id": "hono:2739eb5c52a7",
+      "repoId": "hono",
+      "sha": "2739eb5c52a700cbaa9008272688e921d1f44e0b",
+      "parentSha": "62edfe2cb9cc3e347a1cbc258c1be4e7846195b6",
+      "task": "perf(context): skip Headers creation when there are no headers to merge",
+      "gold": [
+        "src/context.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1785791072,
+      "subject": "perf(context): skip Headers creation when there are no headers to merge (#5122)"
+    },
+    {
+      "id": "hono:3098a3ab239e",
+      "repoId": "hono",
+      "sha": "3098a3ab239ef461c1cfd05a288b67f272b6deee",
+      "parentSha": "2739eb5c52a700cbaa9008272688e921d1f44e0b",
+      "task": "perf(urls): refactor `tryDecodeURIComponent`",
+      "gold": [
+        "src/request.ts",
+        "src/utils/cookie.ts",
+        "src/utils/url.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1785791072,
+      "subject": "perf(urls): refactor `tryDecodeURIComponent` (#5158)"
+    },
+    {
+      "id": "hono:3bc96ba915bf",
+      "repoId": "hono",
+      "sha": "3bc96ba915bf8d5b25430c955aec8f7df500ff21",
+      "parentSha": "75b8a4932a24a4533168600436e10f03055844bf",
+      "task": "feat(cache): add first-class support for QUERY requests * feat(cache): support QUERY requests * fix(cache): report unavailable QUERY hashing * fix(cache): include request method in cache keys * docs(cache): show QUERY-compatible registration",
+      "gold": [
+        "src/middleware/cache/index.test.ts",
+        "src/middleware/cache/index.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1785791072,
+      "subject": "feat(cache): add first-class support for QUERY requests (#5119)"
+    },
+    {
+      "id": "hono:fc8bd834dd2e",
+      "repoId": "hono",
+      "sha": "fc8bd834dd2e01fc2d26d4459680984150e3b5f6",
+      "parentSha": "b2070d0ddd86e59b815b1e1c57cd110f8c02cff6",
+      "task": "perf(request): probe the body cache without allocating `#cachedBody` used `Object.keys(bodyCache)[0]` to find any already cached body, allocating a fresh array on every body read (`req.json()`, `req.text()`, ...) just to read one element. A `for ... in` loop that returns on its first iteration gives the same first-key-by-insertion-order result with no allocation. `bodyCache` is a plain object literal, so there are no enumerable prototype keys to consider.",
+      "gold": [
+        "src/request.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1785791072,
+      "subject": "perf(request): probe the body cache without allocating (#5176)"
+    },
+    {
+      "id": "hono:26de73133b85",
+      "repoId": "hono",
+      "sha": "26de73133b8552f56ba72e025ecd82b08900d796",
+      "parentSha": "7075369e1f6161e04a227eba37373469c09fc743",
+      "task": "fix(etag): stabilize digest across stream chunks * fix(etag): stabilize digest across stream chunks * perf(etag): optimize fixed-size digest chunks",
+      "gold": [
+        "src/middleware/etag/digest.ts",
+        "src/middleware/etag/index.test.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1786324829,
+      "subject": "fix(etag): stabilize digest across stream chunks (#5205)"
+    },
+    {
+      "id": "hono:c409d855d91d",
+      "repoId": "hono",
+      "sha": "c409d855d91d1f0904d19439692216fcf789e6cb",
+      "parentSha": "612b59c0227b421090d46721cd5a98243ad8c6ec",
+      "task": "fix(request): serialize cached JSON body in cloneRawRequest",
+      "gold": [
+        "src/request.test.ts",
+        "src/request.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1787469418,
+      "subject": "fix(request): serialize cached JSON body in cloneRawRequest (#5288)"
+    },
+    {
+      "id": "hono:588ec13fa68e",
+      "repoId": "hono",
+      "sha": "588ec13fa68ea44fed1b5e1b503341db2bf09d70",
+      "parentSha": "552ea024250093a48071b3ded9710de4c6e05f14",
+      "task": "fix(serve-static): only serve GET and HEAD requests",
+      "gold": [
+        "src/middleware/serve-static/index.test.ts",
+        "src/middleware/serve-static/index.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1791879490,
+      "subject": "fix(serve-static): only serve GET and HEAD requests (#5514)"
+    },
+    {
+      "id": "zod:d969423266fc",
+      "repoId": "zod",
+      "sha": "d969423266fccee56ef769da6744cc8bacb04550",
+      "parentSha": "29d2ea2a15f0b1ac4b89138041f786a3dafc490b",
+      "task": "Fix #3437: extendShape erases JSDoc property documentation",
+      "gold": [
+        "deno/lib/helpers/util.ts",
+        "src/helpers/util.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1715105668,
+      "subject": "Fix #3437: extendShape erases JSDoc property documentation (#3463)"
+    },
+    {
+      "id": "zod:6407bed5a229",
+      "repoId": "zod",
+      "sha": "6407bed5a229f330b9353e086f7798f1422e2bb7",
+      "parentSha": "b85686ab852bc75919fd9d853dfca4b0968301dd",
+      "task": "Allow creation of discriminated unions with a readonly array of options",
+      "gold": [
+        "deno/lib/__tests__/discriminated-unions.test.ts",
+        "deno/lib/types.ts",
+        "src/__tests__/discriminated-unions.test.ts",
+        "src/types.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1733797089,
+      "subject": "Allow creation of discriminated unions with a readonly array of options (#3535)"
+    },
+    {
+      "id": "zod:b68c05fea12d",
+      "repoId": "zod",
+      "sha": "b68c05fea12d8060000aa06abc1e95b08f061378",
+      "parentSha": "c1dd537baa9e4fad781ea365643399707fea91be",
+      "task": "feat: Add JWT string validator * feat: add JWT string validator - Add z.string().jwt() validator for checking JWT format - Add optional algorithm validation with z.string().jwt({ alg: string }) - Implement in both main and Deno versions - Add comprehensive test coverage - Use atob() for browser compatibility * fix: rename algorithm to alg ---------",
+      "gold": [
+        "deno/lib/ZodError.ts",
+        "deno/lib/__tests__/string.test.ts",
+        "deno/lib/types.ts",
+        "src/ZodError.ts",
+        "src/__tests__/string.test.ts",
+        "src/types.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1733810569,
+      "subject": "feat: Add JWT string validator (#3893)"
+    },
+    {
+      "id": "zod:4e219d6ad9d5",
+      "repoId": "zod",
+      "sha": "4e219d6ad9d5e56e20afd7423092f506400a29e4",
+      "parentSha": "0c6cbbdd1315683dd3d589fbdc5765c26431dcc9",
+      "task": "Bump min TS version to 5.0",
+      "gold": [
+        ".github/workflows/test.yml",
+        "deno/lib/types.ts",
+        "package.json",
+        "playground.ts",
+        "src/types.ts",
+        "yarn.lock"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1733871479,
+      "subject": "Bump min TS version to 5.0"
+    },
+    {
+      "id": "zod:57a1adf92650",
+      "repoId": "zod",
+      "sha": "57a1adf92650e8e3e8d9777183888217e12d6698",
+      "parentSha": "7ca67d312708964069bb7178e4938e6d9bda27fb",
+      "task": "Fix default & prefault object handling",
+      "gold": [
+        "packages/zod/src/v4/classic/tests/default.test.ts",
+        "packages/zod/src/v4/core/schemas.ts",
+        "packages/zod/src/v4/core/util.ts",
+        "play.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1748391567,
+      "subject": "Fix default & prefault object handling (#4539)"
+    },
+    {
+      "id": "zod:a1276395e53d",
+      "repoId": "zod",
+      "sha": "a1276395e53df7a77219ac1a59f20e3f9c710f67",
+      "parentSha": "7bfc8af0f805453ac06d0d11bce7e76b01fd3240",
+      "task": "rm `console.dir` from `$ZodDiscriminatedUnion`",
+      "gold": [
+        "packages/zod/src/v4/core/schemas.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1748855689,
+      "subject": "rm `console.dir` from `$ZodDiscriminatedUnion` (#4593)"
+    },
+    {
+      "id": "zod:50ef910565a1",
+      "repoId": "zod",
+      "sha": "50ef910565a14c127942442b7e09596afcfdca5f",
+      "parentSha": "d7ffdfa73a800ea810218431d1dd751f15d0fba4",
+      "task": "Add output type generic test",
+      "gold": [
+        "packages/zod/src/v4/classic/tests/generics.test.ts",
+        "play.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1748998145,
+      "subject": "Add output type generic test"
+    },
+    {
+      "id": "zod:2954f40a4e41",
+      "repoId": "zod",
+      "sha": "2954f40a4e41f61e835ba211ff084467dca1f41e",
+      "parentSha": "c58bd9b0125881caee03a408eae88ec1dc5eb18b",
+      "task": "Fix json * Fix json * Tweaks * Clean up * Clean up",
+      "gold": [
+        "packages/zod/src/v4/classic/schemas.ts",
+        "packages/zod/src/v4/classic/tests/recursive-types.test.ts",
+        "packages/zod/src/v4/core/schemas.ts",
+        "play.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1749168043,
+      "subject": "Fix json (#4630)"
+    },
+    {
+      "id": "zod:a6adb148012f",
+      "repoId": "zod",
+      "sha": "a6adb148012f59d734245c637a577ed413a484e7",
+      "parentSha": "e479ea76ae1571064c3dade621b3af0ea2dff942",
+      "task": "zod mini internals * Switch mini to new internals structure * Fix z.json()",
+      "gold": [
+        "packages/zod/src/v4/classic/tests/index.test.ts",
+        "packages/zod/src/v4/mini/schemas.ts",
+        "packages/zod/src/v4/mini/tests/index.test.ts",
+        "packages/zod/src/v4/mini/tests/recursive-types.test.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1749171438,
+      "subject": "zod mini internals (#4631)"
+    },
+    {
+      "id": "zod:6707ebb14c88",
+      "repoId": "zod",
+      "sha": "6707ebb14c885b1c577ce64a240475e26e3ff182",
+      "parentSha": "21ee3f6fceb504069ef91899248239c59e2189b9",
+      "task": "v4: Preserve function types in `.meta()` * Preserve function types * preserve function types * Support function types in replacer * Add additional test ---------",
+      "gold": [
+        "packages/zod/src/v4/classic/tests/registries.test.ts",
+        "packages/zod/src/v4/core/registries.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1749525414,
+      "subject": "v4: Preserve function types in `.meta()` (#4636)"
+    },
+    {
+      "id": "zod:1c2ad8771205",
+      "repoId": "zod",
+      "sha": "1c2ad877120566adc9db3a8d99c1a575bc58d216",
+      "parentSha": "0a83863ee30c8422527a2055cccc9b96e5053b61",
+      "task": "Loose signature for index signature shapes",
+      "gold": [
+        "packages/zod/src/v4/classic/tests/object.test.ts",
+        "packages/zod/src/v4/core/schemas.ts",
+        "play.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1749627374,
+      "subject": "Loose signature for index signature shapes"
+    },
+    {
+      "id": "zod:c568dea33ac4",
+      "repoId": "zod",
+      "sha": "c568dea33ac42382070580687410ee47e83609c4",
+      "parentSha": "82b43fa9ff832b80e249b944fefb8177827136e6",
+      "task": "Drop | undefined from json schema types",
+      "gold": [
+        "packages/zod/src/v4/core/json-schema.ts",
+        "play.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1749668712,
+      "subject": "Drop | undefined from json schema types"
+    },
+    {
+      "id": "zod:7ed0c3694d32",
+      "repoId": "zod",
+      "sha": "7ed0c3694d324f5c02d5b224e7e3163d2fd84c52",
+      "parentSha": "1614fd891b40cc9d23b249abad528e38ca718065",
+      "task": "Allow hours-only offsets. Normalize.",
+      "gold": [
+        "packages/docs/content/api.mdx",
+        "packages/zod/src/v4/classic/tests/string.test.ts",
+        "packages/zod/src/v4/core/regexes.ts",
+        "packages/zod/src/v4/core/schemas.ts",
+        "play.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1749673554,
+      "subject": "Allow hours-only offsets. Normalize. (#4676)"
+    },
+    {
+      "id": "zod:36fe14e1472f",
+      "repoId": "zod",
+      "sha": "36fe14e1472f2a7cd71415841be8832fc4e9acc5",
+      "parentSha": "7a5838dc0da967e15a217bf5abdd81f725da46c4",
+      "task": "Fix optionality of schemas * Mark catch as input optional * merge all changes into one PR * add output optional example * Improvements * WIP * WIP * Remove never changes ---------",
+      "gold": [
+        "packages/zod/src/v4/classic/tests/optional.test.ts",
+        "packages/zod/src/v4/classic/tests/to-json-schema.test.ts",
+        "packages/zod/src/v4/core/schemas.ts",
+        "packages/zod/src/v4/core/to-json-schema.ts",
+        "play.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1751579516,
+      "subject": "Fix optionality of schemas (#4769)"
+    },
+    {
+      "id": "zod:e7f20c2c761f",
+      "repoId": "zod",
+      "sha": "e7f20c2c761f924b1182b65eed49c9235822fa16",
+      "parentSha": "990e03bae12a9b1bc6817e3dbdf337cb3cd87ce2",
+      "task": "Fix treeifyError type for branded primitives. Add test. Closes",
+      "gold": [
+        "packages/zod/src/v4/classic/tests/error-utils.test.ts",
+        "packages/zod/src/v4/core/errors.ts",
+        "play.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1752014997,
+      "subject": "Fix treeifyError type for branded primitives. Add test. Closes #4840 (#4843)"
+    },
+    {
+      "id": "zod:e89901650941",
+      "repoId": "zod",
+      "sha": "e8990165094117e87fb9d04fae7d1a0f60506842",
+      "parentSha": "a7bd58a6d35c5af0cb7301b1c2722bd60b5baa1b",
+      "task": "Support format in z.templateLiteral",
+      "gold": [
+        "packages/zod/src/v4/core/schemas.ts",
+        "play.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1752106605,
+      "subject": "Support format in z.templateLiteral"
+    },
+    {
+      "id": "zod:813451db7fcf",
+      "repoId": "zod",
+      "sha": "813451db7fcf64c5322835984eded9bfe95be1da",
+      "parentSha": "2b571a21875e9e3299de261e512dad300878c3a1",
+      "task": "v4.0.10 * Add discriminator to invalid_union. Closes * WIP * Closes * 4.0.10",
+      "gold": [
+        "packages/zod/jsr.json",
+        "packages/zod/package.json",
+        "packages/zod/src/v4/classic/tests/discriminated-unions.test.ts",
+        "packages/zod/src/v4/core/errors.ts",
+        "packages/zod/src/v4/core/schemas.ts",
+        "packages/zod/src/v4/core/versions.ts",
+        "play.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1753409539,
+      "subject": "v4.0.10 (#4978)"
+    },
+    {
+      "id": "zod:60a937241495",
+      "repoId": "zod",
+      "sha": "60a9372414955094b84aae2f30b491a039780b7c",
+      "parentSha": "3ac7bf00d0d924d1afa1031b798bdd72b59117db",
+      "task": "Implement `llms-full.txt` * Implement llms-full * Add fields to package.json * Fix build",
+      "gold": [
+        "packages/docs/content/v4/index.mdx",
+        "packages/docs/package.json",
+        "packages/zod/package.json",
+        "pnpm-lock.yaml"
+      ],
+      "excludedNewFiles": 2,
+      "excludedModeFiles": [],
+      "committerTime": 1753777089,
+      "subject": "Implement `llms-full.txt` (#5004)"
+    },
+    {
+      "id": "zod:9bdbc2f10d46",
+      "repoId": "zod",
+      "sha": "9bdbc2f10d466050421a8e28c4b95a8a5776d150",
+      "parentSha": "b8257d7d1f51dd3cb4033a58271bb6ac8e3678c7",
+      "task": "Avoid infinite loops in defineLazy. Fixes #4994.",
+      "gold": [
+        "packages/zod/src/v4/core/schemas.ts",
+        "packages/zod/src/v4/core/util.ts",
+        "play.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1753859023,
+      "subject": "Avoid infinite loops in defineLazy. Fixes #4994."
+    },
+    {
+      "id": "zod:aa6f0f02c2a9",
+      "repoId": "zod",
+      "sha": "aa6f0f02c2a92a266ff1495a8d2541ae46012fcb",
+      "parentSha": "9f650385644ae319f806a965b83f79ebd252e497",
+      "task": "More fixes * Fix error message on invalid shape. Fixes * Ignore package.jsons * Fix CIDRv6 validation false positive. Fixes",
+      "gold": [
+        "packages/zod/.gitignore",
+        "packages/zod/src/v4/classic/tests/string.test.ts",
+        "packages/zod/src/v4/core/schemas.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1757567958,
+      "subject": "More fixes (#5223)"
+    },
+    {
+      "id": "zod:d3da530deb71",
+      "repoId": "zod",
+      "sha": "d3da530deb713c853e79405adddf770e156d50ac",
+      "parentSha": "5c2602ceb8be8941c64bbe5ac7d92cc174ae6f7e",
+      "task": "reflect the specified regex correctly in error",
+      "gold": [
+        "packages/zod/src/v4/core/schemas.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1760544850,
+      "subject": "reflect the specified regex correctly in error (#5338)"
+    },
+    {
+      "id": "zod:9d6e7d009469",
+      "repoId": "zod",
+      "sha": "9d6e7d0094691f7b2900d3da47480e41b2c0be64",
+      "parentSha": "2b564dc90853eecb6a21957740a1dd03b33ba35a",
+      "task": "fix(implementasync): Inferred type should always be a promise",
+      "gold": [
+        "packages/zod/src/v4/classic/tests/function.test.ts",
+        "packages/zod/src/v4/core/schemas.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1765854988,
+      "subject": "fix(implementasync): Inferred type should always be a promise (#5476)"
+    },
+    {
+      "id": "zod:73b071d7d088",
+      "repoId": "zod",
+      "sha": "73b071d7d08825dedb6b48b78718739118ee1308",
+      "parentSha": "9d6e7d0094691f7b2900d3da47480e41b2c0be64",
+      "task": "Fix numeric formats error messages to be inclusive * fix: make numeric formats error messages inclusive * docs: clarify that numeric formats bounds are inclusive",
+      "gold": [
+        "packages/docs/content/v4/index.mdx",
+        "packages/zod/src/v4/core/checks.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1765855038,
+      "subject": "Fix numeric formats error messages to be inclusive (#5485)"
+    },
+    {
+      "id": "zod:119376b9dc2e",
+      "repoId": "zod",
+      "sha": "119376b9dc2e80f44bedd282702b46e18e2ee72c",
+      "parentSha": "7b43bc64e7a2720fe66d6e99239c2a00c782e06b",
+      "task": "feat: add map support to Uzbek locale - Add map entry to Sizable object with unit 'yozuv' (entries) - Add tests for map min/max validation error messages - Ensures map schemas display properly localized error messages in Uzbek",
+      "gold": [
+        "packages/zod/src/v4/core/tests/locales/uz.test.ts",
+        "packages/zod/src/v4/locales/uz.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1769371448,
+      "subject": "feat: add map support to Uzbek locale (#5599)"
+    },
+    {
+      "id": "zod:7d98c9093297",
+      "repoId": "zod",
+      "sha": "7d98c909329713cb2f478620f8a67aaf3ef40ce2",
+      "parentSha": "3cd45ebcbcf06a3f16e702a010074dfceca3ea50",
+      "task": "add Sanity as silver sponsor and Mintlify as bronze sponsor",
+      "gold": [
+        "packages/docs/components/bronze.tsx",
+        "packages/docs/components/silver.tsx"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1771165170,
+      "subject": "add Sanity as silver sponsor and Mintlify as bronze sponsor"
+    },
+    {
+      "id": "zod:2f8414bc90ce",
+      "repoId": "zod",
+      "sha": "2f8414bc90cebc76be87c3640617e300a5d9b060",
+      "parentSha": "bee2dc8d4971a5142d6197a01426837e2a57f69d",
+      "task": "fix: add missing addIssue to transform context Closes",
+      "gold": [
+        "packages/zod/src/v4/classic/schemas.ts",
+        "packages/zod/src/v4/classic/tests/transform.test.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1777306026,
+      "subject": "fix: add missing addIssue to transform context (#5699)"
+    },
+    {
+      "id": "zod:65fab33e287b",
+      "repoId": "zod",
+      "sha": "65fab33e287bba2db5942c7f9ad905ac98f62fce",
+      "parentSha": "28f39a6d97ce903ed0d2f6cd99a60d390faa7adf",
+      "task": "feat: allow 'when' parameter in .superRefine * allow 'when' parameter in .superRefine * narrow superRefine params type to {when} The previous `string | $ZodCustomParams` type advertised fields that don't do anything useful for `.superRefine` — `error`/`message`/`path` are never read because the refinement pushes its own issues via `ctx.addIssue`, and `abort` is redundant with the per-issue `fatal` flag (which sets `continue: false` directly on the issue, with finer granularity than a check-level toggle). Introduce a dedicated `$ZodSuperRefineParams` interface exposing only `when` — the one execution-control option that genuinely gates whether the refinement runs at all. Also wire `params` through in `mini` for parity. ---------",
+      "gold": [
+        "packages/zod/src/v4/classic/schemas.ts",
+        "packages/zod/src/v4/classic/tests/refine.test.ts",
+        "packages/zod/src/v4/core/api.ts",
+        "packages/zod/src/v4/core/checks.ts",
+        "packages/zod/src/v4/mini/schemas.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1777333824,
+      "subject": "feat: allow 'when' parameter in .superRefine (#5741)"
+    },
+    {
+      "id": "zod:2e5b23dcd41e",
+      "repoId": "zod",
+      "sha": "2e5b23dcd41eb257bda434b9997fd60a19cdf38f",
+      "parentSha": "518f15ddada3b5d959f4ff32b094789e2d85349a",
+      "task": "fix: add options to invalid discriminator errors * fix: add options to invalid discriminator errors - Add options field to invalid_union errors for discriminated unions - Update English locale to display valid discriminator values - Update snapshot test to reflect new behavior - Fixes * fix: add missing options field to The options field was populated at runtime for discriminated union errors but not declared on the interface, requiring type assertions to access it. This adds the missing type definition.",
+      "gold": [
+        "packages/zod/src/v4/classic/tests/discriminated-unions.test.ts",
+        "packages/zod/src/v4/core/errors.ts",
+        "packages/zod/src/v4/core/schemas.ts",
+        "packages/zod/src/v4/locales/en.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1777334065,
+      "subject": "fix: add options to invalid discriminator errors (#5723)"
+    },
+    {
+      "id": "zod:e06af5de314f",
+      "repoId": "zod",
+      "sha": "e06af5de314f1cad8dfaa0a5f1909e21ffff9e49",
+      "parentSha": "bc07e459bab4f895bf1c99f182c6841d577c16b3",
+      "task": "Update Hey API description Aligned the description to match the GitHub repository.",
+      "gold": [
+        "packages/docs/components/ecosystem.tsx"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1777334735,
+      "subject": "Update Hey API description (#5748)"
+    },
+    {
+      "id": "zod:87cf0f93cd0f",
+      "repoId": "zod",
+      "sha": "87cf0f93cd0f34bdc69f11c9377568e6812841c4",
+      "parentSha": "c7a8ccc0d0fb4f2bd1c938b8d79873a8ebd6573e",
+      "task": "fix(fromJSONSchema): normalize input via JSON round-trip `fromJSONSchema` previously stack-overflowed on cyclic JS object inputs (e.g. dereferenced JSON Schemas where `$ref` strings have been replaced with live object references) and on inputs with infinite-loop-on-access getters or Proxies. JSON Schema is JSON, and JSON has no cycles — these inputs are off-spec. Round-trip the input through `JSON.parse(JSON.stringify(...))` at the top of `fromJSONSchema`. Cyclic and otherwise non-JSON inputs throw a clear error. Getter/Proxy properties are materialized into static values and class instances collapse to plain objects, so the rest of the converter only ever walks a finite, plain object graph. Closes #5675.",
+      "gold": [
+        "packages/zod/src/v4/classic/from-json-schema.ts",
+        "packages/zod/src/v4/classic/tests/from-json-schema.test.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1777343102,
+      "subject": "fix(fromJSONSchema): normalize input via JSON round-trip"
+    },
+    {
+      "id": "zod:cede2c63739a",
+      "repoId": "zod",
+      "sha": "cede2c63739a5823d6aa5093d291e9a111da943d",
+      "parentSha": "95ccab423aec720b2523c3a64cdc7e3204537cc7",
+      "task": "fix(v4): reject tuple holes before required defaults * fix(v4): reject tuple holes before required defaults * refactor(v4): use output opt start for tuple truncation * refactor(v4): name tuple opt starts explicitly * refactor(v4): simplify tuple optout truncation check",
+      "gold": [
+        "packages/zod/src/v4/classic/tests/tuple.test.ts",
+        "packages/zod/src/v4/core/schemas.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1777504129,
+      "subject": "fix(v4): reject tuple holes before required defaults (#5900)"
+    },
+    {
+      "id": "zod:6fbe07b0177e",
+      "repoId": "zod",
+      "sha": "6fbe07b0177efdd1bf1c0b05160e70d7a0702337",
+      "parentSha": "20cc794895cc8604fe0c87d83a5d1c3f89fad0ac",
+      "task": "fix(docs): heading anchor links now include the hash so it doesnt scoll all the way up, follows navbar logic",
+      "gold": [
+        "packages/docs/components/heading.tsx"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1777517343,
+      "subject": "fix(docs): heading anchor links now include the hash so it doesnt scoll all the way up, follows navbar logic (#5791)"
+    },
+    {
+      "id": "zod:2aeec83eb135",
+      "repoId": "zod",
+      "sha": "2aeec83eb135e3a83756e973ef44845fc5a455d2",
+      "parentSha": "4c2fa95ce3f3390fbc522324e406b4e9e89b88f9",
+      "task": "docs: prune lapsed gold sponsors and rebalance logo sizing Remove Brand.dev, Courier, Liblab, and Retool from the Gold tier based on a sponsor audit (no recent payment in GitHub Sponsors or either Stripe account). Update Zernio's logo to the official primary wordmark, and add a per-logo h-12 override so dense wordmarks (Zernio, Stainless) read at the same visual weight as the others.",
+      "gold": [
+        "packages/docs/components/gold.tsx"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1777835956,
+      "subject": "docs: prune lapsed gold sponsors and rebalance logo sizing"
+    },
+    {
+      "id": "zod:599c0e41dccb",
+      "repoId": "zod",
+      "sha": "599c0e41dccb148b3ed24acf487fa2fcd5124619",
+      "parentSha": "27a9036a1faeef797e752dbba1be7c6c1f6ad852",
+      "task": "docs(ecosystem): Add `@chrock-studio/overload` and `@chrock-studio/zod-utils` * docs: Add `@chrock-studio/overload` and `@chrock-studio/zod-utils` to ecosystem documentation - [`@chrock-studio/overload`]( A lightweight, type-safe runtime function overloading that allows runtime dispatch based on argument types. - [`@chrock-studio/zod-utils`]( Zod utilities library providing enhanced functionality (e.g. Rich Domain Mode) for Zod schemas. * Enhance descriptions for overload and zod-utils libraries * Fix package names and update slugs for overload and zod-utils",
+      "gold": [
+        "packages/docs/components/ecosystem.tsx"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1786558097,
+      "subject": "docs(ecosystem): Add `@chrock-studio/overload` and `@chrock-studio/zod-utils` (#6040)"
+    },
+    {
+      "id": "zod:81d9fc6cf47d",
+      "repoId": "zod",
+      "sha": "81d9fc6cf47da97ad4ef2c43de02276fba249790",
+      "parentSha": "d86df5e05724bbe6a4acf42911fbce6f3b2fa0db",
+      "task": "docs: add zod-form-action to ecosystem Adds `zod-form-action` to the Form Integrations list. A small helper for wiring Zod schemas into React 19's `useActionState`, producing typed field errors with minimal boilerplate. No hard dependency on `zod` itself (structurally typed against `safeParse`), MIT licensed. - npm: - GitHub: - Live demo:",
+      "gold": [
+        "packages/docs/components/ecosystem.tsx"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1786582975,
+      "subject": "docs: add zod-form-action to ecosystem (#6314)"
+    },
+    {
+      "id": "zod:9d20fdc3c372",
+      "repoId": "zod",
+      "sha": "9d20fdc3c37207fa3fe77c9524a3421f4399cbf6",
+      "parentSha": "3063993a3317ac8af7a244691b837fce3e53aa96",
+      "task": "fix(v4): preserve z.preprocess input narrowing replaced `preprocess()`'s return type `ZodPipe<ZodTransform<A, B>, U>` with `ZodPreprocess<U>`, which pins `def.in` to a bare `$ZodTransform`. Its `I` slot defaulted to `unknown`, so `$ZodPipeInternals` derived the pipe input as `unknown` and the annotated preprocessor argument stopped reaching `z.input`. Thread the argument type through as a second generic on `$ZodPreprocess` and its def/internals, as `$ZodTransform<unknown, I>`. The transform's output stays `unknown` on purpose: `$ZodPipeDef`'s codec-only `transform?` field is typed over `core.output<A>`, so binding it there would make a narrowed `ZodPreprocess` unassignable to the bare `ZodPreprocess`. Type-only; no runtime change. The documented default is unchanged — an un-annotated preprocessor still infers `unknown`.",
+      "gold": [
+        "packages/zod/src/v4/classic/schemas.ts",
+        "packages/zod/src/v4/classic/tests/preprocess-types.test.ts",
+        "packages/zod/src/v4/core/schemas.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1786644518,
+      "subject": "fix(v4): preserve z.preprocess input narrowing (#5967)"
+    },
+    {
+      "id": "zod:78b523f0e81c",
+      "repoId": "zod",
+      "sha": "78b523f0e81c0f19939cd8ffeb945ebca76d1d2f",
+      "parentSha": "973b1b44e182ad2eeba50fb57e926c69df67cdb2",
+      "task": "fix(json-schema): keep preprocess object properties required in input mode * fix(json-schema): keep preprocess object properties required in input mode `z.preprocess(fn, inner)` builds a pipe whose `in` is a transform. A bare transform reports `optin: \"optional\"` (needed so the preprocessor still runs on absent keys at parse time), and ZodPipe inherits `optin` from its `in`, so the object processor marked preprocessed properties as not-required in `toJSONSchema(..., { io: \"input\" })` — a regression since v4.4.3 . This contradicts runtime parsing: `z.object({ a: z.preprocess(v => v, z.string()) }).parse({})` rejects the absent `a`. The input shape of a preprocess pipe is its inner `out` schema, so optionality should defer to that inner schema (the v4.4.2 behavior, design of #5929). Resolve `optin` through transform-`in` pipes in the JSON-schema object processor only; runtime optin is untouched. Fixes #5968. * fix(json-schema): keep catch properties required in input mode `$ZodCatch` sets `optin = \"optional\"` at runtime so the parser lets the catch handler observe an absent key , but its declared input type keeps the key required. `io: \"input\"` describes the declared type, so resolve past catch the same way this now resolves past a transform-led pipe. flipped this without comment and dropped `\"f\"` from the `input type` snapshot, reverting the position established in and #5003. Restore both. Also updates the object snapshot added by #6409: a catch over a transforming schema declares a `string` input, so the key is required there too. ---------",
+      "gold": [
+        "packages/zod/src/v4/classic/tests/to-json-schema.test.ts",
+        "packages/zod/src/v4/core/json-schema-processors.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1786915492,
+      "subject": "fix(json-schema): keep preprocess object properties required in input mode (#6133)"
+    },
+    {
+      "id": "zod:33d82e6b97f7",
+      "repoId": "zod",
+      "sha": "33d82e6b97f7840757e9e05ee471bb39405002c4",
+      "parentSha": "06666fe222b68de831a772e8b062d2f40b4a608f",
+      "task": "Add Central Kurdish (ckb) locale * feat(locales): add Kurdish (ckb) locale support with error messages * feat(locales): add Kurdish (ckb) locale export to index * fix(locales): update Kurdish (ckb) error messages for clarity * fix(locales): improve formatting of Kurdish (ckb) error messages * feat(locales): add Kurdish (Central) locale to error customization documentation",
+      "gold": [
+        "packages/docs/content/error-customization.mdx",
+        "packages/zod/jsr.json",
+        "packages/zod/src/v4/locales/index.ts"
+      ],
+      "excludedNewFiles": 1,
+      "excludedModeFiles": [],
+      "committerTime": 1786921271,
+      "subject": "Add Central Kurdish (ckb) locale (#6078)"
+    },
+    {
+      "id": "zod:73bacbbb6b83",
+      "repoId": "zod",
+      "sha": "73bacbbb6b83b49b679e141f73f2fd915a514911",
+      "parentSha": "8f813b1e83bd11b3efcfca7084655fa473742e1e",
+      "task": "fix(from-json-schema): drop redundant inclusive bound for draft-04 exclusive ranges In draft-04 `exclusiveMinimum: true` makes the sibling `minimum` exclusive rather than an independent bound, so the converter emitted one check more than the source schema declares: `.min(5)` alongside `.gt(5)`. The extra check is dominated and never binding, so accepted values are unchanged, and `toJSONSchema` output is byte-identical on every target. The one observable effect is in Zod's own parse output, where an out-of-range value reported two issues instead of one, the second naming a bound the schema does not have. `!== true` leaves the draft-06+ numeric form alone, where `minimum` and `exclusiveMinimum` are legitimately independent.",
+      "gold": [
+        "packages/zod/src/v4/classic/from-json-schema.ts",
+        "packages/zod/src/v4/classic/tests/from-json-schema.test.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1786928562,
+      "subject": "fix(from-json-schema): drop redundant inclusive bound for draft-04 exclusive ranges (#6022)"
+    },
+    {
+      "id": "zod:749f545233d7",
+      "repoId": "zod",
+      "sha": "749f545233d7035250620b92e4fc1afcc1bc2f99",
+      "parentSha": "24cdb7fdcae136a0f8ec9a7abc3aa06ba9a80ff7",
+      "task": "docs: add fullproduct.dev to v4 ecosystem page",
+      "gold": [
+        "packages/docs/components/ecosystem.tsx"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1787792013,
+      "subject": "docs: add fullproduct.dev to v4 ecosystem page (#6001)"
+    },
+    {
+      "id": "undici:9041e9fed85a",
+      "repoId": "undici",
+      "sha": "9041e9fed85a69426242dc4ed7aaa7dea4b289d2",
+      "parentSha": "472c40e4f6fb3c7a9e489605057debd81b75acdb",
+      "task": "fix: mock fetch headers shouldn't be an array",
+      "gold": [
+        "lib/fetch/headers.js",
+        "lib/fetch/index.js",
+        "lib/fetch/symbols.js"
+      ],
+      "excludedNewFiles": 1,
+      "excludedModeFiles": [],
+      "committerTime": 1681878817,
+      "subject": "fix: mock fetch headers shouldn't be an array  (#2080)"
+    },
+    {
+      "id": "undici:f08379c55857",
+      "repoId": "undici",
+      "sha": "f08379c55857819f258b0cdc5ad6f944074e2c42",
+      "parentSha": "c83b084879fa0bb8e0469d31ec61428ac68160d5",
+      "task": "better stack trace for body.json * better stack trace for body.json Fixes * not needed * nit",
+      "gold": [
+        "lib/cache/cache.js",
+        "lib/fetch/body.js",
+        "lib/fetch/util.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1692282295,
+      "subject": "better stack trace for body.json (#2215)"
+    },
+    {
+      "id": "undici:8c5577bcda00",
+      "repoId": "undici",
+      "sha": "8c5577bcda00b0d3fdbe5297bfbc783a3efb08a7",
+      "parentSha": "b0d3ca7701766b6cb9ebb8fed7dd08d3a684b91b",
+      "task": "fix undici when node is built with --without-ssl",
+      "gold": [
+        "lib/client.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1695103124,
+      "subject": "fix undici when node is built with --without-ssl (#2272)"
+    },
+    {
+      "id": "undici:5c2e597bd938",
+      "repoId": "undici",
+      "sha": "5c2e597bd938ce99a0246f9dfbfac6d3f3a31be9",
+      "parentSha": "985b3816708512bafefa1544def183cc6d1536be",
+      "task": "Add publish types script * add publish types script * use postpublish script * 5.24.0-test.0 * 5.24.0-test.1 * uncomment * 5.24.0-test.2 * simplify automation * 5.24.0-test.3 * fix script * 5.24.0-test.4 * fix script * 5.24.0-test.5 * * restore versions * delete generated file * Update update-undici-types-version.js * fix contributor list and fix types export * this should fix types * one more adjustment * 5.24.0-test.6 * * revert versions and add README for undici-types ---------",
+      "gold": [
+        "index.d.ts",
+        "package.json"
+      ],
+      "excludedNewFiles": 4,
+      "excludedModeFiles": [],
+      "committerTime": 1695243762,
+      "subject": "Add publish types script (#2273)"
+    },
+    {
+      "id": "undici:3b2df8e62399",
+      "repoId": "undici",
+      "sha": "3b2df8e6239997e672d891b9718e5bf9f27b8fa4",
+      "parentSha": "ed89b45ce7c7fbe0d46f66e32552e677ccbf6bfd",
+      "task": "chore: remove no-simd wasm of llhttp",
+      "gold": [
+        ".npmignore",
+        "build/wasm.js",
+        "lib/dispatcher/client-h1.js",
+        "lib/llhttp/llhttp-wasm.js",
+        "lib/llhttp/llhttp.wasm"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1709140044,
+      "subject": "chore: remove no-simd wasm of llhttp (#2871)"
+    },
+    {
+      "id": "undici:c04802bdd13b",
+      "repoId": "undici",
+      "sha": "c04802bdd13b6a0bd4a8a769eab8ce3424bdc0aa",
+      "parentSha": "2316bae1b790517b9fbc8d066582410604ab733b",
+      "task": "fetch: use EOL of os-module",
+      "gold": [
+        "lib/web/fetch/file.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1709494073,
+      "subject": "fetch: use EOL of os-module (#2915)"
+    },
+    {
+      "id": "undici:7da8232df9fb",
+      "repoId": "undici",
+      "sha": "7da8232df9fbf0cc2fa41e86a8f14cb3dd7f53c7",
+      "parentSha": "ed6c734fa22eacde4e7a16cb5c7eecc154fc8ec5",
+      "task": "perf: improve getResolveErrorBodyCallback",
+      "gold": [
+        "lib/api/util.js"
+      ],
+      "excludedNewFiles": 1,
+      "excludedModeFiles": [],
+      "committerTime": 1710092380,
+      "subject": "perf: improve getResolveErrorBodyCallback (#2940)"
+    },
+    {
+      "id": "undici:825e6e11a134",
+      "repoId": "undici",
+      "sha": "825e6e11a134305d124eaf76444299a476eff057",
+      "parentSha": "e81dc8da1755418f801431546026e3c9bcf91a43",
+      "task": "perf: dump immediatly if known size exceeds limit * perf: dump immediatly if known size exceeds limit * fixup",
+      "gold": [
+        "lib/api/api-request.js",
+        "lib/api/readable.js",
+        "test/client-request.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1710141232,
+      "subject": "perf: dump immediatly if known size exceeds limit (#2882)"
+    },
+    {
+      "id": "undici:dcab693198f3",
+      "repoId": "undici",
+      "sha": "dcab693198f3d3aea0651bdc94ee975855013302",
+      "parentSha": "07019d01c572c751e6817c4c13a99b9a4420eedc",
+      "task": "Cleanup format * for some reason this fixes the test * cleanup custom format * fixup",
+      "gold": [
+        "lib/web/fetch/formdata.js",
+        "lib/web/fetch/headers.js",
+        "lib/web/fetch/request.js",
+        "lib/web/fetch/response.js",
+        "test/fetch/formdata-inspect-custom.js",
+        "test/fetch/request-inspect-custom.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1710490106,
+      "subject": "Cleanup format (#2959)"
+    },
+    {
+      "id": "undici:b4825128d37e",
+      "repoId": "undici",
+      "sha": "b4825128d37e7c02bb13a92111fe2974399a42cc",
+      "parentSha": "fe44b9b36718ff2c171568fc4a239ecb8eba038d",
+      "task": "fix: defer errors with setImmediate",
+      "gold": [
+        "lib/api/readable.js",
+        "test/request-timeout.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1712742850,
+      "subject": "fix: defer errors with setImmediate (#3081)"
+    },
+    {
+      "id": "undici:1f70214869d0",
+      "repoId": "undici",
+      "sha": "1f70214869d0e991e52ec1ed6cb00c3128d82dae",
+      "parentSha": "b4825128d37e7c02bb13a92111fe2974399a42cc",
+      "task": "improve DecoratorHandler * improve DecoratorHandler * fix remark",
+      "gold": [
+        "lib/handler/decorator-handler.js"
+      ],
+      "excludedNewFiles": 1,
+      "excludedModeFiles": [],
+      "committerTime": 1712748574,
+      "subject": "improve DecoratorHandler (#3079)"
+    },
+    {
+      "id": "undici:437732ad77e5",
+      "repoId": "undici",
+      "sha": "437732ad77e5b897d68e2411c296b2f7247a2924",
+      "parentSha": "ead42cdb2f9be593ab36e4e3826d18c01a87f71e",
+      "task": "fetch: Change wording of \"Body is unusable\" error",
+      "gold": [
+        "lib/web/fetch/body.js",
+        "test/fetch/client-fetch.js",
+        "test/node-fetch/main.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1713628673,
+      "subject": "fetch: Change wording of \"Body is unusable\" error (#3105)"
+    },
+    {
+      "id": "undici:b07a9d2a2f9e",
+      "repoId": "undici",
+      "sha": "b07a9d2a2f9e4ed52e6d43cbb187539825586360",
+      "parentSha": "9547fe4cfe4d396b5e1d5ab76611cfec0ec5af78",
+      "task": "fix(H2-#3140): abort requets upon GOAWAY",
+      "gold": [
+        "lib/dispatcher/client-h2.js",
+        "lib/dispatcher/client.js",
+        "test/http2.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1713712917,
+      "subject": "fix(H2-#3140): abort requets upon GOAWAY (#3143)"
+    },
+    {
+      "id": "undici:2e3463c3161b",
+      "repoId": "undici",
+      "sha": "2e3463c3161b75a022839005792532d5c52b3ebc",
+      "parentSha": "9458ffd4f1e5116cdcf8b421a3171d3aded41d46",
+      "task": "fix: tweak keep-alive timeout implementation * fix: tweak keep-alive timeout implementation Closes nodejs/undici#3141 * fix test impacted by default keepAliveTimeoutThreshold change * adjust timer registration strategy * only use fast timers with delay > 1000ms",
+      "gold": [
+        "docs/docs/api/Client.md",
+        "lib/dispatcher/client.js",
+        "lib/util/timers.js",
+        "test/node-test/balanced-pool.js",
+        "test/util.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1713816674,
+      "subject": "fix: tweak keep-alive timeout implementation (#3145)"
+    },
+    {
+      "id": "undici:c8352d7f6d84",
+      "repoId": "undici",
+      "sha": "c8352d7f6d84e08111a50c159bf46766a5399632",
+      "parentSha": "f5025a82f30ede639a3bc5af724044a57e6f3ccd",
+      "task": "Cleanup websocket * cleanup websocket receiver * fix 9.3.2-9.3.8; 9.4.2-9.4.8; 10.1.1 * fixup * fixup",
+      "gold": [
+        "lib/web/websocket/receiver.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1715641356,
+      "subject": "Cleanup websocket (#3257)"
+    },
+    {
+      "id": "undici:7436fee3e17e",
+      "repoId": "undici",
+      "sha": "7436fee3e17ef5ed45e904bc5b6371aee4b416fc",
+      "parentSha": "ed3ad9f16c47b3cb28a39669df05d53f375efe60",
+      "task": "separate whatwg websocket logic from rfc 6455 * separate whatwg websocket logic from rfc 6455 * fixup * remove symbols * move parser events * remove symbols",
+      "gold": [
+        "lib/web/websocket/connection.js",
+        "lib/web/websocket/receiver.js",
+        "lib/web/websocket/symbols.js",
+        "lib/web/websocket/util.js",
+        "lib/web/websocket/websocket.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1720407358,
+      "subject": "separate whatwg websocket logic from rfc 6455 (#3396)"
+    },
+    {
+      "id": "undici:69825dc1483d",
+      "repoId": "undici",
+      "sha": "69825dc1483db3315f2ea2454fc882ed7e131aad",
+      "parentSha": "0f45d422bfc29415b913dcc1a9b94102063ca88b",
+      "task": "fix: restore externalized Node.js dep compatibility * fix: restore externalized Node.js dep compatibility Restore the ability to build Undici compatible with Node.js' `configure --shared-builtin-undici/undici-path ...` build option. Scopes the `hasApk` conditional to only cover the part that requires `apk`. Makes the WASM optimizer (binaryen) optional to allow building on Linux distributions that do not package `binaryen` and must be able to rebuild everything (including tooling) from source. * ci: add workflow for externalized Node.js dep Add a workflow to test building Undici in a way compatible with Node.js built with `configure --shared-builtin-undici/undici-path ...`. This configuration is used by downstream Node.js packagers (e.g. Fedora) who require the ability to be able to build everything from source.",
+      "gold": [
+        "CONTRIBUTING.md",
+        "build/wasm.js"
+      ],
+      "excludedNewFiles": 1,
+      "excludedModeFiles": [],
+      "committerTime": 1722265378,
+      "subject": "fix: restore externalized Node.js dep compatibility (#3421)"
+    },
+    {
+      "id": "undici:c7737283667f",
+      "repoId": "undici",
+      "sha": "c7737283667fb03285753c81c391ca99edad4887",
+      "parentSha": "0b287b9ea0004c6987104bff38afa7d9c365a608",
+      "task": "diagnostics-channel: use not deprecated subscribe fn * diagnostics-channel: use not deprecated subscribe fn * fix linting",
+      "gold": [
+        "lib/core/diagnostics.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1726238173,
+      "subject": "diagnostics-channel: use not deprecated subscribe fn (#3600)"
+    },
+    {
+      "id": "undici:ae18f0e7dade",
+      "repoId": "undici",
+      "sha": "ae18f0e7dade688849a15e1c331a2d0c8e252ca1",
+      "parentSha": "bebe53c396e55dceda23109277ef578a90e3b27e",
+      "task": "prefer fail over close the websocket connection in error cases * fail websocket connection in error cases * fail websocket connection in error cases * remove dupe error event emits",
+      "gold": [
+        "lib/web/websocket/receiver.js",
+        "lib/web/websocket/stream/websocketstream.js",
+        "lib/web/websocket/websocket.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1727478560,
+      "subject": "prefer fail over close the websocket connection in error cases (#3651)"
+    },
+    {
+      "id": "undici:7cd36d198532",
+      "repoId": "undici",
+      "sha": "7cd36d19853206e3e237b4ec6a6b0e1444548c4e",
+      "parentSha": "1cfe0949053aac6267f11b919cee9315a27f1fd6",
+      "task": "Mark http/2 support as stable",
+      "gold": [
+        "docs/docs/api/Client.md",
+        "lib/dispatcher/client-h2.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1732818150,
+      "subject": "Mark http/2 support as stable (#3893)"
+    },
+    {
+      "id": "undici:c2d78cd19fe4",
+      "repoId": "undici",
+      "sha": "c2d78cd19fe4f4c621424491e26ce299e65e934a",
+      "parentSha": "fa1d840682ed934314e837b807c2a3449c569798",
+      "task": "Merge commit from fork * Use crypto.randomInt() * fixup ---------",
+      "gold": [
+        "lib/web/fetch/body.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1737018805,
+      "subject": "Merge commit from fork"
+    },
+    {
+      "id": "undici:d0399c40f116",
+      "repoId": "undici",
+      "sha": "d0399c40f116ae604658fbaca340351cae072668",
+      "parentSha": "57efacb689c44645afcd409e23ae3310f18d70a9",
+      "task": "fix(inteceptor/dump): handle preemptive network errors",
+      "gold": [
+        "lib/interceptor/dump.js",
+        "test/interceptors/dump-interceptor.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1753948670,
+      "subject": "fix(inteceptor/dump): handle preemptive network errors (#4354)"
+    },
+    {
+      "id": "undici:b49a29ab88a6",
+      "repoId": "undici",
+      "sha": "b49a29ab88a662cd65d41f05a05be91b6f8c85ec",
+      "parentSha": "8dd120e3332de496602477affd85d20577e98cc6",
+      "task": "feat: EventSource can be configured with reconnectionTime * feat: EventSource can be configured with node.reconnectionTime, deprecate dispatcher attribute on top level * no need for optional chaining * improve test",
+      "gold": [
+        "lib/web/eventsource/eventsource.js",
+        "test/eventsource/eventsource-connect.js",
+        "test/eventsource/eventsource-custom-dispatcher.js",
+        "types/eventsource.d.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1754930580,
+      "subject": "feat: EventSource can be configured with reconnectionTime (#4260)"
+    },
+    {
+      "id": "undici:f29471cf6460",
+      "repoId": "undici",
+      "sha": "f29471cf6460a53997f2e947c2f6b30536b682fe",
+      "parentSha": "7cc4fcf71275a700a62b16c7df335243b0563a6f",
+      "task": "fix fd parsing unquoted attribute values",
+      "gold": [
+        "lib/web/fetch/formdata-parser.js"
+      ],
+      "excludedNewFiles": 1,
+      "excludedModeFiles": [],
+      "committerTime": 1762697560,
+      "subject": "fix fd parsing unquoted attribute values (#4662)"
+    },
+    {
+      "id": "undici:847419f6a297",
+      "repoId": "undici",
+      "sha": "847419f6a297b1f82503b72086e0b1265e518d9e",
+      "parentSha": "33885134f24937831b83e4e44068d0cd6ab9a201",
+      "task": "fix(cache): regenerate stream from source when cache.match is called after GC",
+      "gold": [
+        "lib/web/cache/cache.js",
+        "lib/web/fetch/response.js",
+        "test/cache/cache.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1768859572,
+      "subject": "fix(cache): regenerate stream from source when cache.match is called after GC (#4713)"
+    },
+    {
+      "id": "undici:be564c1573f4",
+      "repoId": "undici",
+      "sha": "be564c1573f4b562300f3128ff9730b5fd728a7c",
+      "parentSha": "94d147de5cc1fe07eebcbc7fd91519851542ecba",
+      "task": "return response when receiving 401 instead of network error",
+      "gold": [
+        "lib/web/fetch/index.js",
+        "test/fetch/401-statuscode-no-infinite-loop.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1769372405,
+      "subject": "return response when receiving 401 instead of network error (#4769)"
+    },
+    {
+      "id": "undici:a4eaed1124ec",
+      "repoId": "undici",
+      "sha": "a4eaed1124ec084665d215af6395c70439a7dd5a",
+      "parentSha": "0a236106a3a3e1b0aab424f71de2a68ca2c1d37b",
+      "task": "fix: prevent AbortController GC when redirect is 'error'",
+      "gold": [
+        "lib/web/fetch/index.js"
+      ],
+      "excludedNewFiles": 1,
+      "excludedModeFiles": [],
+      "committerTime": 1771499251,
+      "subject": "fix: prevent AbortController GC when redirect is 'error' (#4750)"
+    },
+    {
+      "id": "undici:13d5fefb529c",
+      "repoId": "undici",
+      "sha": "13d5fefb529c86d287de6f27ae368de80a13a0e7",
+      "parentSha": "f734c87280e626c75f59aad55b65eb6a89cef392",
+      "task": "fix(h2): ignore late data frames after request completion",
+      "gold": [
+        "lib/dispatcher/client-h2.js"
+      ],
+      "excludedNewFiles": 1,
+      "excludedModeFiles": [],
+      "committerTime": 1772642243,
+      "subject": "fix(h2): ignore late data frames after request completion (#4845)"
+    },
+    {
+      "id": "undici:07276c90545b",
+      "repoId": "undici",
+      "sha": "07276c90545bd66b075a7002875fcfa7f8d9fd04",
+      "parentSha": "eaedd18dfae592b3c78d0d7706a92e6b14456aa7",
+      "task": "fix: remove unused kSocketPath symbol",
+      "gold": [
+        "lib/core/symbols.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1773090191,
+      "subject": "fix: remove unused kSocketPath symbol"
+    },
+    {
+      "id": "undici:42d4955987a1",
+      "repoId": "undici",
+      "sha": "42d4955987a136ab29beff6c4ed424c9209b2600",
+      "parentSha": "c972895c533d455460b528d95ab89e404b56c9ee",
+      "task": "fix: honor requestTls when proxy is SOCKS5 ProxyAgent silently dropped opts.requestTls when the configured proxy URI was socks5:// (or socks://). Socks5ProxyAgent also lacked any equivalent of requestTls, so even constructed directly it had no way to configure target HTTPS TLS settings (ca, cert, key, rejectUnauthorized, servername). The inner connect callback called tls.connect with ...connectOpts.tls || {} but undici's internal connectOpts never populates a .tls field, so the spread was a dead expression. This change: - Forwards opts.requestTls from ProxyAgent to Socks5ProxyAgent. - Adds a requestTls constructor option on Socks5ProxyAgent stored in the kRequestTls symbol. - Applies it on the inner tls.connect for the target HTTPS upgrade, with socket overriding (must point at the SOCKS5 tunnel) and servername defaulting to targetHost but allowing user override to match the HTTP-proxy path semantics. - Documents the new option in Socks5ProxyAgent.md. - Adds two regression tests covering both the direct Socks5ProxyAgent path and the ProxyAgent forwarding path. Refs GHSA-vmh5-mc38-953g",
+      "gold": [
+        "docs/docs/api/Socks5ProxyAgent.md",
+        "lib/dispatcher/proxy-agent.js",
+        "lib/dispatcher/socks5-proxy-agent.js",
+        "test/socks5-proxy-agent.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1781256323,
+      "subject": "fix: honor requestTls when proxy is SOCKS5"
+    },
+    {
+      "id": "undici:32dbf0b3dd93",
+      "repoId": "undici",
+      "sha": "32dbf0b3dd93daf6d87badf506d52e89f2e20e78",
+      "parentSha": "0d6ecc571095a6bff1c2ad4ee43dd6ae4e97411c",
+      "task": "websocket: limit the number of fragments in a message Introduce the `maxFragments` option to limit the number of fragments in a message. Without this limit, a remote peer could exploit structural wrapper overhead by sending many tiny fragments, consuming far more memory than the payload itself and crashing the process due to OOM. When the limit is hit, the connection is closed with close code 1008.",
+      "gold": [
+        "docs/docs/api/Client.md",
+        "lib/dispatcher/dispatcher-base.js",
+        "lib/web/websocket/receiver.js",
+        "lib/web/websocket/websocket.js",
+        "test/websocket/fragments.js",
+        "types/client.d.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1781272585,
+      "subject": "websocket: limit the number of fragments in a message"
+    },
+    {
+      "id": "undici:a8d1a95bae4d",
+      "repoId": "undici",
+      "sha": "a8d1a95bae4d2502831b5cde35310ad45e42e88e",
+      "parentSha": "cb30e58b45d7c92b03fa9ee0b4a54b5fde1e0573",
+      "task": "fix: auto-detect HTTP proxy tunneling * fix: auto-detect HTTP proxy tunneling * test: enable proxy tunneling in bundle test * fix: forward over HTTPS proxy per RFC 9112 §3.2.2 Tunnel decision now depends on the request protocol only. HTTP requests through an HTTPS proxy use absolute-form request-target over TLS to the proxy instead of CONNECT, matching Node's built-in http.request and RFC 9112. HTTPS requests still tunnel via CONNECT. Http1ProxyWrapper pins the proxy SNI so the inner Client does not derive it from the rewritten Host header, and wraps ERR_TLS_CERT_ALTNAME_INVALID into SecureProxyConnectionError for parity with the tunneling path. * ci: disable shared-builtin job pending nodejs/node sync The forwarding fix from is in undici main but the embedded undici in nodejs/node still expects the old semantics, so the shared-builtin build fails until Node.js 26 ships a release embedding the updated undici. Comment is left in place to re-enable for Node.js 26 at that point. Node.js 24 stays off as the change is not being backported. * fix: force HTTP/1.1 for proxy forwarding * test: force tunneling for CONNECT regression ---------",
+      "gold": [
+        ".github/workflows/ci.yml",
+        "docs/docs/api/ProxyAgent.md",
+        "lib/dispatcher/proxy-agent.js",
+        "test/env-http-proxy-agent-nodejs-bundle.js",
+        "test/env-http-proxy-agent.js",
+        "test/issue-3897.js",
+        "test/proxy-agent.js",
+        "types/proxy-agent.d.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1783159141,
+      "subject": "fix: auto-detect HTTP proxy tunneling (#5116)"
+    },
+    {
+      "id": "undici:6de6e9a14a1d",
+      "repoId": "undici",
+      "sha": "6de6e9a14a1d027f8b4c75b70b54ab05358e8937",
+      "parentSha": "e609acb02d8d4cafe1c0d238e48c6d602fcc16cf",
+      "task": "fix: accept a negative Set-Cookie Max-Age attribute * fix: accept a negative Set-Cookie Max-Age attribute * fix: check only the Max-Age remainder for non-DIGIT characters * revert Max-Age step 1 comment to the pinned spec wording ---------",
+      "gold": [
+        "lib/web/cookies/parse.js",
+        "test/cookie/cookies.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1787144153,
+      "subject": "fix: accept a negative Set-Cookie Max-Age attribute (#5571)"
+    },
+    {
+      "id": "undici:9ceae23f41de",
+      "repoId": "undici",
+      "sha": "9ceae23f41de98a01811fab1c7e816ff5148c88a",
+      "parentSha": "b8be0271ca79cd922a8d4dc387e7664557aa91cf",
+      "task": "fix(websocket): fail instead of hanging on a non-200 extended CONNECT",
+      "gold": [
+        "lib/web/fetch/index.js",
+        "test/websocket/opening-handshake.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1788441376,
+      "subject": "fix(websocket): fail instead of hanging on a non-200 extended CONNECT (#5751)"
+    },
+    {
+      "id": "undici:0160a719063f",
+      "repoId": "undici",
+      "sha": "0160a719063fb0a77f4fdf9500b9166b91e14329",
+      "parentSha": "66e12816064cf3068f63bd134748b7fc4e779bad",
+      "task": "fix(retry): validate resumed response framing Checkpoint the original response framing before exposing headers and reject resumed responses whose Content-Range does not match it. Do not retry after an exposed response without a resumable length, preventing attacker-controlled retry responses from being concatenated into downstream output. Fixes: GHSA-r53p-7pc4-xj5r CVE: CVE-2026-18540",
+      "gold": [
+        "lib/handler/retry-handler.js",
+        "test/interceptors/retry.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1788510860,
+      "subject": "fix(retry): validate resumed response framing"
+    },
+    {
+      "id": "undici:4411a238a98e",
+      "repoId": "undici",
+      "sha": "4411a238a98e8791da5fff10cc9e3578a7668ed6",
+      "parentSha": "9f628993ed8e1fe3acf9e6b3c4b482c5ed3f610d",
+      "task": "fix(websocket): destroy inflater after decompression limit Stop the permessage-deflate inflater after removing its listeners so a late zlib error cannot become an uncaught exception. Add regression coverage for malformed compressed payloads that exceed the configured limit. Fixes: GHSA-3wwx-pv8p-q78v CVE: CVE-2026-85024",
+      "gold": [
+        "lib/web/websocket/permessage-deflate.js",
+        "test/websocket/permessage-deflate-limit.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1788510860,
+      "subject": "fix(websocket): destroy inflater after decompression limit"
+    },
+    {
+      "id": "undici:0712f7d6f3bc",
+      "repoId": "undici",
+      "sha": "0712f7d6f3bc17c5f64ffa5aaeba7591ceb3af61",
+      "parentSha": "51351648448cf5be8a61f2b1e0291be7dbd13691",
+      "task": "fix(env-http-proxy-agent): NO_PROXY wildcard semantics",
+      "gold": [
+        "lib/dispatcher/env-http-proxy-agent.js",
+        "test/env-http-proxy-agent.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1789326784,
+      "subject": "fix(env-http-proxy-agent): NO_PROXY wildcard semantics (#5777)"
+    },
+    {
+      "id": "undici:bee01389d78a",
+      "repoId": "undici",
+      "sha": "bee01389d78adb34eea221140807bb1d843d57f1",
+      "parentSha": "485c85c289150a40c26eaa7c133b65e9b868f0eb",
+      "task": "fix(deduplicate): settle requests when composed with retry * fix(deduplicate): settle requests when composed with retry * test(deduplicate): allow non-overlapping asynchronous retries ---------",
+      "gold": [
+        "lib/handler/deduplication-handler.js"
+      ],
+      "excludedNewFiles": 1,
+      "excludedModeFiles": [],
+      "committerTime": 1789469578,
+      "subject": "fix(deduplicate): settle requests when composed with retry (#5817)"
+    },
+    {
+      "id": "undici:762f3b5a743a",
+      "repoId": "undici",
+      "sha": "762f3b5a743af24db00093f0478873f2afdd97b2",
+      "parentSha": "b8b2ae8f199e677819e1772fb2214ede2d85ed55",
+      "task": "fix(redirect): fix throwOnMaxRedirect edge When throwOnMaxRedirect is true, and exactly the limit of redirects was hit, the client would throw even if the next response was not a redirect. This fixes it.",
+      "gold": [
+        "docs/docs/api/Interceptors.md",
+        "docs/docs/api/RedirectHandler.md",
+        "lib/handler/redirect-handler.js",
+        "test/interceptors/redirect.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1790242527,
+      "subject": "fix(redirect): fix throwOnMaxRedirect edge (#5879)"
+    },
+    {
+      "id": "undici:b5084c7dc239",
+      "repoId": "undici",
+      "sha": "b5084c7dc239172d75c336b1cd51ddac023938a5",
+      "parentSha": "26c2bfb3def0b67241ce878e80657ed5d6c3efa8",
+      "task": "fix(fetch): abort excessive content encoding responses",
+      "gold": [
+        "lib/web/fetch/index.js",
+        "test/fetch/encoding.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1791993864,
+      "subject": "fix(fetch): abort excessive content encoding responses"
+    },
+    {
+      "id": "axios:d17d9a66c531",
+      "repoId": "axios",
+      "sha": "d17d9a66c5319bb123f04e49c99987118207718e",
+      "parentSha": "3e2a925731c3221adbd940d4619151b16a278eda",
+      "task": "feat: brower platform add `data` protocol.",
+      "gold": [
+        "lib/platform/browser/index.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1659373092,
+      "subject": "feat: brower platform add `data` protocol. (#4804)"
+    },
+    {
+      "id": "axios:2149464bb4f1",
+      "repoId": "axios",
+      "sha": "2149464bb4f12c1101b15f73298a060e92470376",
+      "parentSha": "9c3dce366bd594558e5e474ce9135af22a0d9949",
+      "task": "fix: issue with exports not working correctly in common js scenarios",
+      "gold": [
+        "lib/axios.js",
+        "rollup.config.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1665130765,
+      "subject": "fix: issue with exports not working correctly in common js scenarios"
+    },
+    {
+      "id": "axios:717f476b0f19",
+      "repoId": "axios",
+      "sha": "717f476b0f19e51a1794b6a3409ceaa1fe9b456e",
+      "parentSha": "83454a55f6274ee4d7b5cce6c608a62c5aa6b0cb",
+      "task": "fix: restore proxy config backwards compatibility with 0.x * fix: restore proxy config backwards compatibility with 0.x * Formatting",
+      "gold": [
+        "README.md",
+        "lib/adapters/http.js",
+        "test/unit/adapters/http.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1665690920,
+      "subject": "fix: restore proxy config backwards compatibility with 0.x (#5097)"
+    },
+    {
+      "id": "axios:9d4b016ddedf",
+      "repoId": "axios",
+      "sha": "9d4b016ddedf835bfd838b63e50af14d84e2813e",
+      "parentSha": "ed19414b33a1c12022479ef5a9980121bb8e8afb",
+      "task": "feat: added custom params serializer support; * Added custom params serializer support; * Added missed semicolon; Fixed allowUnknown option;",
+      "gold": [
+        "index.d.ts",
+        "lib/core/Axios.js",
+        "lib/helpers/buildURL.js",
+        "test/specs/helpers/buildURL.spec.js",
+        "test/typescript/axios.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1665691930,
+      "subject": "feat: added custom params serializer support; (#5113)"
+    },
+    {
+      "id": "axios:f12d01eed10c",
+      "repoId": "axios",
+      "sha": "f12d01eed10c645679dc2633765041d1c2287eea",
+      "parentSha": "75217e690c33f90c88f2b5f1c6e1025edf4312cf",
+      "task": "chore(ci): fix version bump script by adding `bump` argument for target version;",
+      "gold": [
+        "gulpfile.js",
+        "package-lock.json",
+        "package.json"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1671472379,
+      "subject": "chore(ci): fix version bump script by adding `bump` argument for target version;"
+    },
+    {
+      "id": "axios:a3b246c9de5c",
+      "repoId": "axios",
+      "sha": "a3b246c9de5c3bc4b5a742e15add55b375479451",
+      "parentSha": "d9ebf8fb3ab2e6d277626d72bcf5580e2a6e795b",
+      "task": "fix(http): fixed regression bug when handling synchronous errors inside the adapter;",
+      "gold": [
+        "lib/adapters/http.js",
+        "package.json",
+        "test/unit/adapters/http.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1677095431,
+      "subject": "fix(http): fixed regression bug when handling synchronous errors inside the adapter; (#5564)"
+    },
+    {
+      "id": "axios:a56c8661209d",
+      "repoId": "axios",
+      "sha": "a56c8661209d5ce5a645a05f294a0e08a6c1f6b3",
+      "parentSha": "e7decef6a99f4627e27ed9ea5b00ce8e201c3841",
+      "task": "fix(params): re-added the ability to set the function as `paramsSerializer` config;",
+      "gold": [
+        "index.d.cts",
+        "index.d.ts",
+        "lib/core/Axios.js",
+        "test/unit/adapters/http.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1680713076,
+      "subject": "fix(params): re-added the ability to set the function as `paramsSerializer` config; (#5633)"
+    },
+    {
+      "id": "axios:bbb61e70cb11",
+      "repoId": "axios",
+      "sha": "bbb61e70cb1185adfb1cbbb86eaf6652c48d89d1",
+      "parentSha": "df38c949f26414d88ba29ec1e353c4d4f97eaf09",
+      "task": "fix(formdata): add `multipart/form-data` content type for FormData payload on custom client environments;",
+      "gold": [
+        "lib/adapters/xhr.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1682457697,
+      "subject": "fix(formdata): add `multipart/form-data` content type for FormData payload on custom client environments; (#5678)"
+    },
+    {
+      "id": "axios:e6f7053bf1a3",
+      "repoId": "axios",
+      "sha": "e6f7053bf1a3e87cf1f9da8677e12e3fe829d68e",
+      "parentSha": "bbb61e70cb1185adfb1cbbb86eaf6652c48d89d1",
+      "task": "perf(merge-config): optimize mergeConfig performance by avoiding duplicate key visits;",
+      "gold": [
+        "lib/core/mergeConfig.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1682458486,
+      "subject": "perf(merge-config): optimize mergeConfig performance by avoiding duplicate key visits; (#5679)"
+    },
+    {
+      "id": "axios:9a414bb6c817",
+      "repoId": "axios",
+      "sha": "9a414bb6c81796a95c6c7fe668637825458e8b6d",
+      "parentSha": "b3e327dcc9277bdce34c7ef57beedf644b00d628",
+      "task": "fix(adapter): make adapter loading error more clear by using platform-specific adapters explicitly",
+      "gold": [
+        "lib/defaults/index.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1693071073,
+      "subject": "fix(adapter): make adapter loading error more clear by using platform-specific adapters explicitly (#5837)"
+    },
+    {
+      "id": "axios:ca73eb878df0",
+      "repoId": "axios",
+      "sha": "ca73eb878df0ae2dace81fe3a7f1fb5986231bf1",
+      "parentSha": "9a414bb6c81796a95c6c7fe668637825458e8b6d",
+      "task": "feat: export getAdapter function",
+      "gold": [
+        "index.d.cts",
+        "index.d.ts",
+        "index.js",
+        "lib/axios.js",
+        "test/module/typings/esm/index.ts",
+        "test/specs/api.spec.js",
+        "test/specs/instance.spec.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1693071745,
+      "subject": "feat: export getAdapter function (#5324)"
+    },
+    {
+      "id": "axios:e4107797a7a1",
+      "repoId": "axios",
+      "sha": "e4107797a7a1376f6209fbecfbbce73d3faa7859",
+      "parentSha": "bc9af51b1886d1b3529617702f2a21a6c0ed5d92",
+      "task": "fix(adapters): improved adapters loading logic to have clear error messages;",
+      "gold": [
+        "lib/adapters/adapters.js",
+        "lib/defaults/index.js"
+      ],
+      "excludedNewFiles": 1,
+      "excludedModeFiles": [],
+      "committerTime": 1695746605,
+      "subject": "fix(adapters): improved adapters loading logic to have clear error messages; (#5919)"
+    },
+    {
+      "id": "axios:5aaff532a6b8",
+      "repoId": "axios",
+      "sha": "5aaff532a6b820bb9ab6a8cd0f77131b47e2adb8",
+      "parentSha": "a48a63ad823fc20e5a6a705f05f09842ca49f48c",
+      "task": "fix(dns): fixed lookup function decorator to work properly in node v20;",
+      "gold": [
+        "index.d.cts",
+        "index.d.ts",
+        "lib/adapters/http.js",
+        "test/module/typings/esm/index.ts",
+        "test/unit/adapters/http.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1697983953,
+      "subject": "fix(dns): fixed lookup function decorator to work properly in node v20; (#6011)"
+    },
+    {
+      "id": "axios:f4f2b039dd38",
+      "repoId": "axios",
+      "sha": "f4f2b039dd38eb4829e8583caede4ed6d2dd59be",
+      "parentSha": "1f73dcbbe0bb37f9e9908abb46a3c252536655c8",
+      "task": "fix(dns): fixed lookup error handling;",
+      "gold": [
+        "lib/adapters/http.js",
+        "test/unit/adapters/http.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1704412087,
+      "subject": "fix(dns): fixed lookup error handling; (#6175)"
+    },
+    {
+      "id": "axios:bb5f9a5ab768",
+      "repoId": "axios",
+      "sha": "bb5f9a5ab768452de9e166dc28d0ffc234245ef1",
+      "parentSha": "81e0455b7b57fbaf2be16a73ebe0e6591cc6d8f9",
+      "task": "fix(fetch): treat fetch-related TypeError as an AxiosError.ERR_NETWORK error;",
+      "gold": [
+        "lib/adapters/fetch.js",
+        "test/unit/adapters/fetch.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1715106406,
+      "subject": "fix(fetch): treat fetch-related TypeError as an AxiosError.ERR_NETWORK error; (#6380)"
+    },
+    {
+      "id": "axios:ad3174a3515c",
+      "repoId": "axios",
+      "sha": "ad3174a3515c3c2573f4bcb94818d582826f3914",
+      "parentSha": "b9f4848f8c4c7d53dbe1a1ee06e9b3604c2e56ac",
+      "task": "fix(fetch): capitalize HTTP method names;",
+      "gold": [
+        "lib/adapters/fetch.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1716044461,
+      "subject": "fix(fetch): capitalize HTTP method names; (#6395)"
+    },
+    {
+      "id": "axios:7004707c4180",
+      "repoId": "axios",
+      "sha": "7004707c4180b416341863bd86913fe4fc2f1df1",
+      "parentSha": "fed1a4b2d78ed4a588c84e09d32749ed01dc2794",
+      "task": "fix(adapter): fix undefined reference to hasBrowserEnv",
+      "gold": [
+        "lib/adapters/http.js",
+        "test/unit/regression/SNYK-JS-AXIOS-7361793.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1724415794,
+      "subject": "fix(adapter): fix undefined reference to hasBrowserEnv (#6572)"
+    },
+    {
+      "id": "axios:364993f0d8bc",
+      "repoId": "axios",
+      "sha": "364993f0d8bc6e0e06f76b8a35d2d0a35cab054c",
+      "parentSha": "d1980854fee1765cd02fa0787adf5d6e34dd9dcf",
+      "task": "fix(http): fixed support for IPv6 literal strings in url",
+      "gold": [
+        "lib/adapters/http.js",
+        "test/unit/adapters/http.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1725140845,
+      "subject": "fix(http): fixed support for IPv6 literal strings in url (#5731)"
+    },
+    {
+      "id": "axios:12b32957f125",
+      "repoId": "axios",
+      "sha": "12b32957f1258aee94ef859809ed39f8f88f9dfa",
+      "parentSha": "fc6fa697fb97af8214f2e40538772b52be35a4f8",
+      "task": "fix(http): fixed proxy-from-env module import",
+      "gold": [
+        "lib/adapters/http.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1731006722,
+      "subject": "fix(http): fixed proxy-from-env module import (#5222)"
+    },
+    {
+      "id": "axios:987d2e2dd3b3",
+      "repoId": "axios",
+      "sha": "987d2e2dd3b362757550f36eab875e60640b6ddc",
+      "parentSha": "f112edfdfacb5857ac4f91156fe8b116c456dfca",
+      "task": "fix(http): send minimal end multipart boundary",
+      "gold": [
+        "lib/helpers/formDataToStream.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1745522388,
+      "subject": "fix(http): send minimal end multipart boundary (#6661)"
+    },
+    {
+      "id": "axios:6d84189349c4",
+      "repoId": "axios",
+      "sha": "6d84189349c43b1dcdd977b522610660cc4c7042",
+      "parentSha": "0dbb7fd4f61dc568498cd13a681fa7f907d6ec7e",
+      "task": "fix(params): removing '[' and ']' from URL encode exclude characters",
+      "gold": [
+        "lib/helpers/buildURL.js",
+        "test/specs/helpers/buildURL.spec.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1754073887,
+      "subject": "fix(params): removing '[' and ']' from URL encode exclude characters (#3316) (#5715)"
+    },
+    {
+      "id": "axios:12c314b603e7",
+      "repoId": "axios",
+      "sha": "12c314b603e7852a157e93e47edb626a471ba6c5",
+      "parentSha": "f6d79e773baf70bf4e6d888e72d4bcf589060a84",
+      "task": "perf(http): fix early loop exit;",
+      "gold": [
+        "lib/adapters/http.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1762209790,
+      "subject": "perf(http): fix early loop exit; (#7202)"
+    },
+    {
+      "id": "axios:8d372335f5c5",
+      "repoId": "axios",
+      "sha": "8d372335f5c50ecd01e8615f2468a9eb19703117",
+      "parentSha": "12c314b603e7852a157e93e47edb626a471ba6c5",
+      "task": "fix(http): fix 'socket hang up' bug for keep-alive requests when using timeouts;",
+      "gold": [
+        "lib/adapters/http.js",
+        "test/unit/adapters/http.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1762211315,
+      "subject": "fix(http): fix 'socket hang up' bug for keep-alive requests when using timeouts; (#7206)"
+    },
+    {
+      "id": "axios:e943f6c54581",
+      "repoId": "axios",
+      "sha": "e943f6c54581deb983f065b05b9af757ebb0ca5d",
+      "parentSha": "ebc6056adc341b1bcc7c940262391c2b4c7223b6",
+      "task": "fix: proxy from env v2 fix * chore: remove mise * chore: update proxy from env * chore: fix issues with package * chore: fix esm and cjs * chore: bump lock",
+      "gold": [
+        "lib/adapters/http.js",
+        "mise.toml",
+        "package-lock.json",
+        "package.json",
+        "rollup.config.js",
+        "tests/smoke/cjs/package-lock.json",
+        "tests/smoke/esm/package-lock.json",
+        "tests/smoke/esm/package.json"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1773508206,
+      "subject": "fix: proxy from env v2 fix (#7499)"
+    },
+    {
+      "id": "axios:4950ff601766",
+      "repoId": "axios",
+      "sha": "4950ff601766426098f4b3549f4d3e3fe447effc",
+      "parentSha": "71737063803fb0e26b2aa945d65155d66377f96d",
+      "task": "feat: update sponsors script and how this works for more consistency",
+      "gold": [
+        ".github/workflows/update-sponsor-block.yml",
+        ".gitignore",
+        "bin/sponsors.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1774867975,
+      "subject": "feat: update sponsors script and how this works for more consistency (#10582)"
+    },
+    {
+      "id": "axios:363185461b90",
+      "repoId": "axios",
+      "sha": "363185461b90b1b78845dc8a99a1f103d9b122a1",
+      "parentSha": "fb3befb6daac6cad26b2e54094d0f2d9e47f24df",
+      "task": "fix: unrestricted cloud metadata exfiltration via header injection chain * fix: unrestricted cloud metadata exfiltration via header injection chain * fix: address pattern issue highlighted by cubic * fix: code ql feedback * fix: code ql feedback",
+      "gold": [
+        "lib/core/Axios.js",
+        "lib/core/AxiosHeaders.js",
+        "tests/browser/adapter.browser.test.js",
+        "tests/unit/adapters/fetch.test.js",
+        "tests/unit/adapters/http.test.js",
+        "tests/unit/axiosHeaders.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1775476914,
+      "subject": "fix: unrestricted cloud metadata exfiltration via header injection chain (#10660)"
+    },
+    {
+      "id": "axios:37cf18f2e2c1",
+      "repoId": "axios",
+      "sha": "37cf18f2e2c10171ddd851c8e46938d48cc35948",
+      "parentSha": "0a73b7c585356fd7a85c35fda756dcaffae6089c",
+      "task": "fix: header security issues * fix: improve regex in AxiosURLSearchParams * fix: header should check has own property * chore: implement cubic feedback in test case",
+      "gold": [
+        "lib/adapters/http.js",
+        "lib/utils.js",
+        "tests/unit/adapters/http.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1776516999,
+      "subject": "fix: header security issues (#10749)"
+    },
+    {
+      "id": "axios:70302b6c9008",
+      "repoId": "axios",
+      "sha": "70302b6c9008b3d5242c9685a4c01151e53a4c74",
+      "parentSha": "17b90d0be692f1704e4623731163285b0480520f",
+      "task": "fix(security): ignore inherited parseReviver and related config reads",
+      "gold": [
+        "lib/defaults/index.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1776518082,
+      "subject": "fix(security): ignore inherited parseReviver and related config reads"
+    },
+    {
+      "id": "axios:74a05bc33671",
+      "repoId": "axios",
+      "sha": "74a05bc336718a3c203f4e1da44b4c7c225510c1",
+      "parentSha": "70302b6c9008b3d5242c9685a4c01151e53a4c74",
+      "task": "fix(security): guard http adapter config reads against prototype pollution",
+      "gold": [
+        "lib/adapters/http.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1776518107,
+      "subject": "fix(security): guard http adapter config reads against prototype pollution"
+    },
+    {
+      "id": "axios:1c7f6d76e583",
+      "repoId": "axios",
+      "sha": "1c7f6d76e58359daddf38a6e636dd801ffd9c61b",
+      "parentSha": "48fd644be167f85f6b193ec376133f85ff8f8911",
+      "task": "fix: enforce max body length when max redirects is 0",
+      "gold": [
+        "lib/adapters/http.js",
+        "tests/unit/adapters/http.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1776519942,
+      "subject": "fix: enforce max body length when max redirects is 0 (#10753)"
+    },
+    {
+      "id": "axios:90ae1993e0ea",
+      "repoId": "axios",
+      "sha": "90ae1993e0eaa39ccccbaa25957bb23cc5676df7",
+      "parentSha": "df53d7dd99b202fb194217abd127ae6a630e70dc",
+      "task": "chore: ai readiness * chore: remove readme code for sponsors this will be done manually from here on out * docs: added agents.md",
+      "gold": [
+        ".github/workflows/update-sponsor-block.yml",
+        "scripts/update-readme-sponsors.mjs"
+      ],
+      "excludedNewFiles": 2,
+      "excludedModeFiles": [],
+      "committerTime": 1777735136,
+      "subject": "chore: ai readiness (#10835)"
+    },
+    {
+      "id": "axios:78e8dcf8754e",
+      "repoId": "axios",
+      "sha": "78e8dcf8754ed9d1219628540d69d09bdba5a9be",
+      "parentSha": "9e6cc4725f074734723909beb3ef9a68644aa905",
+      "task": "fix(security): defense-in-depth against already-polluted Object.prototype in formDataToJSON * fix(security): harden prototype pollution protection in formDataToJSON Replace falsy check with hasOwnProp in the intermediate-path branch of formDataToJSON's buildPath to prevent write-through into inherited objects. Without this patch, if Object.prototype is already polluted (e.g. via a third-party library or earlier vulnerability), user-supplied FormData paths like 'injected.hijack' traverse the inherited object and mutate Object.prototype in place. With hasOwnProp, the inherited slot is shadowed by a new own property, keeping writes local to the result. This is defense-in-depth: the existing __proto__ guard blocks direct prototype injection, while this change prevents exploitation of an already-polluted prototype chain. Closes * test(security): use defineProperty + toBe in prototype-pollution regression test ---------",
+      "gold": [
+        "lib/helpers/formDataToJSON.js",
+        "tests/unit/helpers/formDataToJSON.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1777923062,
+      "subject": "fix(security): defense-in-depth against already-polluted Object.prototype in formDataToJSON (#7413)"
+    },
+    {
+      "id": "axios:315ec44489ca",
+      "repoId": "axios",
+      "sha": "315ec44489cafeec509409fb6b0c0a6a88d56dc8",
+      "parentSha": "ea5dab691ed475a1ccc89c4ea76ff59b47b206cd",
+      "task": "refactor(http): extract Http2Sessions into its own module * refactor(http): extract Http2Sessions to lib/helpers for direct unit tests * fix(http2): clear pending idle timer when session closes * fix(http2): address review — strict mode, Node-only note, observable timer test ---------",
+      "gold": [
+        "lib/adapters/http.js"
+      ],
+      "excludedNewFiles": 2,
+      "excludedModeFiles": [],
+      "committerTime": 1779472786,
+      "subject": "refactor(http): extract Http2Sessions into its own module (#10861)"
+    },
+    {
+      "id": "axios:01e869dd28ce",
+      "repoId": "axios",
+      "sha": "01e869dd28cefc52b144c8234e40cf3d56fcb182",
+      "parentSha": "97fb8af785bcdbbc03110429354c365754a072e7",
+      "task": "fix(http): accept path-only url when socketPath is set",
+      "gold": [
+        "PRE_RELEASE_CHANGELOG.md",
+        "lib/adapters/http.js",
+        "tests/unit/adapters/http.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1781634192,
+      "subject": "fix(http): accept path-only url when socketPath is set (#6611) (#10930)"
+    },
+    {
+      "id": "axios:78b5187ee7b6",
+      "repoId": "axios",
+      "sha": "78b5187ee7b6b97e416caf4e116fe7c8d3c2c2ca",
+      "parentSha": "4106dda9abe43bd3a1471b24dd5d0627470570fc",
+      "task": "fix: preserve empty duplicate header values",
+      "gold": [
+        "PRE_RELEASE_CHANGELOG.md",
+        "lib/helpers/parseHeaders.js",
+        "tests/unit/helpers/parseHeaders.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1782755966,
+      "subject": "fix: preserve empty duplicate header values (#11036)"
+    },
+    {
+      "id": "axios:e566ea39a22e",
+      "repoId": "axios",
+      "sha": "e566ea39a22e55a05073b035c51852b4863de012",
+      "parentSha": "78b5187ee7b6b97e416caf4e116fe7c8d3c2c2ca",
+      "task": "fix: return set-cookie values consistently",
+      "gold": [
+        "PRE_RELEASE_CHANGELOG.md",
+        "lib/core/AxiosHeaders.js",
+        "tests/unit/axiosHeaders.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1782757638,
+      "subject": "fix: return set-cookie values consistently (#11037)"
+    },
+    {
+      "id": "axios:a85da2918eb5",
+      "repoId": "axios",
+      "sha": "a85da2918eb540928b54bb3d57692efc8f2f83f1",
+      "parentSha": "97131238cab2e56f58f26b5bfd95e40bb5b9df14",
+      "task": "feat(core): support symbol keys in mergeConfig",
+      "gold": [
+        "PRE_RELEASE_CHANGELOG.md",
+        "PRE_RELEASE_DOCS.md",
+        "lib/core/mergeConfig.js",
+        "tests/unit/core/mergeConfig.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1782930452,
+      "subject": "feat(core): support symbol keys in mergeConfig (#11043)"
+    },
+    {
+      "id": "axios:05acca21c888",
+      "repoId": "axios",
+      "sha": "05acca21c888e44e2125d4813be3311d32f72483",
+      "parentSha": "1de8d518e62e068fffae9a9b54ccba779e2773e8",
+      "task": "fix(helpers): correct data: URL base64 size estimate for maxContentLength guard",
+      "gold": [
+        "PRE_RELEASE_CHANGELOG.md",
+        "lib/adapters/http.js",
+        "lib/helpers/estimateDataURLDecodedBytes.js",
+        "tests/unit/adapters/fetch.test.js",
+        "tests/unit/adapters/http.test.js",
+        "tests/unit/estimateDataURLDecodedBytes.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1784033174,
+      "subject": "fix(helpers): correct data: URL base64 size estimate for maxContentLength guard (#11061)"
+    },
+    {
+      "id": "axios:e6824eec5fcf",
+      "repoId": "axios",
+      "sha": "e6824eec5fcf9da467a9792724396badc490c469",
+      "parentSha": "d8a919fd81403d59058c0e9dbefc540407dee83f",
+      "task": "fix: core methodList, HTTP adapter errors, and add tests",
+      "gold": [
+        "PRE_RELEASE_CHANGELOG.md",
+        "lib/adapters/http.js",
+        "lib/core/Axios.js",
+        "lib/core/mergeConfig.js",
+        "lib/defaults/index.js",
+        "tests/unit/adapters/http.test.js",
+        "tests/unit/axios.test.js"
+      ],
+      "excludedNewFiles": 1,
+      "excludedModeFiles": [],
+      "committerTime": 1786644885,
+      "subject": "fix: core methodList, HTTP adapter errors, and add tests (#11096)"
+    },
+    {
+      "id": "axios:cf744d227a10",
+      "repoId": "axios",
+      "sha": "cf744d227a103067d09d5d07aed5a1f2f243791d",
+      "parentSha": "f694ecd6ac49bb1917e086b5e532e1627c62d43a",
+      "task": "fix(core)!: keep literal request headers named after a method",
+      "gold": [
+        "PRE_RELEASE_CHANGELOG.md",
+        "PRE_RELEASE_DOCS.md",
+        "lib/core/Axios.js",
+        "tests/browser/defaults.browser.test.js",
+        "tests/unit/axios.test.js"
+      ],
+      "excludedNewFiles": 3,
+      "excludedModeFiles": [],
+      "committerTime": 1791825970,
+      "subject": "fix(core)!: keep literal request headers named after a method (#11156)"
+    },
+    {
+      "id": "fastify:9b0c85472e07",
+      "repoId": "fastify",
+      "sha": "9b0c85472e07cc2907591b3df8f9e7e0b1869b7d",
+      "parentSha": "886fd348150476ff1303f7ca28d76546c57a3f15",
+      "task": "add support for running preSerialization hooks for custom reply serializers",
+      "gold": [
+        "lib/reply.js",
+        "test/internals/reply.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1609835675,
+      "subject": "add support for running preSerialization hooks for custom reply serializers (#2773)"
+    },
+    {
+      "id": "fastify:478b78c4cf55",
+      "repoId": "fastify",
+      "sha": "478b78c4cf550ed9b34c6fbfcaf244de556016ec",
+      "parentSha": "54e872da811356011a335609fab0efdb0ce599a1",
+      "task": "Added a comment about lru.default",
+      "gold": [
+        "lib/contentTypeParser.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1615221656,
+      "subject": "Added a comment about lru.default (#2921)"
+    },
+    {
+      "id": "fastify:53e3e792ebd5",
+      "repoId": "fastify",
+      "sha": "53e3e792ebd5aba68be94f753f48d2e9b2ed832c",
+      "parentSha": "c50b879ed622426689893e465280b46c939789ff",
+      "task": "fix regression: schema duplicate * build(deps-dev): bump concurrently from 5.3.0 to 6.0.0 Bumps [concurrently]( from 5.3.0 to 6.0.0. - [Release notes]( - [Commits]( * build(deps): bump fastify/github-action-merge-dependabot Bumps [fastify/github-action-merge-dependabot]( from v1.1.1 to v1.2.1. - [Release notes]( - [Commits]( * fix: ajv creation when not necessary * test: add regression test",
+      "gold": [
+        "lib/route.js",
+        "package.json",
+        "test/schema-special-usage.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1615911168,
+      "subject": "fix regression: schema duplicate (#2925)"
+    },
+    {
+      "id": "fastify:3460ddab5c87",
+      "repoId": "fastify",
+      "sha": "3460ddab5c87b8baa0cd7a93a2c7d34e86d535fb",
+      "parentSha": "701804c3bb2f38526b38bbab2bf13c1c1d7fb8a0",
+      "task": "fix: catch errors thrown by serializers in the default error handler",
+      "gold": [
+        "lib/reply.js",
+        "test/schema-serialization.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1616248752,
+      "subject": "fix: catch errors thrown by serializers in the default error handler (#2942)"
+    },
+    {
+      "id": "fastify:20e17310b74f",
+      "repoId": "fastify",
+      "sha": "20e17310b74fddb786a33484183ad0e49e817ab6",
+      "parentSha": "7dbfbe1fa8d7597297d6677a13b748924f097aeb",
+      "task": "upgrade fast-json-stringify with ajv8",
+      "gold": [
+        "fastify.d.ts",
+        "lib/error-handler.js",
+        "lib/schema-compilers.js",
+        "lib/schema-controller.js",
+        "package.json"
+      ],
+      "excludedNewFiles": 2,
+      "excludedModeFiles": [],
+      "committerTime": 1641336513,
+      "subject": "upgrade fast-json-stringify with ajv8 (#3280)"
+    },
+    {
+      "id": "fastify:4d870895b4c7",
+      "repoId": "fastify",
+      "sha": "4d870895b4c732718119b278648e48ce01b5e23b",
+      "parentSha": "afdd647c88422c5214297ff3156da078ab9819f1",
+      "task": "fix: accept-version on default route * fix: accept-version on default route * test: update test * chore: update comment and docs * test: more test on symbol",
+      "gold": [
+        "docs/Reference/Request.md",
+        "fastify.js",
+        "lib/route.js",
+        "lib/symbols.js",
+        "test/versioned-routes.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1642407784,
+      "subject": "fix: accept-version on default route (#3630)"
+    },
+    {
+      "id": "fastify:7cdc90354225",
+      "repoId": "fastify",
+      "sha": "7cdc90354225671b05b4d307a9f611aff861be48",
+      "parentSha": "17a487529c8454101f7712e1f9557d845ec21bc5",
+      "task": "Fix: Serialization errors will be send to errorHandler",
+      "gold": [
+        "lib/reply.js",
+        "test/schema-serialization.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1643747391,
+      "subject": "Fix: Serialization errors will be send to errorHandler (#3674)"
+    },
+    {
+      "id": "fastify:628870555055",
+      "repoId": "fastify",
+      "sha": "62887055505577ca05036079bb3f405274819871",
+      "parentSha": "15972961777bb26e3faafa51e01d04682597abf1",
+      "task": "fix: calling reply.callNotFound uncaught exception",
+      "gold": [
+        "fastify.js",
+        "test/404s.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1644140599,
+      "subject": "fix: calling reply.callNotFound uncaught exception (#3661)"
+    },
+    {
+      "id": "fastify:976557642fb2",
+      "repoId": "fastify",
+      "sha": "976557642fb2525d4fcf8811292e1900cd6f66a4",
+      "parentSha": "284cb2e5b0d547cb2213b32064e1396f60f1162f",
+      "task": "Tests should pass on a host with only a single network interface * Tests should pass on a host with only a single network interface * maybe passing on Github Actions * Fixed tests * fixed node v14",
+      "gold": [
+        "fastify.js",
+        "lib/server.js",
+        "test/custom-http-server.test.js",
+        "test/https/custom-https-server.test.js",
+        "test/listen.test.js",
+        "test/logger.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1645016636,
+      "subject": "Tests should pass on a host with only a single network interface (#3703)"
+    },
+    {
+      "id": "fastify:edbb82035c6e",
+      "repoId": "fastify",
+      "sha": "edbb82035c6e121cc835d6e654a4e88434296af0",
+      "parentSha": "39dbc80c58ac81d4d7a65a680a74514870e57905",
+      "task": "chore: remove content-length when Transfer-Encoding is added",
+      "gold": [
+        "lib/reply.js",
+        "test/reply-trailers.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1648892191,
+      "subject": "chore: remove content-length when Transfer-Encoding is added (#3814)"
+    },
+    {
+      "id": "fastify:85743a337630",
+      "repoId": "fastify",
+      "sha": "85743a337630cda6b3790c3770716b555d35d86e",
+      "parentSha": "51923315a52c4baaea3a2b81419b08de56ca6c17",
+      "task": "Bumped v4.0.0-rc.1",
+      "gold": [
+        "fastify.js",
+        "package.json"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1649787412,
+      "subject": "Bumped v4.0.0-rc.1"
+    },
+    {
+      "id": "fastify:4efa00b64ae6",
+      "repoId": "fastify",
+      "sha": "4efa00b64ae67596797e9a19ea565e5fba94b7ae",
+      "parentSha": "94989c13b330f27eddfde0c8f8cb11e4d25c1c32",
+      "task": "Bumped v4.0.0-rc.3",
+      "gold": [
+        "fastify.js",
+        "package.json"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1653297723,
+      "subject": "Bumped v4.0.0-rc.3"
+    },
+    {
+      "id": "fastify:d1dc83d73a12",
+      "repoId": "fastify",
+      "sha": "d1dc83d73a120774fb15bfa10166e449ada442c9",
+      "parentSha": "b1ede5872d9a57e02fc8ea94c7c8ace1e7cde965",
+      "task": "improve schema.response validation error message",
+      "gold": [
+        "lib/validation.js",
+        "test/schema-feature.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1653596038,
+      "subject": "improve schema.response validation error message (#3935)"
+    },
+    {
+      "id": "fastify:b6b755339cfb",
+      "repoId": "fastify",
+      "sha": "b6b755339cfbc0f63c5e06559a69d44d49a369a7",
+      "parentSha": "080be59b6c28f08f29863fb21e08b98716f1a421",
+      "task": "Make the root pluginName 'fastify' Ref:",
+      "gold": [
+        "docs/Reference/Server.md",
+        "fastify.js",
+        "test/plugin.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1653914543,
+      "subject": "Make the root pluginName 'fastify' (#3946)"
+    },
+    {
+      "id": "fastify:db8f0a857347",
+      "repoId": "fastify",
+      "sha": "db8f0a8573479565741739862d7ac469d973c949",
+      "parentSha": "73bea70d388db1e6b85601e154caaa51dde0d403",
+      "task": "refactor: use object as internal route args",
+      "gold": [
+        "fastify.js",
+        "lib/route.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1655730584,
+      "subject": "refactor: use object as internal route args (#4054)"
+    },
+    {
+      "id": "fastify:fe889eaeead1",
+      "repoId": "fastify",
+      "sha": "fe889eaeead123a841bc4dc017af7ad1d5dcc293",
+      "parentSha": "ed4f4c1e2abe6c30015556e97420f163700ce125",
+      "task": "fix: default clientError replies on reused connection When fastify server receives request with invalid url in a reused connection, it closes the connection instead of 400 Bad Request reply. The closed connection is then propagated by load balancer (ALB) as 502 error. This turns client errors into closely monitored server errors. `socket.bytesWritten` is never going to be 0 on reused connection.",
+      "gold": [
+        "fastify.js",
+        "test/request-error.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1657642062,
+      "subject": "fix: default clientError replies on reused connection (#4101) (#4133)"
+    },
+    {
+      "id": "fastify:0ca63a0819a1",
+      "repoId": "fastify",
+      "sha": "0ca63a0819a154023c4de14e2723578a2b3f0961",
+      "parentSha": "81a937a90c13f17e4e23f1ae25d9e525fe687bf2",
+      "task": "refactor: rename `request.validate` to `request.validateInput` * docs(reply): add documentation for new validation apis * docs(reply): adjust serialization documentation * docs: address comments * refactor(request): rename from validate to validateInput * docs: adjust new renaming * refactor: change method name * Update docs/Reference/Request.md",
+      "gold": [
+        "docs/Reference/Reply.md",
+        "docs/Reference/Request.md",
+        "lib/request.js",
+        "test/internals/request-validate.test.js",
+        "test/internals/request.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1658224705,
+      "subject": "refactor: rename `request.validate` to `request.validateInput` (#4139)"
+    },
+    {
+      "id": "fastify:a71dd83cc65c",
+      "repoId": "fastify",
+      "sha": "a71dd83cc65c79c2a01dfbe91f8ee64fec3c0509",
+      "parentSha": "e9604ce3af7a6a846bdbca1d20a93dc7e5a51401",
+      "task": "fix: Improve error message for hooks check * Improve error message for hooks check * log null value more precisely * final update and all testcase passed",
+      "gold": [
+        "lib/hooks.js",
+        "lib/route.js",
+        "test/hooks.test.js",
+        "test/internals/hooks.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1667237647,
+      "subject": "fix: Improve error message for hooks check (#4387)"
+    },
+    {
+      "id": "fastify:897360ad9a01",
+      "repoId": "fastify",
+      "sha": "897360ad9a01340b45d94f001d8c46aeee22581f",
+      "parentSha": "4bde0e0b259b8df6495ae93c91e06615b61be9c6",
+      "task": "perf: only check for isEssence once in RegExp for content-type-parser",
+      "gold": [
+        "lib/contentTypeParser.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1671871339,
+      "subject": "perf: only check for isEssence once in RegExp for  content-type-parser (#4481)"
+    },
+    {
+      "id": "fastify:4031acbe0c65",
+      "repoId": "fastify",
+      "sha": "4031acbe0c65f436ba689e34ec72c633fbde037a",
+      "parentSha": "1c45ccfaa99674fa5cabafa9e143456e62d31973",
+      "task": "fix: body reader to use statusCode from stream error, if available * body reader to use statusCode from stream error, if available * another test for non-number statusCode ---------",
+      "gold": [
+        "lib/contentTypeParser.js",
+        "test/hooks-async.test.js",
+        "test/route-hooks.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1686224876,
+      "subject": "fix: body reader to use statusCode from stream error, if available (#4787)"
+    },
+    {
+      "id": "fastify:3f02c96bc379",
+      "repoId": "fastify",
+      "sha": "3f02c96bc37929cb57f7ce6a15bade106fd6af64",
+      "parentSha": "d8aece2c9ed313896abde2a9b440c0658252efaf",
+      "task": "fix: return 431 status code on HTTP header overflow error",
+      "gold": [
+        "fastify.js"
+      ],
+      "excludedNewFiles": 1,
+      "excludedModeFiles": [],
+      "committerTime": 1688019783,
+      "subject": "fix: return 431 status code on HTTP header overflow error (#4856)"
+    },
+    {
+      "id": "fastify:ad2da127e78b",
+      "repoId": "fastify",
+      "sha": "ad2da127e78b06084a43d8f697bf83f0f9750e45",
+      "parentSha": "a34d1c993c5d6f62e4c2fb55ad844244acdc1969",
+      "task": "docs: remove thenable promisesaplus spec references",
+      "gold": [
+        "docs/Reference/Plugins.md",
+        "docs/Reference/Reply.md",
+        "lib/reply.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1697007365,
+      "subject": "docs: remove thenable promisesaplus spec references (#5081)"
+    },
+    {
+      "id": "fastify:797f27d7b6fd",
+      "repoId": "fastify",
+      "sha": "797f27d7b6fde7c616bc63fe51201b5a6843f8ab",
+      "parentSha": "b59b0a5dcc38f2b81b5ee38e92070efb7bea1c69",
+      "task": "fix: HEAD route search * fix: HEAD route search * Update lib/route.js ---------",
+      "gold": [
+        "lib/route.js",
+        "package.json",
+        "test/constrained-routes.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1697021060,
+      "subject": "fix: HEAD route search (#5078)"
+    },
+    {
+      "id": "fastify:9ac27e0d7c84",
+      "repoId": "fastify",
+      "sha": "9ac27e0d7c8456cc685ac040e1d326ed0de10446",
+      "parentSha": "572f8dafd12916f245e6644fc1f7a687156578cd",
+      "task": "feat: log all available addresses if listening host is 0.0.0.0",
+      "gold": [
+        "lib/server.js",
+        "test/listen.1.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1716316415,
+      "subject": "feat: log all available addresses if listening host is 0.0.0.0 (#5476)"
+    },
+    {
+      "id": "fastify:93ca82c18db9",
+      "repoId": "fastify",
+      "sha": "93ca82c18db980155184eb92ba1f0fcd2e1006fa",
+      "parentSha": "37ccb2a61e61f867eaedf0bc43b971cd88e35a35",
+      "task": "Bumped v5.0.0-alpha.3",
+      "gold": [
+        "fastify.js",
+        "package.json"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1719569578,
+      "subject": "Bumped v5.0.0-alpha.3"
+    },
+    {
+      "id": "fastify:f3ee7f79c558",
+      "repoId": "fastify",
+      "sha": "f3ee7f79c558371309a498230c8dd0d4ac72dfdc",
+      "parentSha": "870bb82de8444b091cee8928cc5e6110ace44f91",
+      "task": "feat: support different body schema per content type * feat: support different body schema per content type * Add test for internal schema compiler * Consistent formatting of tests * Add test to avoid regression if types get stricter * Fix types test * Lint * Prefer single quoutes * Add docs with example schema * Remove unrelated formatting changes * Remove extra semicolon * Avoid using contractions * Reduce branches * Consistent variable naming * Add todo for adding request.contentType * Reduce nesting ---------",
+      "gold": [
+        "docs/Reference/Validation-and-Serialization.md",
+        "lib/schemas.js",
+        "lib/validation.js",
+        "test/internals/validation.test.js",
+        "test/schema-feature.test.js",
+        "test/schema-validation.test.js",
+        "test/types/schema.test-d.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1720531718,
+      "subject": "feat: support different body schema per content type (#5545)"
+    },
+    {
+      "id": "fastify:153b7df27957",
+      "repoId": "fastify",
+      "sha": "153b7df279570e898690b6e8d8fccf29d30658e4",
+      "parentSha": "025fa7ae284406c45a757dd1aebb5f5d5d5b3851",
+      "task": "chore: update Testing guide to use node:test * chore: update Testing guide to use node:test * fix: liniting",
+      "gold": [
+        "docs/Guides/Testing.md",
+        "docs/Guides/Write-Plugin.md",
+        "lib/logger.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1728997521,
+      "subject": "chore: update Testing guide to use node:test (#5738)"
+    },
+    {
+      "id": "fastify:9d9431dd3ab5",
+      "repoId": "fastify",
+      "sha": "9d9431dd3ab5f365b640ff87879917e4d510fd7b",
+      "parentSha": "3ca649315e81e69b8b03fa5a973318cc3ed2257c",
+      "task": "refactor(lib/validation): replace regexp `.exec()` with `.test()`",
+      "gold": [
+        "lib/validation.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1729363966,
+      "subject": "refactor(lib/validation): replace regexp `.exec()` with `.test()` (#5750)"
+    },
+    {
+      "id": "fastify:5aa86f877fe0",
+      "repoId": "fastify",
+      "sha": "5aa86f877fe02ccd7bddba6ceeb4d4597140c290",
+      "parentSha": "9d9431dd3ab5f365b640ff87879917e4d510fd7b",
+      "task": "refactor(lib/validation): remove redundant regex quantifier",
+      "gold": [
+        "lib/validation.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1729366462,
+      "subject": "refactor(lib/validation): remove redundant regex quantifier (#5751)"
+    },
+    {
+      "id": "fastify:b03d0783f246",
+      "repoId": "fastify",
+      "sha": "b03d0783f24602748ca5042cc30dfadefdd2c53a",
+      "parentSha": "6a428d94f6bf42792d4b91dd7643f74f5e2960eb",
+      "task": "fix: handle non FastifyErrors in custom handler properly, set type of error-parameter for setErrorHandler and errorHandler to unknown, but configurable via generic TError * types: loosen setErrorHandler and errorHandler types * set TError to unknown add generic to errorHandler * fix * remove obsolte type tst * add unit test, fix potential issue ---------",
+      "gold": [
+        "lib/error-handler.js",
+        "test/500s.test.js",
+        "test/types/instance.test-d.ts",
+        "types/instance.d.ts"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1758838331,
+      "subject": "fix: handle non FastifyErrors in custom handler properly, set type of error-parameter for setErrorHandler and errorHandler to unknown, but configurable via generic TError (#6308)"
+    },
+    {
+      "id": "fastify:329e40f09f23",
+      "repoId": "fastify",
+      "sha": "329e40f09f23910ed0193a9636b474844a7fbe79",
+      "parentSha": "34fea68924d1b8bec34b18b5317c71f9006790f1",
+      "task": "fix: error throwing in reply * fix: instantiate readable stream error * Create reply-web-stream-locked.test.js * fix test ---------",
+      "gold": [
+        "lib/reply.js"
+      ],
+      "excludedNewFiles": 1,
+      "excludedModeFiles": [],
+      "committerTime": 1758916599,
+      "subject": "fix: error throwing in reply (#6299)"
+    },
+    {
+      "id": "fastify:3b0f76993d51",
+      "repoId": "fastify",
+      "sha": "3b0f76993d51f8db662814c693f4ebea8d97cc95",
+      "parentSha": "e4474cfd794b1ff3cf4cbdb60c465c69fed4db1d",
+      "task": "fix: anchor keyValuePairsReg to prevent quadratic backtracking",
+      "gold": [
+        "lib/content-type.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1772873056,
+      "subject": "fix: anchor keyValuePairsReg to prevent quadratic backtracking (#6558)"
+    },
+    {
+      "id": "fastify:2bf4265b991a",
+      "repoId": "fastify",
+      "sha": "2bf4265b991aa4c9a2d3886882be6f062338c7bc",
+      "parentSha": "fc9eafddae37dea167d2affc26a29a04f9412047",
+      "task": "fix: chunk large HTTP/2 buffer replies",
+      "gold": [
+        "docs/Reference/Reply.md",
+        "lib/reply.js",
+        "test/http2/plain.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1780838387,
+      "subject": "fix: chunk large HTTP/2 buffer replies (#6746)"
+    },
+    {
+      "id": "fastify:5f4871f931d4",
+      "repoId": "fastify",
+      "sha": "5f4871f931d45d576bc3385cd1e95f0d668abf4f",
+      "parentSha": "ec4bc662af6c124e70b255f90795d4f08a8f8366",
+      "task": "perf: reduce per-request overhead in the request lifecycle * perf: reduce per-request overhead in the request lifecycle Improve the \"simple\" benchmark throughput by ~4% by cutting per-request work: - reply: call res.end(payload) directly when there are no trailers, so headers, payload and the finishing chunk are flushed through the stream machinery in a single corked write - validation: skip validate() entirely when the route has no params/body/querystring/headers schemas - route: skip child logger creation when logging is disabled and the default child logger factory is in use, as the null logger's child() returns itself - req-id-gen: read kGenReqId directly instead of going through the genReqId getter - logger: use performance.now() instead of process.hrtime(), which allocates a tuple on every call Claude-Session: * test: cover the genReqId getter The getter is no longer exercised by the request path, which reads the symbol directly, so cover it explicitly. Claude-Session: ---------",
+      "gold": [
+        "lib/logger-factory.js",
+        "lib/reply.js",
+        "lib/req-id-gen-factory.js",
+        "lib/route.js",
+        "lib/validation.js",
+        "test/genReqId.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1783241099,
+      "subject": "perf: reduce per-request overhead in the request lifecycle (#6831)"
+    },
+    {
+      "id": "fastify:6ac2e9537053",
+      "repoId": "fastify",
+      "sha": "6ac2e953705312d0ac8776166b96f509dd153613",
+      "parentSha": "5f4871f931d45d576bc3385cd1e95f0d668abf4f",
+      "task": "fix: derive request.port from request.host * fix: derive request.port from request.host * fix test ---------",
+      "gold": [
+        "lib/request.js",
+        "test/internals/request.test.js",
+        "test/trust-proxy.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1783243222,
+      "subject": "fix: derive request.port from request.host (#6680)"
+    },
+    {
+      "id": "fastify:97d10c26a3f5",
+      "repoId": "fastify",
+      "sha": "97d10c26a3f5ba59a24c630d31c29335da64d540",
+      "parentSha": "6e680c3e8150071be96cba6b30e1d74487559b54",
+      "task": "perf: reuse cached content types for response serialization",
+      "gold": [
+        "lib/schemas.js",
+        "test/schema-serialization.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1784383893,
+      "subject": "perf: reuse cached content types for response serialization (#6854)"
+    },
+    {
+      "id": "fastify:16a74e7cb2d1",
+      "repoId": "fastify",
+      "sha": "16a74e7cb2d1abdc2feca9097f2936fe8b851a5c",
+      "parentSha": "27938ac777c15482a81881b29f86c82b025f7fae",
+      "task": "fix: reset lastIndex before testing global/sticky content-type RegExp parsers A content-type parser registered with a g- or y-flagged RegExp keeps a mutable lastIndex between calls, so getParser's .test() could skip part of the next content type and match inconsistently. Reset lastIndex before each test.",
+      "gold": [
+        "lib/content-type-parser.js",
+        "test/content-parser.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1786171070,
+      "subject": "fix: reset lastIndex before testing global/sticky content-type RegExp parsers (#6846)"
+    },
+    {
+      "id": "fastify:eaff726a68c6",
+      "repoId": "fastify",
+      "sha": "eaff726a68c629c1aedc99f96b3c4b95dfdb38d1",
+      "parentSha": "3efe8748335fea67b7006773a8ea28dd4abc8724",
+      "task": "feat: add `Reply.prototype.mediaType` * feat: add `Reply.prototype.mediaType` * additional test ---------",
+      "gold": [
+        "docs/Reference/Reply.md",
+        "lib/reply.js",
+        "test/internals/reply.test.js"
+      ],
+      "excludedNewFiles": 1,
+      "excludedModeFiles": [],
+      "committerTime": 1786635122,
+      "subject": "feat: add `Reply.prototype.mediaType` (#6932)"
+    },
+    {
+      "id": "fastify:3aa8dfd7298c",
+      "repoId": "fastify",
+      "sha": "3aa8dfd7298c6e02399a7b3c29c637eb092dc9ef",
+      "parentSha": "af6e2e433cfa2b4531e6297738da2acd66207742",
+      "task": "fix(validation): normalize header names in every schema subschema Normalize header-schema property names to lowercase across every schema position - properties, required, dependencies, dependentRequired, dependentSchemas, and nested subschemas - so case-sensitive assertions match Node's lowercased request headers. Header schemas referenced through an external shared $ref are not reached by this normalization and now emit a warning.",
+      "gold": [
+        "docs/Reference/Warnings.md",
+        "lib/validation.js",
+        "lib/warnings.js",
+        "test/schema-validation.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1788454438,
+      "subject": "fix(validation): normalize header names in every schema subschema"
+    },
+    {
+      "id": "fastify:a479a7ce59f9",
+      "repoId": "fastify",
+      "sha": "a479a7ce59f99b6f5a0d20f0745dbd16a3906c09",
+      "parentSha": "e222f53aa267080b349eacdeaff03ea9a061e8c7",
+      "task": "fix(reply): send stream trailers after the stream actually finishes ## Checklist - [x] run `npm run test` - [x] tests are included - [ ] documentation is changed or added - [x] commit message and code follows the [Developer's Certification of Origin]( and the [Code of conduct]( ## What this does When trailers are registered, `sendStream()` pipes with `{ end: false }` so `sendTrailer()` can own `res.end()` once the trailers resolve, since the default pipe behavior would end the response on its own and race the trailer flush (`fastify.inject()` never touches a real socket, so this race never showed up in the existing tests). The trailer flush itself was wired through a plain `payload.on('end', ...)` listener. If the stream had already ended before `reply.send()` was called, that `end` event had already fired and the listener was registered too late, so the trailers never got sent, and since nothing else was calling `res.end()` either, the response hung. This moves the trailer flush into the `eos` (`stream.finished`) listener already present in `sendStream()`. It fires exactly once when the stream is done, error or not, and it fires even for a stream that finished before the listener was attached, so the pre-ended case is handled the same way as the normal one. ## Tests Added real-socket coverage in `test/reply-trailers.test.js`, since `inject()` can't see the pipe/`res.end()` race: trailers on a Readable stream, trailers on a web ReadableStream, a stream with no trailers registered, a stream that errors before ending, and a stream that has already ended before being handed to `send()`. ---------",
+      "gold": [
+        "lib/reply.js",
+        "test/reply-trailers.test.js"
+      ],
+      "excludedNewFiles": 0,
+      "excludedModeFiles": [],
+      "committerTime": 1791966519,
+      "subject": "fix(reply): send stream trailers after the stream actually finishes (#6953)"
+    }
+  ]
+}
