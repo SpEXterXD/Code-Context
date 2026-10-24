@@ -102,6 +102,9 @@ function argSplit(): "eval" | "tuning" {
   return "tuning";
 }
 
+/** The candidate-cap probe doubles runtime; skip it when not needed. */
+const capProbe = !process.argv.includes("--no-cap-probe");
+
 function argReposFilter(): string[] | undefined {
   const i = process.argv.indexOf("--repos");
   const value = i >= 0 ? process.argv[i + 1] : undefined;
@@ -229,10 +232,30 @@ async function main(): Promise<void> {
   const skippedTasks: Array<{ task: string; phase: string; error: string }> = [];
   const perTask: Array<{
     task: string;
+    repoId: string;
+    goldCount: number;
     rankedRecall8: number;
     packageRecall: number;
+    bm25Recall8: number;
     rankedRecall8BigCap: number;
     goldNewlyInTop8BigCap: number;
+    /** Step-0 (b): where the delivered package files came from. */
+    pkgFromTop8: number;
+    pkgRankedDeeper: number;
+    pkgNotRanked: number;
+    pkgMetadataOnly: number;
+  }> = [];
+  /** Step-0 (a): top-8-ranked gold that did not make the package, with why. */
+  const top8Losses: Array<{
+    task: string;
+    repoId: string;
+    path: string;
+    rank: number;
+    tier: string | null;
+    reason: "not-in-payload" | "budget-degraded" | "security-withheld";
+    /** Package slots taken by files ranked below this gold / not ranked at all. */
+    displacedByLowerRanked: number;
+    displacedByUnranked: number;
   }> = [];
   const fieldOverlapExamples: Array<{
     task: string;
@@ -321,6 +344,7 @@ async function main(): Promise<void> {
       const why = parseWhySection(context.payload);
       const source = parseSourceSections(context.payload);
       const snapshotMap = readSnapshot(snapDir);
+      const bm25Ranking = bm25Baseline(snapshotMap, t.task).slice(0, TOP_N);
       const bm25RankOf = new Map(
         bm25Baseline(snapshotMap, t.task)
           .slice(0, 50)
@@ -328,22 +352,27 @@ async function main(): Promise<void> {
       );
 
       // (d) same persisted index, candidate limit widened via maxFiles.
-      const appBig = new OccApplication(snapDir, store, {
-        ...DEFAULT_CONFIG,
-        maxFiles: BIG_CAP_MAX_FILES,
-      });
-      appBig.initialize();
-      let bigContext: ReturnType<OccApplication["buildContext"]>;
-      try {
-        bigContext = appBig.buildContext("task", { taskText: t.task });
-      } catch (error) {
-        bigContext = context; // cap probe unavailable; fall back to normal ranking
-        const skip = { task: t.id, phase: "build-bigcap", error: (error as Error).message };
-        skippedTasks.push(skip);
-        taskSkips.push(skip);
+      // Skippable (--no-cap-probe) when the probe is not needed.
+      let bigRanked = ranked;
+      let bigRankOf = rankOf;
+      if (capProbe) {
+        const appBig = new OccApplication(snapDir, store, {
+          ...DEFAULT_CONFIG,
+          maxFiles: BIG_CAP_MAX_FILES,
+        });
+        appBig.initialize();
+        let bigContext: ReturnType<OccApplication["buildContext"]>;
+        try {
+          bigContext = appBig.buildContext("task", { taskText: t.task });
+        } catch (error) {
+          bigContext = context; // cap probe unavailable; fall back to normal ranking
+          const skip = { task: t.id, phase: "build-bigcap", error: (error as Error).message };
+          skippedTasks.push(skip);
+          taskSkips.push(skip);
+        }
+        bigRanked = bigContext.retrieval?.ranked ?? [];
+        bigRankOf = new Map(bigRanked.map((r, i) => [r.path, i + 1] as const));
       }
-      const bigRanked = bigContext.retrieval?.ranked ?? [];
-      const bigRankOf = new Map(bigRanked.map((r, i) => [r.path, i + 1] as const));
 
       const taskTokens = new Set(contentWords(t.task));
       let goldNewlyInTop8 = 0;
@@ -412,12 +441,52 @@ async function main(): Promise<void> {
           const bigRank = bigRankOf.get(g) ?? null;
           if (bigRank !== null && bigRank <= TOP_N) goldNewlyInTop8++;
         }
+        // M3b Step-0 (a): top-8-ranked gold missing from the package — why,
+        // and what took its slots.
+        if (rank !== null && rank <= TOP_N && stage !== "delivered" && stage !== "not-indexed") {
+          const reason =
+            stage === "security-withheld"
+              ? "security-withheld"
+              : whyEntry
+                ? "budget-degraded"
+                : "not-in-payload";
+          let lower = 0;
+          let unranked = 0;
+          for (const p of source.withSource) {
+            const r = rankOf.get(p);
+            if (r === undefined) unranked++;
+            else if (r > rank) lower++;
+          }
+          top8Losses.push({
+            task: t.id,
+            repoId,
+            path: g,
+            rank,
+            tier: whyEntry?.tier ?? null,
+            reason,
+            displacedByLowerRanked: lower,
+            displacedByUnranked: unranked,
+          });
+        }
         records.push(record);
         taskRecords.push(record);
       }
 
+      // M3b Step-0 (b): composition of the delivered package.
+      let fromTop8 = 0;
+      let rankedDeeper = 0;
+      let notRanked = 0;
+      for (const p of source.withSource) {
+        const r = rankOf.get(p);
+        if (r === undefined) notRanked++;
+        else if (r <= TOP_N) fromTop8++;
+        else rankedDeeper++;
+      }
+
       const perTaskEntry = {
         task: t.id,
+        repoId,
+        goldCount: t.gold.length,
         rankedRecall8: recallAtK(
           ranked.map((r) => ({ path: r.path, score: r.score })),
           t.gold,
@@ -425,12 +494,17 @@ async function main(): Promise<void> {
         ),
         packageRecall:
           t.gold.filter((g) => source.withSource.has(g)).length / Math.max(1, t.gold.length),
+        bm25Recall8: recallAtK(bm25Ranking, t.gold, TOP_N),
         rankedRecall8BigCap: recallAtK(
           bigRanked.map((r) => ({ path: r.path, score: r.score })),
           t.gold,
           TOP_N,
         ),
         goldNewlyInTop8BigCap: goldNewlyInTop8,
+        pkgFromTop8: fromTop8,
+        pkgRankedDeeper: rankedDeeper,
+        pkgNotRanked: notRanked,
+        pkgMetadataOnly: source.metadataOnly.size,
       };
       perTask.push(perTaskEntry);
       checkpoint(t, perTaskEntry, taskRecords, taskSkips.length > 0 ? taskSkips : undefined);
@@ -458,6 +532,55 @@ async function main(): Promise<void> {
     tierOfMissedTests[k] = (tierOfMissedTests[k] ?? 0) + 1;
   }
 
+  // ---- M3b Step-0 aggregates ----
+  const composition = {
+    meanFilesWithSource: mean(
+      perTask.map((p) => p.pkgFromTop8 + p.pkgRankedDeeper + p.pkgNotRanked),
+    ),
+    meanFromTop8: mean(perTask.map((p) => p.pkgFromTop8)),
+    meanRankedDeeper: mean(perTask.map((p) => p.pkgRankedDeeper)),
+    meanNotRanked: mean(perTask.map((p) => p.pkgNotRanked)),
+    meanMetadataOnly: mean(perTask.map((p) => p.pkgMetadataOnly)),
+    packagesWithUnrankedFiles: perTask.filter((p) => p.pkgNotRanked > 0).length,
+    packagesWithDeeperRanked: perTask.filter((p) => p.pkgRankedDeeper > 0).length,
+    packagesWithTop8GoldMissed: perTask.filter((p) => p.rankedRecall8 > p.packageRecall).length,
+  };
+  const top8LossByReason: Record<string, number> = {};
+  for (const l of top8Losses) top8LossByReason[l.reason] = (top8LossByReason[l.reason] ?? 0) + 1;
+  const top8LossSummary = {
+    total: top8Losses.length,
+    byReason: top8LossByReason,
+    meanDisplacedByLowerRanked: mean(top8Losses.map((l) => l.displacedByLowerRanked)),
+    meanDisplacedByUnranked: mean(top8Losses.map((l) => l.displacedByUnranked)),
+    examples: top8Losses.slice(0, 8),
+  };
+  const gapBucket = (
+    keyOf: (p: (typeof perTask)[number]) => string,
+  ): Record<string, { tasks: number; occRanked8: number; occPkg: number; bm25Top8: number }> => {
+    const acc: Record<
+      string,
+      { tasks: number; occRanked8: number; occPkg: number; bm25Top8: number }
+    > = {};
+    for (const p of perTask) {
+      const k = keyOf(p);
+      const r = (acc[k] ??= { tasks: 0, occRanked8: 0, occPkg: 0, bm25Top8: 0 });
+      r.tasks++;
+      r.occRanked8 += p.rankedRecall8;
+      r.occPkg += p.packageRecall;
+      r.bm25Top8 += p.bm25Recall8;
+    }
+    for (const r of Object.values(acc)) {
+      r.occRanked8 /= r.tasks;
+      r.occPkg /= r.tasks;
+      r.bm25Top8 /= r.tasks;
+    }
+    return Object.fromEntries(Object.entries(acc).sort(([a], [b]) => a.localeCompare(b)));
+  };
+  const gapByRepo = gapBucket((p) => p.repoId);
+  const gapByGoldCount = gapBucket((p) =>
+    p.goldCount === 1 ? "1" : p.goldCount === 2 ? "2" : p.goldCount === 3 ? "3" : "4+",
+  );
+
   const out = {
     split,
     occCommit: occHeadCommit(),
@@ -469,8 +592,13 @@ async function main(): Promise<void> {
     recall: {
       rankedRecall8Mean: mean(perTask.map((p) => p.rankedRecall8)),
       packageRecallMean: mean(perTask.map((p) => p.packageRecall)),
+      bm25Recall8Mean: mean(perTask.map((p) => p.bm25Recall8)),
       rankedRecall8BigCapMean: mean(perTask.map((p) => p.rankedRecall8BigCap)),
     },
+    packageComposition: composition,
+    top8Loss: top8LossSummary,
+    gapByRepo,
+    gapByGoldCount,
     candidateCap: {
       goldNotInCandidates: records.filter((r) => r.stage === "not-in-candidates").length,
       goldNotInCandidatesBigCap: records.filter((r) => r.occRankBigCap === null).length,
@@ -509,10 +637,29 @@ async function main(): Promise<void> {
   }
   console.log(`\nranked Recall@8 mean: ${out.recall.rankedRecall8Mean.toFixed(3)}`);
   console.log(`package recall mean:  ${out.recall.packageRecallMean.toFixed(3)}`);
+  console.log(`bm25 top-8 recall mean: ${out.recall.bm25Recall8Mean.toFixed(3)}`);
   console.log(
     `ranked Recall@8 with ${BIG_CAP_MAX_FILES}-maxFiles cap: ${out.recall.rankedRecall8BigCapMean.toFixed(3)}`,
   );
   console.log(`gold newly in top-8 under big cap: ${out.candidateCap.goldNewlyInTop8BigCap}`);
+  console.log(
+    `\npackage composition (mean per package): ${composition.meanFilesWithSource.toFixed(2)} files with source = top8 ${composition.meanFromTop8.toFixed(2)} + ranked-deeper ${composition.meanRankedDeeper.toFixed(2)} + not-ranked ${composition.meanNotRanked.toFixed(2)}; metadata-only ${composition.meanMetadataOnly.toFixed(2)}; packages with unranked files ${composition.packagesWithUnrankedFiles}/${perTask.length}, with deeper-ranked ${composition.packagesWithDeeperRanked}, with top8-gold missed ${composition.packagesWithTop8GoldMissed}`,
+  );
+  console.log(
+    `top-8-ranked gold lost from package: ${top8LossSummary.total} (${JSON.stringify(top8LossByReason)}), mean displaced by lower-ranked ${top8LossSummary.meanDisplacedByLowerRanked.toFixed(2)} / unranked ${top8LossSummary.meanDisplacedByUnranked.toFixed(2)}`,
+  );
+  console.log(`\ngap by repo (occRanked8 / occPkg / bm25Top8):`);
+  for (const [repo, g] of Object.entries(gapByRepo)) {
+    console.log(
+      `  ${repo.padEnd(8)} ${g.occRanked8.toFixed(3)} / ${g.occPkg.toFixed(3)} / ${g.bm25Top8.toFixed(3)}  (${g.tasks} tasks)`,
+    );
+  }
+  console.log(`gap by gold-file count (occRanked8 / occPkg / bm25Top8):`);
+  for (const [k, g] of Object.entries(gapByGoldCount)) {
+    console.log(
+      `  ${k.padEnd(8)} ${g.occRanked8.toFixed(3)} / ${g.occPkg.toFixed(3)} / ${g.bm25Top8.toFixed(3)}  (${g.tasks} tasks)`,
+    );
+  }
   console.log(`\nfield overlap (BM25-high candidate misses): ${JSON.stringify(overlapCounts)}`);
   for (const e of fieldOverlapExamples.slice(0, 4)) {
     console.log(
