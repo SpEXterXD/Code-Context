@@ -231,3 +231,31 @@ the per-task values both results files record. E3 (test-file boost: only
 29/155 test-gold files carry a `tests` edge) and E4 (diversity) were
 skipped — see the milestone report for the evidence-based justification.
 
+## M3b packaging (P1 rank-priority + holdout)
+
+Step-0 packaging diagnostics (`npm run eval:diagnose`, both splits)
+showed that on the eval split **OCC's ranking already beat BM25 top-8
+(0.480 vs 0.437) while the package lost 0.145 of ranked recall**: packages
+averaged 7.76 files holding only 4.27 of the top-8, 129 top-8 gold files
+were budget-degraded, and packages contained ZERO unranked/structural
+extras — inclusion order (tier, score) let tier-boosted files ranked 9–30
+consume slots before top-ranked gold.
+
+**P1 — `M3B_RANK_PRIORITY`** (ablatable, `--ablate rankPriority`): the
+first six retrieval-ranked eligible files claim content slots in rank
+order before tier-ordered extras. Pure ordering — tiers, budgets, ledger
+and WHY reasons unchanged. Tuning paired A/B (n=300, same commit):
+**package recall +0.060 [0.040, 0.083]** with every ranking metric
+byte-identical.
+
+**Holdout** (`--split holdout`, single shot, run-once guarded): the
+intended post-pin holdout was impossible — upstreams had advanced only
+0/0/1/1/6 non-merge commits past the pins (fetched 2026-10-25). The
+implemented holdout is **unsampled eval-half tasks**: the
+(tasksPerRepo+holdoutTasksPerRepo) draw of the same seeded sample stream
+minus the committed eval sample (containment asserted; disjoint from the
+eval sample and, by construction, from the tuning half). n=300 (60/repo),
+hash recorded in results-holdout.json. The single holdout run also
+computes the paired OCC(M3b) − OCC(M3, P1 ablated in-process) comparison
+so no second run is needed.
+

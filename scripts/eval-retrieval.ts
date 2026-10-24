@@ -60,6 +60,7 @@ import {
   isTestPath,
 } from "./eval/lib";
 import {
+  buildHoldoutDataset,
   buildTuningDataset,
   loadEvalDataset,
   loadReposFile,
@@ -74,6 +75,8 @@ const RESULTS_JSON = path.join(ROOT, "docs", "eval", "results.json");
 const RESULTS_MD = path.join(ROOT, "docs", "eval", "results.md");
 const TUNING_RESULTS_JSON = path.join(ROOT, "docs", "eval", "results-tuning.json");
 const TUNING_RESULTS_MD = path.join(ROOT, "docs", "eval", "results-tuning.md");
+const HOLDOUT_RESULTS_JSON = path.join(ROOT, "docs", "eval", "results-holdout.json");
+const HOLDOUT_RESULTS_MD = path.join(ROOT, "docs", "eval", "results-holdout.md");
 const SCRATCH_ROOT = path.join(ROOT, ".eval-cache", "scratch");
 
 const SEED = 20260918;
@@ -140,9 +143,13 @@ interface CaseStudy {
 
 interface ResultsFile {
   /** Which half of the time split this run measured. */
-  split: "eval" | "tuning";
+  split: "eval" | "tuning" | "holdout";
   /** Named scoring constants disabled for this run (--ablate), if any. */
   ablations: string[];
+  /** Holdout only: how the holdout was constructed and why. */
+  holdoutDefinition?: string;
+  /** Holdout only: paired OCC(M3b) − OCC(M3, P1 ablated in-process) diffs. */
+  pairedOccM3bVsM3?: Record<GoldSlice, Record<PairedMetricKey, PairedDiff>>;
   /**
    * M3 eval-run budget: how many full eval-split runs (including this one)
    * have happened on this machine across the milestone. null for tuning.
@@ -208,12 +215,12 @@ function argReposFilter(): string[] | undefined {
   return value ? value.split(",").filter((s) => s.length > 0) : undefined;
 }
 
-function argSplit(): "eval" | "tuning" {
+function argSplit(): "eval" | "tuning" | "holdout" {
   const i = process.argv.indexOf("--split");
   const value = i >= 0 ? process.argv[i + 1] : undefined;
-  if (value === "tuning") return "tuning";
+  if (value === "tuning" || value === "holdout") return value;
   if (value !== undefined && value !== "eval") {
-    console.error(`--split must be "eval" or "tuning" (got ${value})`);
+    console.error(`--split must be "eval", "tuning" or "holdout" (got ${value})`);
     process.exit(1);
   }
   return "eval";
@@ -305,16 +312,57 @@ function argAblations(): string[] {
 async function run(): Promise<void> {
   const split = argSplit();
   const ablations = argAblations();
+  if (split === "holdout" && ablations.length > 0) {
+    console.error("--ablate is not allowed on the holdout (single-shot final confirmation)");
+    process.exit(1);
+  }
   for (const name of ablations) {
     ABLATIONS[name]!.apply();
     console.log(`ABLATION active: ${name} — ${ABLATIONS[name]!.label}`);
   }
-  const outJson = split === "tuning" ? TUNING_RESULTS_JSON : RESULTS_JSON;
-  const outMd = split === "tuning" ? TUNING_RESULTS_MD : RESULTS_MD;
+  const outJson =
+    split === "tuning"
+      ? TUNING_RESULTS_JSON
+      : split === "holdout"
+        ? HOLDOUT_RESULTS_JSON
+        : RESULTS_JSON;
+  const outMd =
+    split === "tuning" ? TUNING_RESULTS_MD : split === "holdout" ? HOLDOUT_RESULTS_MD : RESULTS_MD;
   const repos = loadReposFile();
   const filter = argReposFilter();
   let dataset: DatasetFile;
-  if (split === "tuning") {
+  if (split === "holdout") {
+    // Run-once guard: the holdout is the final confirmation and must never
+    // be re-run or peeked at twice.
+    const guard = path.join(ROOT, ".eval-cache", "holdout-runs.json");
+    let runs = 0;
+    try {
+      runs = (JSON.parse(fs.readFileSync(guard, "utf8")) as { count?: number }).count ?? 0;
+    } catch {
+      /* fresh */
+    }
+    if (runs >= 1) {
+      console.error("HOLDOUT ALREADY RUN — refusing a second run (see results-holdout.json).");
+      process.exit(1);
+    }
+    fs.mkdirSync(path.dirname(guard), { recursive: true });
+    fs.writeFileSync(
+      guard,
+      `${JSON.stringify({ count: runs + 1, at: new Date().toISOString() })}\n`,
+    );
+    console.log(
+      "======================================================================\n" +
+        " HOLDOUT RUN (single shot) — unsampled eval-half tasks; also computes\n" +
+        " the paired OCC(M3b) vs OCC(M3, P1 ablated in-process) comparison.\n" +
+        "======================================================================",
+    );
+    try {
+      dataset = buildHoldoutDataset(repos, filter);
+    } catch (error) {
+      console.error((error as Error).message);
+      process.exit(1);
+    }
+  } else if (split === "tuning") {
     console.log(
       "======================================================================\n" +
         " TUNING SPLIT RUN — writes docs/eval/results-tuning.* only;\n" +
@@ -368,6 +416,14 @@ async function run(): Promise<void> {
   const fullRankedByTask = new Map<string, string[]>();
   /** Files actually included in OCC's generated package, parsed from the payload. */
   const packageFilesByTask = new Map<string, string[]>();
+  /** Holdout only: per-task metrics of the M3 configuration (P1 ablated
+   *  in-process right after the M3b build) for the paired comparison. */
+  const perTaskM3: Array<{
+    id: string;
+    goldFiles: number;
+    full: Record<PairedMetricKey, number>;
+    sourceOnly: Record<PairedMetricKey, number>;
+  }> = [];
 
   // Per-task checkpoint: an interrupted run (crash, stall, network) resumes
   // from the JSONL instead of repeating hours of snapshots and indexing.
@@ -379,9 +435,11 @@ async function run(): Promise<void> {
     packageStats?: { tokens: number; files: number };
     timing?: { snapshotMs: number; indexMs: number; occMs: number; baselinesMs: number };
     skipped?: { task: string; error: string };
+    perTaskM3?: (typeof perTaskM3)[number];
   }
   const checkpointFile = path.join(ROOT, ".eval-cache", `results-${split}.records.jsonl`);
   const doneTasks = new Set<string>();
+  const doneM3 = new Map<string, (typeof perTaskM3)[number]>();
   if (fs.existsSync(checkpointFile)) {
     for (const line of fs.readFileSync(checkpointFile, "utf8").split(/\r?\n/)) {
       if (line.trim().length === 0) continue;
@@ -392,6 +450,7 @@ async function run(): Promise<void> {
       if (c.fullRanked) fullRankedByTask.set(c.task, c.fullRanked);
       if (c.packageFiles) packageFilesByTask.set(c.task, c.packageFiles);
       if (c.packageStats) occPackageStats.push(c.packageStats);
+      if (c.perTaskM3) doneM3.set(c.task, c.perTaskM3);
       if (c.timing) {
         timingMs.snapshotMs += c.timing.snapshotMs;
         timingMs.indexMs += c.timing.indexMs;
@@ -400,6 +459,7 @@ async function run(): Promise<void> {
       }
     }
     console.log(`resuming: ${doneTasks.size} tasks already checkpointed`);
+    for (const entry of doneM3.values()) perTaskM3.push(entry);
   }
   const checkpoint = (c: TaskCheckpoint): void => {
     fs.mkdirSync(path.dirname(checkpointFile), { recursive: true });
@@ -488,6 +548,42 @@ async function run(): Promise<void> {
       dTiming.baselinesMs = performance.now() - blStart;
       timingMs.baselinesMs += dTiming.baselinesMs;
 
+      // Holdout only: same index, same task, M3 configuration (P1 ablated
+      // in-process) — captured per task so the final confirmation is PAIRED
+      // within the single allowed holdout run.
+      let m3Entry: (typeof perTaskM3)[number] | undefined;
+      if (split === "holdout") {
+        M3B_RANK_PRIORITY.enabled = false;
+        try {
+          const ctxM3 = app.buildContext("task", { taskText: t.task });
+          const rankedM3 = (ctxM3.retrieval?.ranked ?? []).slice(0, RETRIEVE_LIMIT);
+          const pkgM3 = new Set(
+            [...ctxM3.payload.matchAll(/^### FILE: (.+)$/gm)].map((m) => m[1]!),
+          );
+          const pkgRecall = (gold: string[]): number =>
+            gold.length === 0 ? 0 : gold.filter((g) => pkgM3.has(g)).length / gold.length;
+          const full = taskMetrics(rankedM3, t.gold);
+          const srcGold = t.gold.filter(isOccParsedPath);
+          const src =
+            srcGold.length > 0
+              ? taskMetrics(rankedM3, srcGold)
+              : { top1: 0, recall5: 0, recall10: 0, allGoldAcc10: 0, mrr: 0 };
+          m3Entry = {
+            id: t.id,
+            goldFiles: t.gold.length,
+            full: { ...full, packageRecall: pkgRecall(t.gold) },
+            sourceOnly: { ...src, packageRecall: pkgRecall(srcGold) },
+          };
+          perTaskM3.push(m3Entry);
+        } catch (error) {
+          console.error(
+            `  ${t.id}: M3-side build skipped (${(error as Error).message.slice(0, 70)})`,
+          );
+        } finally {
+          M3B_RANK_PRIORITY.enabled = true;
+        }
+      }
+
       fs.rmSync(snapDir, { recursive: true, force: true });
       checkpoint({
         task: t.id,
@@ -499,6 +595,7 @@ async function run(): Promise<void> {
         packageFiles: packageFilesByTask.get(t.id) ?? [],
         packageStats: pkgStats,
         timing: dTiming,
+        perTaskM3: m3Entry,
       });
       console.log(
         `  ${repoId} ${t.id}: rerank ${occRanking.length} files (snapshot had ${snapshot.size})`,
@@ -723,9 +820,33 @@ async function run(): Promise<void> {
       };
     });
 
+  // Holdout: paired OCC(M3b) vs OCC(M3, P1 ablated in-process) bootstrap.
+  let pairedOccM3bVsM3: ResultsFile["pairedOccM3bVsM3"];
+  if (split === "holdout") {
+    const m3ById = new Map(perTaskM3.map((m) => [m.id, m] as const));
+    const joined = perTask.filter((p) => m3ById.has(p.id));
+    pairedOccM3bVsM3 = {} as NonNullable<ResultsFile["pairedOccM3bVsM3"]>;
+    for (const slice of ["full", "sourceOnly"] as GoldSlice[]) {
+      const row = {} as Record<PairedMetricKey, PairedDiff>;
+      for (const key of PAIRED_METRIC_KEYS) {
+        row[key] = pairedDiffCi(
+          joined.map((p) => p[slice][key]),
+          joined.map((p) => m3ById.get(p.id)![slice][key]),
+          SEED + hashString(`m3b:${slice}:${key}`),
+        );
+      }
+      pairedOccM3bVsM3[slice] = row;
+    }
+  }
+
   const results: ResultsFile = {
     split,
     ablations,
+    holdoutDefinition:
+      split === "holdout"
+        ? "unsampled eval-half tasks: the (tasksPerRepo + holdoutTasksPerRepo) draw of the SAME seeded sample stream minus the committed eval sample (containment asserted); disjoint from the eval sample by filter and from the tuning half by construction. Intended post-pin commits were unavailable: upstreams advanced only 0/0/1/1/6 non-merge commits past the pins as of 2026-10-25."
+        : undefined,
+    pairedOccM3bVsM3,
     evalSplitRunsIncludingThis: evalRunIndex,
     seed: SEED,
     occCommit: occHeadCommit(),
@@ -772,7 +893,7 @@ function fmt(s: { mean: number; ciLow: number; ciHigh: number }): string {
 function writeResultsMd(results: ResultsFile, dataset: DatasetFile, outPath: string): void {
   const lines: string[] = [];
   lines.push(
-    `# Retrieval Evaluation Results${results.split === "tuning" ? " — TUNING SPLIT" : ""}`,
+    `# Retrieval Evaluation Results${results.split === "tuning" ? " — TUNING SPLIT" : results.split === "holdout" ? " — HOLDOUT (single shot)" : ""}`,
   );
   lines.push("");
   lines.push(
@@ -835,6 +956,23 @@ function writeResultsMd(results: ResultsFile, dataset: DatasetFile, outPath: str
       );
     }
     lines.push("");
+  }
+  if (results.pairedOccM3bVsM3) {
+    lines.push("## Paired bootstrap: OCC(M3b) − OCC(M3, P1 ablated in-process)");
+    lines.push("");
+    for (const slice of ["full", "sourceOnly"] as GoldSlice[]) {
+      lines.push(`### ${slice === "full" ? "Full gold" : "Source-only slice"}`);
+      lines.push("");
+      lines.push("| Metric | Mean diff (M3b − M3) [95% CI] | Excludes 0 |");
+      lines.push("|---|---|---|");
+      for (const key of PAIRED_METRIC_KEYS) {
+        const d = results.pairedOccM3bVsM3[slice][key];
+        lines.push(
+          `| ${key} | ${d.meanDiff.toFixed(3)} [${d.ciLow.toFixed(3)}, ${d.ciHigh.toFixed(3)}] | ${d.excludesZero ? "**yes**" : "no"} |`,
+        );
+      }
+      lines.push("");
+    }
   }
   lines.push("## All-gold gap analysis (BM25 all-gold in top 10, OCC not)");
   lines.push("");

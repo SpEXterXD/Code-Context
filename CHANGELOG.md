@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+### Added (M3b: packaging)
+
+- **P1 — rank-priority content slots** (`M3B_RANK_PRIORITY`, ablatable):
+  Step-0 diagnostics showed OCC's ranking beat BM25 top-8 on the eval
+  split (0.480 vs 0.437) but tier-ordered inclusion let tier-boosted files
+  ranked 9–30 consume content slots before top-ranked gold (packages held
+  only 4.27 of the top-8; 129 top-8 gold files budget-degraded; zero
+  unranked extras). The first six retrieval-ranked eligible files now
+  claim slots in rank order first. Tuning paired A/B (n=300): package
+  recall +0.060 [0.040, 0.083]; every ranking metric unchanged.
+- M3b Step-0 packaging diagnostics in `eval-diagnose` (ranked R@8 vs
+  package recall vs BM25 top-8, package composition, top-8-loss breakdown
+  with displacement counts, gap by repo and gold-file count;
+  `--no-cap-probe`). Single-shot holdout mode (`--split holdout`) with a
+  run-once guard: unsampled eval-half tasks from the same seeded stream
+  (post-pin commits were unavailable — upstreams advanced only 8 non-merge
+  commits past the pins as of 2026-10-25), with an in-process paired
+  OCC(M3b) vs OCC(M3, P1 ablated) comparison so one run suffices.
+  Checkpoint resume now tolerates a truncated final line (a hard kill can
+  interrupt the append).
+
 ### Added (M3: retrieval improvements, measured)
 
 - **E2 — content-score fusion** (`M3_CONTENT_FUSION`, ablatable): the final

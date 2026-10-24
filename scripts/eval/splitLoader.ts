@@ -29,6 +29,8 @@ export interface ReposFile {
   tasksPerRepo: number;
   /** M3: separate sample size for the tuning split (defaults to tasksPerRepo). */
   tuningTasksPerRepo?: number;
+  /** M3b: holdout draw size per repo (unsampled eval-half tasks). */
+  holdoutTasksPerRepo?: number;
   repos: {
     id: string;
     url: string;
@@ -158,6 +160,92 @@ export function buildTuningDataset(repos: ReposFile, wanted: string[] | undefine
   return {
     seed: repos.seed,
     tasksPerRepo: repos.tasksPerRepo,
+    datasetHash: datasetHash(allTasks),
+    repos: perRepo,
+    tasks: allTasks,
+  };
+}
+
+/**
+ * M3b HOLDOUT. The intended fresh post-pin holdout was impossible: as of
+ * 2026-10-25 the five upstreams had advanced only 0/0/1/1/6 non-merge
+ * commits past the pins (fetched and verified). The implemented alternative:
+ * UNSAMPLED eval-half tasks. The seeded sampler draws sequentially, so with
+ * the same seed and pool its first `tasksPerRepo` distinct picks reproduce
+ * the committed eval dataset exactly; picks tasksPerRepo+1..
+ * tasksPerRepo+holdoutPerRepo are never-measured tasks from the same
+ * filtered pool — disjoint from BOTH the eval sample (asserted against
+ * docs/eval/dataset.json) and the tuning half (different half by
+ * construction).
+ */
+export function buildHoldoutDataset(repos: ReposFile, wanted: string[] | undefined): DatasetFile {
+  const evalDataset = loadEvalDataset();
+  const evalIds = new Set(evalDataset.tasks.map((t) => t.id));
+  const holdoutPerRepo = repos.holdoutTasksPerRepo ?? 60;
+  const perRepo: Record<string, RepoEntry> = {};
+  const allTasks: DatasetTask[] = [];
+  for (const repo of repos.repos) {
+    if (wanted && !wanted.includes(repo.id)) continue;
+    const clonePath = cloneDirFor(repo.id);
+    try {
+      verifyPinnedCommit(clonePath, repo.pinnedCommit);
+    } catch (error) {
+      throw new Error(`[${repo.id}] ${(error as Error).message}`);
+    }
+    // Draw the eval sample PLUS the holdout in one deterministic stream.
+    // The sampler draws sequentially, so the tasksPerRepo-task draw is a
+    // SUBSET of the (tasksPerRepo + holdoutPerRepo) draw (verified below);
+    // the holdout is the remainder — unsampled by construction.
+    const drawCount = repos.tasksPerRepo + holdoutPerRepo;
+    const built = buildDataset(
+      repo.id,
+      mineCommits(clonePath, repo.pinnedCommit),
+      drawCount,
+      repos.seed,
+      "eval",
+    );
+    const drawnIds = new Set(built.tasks.map((t) => t.id));
+    const repoEvalIds = [...evalIds].filter((id) => id.startsWith(`${repo.id}:`));
+    const missing = repoEvalIds.filter((id) => !drawnIds.has(id));
+    if (missing.length > 0) {
+      throw new Error(
+        `[${repo.id}] holdout draw does not contain the committed eval sample (${missing.length} missing, e.g. ${missing[0]}) — sampler drift; refusing to continue`,
+      );
+    }
+    const holdoutSample = built.tasks.filter((t) => !evalIds.has(t.id));
+    if (holdoutSample.length < Math.min(holdoutPerRepo, built.tasks.length - repoEvalIds.length)) {
+      throw new Error(`[BUG] holdout draw for ${repo.id} unexpectedly short`);
+    }
+    const treeCache = new Map<string, LsTreeEntry[]>();
+    const filtered = applyModeGoldFilter(holdoutSample, (parentSha) => {
+      let entries = treeCache.get(parentSha);
+      if (!entries) {
+        entries = lsTree(clonePath, parentSha);
+        treeCache.set(parentSha, entries);
+      }
+      return entries;
+    });
+    const stats: DatasetStats = {
+      ...built.stats,
+      sampled: holdoutSample.length,
+      evaluatedTasks: filtered.tasks.length,
+    };
+    perRepo[repo.id] = {
+      pinnedCommit: repo.pinnedCommit,
+      license: repo.license,
+      note: repo.note,
+      sourceFilesAtPin: 0,
+      stats,
+      datasetHash: datasetHash(filtered.tasks),
+    };
+    allTasks.push(...filtered.tasks);
+    console.log(
+      `[${repo.id}] HOLDOUT (unsampled eval-half): drew=${drawCount}, holdout=${holdoutSample.length}, evaluated=${filtered.tasks.length}, disjoint-from-eval=verified`,
+    );
+  }
+  return {
+    seed: repos.seed,
+    tasksPerRepo: holdoutPerRepo,
     datasetHash: datasetHash(allTasks),
     repos: perRepo,
     tasks: allTasks,
