@@ -157,17 +157,21 @@ describe("ContextBuilder", () => {
   });
 
   it("never exceeds any configured budget on a fixture larger than the budget", async () => {
-    app = await makeApp({ maxFiles: 3, maxChars: 4000, maxLines: 120, maxTokens: 900 });
+    // M3/E1 (body lexical field) surfaces more matched symbols on this
+    // fixture, so the STATIC sections grew past the old marginal budget
+    // (≈3713 chars ≈ 929 tokens); 4200/130/1000 still forces degradation —
+    // the budget property under test.
+    app = await makeApp({ maxFiles: 3, maxChars: 4200, maxLines: 130, maxTokens: 1000 });
     const result = app.buildContext("task", {
       taskText: "authentication login rate limiting session",
     });
     expect(result.filesIncluded).toBeLessThanOrEqual(3);
-    expect(result.chars).toBeLessThanOrEqual(4000);
-    expect(result.lines).toBeLessThanOrEqual(120);
-    expect(result.estimatedTokens).toBeLessThanOrEqual(900);
+    expect(result.chars).toBeLessThanOrEqual(4200);
+    expect(result.lines).toBeLessThanOrEqual(130);
+    expect(result.estimatedTokens).toBeLessThanOrEqual(1000);
     // the payload itself respects the same budget (not just the ledger)
-    expect(result.payload.length).toBeLessThanOrEqual(4000);
-    expect(result.payload.split("\n").length).toBeLessThanOrEqual(120);
+    expect(result.payload.length).toBeLessThanOrEqual(4200);
+    expect(result.payload.split("\n").length).toBeLessThanOrEqual(130);
   });
 
   it("enforces maxFiles as the binding budget when char/line budgets are generous", async () => {

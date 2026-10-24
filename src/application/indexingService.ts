@@ -12,6 +12,7 @@ import {
 import { Sha256FileHasher, type FileHasher } from "../workspace/fileHasher";
 import { detectLanguage, isTestFile } from "../workspace/languageDetection";
 import type { ParsedFile, SourceParser } from "../parser/parser";
+import { BODY_TOKEN_TOP_N, extractBodyTokens, type BodyTokens } from "../parser/bodyTokens";
 import { AnalysisEngine } from "../analysis/analysisEngine";
 import { JsonIndexStore, fingerprintForRoot, type IndexStore } from "../index/indexStore";
 import { toPosixPath } from "../shared/ids";
@@ -285,7 +286,7 @@ export class IndexingService {
       }
 
       // Parse phase (pure): read + parse every changed file.
-      const fresh: Array<{ meta: FileMeta; parsed: ParsedFile }> = [];
+      const fresh: Array<{ meta: FileMeta; parsed: ParsedFile; body?: BodyTokens }> = [];
       let processed = 0;
       const analysis = new AnalysisEngine(
         this.rootPath,
@@ -313,7 +314,11 @@ export class IndexingService {
             isTest: file.isTest,
             parseStatus: "PARSED",
           };
-          fresh.push({ meta, parsed: this.parserFor(file.path).parse(file.path, content) });
+          fresh.push({
+            meta,
+            parsed: this.parserFor(file.path).parse(file.path, content),
+            body: extractBodyTokens(content, BODY_TOKEN_TOP_N),
+          });
           this.parseCounter++;
         } catch (e) {
           logger.warn(`parse failed for ${file.path}: ${(e as Error).message}`);
@@ -354,7 +359,10 @@ export class IndexingService {
       const committed = provisional.map((provisionalEntry, index) => {
         const source = fresh[index];
         if (!source) throw new OccError("INVALID_STATE", "provisional/fresh length mismatch");
-        return analysis.buildFileEntry(provisionalEntry.meta, source.parsed);
+        const entry = analysis.buildFileEntry(provisionalEntry.meta, source.parsed);
+        return source.body
+          ? { ...entry, bodyTokens: source.body.terms, bodyLength: source.body.total }
+          : entry;
       });
 
       // Commit phase: persist atomically per entry, then update memory.
@@ -450,7 +458,9 @@ export class IndexingService {
       const entry = analysis.buildFileEntry(meta, parsed);
       staged.set(rel, { ...entry, internalRelations: [] });
       analysis.setEntriesView(staged);
-      return analysis.buildFileEntry(meta, parsed);
+      const final = analysis.buildFileEntry(meta, parsed);
+      const body = extractBodyTokens(content, BODY_TOKEN_TOP_N);
+      return { ...final, bodyTokens: body.terms, bodyLength: body.total };
     } catch (e) {
       logger.warn(`single-file analysis failed for ${rel}: ${(e as Error).message}`);
       return {

@@ -33,6 +33,7 @@ import process from "node:process";
 import { OccApplication } from "../src/application/contextService";
 import { CancellationSource } from "../src/shared/cancellation";
 import { M3_CONTENT_FUSION } from "../src/retrieval/hybridRetriever";
+import { M3_BODY_FIELD } from "../src/retrieval/invertedIndex";
 
 import { bm25Baseline, filenameBaseline, randomBaseline } from "./eval/baselines";
 import type { DatasetTask } from "./eval/dataset";
@@ -267,6 +268,12 @@ const ABLATIONS: Record<string, { label: string; apply: () => void }> = {
     label: "M3_CONTENT_FUSION (E2 content-score fusion) disabled",
     apply: () => {
       M3_CONTENT_FUSION.enabled = false;
+    },
+  },
+  body: {
+    label: "M3_BODY_FIELD (E1 body lexical field) disabled",
+    apply: () => {
+      M3_BODY_FIELD.enabled = false;
     },
   },
 };
