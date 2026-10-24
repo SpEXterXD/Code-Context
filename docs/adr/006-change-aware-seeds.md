@@ -20,31 +20,61 @@ flags, async, timeout):
 
 - `status --porcelain=v1 -z` — the authoritative map: staged/unstaged/
   untracked, renames (`R  new\0old\0`), deletions, and untracked files.
-- `diff --name-only` and `diff --cached --name-only` — used to distinguish
-  staged vs unstaged edits (the status codes already encode this; the diffs
-  are the cross-check).
+- `diff --no-ext-diff --no-textconv --name-only` and
+  `diff --no-ext-diff --no-textconv --cached --name-only` — the cross-check
+  for staged vs unstaged. **`--no-ext-diff` and `--no-textconv` are
+  mandatory on every diff invocation**: an external diff driver
+  (`diff.external`, git-config(1)) or a textconv filter is
+  repo-configurable ARBITRARY COMMAND EXECUTION, exactly like fsmonitor.
+  `npm run eval:seed-hazard-repro` reproduces this for `diff.external`,
+  a textconv driver, and a clean/smudge filter, each run raw and through
+  safeGit, for both `status` and `diff`; anything that still executes
+  through safeGit would be documented here and relied on the trust gate
+  (with a test that untrusted workspaces never reach the collector).
 
-Handling rules: untracked files are seeds (they exist on disk); deleted
-paths are seeds for _retrieval only_ (never read); renames seed both paths;
-binary files (NUL sniff, same rule as the scanner) are path-only seeds;
-diff content extraction skips files above `maxFileSizeBytes`; submodule
-paths (gitlink entries in status) are path-only seeds; CRLF is irrelevant
-to path seeds and content passes through unchanged (deterministic bytes);
-a diff larger than the `CURRENT CHANGES` budget is truncated per-file
-round-robin (deterministic order) with a truncation note. **Gated on
-`vscode.workspace.isTrusted`** exactly like recency: untrusted workspaces
-skip git entirely.
+Handling rules: untracked files are path-only seeds by default; their
+add-diff is rendered under the size cap only when the file is small enough
+(read from disk, never via diff content) — blocked paths never reach that
+step; deleted paths are seeds for _retrieval only_ (never read), and their
+REMOVED LINES in a diff are content and are scanned like any other diff
+text; renames seed both paths; binary files (NUL sniff, same rule as the
+scanner) are path-only seeds; diff content extraction skips files above
+`maxFileSizeBytes`; submodule paths (gitlink entries in status) are
+path-only seeds; CRLF is irrelevant to path seeds and content passes
+through unchanged (deterministic bytes); a diff larger than the
+`CURRENT CHANGES` budget is truncated per-file round-robin (deterministic
+order) with a truncation note. **Gated on `vscode.workspace.isTrusted`**
+exactly like recency: untrusted workspaces skip git entirely.
+
+**Flood control**: changed-path seeds are capped (default 20,
+`changeSeeds.maxPaths`), ordered deterministically — state priority
+(staged < unstaged < untracked < deleted), then path — and lockfiles,
+generated artifacts (`*.min.js`, `*.map`, lock files, build directories)
+and git-ignored paths are excluded before the cap. A merge/rebase in
+progress (`.git/MERGE_HEAD`, `.git/rebase-merge`, `.git/rebase-apply`)
+adds a status note and keeps the (staged-conflict) seeds. A
+500-changed-files repo must produce the same capped, ordered seed set as
+any other input (tested).
 
 ### b) Diff content as a `## CURRENT CHANGES` section
 
+- **Sensitive-path BLOCK rules are applied BEFORE any diff content is
+  read**: a blocked path contributes a path-only WHY entry (like a blocked
+  source file) and its diff is never collected, scanned, or rendered.
+- Deleted-file removed lines are content: they are scanned and redacted
+  exactly like added lines.
+- Untracked files: path-only seed by default; when the file is small
+  enough (≤ `maxFileSizeBytes`) its full content is rendered as an
+  add-diff under the same cap, after the block check.
 - Bounded: a dedicated budget slice (setting `currentChangesMaxTokens`,
   default ≈1500 tokens, counted in the SAME ledger — it competes with file
   content, never exceeds `maxTokens`).
 - Hunks ordered deterministically: by path, then hunk start line; unified
-  diff format via `git diff` (safeGit, no pager); the diff text is passed
-  through the SAME secret scanner + redaction as source files (diffs
-  routinely contain secrets), and the final payload goes through the
-  existing fail-closed leak gate — no new security code paths.
+  diff format via `git diff --no-ext-diff --no-textconv` (safeGit, no
+  pager); the diff text is passed through the SAME secret scanner +
+  redaction as source files (diffs routinely contain secrets), and the
+  final payload goes through the existing fail-closed leak gate — no new
+  security code paths.
 - Rendered inside the existing content-aware fence (M1/F1) so diff content
   cannot forge structure.
 
@@ -86,7 +116,12 @@ fixtures of all five formats.
   like user pins today) and fire new signals with named, ablatable
   constants (one object, `M4_SEED_WEIGHTS = { diffTouched, openEditor,
 diagnostic, stackFrame }`), disabled entirely by an `--ablate seeds`
-  harness switch and a settings toggle.
+  harness switch and a settings toggle. **Only `diffTouched` is tuned** by
+  the simulation (see below); `openEditor`/`diagnostic`/`stackFrame` ship
+  with conservative untuned defaults (0.3/0.4/0.4), documented as untuned,
+  and their seed sources are **off by default** behind settings
+  (`offlineCodeContext.seedEditors`, `seedDiagnostics`, `seedStackTraces` —
+  all false; `changeSeeds` itself defaults on with `maxPaths: 20`).
 - WHY reasons are derived from the fired signals (existing
   explainSignals machinery), so the "signal is real" test verifies each
   new reason against actual seed data.
@@ -99,12 +134,14 @@ diagnostic, stackFrame }`), disabled entirely by an `--ablate seeds`
 
 ### f) Wire format
 
-- `## CURRENT CHANGES` is **additive**; we propose **bumping
-  `CONTEXT_VERSION` to 2** (byte-compat break is acceptable per the M1
-  decision, and the version line lets consumers branch). Section order:
-  after `## DEVELOPER TASK`, before `## PROJECT STRUCTURE` — the user's
-  working state is the second-most-important context after the task.
-- Fence safety (content-aware fence length) applies to the diff blocks.
+- `## CURRENT CHANGES` is **additive and optional** (present only when diff
+  content exists). **`CONTEXT_VERSION` stays 1** — "v2" is reserved for the
+  roadmap item (task repetition, OMITTED BUT RELEVANT, repo conventions,
+  symbol-level slicing). Consumers that do not know the section simply see
+  one more inert section; the fence-safety fix applies to every diff block.
+  Section order: after `## DEVELOPER TASK`, before `## PROJECT STRUCTURE` —
+  the user's working state is the second-most-important context after the
+  task.
 - Determinism: same repo state + same `SeedSet` ⇒ byte-identical payload
   (no timestamps; diff text is deterministic for a given tree state;
   diagnostics/open-editor order is normalized at the SeedSet boundary).
@@ -134,28 +171,52 @@ irrelevant.
   `ceil(k/2)` gold files per qualifying task as "already edited" (seeded by
   the task id; sorted for stability). The remaining gold is HIDDEN — the
   only thing scored.
-- **Conditions**: (1) OCC unseeded, (2) OCC seeded with revealed gold paths
-  (+ their diffs synthesized? no — the simulation seeds PATHS only, no diff
-  content, since snapshots have no working tree), (3) BM25 with the
-  revealed file names appended to the query text (lexical-equivalent
-  advantage), (4) **decoy control**: reveal the same count of non-gold
-  changed-looking files (deterministic pick from the snapshot: same
-  directory as a gold file, not gold) to verify seeds do not hurt when
-  irrelevant.
+- **Fairness (applies to EVERY arm)**: the revealed files are removed from
+  each arm's ranked list AND from its delivered package before any
+  hidden-gold metric is computed — no arm can score a hidden gold file it
+  holds in hand, and no arm benefits or suffers from revealed files
+  occupying ranked slots. This removal is a pure harness function,
+  unit-tested. The same removal applies to the `## CURRENT CHANGES`
+  comparison arms.
+- **Conditions**: (1) OCC unseeded; (2) OCC seeded with revealed gold paths
+  (paths only — snapshots have no working tree, so no diff content);
+  (3) BM25 with the revealed file names appended to the query text
+  (lexical-equivalent advantage); (4) **same-directory decoy control**:
+  the same count of non-gold files picked deterministically from a gold
+  file's directory; (5) **mixed-precision arm**: ~50% revealed gold +
+  ~50% same-directory non-gold decoys; (6) **random-decoy arm**: the same
+  count of random non-gold snapshot files; (7) **real-diff arm**: OCC
+  seeded as in (2) PLUS the revealed files' REAL commit diff (from the
+  pinned clone) rendered as `## CURRENT CHANGES` — measures token cost,
+  effect on (hidden) package recall, secret handling and determinism of
+  the full pipeline, reported separately.
+- **Tuning scope**: ONLY `DIFF_TOUCHED` is tuned by simulation — its weight
+  is swept on the tuning split and chosen to maximize hidden-gold gain
+  subject to the MIXED arm not significantly regressing.
+  `OPEN_EDITOR`, `DIAGNOSTIC` and `STACK_FRAME` get conservative untuned
+  defaults, are documented as untuned, and are **off by default** behind
+  settings.
 - **Metrics**: hidden-gold Recall@8 / Recall@10 / MRR on the ranked list,
   hidden-gold package recall, Top-1 on hidden gold. All aggregated with
   the existing paired bootstrap.
-- **Keep rule**: seeded-vs-unseeded hidden-gold recall improves with a
-  paired CI excluding 0 AND unseeded-task metrics (Top-1/MRR/package
-  recall on the k=1 tasks, which receive no seeds) do not significantly
-  regress. The decoy arm must not degrade hidden-gold recall (CI includes
-  0 at worst).
-- **Datasets**: tune on the tuning split only. Final confirmation on a
-  fresh pool built exactly like the M3b holdout: first check upstream
-  advancement (`git fetch` in the eval cache, report non-merge counts past
-  the pins); if enough (≥40/repo post-pin candidates), re-pin and use
-  post-pin tasks; otherwise use never-measured unsampled tasks and label
-  them as such in results.json. Run ONCE.
+- **Pre-registered primary metric**: **hidden-gold package recall**
+  (seeded vs unseeded; the paired 95% CI must exclude 0 for the milestone
+  to ship the default-on DIFF_TOUCHED signal). Every other metric and arm
+  is secondary and labeled as such in results.
+- **Keep rule**: the primary metric's paired CI excludes 0 (seeded >
+  unseeded) AND unseeded-task metrics (k=1 tasks, which receive no seeds)
+  do not significantly regress AND the mixed/random-decoy arms do not
+  significantly degrade hidden-gold recall.
+- **Datasets**: tune on the tuning split only. Final confirmation runs ONCE
+  per pool, from a clean committed tree, on TWO disjoint pools:
+  (a) **pool A** — eval-stream picks 161–220 per repo: drawn from the same
+  seeded stream, asserted in code to be disjoint from the committed eval
+  sample (picks 1–100), from the M3b holdout (picks 101–160, reproduced
+  and asserted), and from the tuning half by construction;
+  (b) **pool B** — 2–3 NEW TS/JS repositories never used before, pinned and
+  recorded in `repos.json` as an independent confirmation pool.
+  If upstream repos have advanced enough past the pins, post-pin tasks are
+  preferred for pool A and labeled; otherwise unsampled tasks as above.
 - **Determinism**: fixed seeds everywhere (task-id-derived sampler seed;
   the harness seed for bootstrap); same dataset + same commit ⇒ identical
   metric sections; per-task checkpoint/resume as in the existing runner.
@@ -190,3 +251,20 @@ irrelevant.
 - fsmonitor/hook safety: the existing `eval:fsmonitor-repro` covers the
   status/diff invocations the seed collector adds (already proven for
   status/diff raw-vs-helper).
+
+## Amendments (approved at implementation start, 2026-10-25)
+
+The ten changes approved at CHECKPOINT 1 are incorporated above; the
+load-bearing ones: fairness removal of revealed files in every arm (unit-
+tested), mixed-precision and random-decoy arms, DIFF_TOUCHED-only tuning
+with untuned OFF-by-default editor/diagnostic/stack signals, mandatory
+`--no-ext-diff --no-textconv` plus the seed-hazard repro for
+`diff.external`/textconv/clean-smudge filters, sensitive-path BLOCK before
+diff content is read, deleted-line scanning, untracked add-diff under the
+cap, NO CONTEXT_VERSION bump (v2 stays a roadmap item), flood control
+(cap 20, state-then-path order, lockfile/generated exclusion,
+merge/rebase note, 500-file test), the real-diff budget arm, two disjoint
+confirmation pools (picks 161–220 asserted + 2–3 new repos) with
+**hidden-gold package recall pre-registered as the single primary
+metric**, and a linear-time, length-capped (64 KB) stack-trace parser with
+adversarial and timing tests.
