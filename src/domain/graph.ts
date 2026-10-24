@@ -109,7 +109,6 @@ export class RelationshipGraph {
     this.outgoing.delete(fileNode);
     this.incoming.delete(fileNode);
     this.fileEntries.delete(filePath);
-    this.deriveExternalPackages();
   }
 
   clear(): void {
@@ -139,8 +138,6 @@ export class RelationshipGraph {
     for (const rel of entry.internalRelations) {
       add(rel.source, rel.target, rel.kind, rel.provenance);
     }
-
-    this.deriveExternalPackages();
   }
 
   private addEdge(source: NodeId, target: NodeId, kind: string, provenance: string): void {
@@ -151,6 +148,7 @@ export class RelationshipGraph {
     const inc = this.incoming.get(target) ?? [];
     if (!inc.some((e) => e.source === source && e.kind === kind)) inc.push(edge);
     this.incoming.set(target, inc);
+    this.noteExternalAdded(source, target);
   }
 
   private removeFromList(map: Map<NodeId, GraphEdge[]>, key: NodeId, edge: GraphEdge): void {
@@ -159,19 +157,35 @@ export class RelationshipGraph {
     const idx = list.findIndex(
       (e) => e.source === edge.source && e.target === edge.target && e.kind === edge.kind,
     );
-    if (idx >= 0) list.splice(idx, 1);
+    if (idx >= 0) {
+      list.splice(idx, 1);
+      // Only removals from an incoming list can retire an external package:
+      // the incoming list of external:<pkg> holds every remaining reference.
+      if (map === this.incoming) this.noteExternalRemoved(edge.target);
+    }
     if (list.length === 0) map.delete(key);
   }
 
-  private deriveExternalPackages(): void {
-    this.externalPackages.clear();
-    for (const [node, edges] of this.outgoing) {
-      if (!node.startsWith("file:")) continue;
-      for (const e of edges) {
-        if (e.target.startsWith("external:")) {
-          this.externalPackages.add(e.target.slice("external:".length));
-        }
-      }
+  /**
+   * M3-hardening: the external-package set is maintained INCREMENTALLY on
+   * edge add/remove instead of being re-derived from the whole graph after
+   * every entry upsert (which made startup load O(N²) — the second-hot spot
+   * in the M2 startup profile). The maintenance is scoped exactly like the
+   * previous full derivation: only edges whose SOURCE is a file node count,
+   * so the resulting set is byte-identical to a full scan (verified by the
+   * fuzz test in graph.test.ts, which compares against a public-API oracle).
+   */
+  private noteExternalAdded(source: NodeId, target: NodeId): void {
+    if (source.startsWith("file:") && target.startsWith("external:")) {
+      this.externalPackages.add(target.slice("external:".length));
+    }
+  }
+
+  private noteExternalRemoved(target: NodeId): void {
+    if (!target.startsWith("external:")) return;
+    const remaining = this.incoming.get(target) ?? [];
+    if (!remaining.some((e) => e.source.startsWith("file:"))) {
+      this.externalPackages.delete(target.slice("external:".length));
     }
   }
 }
