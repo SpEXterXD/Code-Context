@@ -1,0 +1,1860 @@
+{
+  "split": "tuning",
+  "evalSplitRunsIncludingThis": null,
+  "seed": 20260918,
+  "occCommit": "821c5c8d5ef94c291e2871f3eb26a44b27c89921",
+  "workingTreeClean": true,
+  "datasetHash": "ec50ab4f",
+  "tasks": 300,
+  "skippedTasks": [],
+  "systems": {
+    "occ": {
+      "overall": {
+        "top1": {
+          "n": 300,
+          "mean": 0.46,
+          "ciLow": 0.4033333333333333,
+          "ciHigh": 0.5166666666666667
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.508484126984127,
+          "ciLow": 0.4700634920634923,
+          "ciHigh": 0.5481746031746032
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.6276111111111113,
+          "ciLow": 0.5880793650793652,
+          "ciHigh": 0.6648888888888891
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.39,
+          "ciLow": 0.33666666666666667,
+          "ciHigh": 0.44666666666666666
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.6019493851772755,
+          "ciLow": 0.559064894318608,
+          "ciHigh": 0.6468012509784008
+        }
+      },
+      "perRepo": {
+        "axios": {
+          "top1": {
+            "n": 60,
+            "mean": 0.4666666666666667,
+            "ciLow": 0.35,
+            "ciHigh": 0.5833333333333334
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.5067460317460317,
+            "ciLow": 0.41242063492063485,
+            "ciHigh": 0.6046031746031745
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.5920238095238095,
+            "ciLow": 0.49583333333333335,
+            "ciHigh": 0.6843650793650793
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.38333333333333336,
+            "ciLow": 0.26666666666666666,
+            "ciHigh": 0.5
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.5837193703340317,
+            "ciLow": 0.48125595561017553,
+            "ciHigh": 0.6819466780521363
+          }
+        },
+        "fastify": {
+          "top1": {
+            "n": 60,
+            "mean": 0.43333333333333335,
+            "ciLow": 0.3,
+            "ciHigh": 0.5666666666666667
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.508968253968254,
+            "ciLow": 0.4203571428571428,
+            "ciHigh": 0.5967460317460317
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.6209523809523809,
+            "ciLow": 0.5428571428571428,
+            "ciHigh": 0.7015079365079365
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.3333333333333333,
+            "ciLow": 0.21666666666666667,
+            "ciHigh": 0.45
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.6139817123965676,
+            "ciLow": 0.5139559893273661,
+            "ciHigh": 0.7068506493506495
+          }
+        },
+        "hono": {
+          "top1": {
+            "n": 60,
+            "mean": 0.31666666666666665,
+            "ciLow": 0.21666666666666667,
+            "ciHigh": 0.43333333333333335
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.491388888888889,
+            "ciLow": 0.3916666666666666,
+            "ciHigh": 0.583888888888889
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.6549999999999998,
+            "ciLow": 0.5600000000000002,
+            "ciHigh": 0.7441666666666665
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.45,
+            "ciLow": 0.31666666666666665,
+            "ciHigh": 0.5666666666666667
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.5036451899596188,
+            "ciLow": 0.41138924817278466,
+            "ciHigh": 0.5982539682539684
+          }
+        },
+        "undici": {
+          "top1": {
+            "n": 60,
+            "mean": 0.43333333333333335,
+            "ciLow": 0.31666666666666665,
+            "ciHigh": 0.55
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.495,
+            "ciLow": 0.3927777777777778,
+            "ciHigh": 0.595
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.6619444444444444,
+            "ciLow": 0.5694444444444445,
+            "ciHigh": 0.7544444444444445
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.5,
+            "ciLow": 0.36666666666666664,
+            "ciHigh": 0.6166666666666667
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.5459256605109141,
+            "ciLow": 0.45212917659346225,
+            "ciHigh": 0.646905476905477
+          }
+        },
+        "zod": {
+          "top1": {
+            "n": 60,
+            "mean": 0.65,
+            "ciLow": 0.5333333333333333,
+            "ciHigh": 0.7666666666666667
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.5403174603174604,
+            "ciLow": 0.46388888888888885,
+            "ciHigh": 0.6197619047619048
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.6081349206349207,
+            "ciLow": 0.5317063492063493,
+            "ciHigh": 0.6853571428571429
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.2833333333333333,
+            "ciLow": 0.16666666666666666,
+            "ciHigh": 0.4
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.7624749926852462,
+            "ciLow": 0.668692899202692,
+            "ciHigh": 0.8492290249433108
+          }
+        }
+      },
+      "overallSourceOnly": {
+        "top1": {
+          "n": 300,
+          "mean": 0.46,
+          "ciLow": 0.4033333333333333,
+          "ciHigh": 0.5166666666666667
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.5117301587301588,
+          "ciLow": 0.47307936507936543,
+          "ciHigh": 0.5511349206349206
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.631793650793651,
+          "ciLow": 0.5929761904761904,
+          "ciHigh": 0.6700714285714285
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.39666666666666667,
+          "ciLow": 0.3433333333333333,
+          "ciHigh": 0.4533333333333333
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.6019493851772755,
+          "ciLow": 0.559064894318608,
+          "ciHigh": 0.6468012509784008
+        }
+      },
+      "packageRecall": {
+        "n": 300,
+        "mean": 0.5947103174603178,
+        "ciLow": 0.5538333333333335,
+        "ciHigh": 0.6350079365079366
+      },
+      "packageStats": {
+        "meanTokens": 25213.533333333333,
+        "meanFilesIncluded": 14.923333333333334
+      }
+    },
+    "filename": {
+      "overall": {
+        "top1": {
+          "n": 300,
+          "mean": 0.20666666666666667,
+          "ciLow": 0.16,
+          "ciHigh": 0.25333333333333335
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.22816269841269843,
+          "ciLow": 0.1876825396825397,
+          "ciHigh": 0.26542063492063495
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.32513888888888887,
+          "ciLow": 0.28220238095238115,
+          "ciHigh": 0.36328571428571443
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.16333333333333333,
+          "ciLow": 0.12333333333333334,
+          "ciHigh": 0.20333333333333334
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.31172498893474904,
+          "ciLow": 0.26771920020402634,
+          "ciHigh": 0.35636541585283993
+        }
+      },
+      "perRepo": {
+        "axios": {
+          "top1": {
+            "n": 60,
+            "mean": 0.21666666666666667,
+            "ciLow": 0.11666666666666667,
+            "ciHigh": 0.31666666666666665
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.1907142857142857,
+            "ciLow": 0.1193650793650794,
+            "ciHigh": 0.27055555555555555
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.2412698412698413,
+            "ciLow": 0.15904761904761905,
+            "ciHigh": 0.3266666666666666
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.1,
+            "ciLow": 0.03333333333333333,
+            "ciHigh": 0.18333333333333332
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.29177352230092335,
+            "ciLow": 0.1947442397906557,
+            "ciHigh": 0.3974364060534668
+          }
+        },
+        "fastify": {
+          "top1": {
+            "n": 60,
+            "mean": 0.15,
+            "ciLow": 0.06666666666666667,
+            "ciHigh": 0.25
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.2340873015873016,
+            "ciLow": 0.16444444444444445,
+            "ciHigh": 0.3122619047619048
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.2679761904761905,
+            "ciLow": 0.19769841269841268,
+            "ciHigh": 0.34130952380952373
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.08333333333333333,
+            "ciLow": 0.016666666666666666,
+            "ciHigh": 0.16666666666666666
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.3007737764670372,
+            "ciLow": 0.22223370635776402,
+            "ciHigh": 0.38448051671666744
+          }
+        },
+        "hono": {
+          "top1": {
+            "n": 60,
+            "mean": 0.36666666666666664,
+            "ciLow": 0.25,
+            "ciHigh": 0.48333333333333334
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.47638888888888886,
+            "ciLow": 0.37583333333333324,
+            "ciHigh": 0.5858333333333334
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.5812698412698414,
+            "ciLow": 0.4832539682539683,
+            "ciHigh": 0.6862698412698414
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.38333333333333336,
+            "ciLow": 0.26666666666666666,
+            "ciHigh": 0.5166666666666667
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.497971235540201,
+            "ciLow": 0.3964692286071596,
+            "ciHigh": 0.6039373610063267
+          }
+        },
+        "undici": {
+          "top1": {
+            "n": 60,
+            "mean": 0.21666666666666667,
+            "ciLow": 0.11666666666666667,
+            "ciHigh": 0.31666666666666665
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.16194444444444445,
+            "ciLow": 0.08888888888888889,
+            "ciHigh": 0.23888888888888887
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.39444444444444443,
+            "ciLow": 0.2936111111111111,
+            "ciHigh": 0.4927777777777778
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.23333333333333334,
+            "ciLow": 0.13333333333333333,
+            "ciHigh": 0.35
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.2892567073918493,
+            "ciLow": 0.19636586316733365,
+            "ciHigh": 0.3889685151918924
+          }
+        },
+        "zod": {
+          "top1": {
+            "n": 60,
+            "mean": 0.08333333333333333,
+            "ciLow": 0.016666666666666666,
+            "ciHigh": 0.15
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.07767857142857143,
+            "ciLow": 0.03819444444444444,
+            "ciHigh": 0.12291666666666665
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.14073412698412702,
+            "ciLow": 0.08958333333333332,
+            "ciHigh": 0.19896825396825393
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.016666666666666666,
+            "ciLow": 0,
+            "ciHigh": 0.05
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.17884970297373307,
+            "ciLow": 0.11282168767027342,
+            "ciHigh": 0.2567407441664255
+          }
+        }
+      },
+      "overallSourceOnly": {
+        "top1": {
+          "n": 300,
+          "mean": 0.20333333333333334,
+          "ciLow": 0.15333333333333332,
+          "ciHigh": 0.24666666666666667
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.22734920634920636,
+          "ciLow": 0.18709523809523815,
+          "ciHigh": 0.2642777777777779
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.32443650793650797,
+          "ciLow": 0.2806746031746031,
+          "ciHigh": 0.3618571428571429
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.16333333333333333,
+          "ciLow": 0.12333333333333334,
+          "ciHigh": 0.20333333333333334
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.30728046946029264,
+          "ciLow": 0.2633167454020468,
+          "ciHigh": 0.3502914541706534
+        }
+      },
+      "packageRecall": {
+        "n": 300,
+        "mean": 0.27482936507936506,
+        "ciLow": 0.2353293650793651,
+        "ciHigh": 0.3128095238095238
+      }
+    },
+    "bm25": {
+      "overall": {
+        "top1": {
+          "n": 300,
+          "mean": 0.29333333333333333,
+          "ciLow": 0.24333333333333335,
+          "ciHigh": 0.35
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.42720238095238094,
+          "ciLow": 0.38010317460317466,
+          "ciHigh": 0.4751587301587301
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.5916825396825396,
+          "ciLow": 0.5468333333333333,
+          "ciHigh": 0.6364047619047617
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.37333333333333335,
+          "ciLow": 0.31666666666666665,
+          "ciHigh": 0.43
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.45967873735980114,
+          "ciLow": 0.41463860312923867,
+          "ciHigh": 0.5016683685925333
+        }
+      },
+      "perRepo": {
+        "axios": {
+          "top1": {
+            "n": 60,
+            "mean": 0.2,
+            "ciLow": 0.1,
+            "ciHigh": 0.3
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.38380952380952377,
+            "ciLow": 0.2765873015873016,
+            "ciHigh": 0.49198412698412697
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.5418253968253968,
+            "ciLow": 0.4447222222222222,
+            "ciHigh": 0.6483333333333333
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.35,
+            "ciLow": 0.23333333333333334,
+            "ciHigh": 0.48333333333333334
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.35864061714318185,
+            "ciLow": 0.27134117951215025,
+            "ciHigh": 0.4566181022326712
+          }
+        },
+        "fastify": {
+          "top1": {
+            "n": 60,
+            "mean": 0.2833333333333333,
+            "ciLow": 0.18333333333333332,
+            "ciHigh": 0.4
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.39158730158730154,
+            "ciLow": 0.2971825396825397,
+            "ciHigh": 0.48837301587301585
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.5317857142857142,
+            "ciLow": 0.43063492063492065,
+            "ciHigh": 0.625515873015873
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.3,
+            "ciLow": 0.18333333333333332,
+            "ciHigh": 0.4166666666666667
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.4491686055753392,
+            "ciLow": 0.3605549342314047,
+            "ciHigh": 0.5456313028932999
+          }
+        },
+        "hono": {
+          "top1": {
+            "n": 60,
+            "mean": 0.31666666666666665,
+            "ciLow": 0.18333333333333332,
+            "ciHigh": 0.45
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.4198809523809523,
+            "ciLow": 0.3241666666666667,
+            "ciHigh": 0.5133333333333332
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.5607142857142856,
+            "ciLow": 0.4671031746031745,
+            "ciHigh": 0.6464285714285715
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.3333333333333333,
+            "ciLow": 0.21666666666666667,
+            "ciHigh": 0.45
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.49234635734635734,
+            "ciLow": 0.385115995115995,
+            "ciHigh": 0.5977101139601141
+          }
+        },
+        "undici": {
+          "top1": {
+            "n": 60,
+            "mean": 0.4,
+            "ciLow": 0.2833333333333333,
+            "ciHigh": 0.5333333333333333
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.5644444444444444,
+            "ciLow": 0.45,
+            "ciHigh": 0.6688888888888889
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.7086111111111112,
+            "ciLow": 0.611111111111111,
+            "ciHigh": 0.8052777777777779
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.55,
+            "ciLow": 0.4166666666666667,
+            "ciHigh": 0.6833333333333333
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.5478132947040509,
+            "ciLow": 0.4489372470044738,
+            "ciHigh": 0.6496774521774523
+          }
+        },
+        "zod": {
+          "top1": {
+            "n": 60,
+            "mean": 0.26666666666666666,
+            "ciLow": 0.15,
+            "ciHigh": 0.38333333333333336
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.3762896825396825,
+            "ciLow": 0.29406746031746034,
+            "ciHigh": 0.4563888888888889
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.6154761904761903,
+            "ciLow": 0.5243650793650793,
+            "ciHigh": 0.7018650793650794
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.3333333333333333,
+            "ciLow": 0.21666666666666667,
+            "ciHigh": 0.45
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.4504248120300751,
+            "ciLow": 0.3560822194374825,
+            "ciHigh": 0.5438668198273461
+          }
+        }
+      },
+      "overallSourceOnly": {
+        "top1": {
+          "n": 300,
+          "mean": 0.29,
+          "ciLow": 0.24,
+          "ciHigh": 0.3433333333333333
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.4286309523809524,
+          "ciLow": 0.3815000000000001,
+          "ciHigh": 0.4762579365079366
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.5944365079365079,
+          "ciLow": 0.5496984126984127,
+          "ciHigh": 0.6392619047619049
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.37666666666666665,
+          "ciLow": 0.32,
+          "ciHigh": 0.43333333333333335
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.4580120706931345,
+          "ciLow": 0.41391731232685897,
+          "ciHigh": 0.4996057785703478
+        }
+      },
+      "packageRecall": {
+        "n": 300,
+        "mean": 0.5344484126984125,
+        "ciLow": 0.4897023809523811,
+        "ciHigh": 0.580047619047619
+      }
+    },
+    "random": {
+      "overall": {
+        "top1": {
+          "n": 300,
+          "mean": 0.03,
+          "ciLow": 0.013333333333333334,
+          "ciHigh": 0.05
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.04122619047619047,
+          "ciLow": 0.028055555555555552,
+          "ciHigh": 0.05480952380952379
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.08863095238095237,
+          "ciLow": 0.0664722222222222,
+          "ciHigh": 0.11116269841269835
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.023333333333333334,
+          "ciLow": 0.006666666666666667,
+          "ciHigh": 0.043333333333333335
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.09793396283136235,
+          "ciLow": 0.07777824836571089,
+          "ciHigh": 0.11977461873758209
+        }
+      },
+      "perRepo": {
+        "axios": {
+          "top1": {
+            "n": 60,
+            "mean": 0.03333333333333333,
+            "ciLow": 0,
+            "ciHigh": 0.08333333333333333
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.04027777777777777,
+            "ciLow": 0.0125,
+            "ciHigh": 0.07222222222222223
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.08765873015873016,
+            "ciLow": 0.04222222222222223,
+            "ciHigh": 0.14265873015873015
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.016666666666666666,
+            "ciLow": 0,
+            "ciHigh": 0.05
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.08592828311042336,
+            "ciLow": 0.047593448171999085,
+            "ciHigh": 0.13982563755124727
+          }
+        },
+        "fastify": {
+          "top1": {
+            "n": 60,
+            "mean": 0.03333333333333333,
+            "ciLow": 0,
+            "ciHigh": 0.08333333333333333
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.04000000000000001,
+            "ciLow": 0.014444444444444444,
+            "ciHigh": 0.07111111111111111
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.08559523809523811,
+            "ciLow": 0.04464285714285714,
+            "ciHigh": 0.13365079365079366
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.016666666666666666,
+            "ciLow": 0,
+            "ciHigh": 0.05
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.11369842162324474,
+            "ciLow": 0.07023458020940221,
+            "ciHigh": 0.1645406750579552
+          }
+        },
+        "hono": {
+          "top1": {
+            "n": 60,
+            "mean": 0.016666666666666666,
+            "ciLow": 0,
+            "ciHigh": 0.05
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.020555555555555553,
+            "ciLow": 0.0033333333333333335,
+            "ciHigh": 0.043333333333333335
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.05404761904761905,
+            "ciLow": 0.023650793650793648,
+            "ciHigh": 0.09182539682539684
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.06000702935175103,
+            "ciLow": 0.03134311805447237,
+            "ciHigh": 0.101044801337002
+          }
+        },
+        "undici": {
+          "top1": {
+            "n": 60,
+            "mean": 0.016666666666666666,
+            "ciLow": 0,
+            "ciHigh": 0.05
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.07888888888888891,
+            "ciLow": 0.03444444444444445,
+            "ciHigh": 0.12833333333333333
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.1613888888888889,
+            "ciLow": 0.08722222222222221,
+            "ciHigh": 0.2363888888888889
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0.08333333333333333,
+            "ciLow": 0.016666666666666666,
+            "ciHigh": 0.16666666666666666
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.11349823376546195,
+            "ciLow": 0.07125188449660551,
+            "ciHigh": 0.16096251033957482
+          }
+        },
+        "zod": {
+          "top1": {
+            "n": 60,
+            "mean": 0.05,
+            "ciLow": 0,
+            "ciHigh": 0.11666666666666667
+          },
+          "recall5": {
+            "n": 60,
+            "mean": 0.026408730158730152,
+            "ciLow": 0.008888888888888889,
+            "ciHigh": 0.044861111111111115
+          },
+          "recall10": {
+            "n": 60,
+            "mean": 0.05446428571428572,
+            "ciLow": 0.02740079365079365,
+            "ciHigh": 0.0823809523809524
+          },
+          "allGoldAcc10": {
+            "n": 60,
+            "mean": 0,
+            "ciLow": 0,
+            "ciHigh": 0
+          },
+          "mrr": {
+            "n": 60,
+            "mean": 0.1165378463059306,
+            "ciLow": 0.06545658917226423,
+            "ciHigh": 0.18468157389019527
+          }
+        }
+      },
+      "overallSourceOnly": {
+        "top1": {
+          "n": 300,
+          "mean": 0.03,
+          "ciLow": 0.013333333333333334,
+          "ciHigh": 0.05
+        },
+        "recall5": {
+          "n": 300,
+          "mean": 0.04136507936507936,
+          "ciLow": 0.028174603174603175,
+          "ciHigh": 0.05514285714285714
+        },
+        "recall10": {
+          "n": 300,
+          "mean": 0.08910317460317459,
+          "ciLow": 0.06682539682539682,
+          "ciHigh": 0.11155555555555552
+        },
+        "allGoldAcc10": {
+          "n": 300,
+          "mean": 0.023333333333333334,
+          "ciLow": 0.006666666666666667,
+          "ciHigh": 0.043333333333333335
+        },
+        "mrr": {
+          "n": 300,
+          "mean": 0.09773625990195213,
+          "ciLow": 0.07763878207231711,
+          "ciHigh": 0.11968009041134645
+        }
+      },
+      "packageRecall": {
+        "n": 300,
+        "mean": 0.07890079365079365,
+        "ciLow": 0.05857142857142854,
+        "ciHigh": 0.10216666666666663
+      }
+    }
+  },
+  "goldSliceStats": {
+    "full": {
+      "goldFiles": 865,
+      "tasks": 300
+    },
+    "sourceOnly": {
+      "goldFiles": 850,
+      "tasks": 300,
+      "tasksExcludedEmpty": 0
+    },
+    "perRepo": {
+      "axios": {
+        "fullFiles": 134,
+        "sourceFiles": 130,
+        "sourceTasks": 60
+      },
+      "fastify": {
+        "fullFiles": 186,
+        "sourceFiles": 185,
+        "sourceTasks": 60
+      },
+      "hono": {
+        "fullFiles": 197,
+        "sourceFiles": 197,
+        "sourceTasks": 60
+      },
+      "undici": {
+        "fullFiles": 132,
+        "sourceFiles": 132,
+        "sourceTasks": 60
+      },
+      "zod": {
+        "fullFiles": 216,
+        "sourceFiles": 206,
+        "sourceTasks": 60
+      }
+    }
+  },
+  "pairedBootstrap": {
+    "full": {
+      "top1": {
+        "n": 300,
+        "meanDiff": 0.16666666666666666,
+        "ciLow": 0.09333333333333334,
+        "ciHigh": 0.24,
+        "excludesZero": true
+      },
+      "recall5": {
+        "n": 300,
+        "meanDiff": 0.08128174603174604,
+        "ciLow": 0.03569841269841272,
+        "ciHigh": 0.13194444444444445,
+        "excludesZero": true
+      },
+      "recall10": {
+        "n": 300,
+        "meanDiff": 0.035928571428571435,
+        "ciLow": -0.006626984126984129,
+        "ciHigh": 0.07884920634920634,
+        "excludesZero": false
+      },
+      "allGoldAcc10": {
+        "n": 300,
+        "meanDiff": 0.016666666666666666,
+        "ciLow": -0.03333333333333333,
+        "ciHigh": 0.07,
+        "excludesZero": false
+      },
+      "mrr": {
+        "n": 300,
+        "meanDiff": 0.1422706478174747,
+        "ciLow": 0.08769795904906248,
+        "ciHigh": 0.19436302747910356,
+        "excludesZero": true
+      },
+      "packageRecall": {
+        "n": 300,
+        "meanDiff": 0.06026190476190475,
+        "ciLow": 0.012626984126984118,
+        "ciHigh": 0.11188095238095236,
+        "excludesZero": true
+      }
+    },
+    "sourceOnly": {
+      "top1": {
+        "n": 300,
+        "meanDiff": 0.17,
+        "ciLow": 0.1,
+        "ciHigh": 0.24,
+        "excludesZero": true
+      },
+      "recall5": {
+        "n": 300,
+        "meanDiff": 0.08309920634920634,
+        "ciLow": 0.03758730158730159,
+        "ciHigh": 0.13065873015873022,
+        "excludesZero": true
+      },
+      "recall10": {
+        "n": 300,
+        "meanDiff": 0.037357142857142846,
+        "ciLow": -0.010222222222222221,
+        "ciHigh": 0.08329365079365082,
+        "excludesZero": false
+      },
+      "allGoldAcc10": {
+        "n": 300,
+        "meanDiff": 0.02,
+        "ciLow": -0.03666666666666667,
+        "ciHigh": 0.07333333333333333,
+        "excludesZero": false
+      },
+      "mrr": {
+        "n": 300,
+        "meanDiff": 0.14393731448414135,
+        "ciLow": 0.09182007652123575,
+        "ciHigh": 0.1993582012702778,
+        "excludesZero": true
+      },
+      "packageRecall": {
+        "n": 300,
+        "meanDiff": 0.06099206349206348,
+        "ciLow": 0.01313492063492064,
+        "ciHigh": 0.11303968253968258,
+        "excludesZero": true
+      }
+    }
+  },
+  "allGoldGap": {
+    "tasks": [
+      {
+        "id": "axios:1de70bd13050",
+        "repoId": "axios",
+        "missing": [
+          {
+            "path": "examples/server.js",
+            "type": "source",
+            "occRank": 54,
+            "bm25Rank": 10,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "axios:63f41b53aa45",
+        "repoId": "axios",
+        "missing": [
+          {
+            "path": "README.md",
+            "type": "docs",
+            "occRank": null,
+            "bm25Rank": 7,
+            "inOccCandidates": false
+          },
+          {
+            "path": "examples/upload/index.html",
+            "type": "other",
+            "occRank": 50,
+            "bm25Rank": 1,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "axios:83ae3830e407",
+        "repoId": "axios",
+        "missing": [
+          {
+            "path": "test/specs/interceptors.spec.js",
+            "type": "test",
+            "occRank": 12,
+            "bm25Rank": 3,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "axios:af170334bdd0",
+        "repoId": "axios",
+        "missing": [
+          {
+            "path": "README.md",
+            "type": "docs",
+            "occRank": 34,
+            "bm25Rank": 2,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "axios:e0b1bb6d0ba9",
+        "repoId": "axios",
+        "missing": [
+          {
+            "path": "Gruntfile.js",
+            "type": "source",
+            "occRank": 23,
+            "bm25Rank": 1,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "axios:f40de498e6af",
+        "repoId": "axios",
+        "missing": [
+          {
+            "path": "karma.conf.js",
+            "type": "source",
+            "occRank": 11,
+            "bm25Rank": 1,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:42ac663bb175",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "docs/Server.md",
+            "type": "docs",
+            "occRank": null,
+            "bm25Rank": 1,
+            "inOccCandidates": false
+          },
+          {
+            "path": "test/route-prefix.test.js",
+            "type": "test",
+            "occRank": 24,
+            "bm25Rank": 3,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:84122c9e4b57",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "test/listen.test.js",
+            "type": "test",
+            "occRank": 13,
+            "bm25Rank": 1,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:978dd0c00bf1",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "package.json",
+            "type": "ci-config",
+            "occRank": 21,
+            "bm25Rank": 7,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:9eaa756deae8",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "package.json",
+            "type": "ci-config",
+            "occRank": 29,
+            "bm25Rank": 4,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:ac8fed4387d1",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "test/custom-parser.test.js",
+            "type": "test",
+            "occRank": 13,
+            "bm25Rank": 4,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "fastify:cdd259ee1628",
+        "repoId": "fastify",
+        "missing": [
+          {
+            "path": "package.json",
+            "type": "ci-config",
+            "occRank": 17,
+            "bm25Rank": 3,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "hono:4df4bb4b57a7",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "deno_dist/jsx/dom/index.ts",
+            "type": "source",
+            "occRank": 11,
+            "bm25Rank": 7,
+            "inOccCandidates": true
+          },
+          {
+            "path": "deno_dist/jsx/hooks/index.ts",
+            "type": "source",
+            "occRank": 40,
+            "bm25Rank": 4,
+            "inOccCandidates": true
+          },
+          {
+            "path": "src/jsx/dom/index.test.tsx",
+            "type": "test",
+            "occRank": 39,
+            "bm25Rank": 1,
+            "inOccCandidates": true
+          },
+          {
+            "path": "src/jsx/dom/index.ts",
+            "type": "source",
+            "occRank": 12,
+            "bm25Rank": 6,
+            "inOccCandidates": true
+          },
+          {
+            "path": "src/jsx/hooks/index.ts",
+            "type": "source",
+            "occRank": 41,
+            "bm25Rank": 3,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "hono:8b0f189a3fab",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "deno_dist/middleware/pretty-json/index.ts",
+            "type": "source",
+            "occRank": null,
+            "bm25Rank": 9,
+            "inOccCandidates": false
+          },
+          {
+            "path": "src/context.test.ts",
+            "type": "test",
+            "occRank": null,
+            "bm25Rank": 6,
+            "inOccCandidates": false
+          },
+          {
+            "path": "src/middleware/pretty-json/index.ts",
+            "type": "source",
+            "occRank": 29,
+            "bm25Rank": 8,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "hono:90da1961930b",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "deno_test/middleware.test.tsx",
+            "type": "test",
+            "occRank": 17,
+            "bm25Rank": 6,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "hono:9ef8f8528d0c",
+        "repoId": "hono",
+        "missing": [
+          {
+            "path": "src/router/reg-exp-router/router.ts",
+            "type": "source",
+            "occRank": 40,
+            "bm25Rank": 5,
+            "inOccCandidates": true
+          },
+          {
+            "path": "src/utils/url.ts",
+            "type": "source",
+            "occRank": 36,
+            "bm25Rank": 2,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "undici:075d80a89297",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "lib/fetch/body.js",
+            "type": "source",
+            "occRank": 31,
+            "bm25Rank": 4,
+            "inOccCandidates": true
+          },
+          {
+            "path": "test/client-fetch.js",
+            "type": "test",
+            "occRank": 51,
+            "bm25Rank": 3,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "undici:1b858fbcaec4",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "lib/websocket/receiver.js",
+            "type": "source",
+            "occRank": 49,
+            "bm25Rank": 1,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "undici:221c81db894e",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "test/client-pipelining.js",
+            "type": "test",
+            "occRank": 17,
+            "bm25Rank": 7,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "undici:3d685b0df479",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "test/client.js",
+            "type": "test",
+            "occRank": 14,
+            "bm25Rank": 7,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "undici:9efbfb7fce41",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "lib/client.js",
+            "type": "source",
+            "occRank": null,
+            "bm25Rank": 6,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "undici:bd69341d538a",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "lib/fetch/body.js",
+            "type": "source",
+            "occRank": 38,
+            "bm25Rank": 1,
+            "inOccCandidates": true
+          },
+          {
+            "path": "test/fetch/client-fetch.js",
+            "type": "test",
+            "occRank": 36,
+            "bm25Rank": 2,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "undici:fa6b2100a1b5",
+        "repoId": "undici",
+        "missing": [
+          {
+            "path": "lib/fetch/util.js",
+            "type": "source",
+            "occRank": 33,
+            "bm25Rank": 2,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "zod:47091603204b",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "README.md",
+            "type": "docs",
+            "occRank": null,
+            "bm25Rank": 1,
+            "inOccCandidates": false
+          },
+          {
+            "path": "deno/lib/README.md",
+            "type": "docs",
+            "occRank": null,
+            "bm25Rank": 2,
+            "inOccCandidates": false
+          },
+          {
+            "path": "deno/lib/__tests__/partials.test.ts",
+            "type": "test",
+            "occRank": 48,
+            "bm25Rank": 8,
+            "inOccCandidates": true
+          },
+          {
+            "path": "src/__tests__/partials.test.ts",
+            "type": "test",
+            "occRank": 49,
+            "bm25Rank": 7,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "zod:4e42ee315ad8",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "deno/lib/README.md",
+            "type": "docs",
+            "occRank": null,
+            "bm25Rank": 2,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "zod:6606b013dc83",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "deno/lib/types.ts",
+            "type": "source",
+            "occRank": 63,
+            "bm25Rank": 10,
+            "inOccCandidates": true
+          },
+          {
+            "path": "src/types.ts",
+            "type": "source",
+            "occRank": 65,
+            "bm25Rank": 9,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "zod:827cb5d47af5",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "deno/lib/__tests__/string.test.ts",
+            "type": "test",
+            "occRank": null,
+            "bm25Rank": 2,
+            "inOccCandidates": false
+          },
+          {
+            "path": "src/__tests__/string.test.ts",
+            "type": "test",
+            "occRank": null,
+            "bm25Rank": 1,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "zod:89a5334dc9e3",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "deno/lib/__tests__/discriminatedUnions.test.ts",
+            "type": "test",
+            "occRank": 71,
+            "bm25Rank": 9,
+            "inOccCandidates": true
+          },
+          {
+            "path": "src/__tests__/discriminatedUnions.test.ts",
+            "type": "test",
+            "occRank": 72,
+            "bm25Rank": 8,
+            "inOccCandidates": true
+          }
+        ]
+      },
+      {
+        "id": "zod:ab8a37191fa2",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "README.md",
+            "type": "docs",
+            "occRank": null,
+            "bm25Rank": 2,
+            "inOccCandidates": false
+          }
+        ]
+      },
+      {
+        "id": "zod:c190a84bfe55",
+        "repoId": "zod",
+        "missing": [
+          {
+            "path": "package.json",
+            "type": "ci-config",
+            "occRank": null,
+            "bm25Rank": 8,
+            "inOccCandidates": false
+          }
+        ]
+      }
+    ],
+    "summary": {
+      "tasks": 30,
+      "missingFiles": 47,
+      "byType": {
+        "ci-config": 4,
+        "docs": 7,
+        "other": 1,
+        "source": 18,
+        "test": 17
+      },
+      "notInOccCandidates": 12,
+      "occRankMedian": 34,
+      "bm25RankMedian": 4
+    }
+  },
+  "caseStudies": {
+    "worst": [
+      {
+        "id": "hono:128970e2d221",
+        "repoId": "hono",
+        "subject": "chore: move under `honojs` organization (#178)",
+        "task": "chore: move under `honojs` organization",
+        "gold": [
+          "README.md",
+          "docs/README.ja.md",
+          "examples/compute-at-edge/package.json",
+          "examples/jsx-ssr/src/components/footer.tsx",
+          "package.json",
+          "src/middleware/mustache/README.md",
+          "src/middleware/serve-static/README.md"
+        ],
+        "topRanked": [
+          "src/router/reg-exp-router/router.test.ts",
+          "src/hono.ts",
+          "src/router/trie-router/node.ts",
+          "src/router/trie-router/router.ts",
+          "src/utils/url.ts",
+          "src/router.ts",
+          "src/router/reg-exp-router/router.ts",
+          "src/compose.ts",
+          "src/context.ts",
+          "src/index.ts"
+        ],
+        "mrr": 0,
+        "recall10": 0
+      },
+      {
+        "id": "hono:a104bf0010ba",
+        "repoId": "hono",
+        "subject": "fix(netlify): fix import paths (#1304)",
+        "task": "fix(netlify): fix import paths",
+        "gold": [
+          "deno_dist/adapter/netlify/handler.ts",
+          "deno_dist/adapter/netlify/mod.ts",
+          "src/adapter/netlify/handler.ts",
+          "src/adapter/netlify/mod.ts"
+        ],
+        "topRanked": [
+          "src/utils/url.ts",
+          "deno_dist/utils/url.ts",
+          "deno_dist/hono-base.ts",
+          "src/hono-base.ts",
+          "src/utils/url.test.ts",
+          "src/hono.test.ts",
+          "deno_dist/router/reg-exp-router/router.ts",
+          "src/router/reg-exp-router/router.ts",
+          "src/types.test.ts",
+          "src/adapter/aws-lambda/handler.ts"
+        ],
+        "mrr": 0,
+        "recall10": 0
+      },
+      {
+        "id": "zod:6606b013dc83",
+        "repoId": "zod",
+        "subject": "Roll back all early abort changes",
+        "task": "Roll back all early abort changes",
+        "gold": [
+          "deno/lib/types.ts",
+          "src/types.ts"
+        ],
+        "topRanked": [
+          "deno/lib/__tests__/error.test.ts",
+          "src/__tests__/error.test.ts",
+          "deno/lib/ZodError.ts",
+          "deno/lib/__tests__/anyunknown.test.ts",
+          "deno/lib/__tests__/array.test.ts",
+          "deno/lib/__tests__/base.test.ts",
+          "deno/lib/__tests__/crazySchema.ts",
+          "deno/lib/__tests__/default.test.ts",
+          "deno/lib/__tests__/enum.test.ts",
+          "deno/lib/__tests__/firstparty.test.ts"
+        ],
+        "mrr": 0,
+        "recall10": 0
+      },
+      {
+        "id": "zod:5f84473deb54",
+        "repoId": "zod",
+        "subject": "Add default export in mod.ts",
+        "task": "Add default export in mod.ts",
+        "gold": [
+          "deno-build.mjs",
+          "deno/lib/README.md",
+          "deno/lib/mod.ts"
+        ],
+        "topRanked": [
+          "deno/lib/types.ts",
+          "src/types.ts",
+          "package.json",
+          "configs/babel-jest.config.json",
+          "configs/ts-jest.config.json",
+          "configs/jest.config.json",
+          "jest.config.json",
+          "deno/lib/__tests__/default.test.ts",
+          "src/__tests__/default.test.ts",
+          "deno/lib/__tests__/catch.test.ts"
+        ],
+        "mrr": 0,
+        "recall10": 0
+      },
+      {
+        "id": "undici:9efbfb7fce41",
+        "repoId": "undici",
+        "subject": "fix: removed no longer relevant note",
+        "task": "fix: removed no longer relevant note",
+        "gold": [
+          "lib/client.js"
+        ],
+        "topRanked": [],
+        "mrr": 0,
+        "recall10": 0
+      }
+    ],
+    "best": [
+      {
+        "id": "fastify:92f106a7b083",
+        "repoId": "fastify",
+        "subject": "fix(internals): fix typo in handleRequest (#2240)",
+        "task": "fix(internals): fix typo in handleRequest Add missing `raw` property in path when accessing `writableEnded`. Explicitly set `writableEnded` only in Node versions greather than equal to 12.9.0 in `preValidationCallback` test.",
+        "gold": [
+          "lib/handleRequest.js",
+          "test/internals/handleRequest.test.js"
+        ],
+        "topRanked": [
+          "lib/handleRequest.js",
+          "test/internals/handleRequest.test.js",
+          "fastify.js",
+          "lib/route.js",
+          "lib/reply.js",
+          "lib/logger.js",
+          "test/internals/contentTypeParser.test.js",
+          "lib/contentTypeParser.js",
+          "lib/pluginUtils.js",
+          "lib/validation.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      },
+      {
+        "id": "fastify:c4eb4267c533",
+        "repoId": "fastify",
+        "subject": "Simplify schemaErrorsText builder function (#1412)",
+        "task": "Simplify schemaErrorsText builder function * Simplify schemaErrorsText builder function * Remove unnecessary null check",
+        "gold": [
+          "lib/validation.js"
+        ],
+        "topRanked": [
+          "lib/validation.js",
+          "lib/decorate.js",
+          "lib/pluginUtils.js",
+          "fastify.js",
+          "test/internals/handleRequest.test.js",
+          "lib/reply.js",
+          "lib/contentTypeParser.js",
+          "lib/handleRequest.js",
+          "test/internals/plugin.test.js",
+          "lib/wrapThenable.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      },
+      {
+        "id": "fastify:889f16dcbf7f",
+        "repoId": "fastify",
+        "subject": "Fix missing object wrapper for errors in pino log (#1180)",
+        "task": "Fix missing object wrapper for errors in pino log log is a pino logger, the first argument is a mapping, so in order to give it an error object, we must give it an object with an 'err' field. This commit fixes places where this has been forgotten, except in test files.",
+        "gold": [
+          "fastify.js",
+          "lib/reply.js",
+          "lib/wrapThenable.js"
+        ],
+        "topRanked": [
+          "fastify.js",
+          "lib/reply.js",
+          "test/internals/handleRequest.test.js",
+          "test/internals/contentTypeParser.test.js",
+          "lib/wrapThenable.js",
+          "lib/handleRequest.js",
+          "lib/request.js",
+          "lib/hookRunner.js",
+          "lib/validation.js",
+          "lib/schemas.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      },
+      {
+        "id": "fastify:015480adf8b4",
+        "repoId": "fastify",
+        "subject": "Added deprecation warning for genReqId option in logger (#1166)",
+        "task": "Added deprecation warning for genReqId option in logger",
+        "gold": [
+          "fastify.js"
+        ],
+        "topRanked": [
+          "fastify.js",
+          "lib/logger.js",
+          "lib/reply.js",
+          "lib/validation.js",
+          "test/internals/handleRequest.test.js",
+          "lib/request.js",
+          "lib/handleRequest.js",
+          "lib/wrapThenable.js",
+          "docs/Server.md",
+          "lib/reqIdGenFactory.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      },
+      {
+        "id": "fastify:13011ce6f8f0",
+        "repoId": "fastify",
+        "subject": "Simplify building Hooks and ContentTypeParser",
+        "task": "Simplify building Hooks and ContentTypeParser Creating a new constructor and inheriting from the old one isn't necessary for Hooks and ContentTypeParser. Simply creating a new instance and cloning the values is all that's needed. This also improves debugging, general code compatibility, and possibly performance since the hooks and parsersList will now be real arrays instead of array-like objects.",
+        "gold": [
+          "lib/ContentTypeParser.js",
+          "lib/hooks.js"
+        ],
+        "topRanked": [
+          "lib/hooks.js",
+          "lib/ContentTypeParser.js",
+          "lib/logger.js",
+          "fastify.js",
+          "lib/reply.js",
+          "lib/handleRequest.js",
+          "lib/validation.js",
+          "test/internals/handleRequest.test.js",
+          "lib/errorUtils.js",
+          "lib/pluginUtils.js"
+        ],
+        "mrr": 1,
+        "recall10": 1
+      }
+    ]
+  },
+  "timingMs": {
+    "snapshotMs": 2936998.5421,
+    "indexMs": 284695.85000000056,
+    "occMs": 32640.105299997842,
+    "baselinesMs": 52269.63060000099
+  },
+  "environment": {
+    "node": "v24.15.0",
+    "platform": "win32 10.0.26300",
+    "cpu": "AMD Ryzen 7 4800H with Radeon Graphics         ",
+    "totalMemGB": 15.4
+  }
+}

@@ -161,14 +161,21 @@ export function parseNameStatusStream(stream: string): Map<string, TouchedFile[]
   return out;
 }
 
-/** Mines the full merge-free history of one clone (read-only). */
-export function mineCommits(clonePath: string): MinedCommit[] {
-  const metaStream = runGit(clonePath, ["log", "--no-merges", `--format=${META_FORMAT}`]);
+/**
+ * Mines the merge-free history of one clone, bounded by `ref` (the pinned
+ * commit) — read-only. Bounding at the pin makes the dataset a pure function
+ * of repos.json: a clone taken later sees new upstream commits, but history
+ * below the immutable pin is identical, so the mined set never drifts.
+ */
+export function mineCommits(clonePath: string, ref?: string): MinedCommit[] {
+  const range = ref ? [ref] : [];
+  const metaStream = runGit(clonePath, ["log", "--no-merges", ...range, `--format=${META_FORMAT}`]);
   const filesStream = runGit(clonePath, [
     "log",
     "--no-merges",
     "-M",
     "--name-status",
+    ...range,
     `--format=${FILES_FORMAT}`,
   ]);
   const meta = parseMetaStream(metaStream);
@@ -208,7 +215,27 @@ export interface CloneResult {
 export function ensureClone(repo: CloneSpec): CloneResult {
   const dir = cloneDirFor(repo.id);
   try {
-    if (fs.existsSync(path.join(dir, ".git"))) return { clonePath: dir, fresh: false };
+    if (fs.existsSync(path.join(dir, ".git"))) {
+      // Partial clones (promisor/blob:none) lazily fetch blobs over the
+      // network at snapshot time — one transient failure kills a whole run,
+      // so refuse them loudly instead of failing 90 minutes in.
+      // (git config --get exits 1 for unset keys = healthy full clone.)
+      let promisor = "";
+      try {
+        promisor = execFileSync("git", ["-C", dir, "config", "--get", "remote.origin.promisor"], {
+          encoding: "utf8",
+          stdio: "pipe",
+        }).trim();
+      } catch {
+        /* unset: full clone */
+      }
+      if (promisor === "true") {
+        throw new Error(
+          `Clone at ${dir} is a PARTIAL clone (promisor=true). Delete it and re-run to get a full clone: snapshots must never need the network.`,
+        );
+      }
+      return { clonePath: dir, fresh: false };
+    }
     fs.mkdirSync(path.dirname(dir), { recursive: true });
     execFileSync(
       "git",
@@ -224,7 +251,7 @@ export function ensureClone(repo: CloneSpec): CloneResult {
     );
     return { clonePath: dir, fresh: true };
   } catch (cause) {
-    fs.rmSync(dir, { recursive: true, force: true });
+    if (!fs.existsSync(path.join(dir, ".git"))) fs.rmSync(dir, { recursive: true, force: true });
     throw new Error(
       `Clone of ${repo.url} failed (missing network?) — skip by running with an existing cache under ${REPO_CACHE_ROOT}. Cause: ${String(cause)}`,
       { cause },

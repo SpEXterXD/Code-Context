@@ -231,7 +231,6 @@ function nextEvalRunIndex(): number {
 
 async function run(): Promise<void> {
   const split = argSplit();
-  const evalRunIndex = split === "eval" ? nextEvalRunIndex() : null;
   const outJson = split === "tuning" ? TUNING_RESULTS_JSON : RESULTS_JSON;
   const outMd = split === "tuning" ? TUNING_RESULTS_MD : RESULTS_MD;
   const repos = loadReposFile();
@@ -292,24 +291,67 @@ async function run(): Promise<void> {
   /** Files actually included in OCC's generated package, parsed from the payload. */
   const packageFilesByTask = new Map<string, string[]>();
 
+  // Per-task checkpoint: an interrupted run (crash, stall, network) resumes
+  // from the JSONL instead of repeating hours of snapshots and indexing.
+  interface TaskCheckpoint {
+    task: string;
+    ranks?: Record<SystemName, RankedFile[]>;
+    fullRanked?: string[];
+    packageFiles?: string[];
+    packageStats?: { tokens: number; files: number };
+    timing?: { snapshotMs: number; indexMs: number; occMs: number; baselinesMs: number };
+    skipped?: { task: string; error: string };
+  }
+  const checkpointFile = path.join(ROOT, ".eval-cache", `results-${split}.records.jsonl`);
+  const doneTasks = new Set<string>();
+  if (fs.existsSync(checkpointFile)) {
+    for (const line of fs.readFileSync(checkpointFile, "utf8").split(/\r?\n/)) {
+      if (line.trim().length === 0) continue;
+      const c = JSON.parse(line) as TaskCheckpoint;
+      doneTasks.add(c.task);
+      if (c.skipped) skippedTasks.push(c.skipped);
+      if (c.ranks) for (const s of SYSTEMS) ranks.get(s)!.set(c.task, c.ranks[s] ?? []);
+      if (c.fullRanked) fullRankedByTask.set(c.task, c.fullRanked);
+      if (c.packageFiles) packageFilesByTask.set(c.task, c.packageFiles);
+      if (c.packageStats) occPackageStats.push(c.packageStats);
+      if (c.timing) {
+        timingMs.snapshotMs += c.timing.snapshotMs;
+        timingMs.indexMs += c.timing.indexMs;
+        timingMs.occMs += c.timing.occMs;
+        timingMs.baselinesMs += c.timing.baselinesMs;
+      }
+    }
+    console.log(`resuming: ${doneTasks.size} tasks already checkpointed`);
+  }
+  const checkpoint = (c: TaskCheckpoint): void => {
+    fs.mkdirSync(path.dirname(checkpointFile), { recursive: true });
+    fs.appendFileSync(checkpointFile, `${JSON.stringify(c)}\n`);
+  };
+
   for (const repoId of repoIds) {
     for (const t of tasks.filter((x) => x.repoId === repoId)) {
+      if (doneTasks.has(t.id)) continue;
+      let dTiming = { snapshotMs: 0, indexMs: 0, occMs: 0, baselinesMs: 0 };
       const clonePath = cloneDirFor(repoId);
       const snapshotStart = performance.now();
       // Task ids contain ':' (e.g. "axios:d17d9a66"); Windows paths reject it.
       const snapKey = `${repoId}-${t.sha.slice(0, 12)}`;
       materializeSnapshot(clonePath, t.parentSha, SCRATCH_ROOT, snapKey);
-      timingMs.snapshotMs += performance.now() - snapshotStart;
+      dTiming.snapshotMs = performance.now() - snapshotStart;
 
       const indexStart = performance.now();
       const snapDir = path.join(SCRATCH_ROOT, snapKey);
       const app = new OccApplication(snapDir, path.join(SCRATCH_ROOT, "store"));
       app.initialize();
       const indexResult = await app.indexing.indexWorkspace(CancellationSource.never());
-      timingMs.indexMs += performance.now() - indexStart;
+      dTiming.indexMs = performance.now() - indexStart;
+      timingMs.snapshotMs += dTiming.snapshotMs;
+      timingMs.indexMs += dTiming.indexMs;
       if (indexResult.cancelled || app.indexing.getEntries().size === 0) {
         console.error(`  ${repoId} ${t.id}: indexing produced no entries — skipping task`);
         fs.rmSync(snapDir, { recursive: true, force: true });
+        checkpoint({ task: t.id, timing: dTiming, skipped: { task: t.id, error: "no entries" } });
+        skippedTasks.push({ task: t.id, error: "no entries" });
         continue;
       }
 
@@ -331,9 +373,11 @@ async function run(): Promise<void> {
         // e.g. CONTEXT_BUDGET_UNREACHABLE when static sections alone exceed
         // the budget on very large snapshots — skip the task, never crash
         // the whole run.
-        skippedTasks.push({ task: t.id, error: (error as Error).message });
-        console.error(`  ${repoId} ${t.id}: SKIPPED (${(error as Error).message.slice(0, 90)})`);
+        const skipped = { task: t.id, error: (error as Error).message };
+        skippedTasks.push(skipped);
+        console.error(`  ${repoId} ${t.id}: SKIPPED (${skipped.error.slice(0, 90)})`);
         fs.rmSync(snapDir, { recursive: true, force: true });
+        checkpoint({ task: t.id, timing: dTiming, skipped });
         continue;
       }
       const rankedAll = context.retrieval?.ranked ?? [];
@@ -351,8 +395,10 @@ async function run(): Promise<void> {
       packageFilesByTask.set(t.id, [
         ...new Set([...context.payload.matchAll(/^### FILE: (.+)$/gm)].map((m) => m[1]!)),
       ]);
-      occPackageStats.push({ tokens: context.estimatedTokens, files: context.filesIncluded });
-      timingMs.occMs += performance.now() - occStart;
+      const pkgStats = { tokens: context.estimatedTokens, files: context.filesIncluded };
+      occPackageStats.push(pkgStats);
+      dTiming.occMs = performance.now() - occStart;
+      timingMs.occMs += dTiming.occMs;
 
       const blStart = performance.now();
       const snapshot = readSnapshot(snapDir);
@@ -361,9 +407,21 @@ async function run(): Promise<void> {
       ranks
         .get("random")!
         .set(t.id, randomBaseline(snapshot, t.task, SEED).slice(0, RETRIEVE_LIMIT));
-      timingMs.baselinesMs += performance.now() - blStart;
+      dTiming.baselinesMs = performance.now() - blStart;
+      timingMs.baselinesMs += dTiming.baselinesMs;
 
       fs.rmSync(snapDir, { recursive: true, force: true });
+      checkpoint({
+        task: t.id,
+        ranks: Object.fromEntries(SYSTEMS.map((s) => [s, ranks.get(s)!.get(t.id) ?? []])) as Record<
+          SystemName,
+          RankedFile[]
+        >,
+        fullRanked: fullRankedByTask.get(t.id) ?? [],
+        packageFiles: packageFilesByTask.get(t.id) ?? [],
+        packageStats: pkgStats,
+        timing: dTiming,
+      });
       console.log(
         `  ${repoId} ${t.id}: rerank ${occRanking.length} files (snapshot had ${snapshot.size})`,
       );
@@ -562,6 +620,9 @@ async function run(): Promise<void> {
     best: sortedCases.slice(-5).map(toCase).reverse(),
   };
 
+  // Eval-run budget is consumed only by runs that COMPLETE (a crashed run
+  // measures nothing and must not burn one of the two allowed eval runs).
+  const evalRunIndex = split === "eval" ? nextEvalRunIndex() : null;
   const results: ResultsFile = {
     split,
     evalSplitRunsIncludingThis: evalRunIndex,
@@ -587,6 +648,7 @@ async function run(): Promise<void> {
 
   fs.mkdirSync(path.dirname(outJson), { recursive: true });
   fs.writeFileSync(outJson, `${JSON.stringify(results, null, 2)}\n`);
+  fs.rmSync(checkpointFile, { force: true }); // complete: a fresh run starts clean
   writeResultsMd(results, dataset, outMd);
   console.log(`results written: ${path.relative(ROOT, outJson)} + ${path.relative(ROOT, outMd)}`);
 }

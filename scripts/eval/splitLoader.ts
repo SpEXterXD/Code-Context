@@ -126,7 +126,7 @@ export function buildTuningDataset(repos: ReposFile, wanted: string[] | undefine
     }
     const built = buildDataset(
       repo.id,
-      mineCommits(clonePath),
+      mineCommits(clonePath, repo.pinnedCommit),
       repos.tuningTasksPerRepo ?? repos.tasksPerRepo,
       repos.seed,
       "tuning",

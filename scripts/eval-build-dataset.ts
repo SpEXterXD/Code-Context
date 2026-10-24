@@ -97,7 +97,7 @@ async function main(): Promise<void> {
     }
     const sourceFilesAtPin = countSourceFiles(clonePath, repo.pinnedCommit);
     console.log(`[${repo.id}] mining history (source files at pin: ${sourceFilesAtPin})…`);
-    const mined = mineCommits(clonePath);
+    const mined = mineCommits(clonePath, repo.pinnedCommit);
     const built = buildDataset(repo.id, mined, tasksPerRepo, config.seed);
     // Effective gold: parent-tree regular files only. Symlinks and gitlinks
     // are excluded from gold (and from every indexed snapshot) by git tree
