@@ -82,6 +82,15 @@ vi.mock("vscode", () => {
       get workspaceFolders() {
         return state.workspaceRoot ? [{ uri: fileUri(state.workspaceRoot) }] : undefined;
       },
+      getConfiguration: () => ({
+        get: (key: string) =>
+          (
+            ({ maxGraphDepth: 3, currentChangesMaxTokens: 1500, changeSeeds: false }) as Record<
+              string,
+              unknown
+            >
+          )[key],
+      }),
     },
     env: {
       clipboard: {

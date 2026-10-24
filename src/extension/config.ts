@@ -30,6 +30,33 @@ export function readConfig(): OccConfig {
   return config;
 }
 
+/** M4 seed-collection settings (seedProvider). Editor/diagnostic/stack
+ * seed sources are untuned and OFF by default (ADR-006). */
+export function readSeedSettings(): {
+  changeSeeds: boolean;
+  changeSeedsMaxPaths: number;
+  seedEditors: boolean;
+  seedDiagnostics: boolean;
+  seedStackTraces: boolean;
+} {
+  const cfg = vscode.workspace.getConfiguration("offlineCodeContext");
+  const bool = (key: string, fallback: boolean): boolean => {
+    const value = cfg.get<boolean>(key);
+    return typeof value === "boolean" ? value : fallback;
+  };
+  const int = (key: string, fallback: number): number => {
+    const value = cfg.get<number>(key);
+    return typeof value === "number" && Number.isFinite(value) ? Math.floor(value) : fallback;
+  };
+  return {
+    changeSeeds: bool("changeSeeds", true),
+    changeSeedsMaxPaths: int("changeSeedsMaxPaths", 20),
+    seedEditors: bool("seedEditors", false),
+    seedDiagnostics: bool("seedDiagnostics", false),
+    seedStackTraces: bool("seedStackTraces", false),
+  };
+}
+
 export function statusBarEnabled(): boolean {
   return vscode.workspace.getConfiguration("offlineCodeContext").get<boolean>("statusBar") ?? true;
 }

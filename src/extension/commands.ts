@@ -2,7 +2,8 @@ import * as vscode from "vscode";
 
 import { OccApplication } from "../application/contextService";
 import type { ContextBuildResult, ContextMode, ContextScope } from "../context/contextBuilder";
-import { readConfig } from "./config";
+import { readConfig, readSeedSettings } from "./config";
+import { collectChangeSeeds, seedFromClipboard } from "./seedProvider";
 import { ContextPreviewProvider } from "./previewProvider";
 import { OccError } from "../shared/errors";
 import { logger } from "../shared/logging";
@@ -50,7 +51,21 @@ export function registerCommands(
   ): Promise<ContextBuildResult | null> => {
     try {
       const result = await withProgress(`building ${label}`, async () => {
-        return app.buildContext(mode, request);
+        // M4 change-aware seeds: collected ahead of the build (trust-gated,
+        // fail-soft — a collection failure degrades to unseeded behavior).
+        const config = readConfig();
+        const seedSet = await collectChangeSeeds({
+          rootPath: app.rootPath,
+          trusted: vscode.workspace.isTrusted !== false,
+          config: {
+            ...readSeedSettings(),
+            maxFileSizeBytes: config.maxFileSizeBytes,
+          },
+          indexedPaths: () => [...app.indexing.getEntries().keys()],
+          readClipboard: async () => await vscode.env.clipboard.readText(),
+        });
+        for (const note of seedSet.notes) logger.info(`seeds: ${note}`);
+        return app.buildContext(mode, { ...request, seedSet });
       });
       last = { mode, result };
       if (!options.silent) {
@@ -399,6 +414,20 @@ export function registerCommands(
       if (confirm !== "Delete") return;
       await app.indexing.clearIndex();
       void vscode.window.showInformationMessage("OCC: local index cleared.");
+    }),
+
+    // M4: parse a stack trace from the clipboard into seed frames (resolved
+    // against the index; paths outside the workspace are ignored).
+    vscode.commands.registerCommand("offlineCodeContext.seedFromStackTrace", async () => {
+      const { count } = await seedFromClipboard({
+        readClipboard: async () => await vscode.env.clipboard.readText(),
+        indexedPaths: () => [...app.indexing.getEntries().keys()],
+      });
+      void vscode.window.showInformationMessage(
+        count > 0
+          ? `OCC: ${count} stack frame(s) captured as seeds for the next generated package.`
+          : "OCC: no resolvable stack frames found in the clipboard.",
+      );
     }),
   ];
 }

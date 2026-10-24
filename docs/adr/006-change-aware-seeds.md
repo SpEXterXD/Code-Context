@@ -28,9 +28,20 @@ flags, async, timeout):
   repo-configurable ARBITRARY COMMAND EXECUTION, exactly like fsmonitor.
   `npm run eval:seed-hazard-repro` reproduces this for `diff.external`,
   a textconv driver, and a clean/smudge filter, each run raw and through
-  safeGit, for both `status` and `diff`; anything that still executes
-  through safeGit would be documented here and relied on the trust gate
-  (with a test that untrusted workspaces never reach the collector).
+  safeGit, for both `status` and `diff`. MEASURED (git 2.53, 2026-10-25):
+  raw `status` executes the CLEAN filter (index refresh) but safeGit's
+  `GIT_OPTIONAL_LOCKS=0` prevents it; a PLAIN `diff` executes the external
+  driver, the textconv filter AND the clean filter — raw AND through
+  safeGit's global flags, which do not cover diff drivers — while the
+  collector's exact form (`diff --no-ext-diff --no-textconv`) still runs
+  the CLEAN filter (there is no git flag to disable filters on diff).
+  Therefore: diff content collection can never be made hazard-free by
+  flags alone; it is protected by (1) the collector always passing
+  `--no-ext-diff --no-textconv` (kills the two RCE-prone drivers), and
+  (2) the workspace-trust gate — in untrusted workspaces the collector is
+  never invoked (tested in seedProvider.test.ts). A plumbing-based
+  self-computed diff (cat-file vs disk, no filters) is the future
+  hardening if this is ever revisited.
 
 Handling rules: untracked files are path-only seeds by default; their
 add-diff is rendered under the size cap only when the file is small enough
