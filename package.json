@@ -32,8 +32,8 @@
   ],
   "capabilities": {
     "untrustedWorkspaces": {
-      "supported": true,
-      "description": "OCC only reads workspace files into a local index and copies context to the clipboard; it never writes workspace files or executes workspace content, so it works in restricted mode."
+      "supported": "limited",
+      "description": "OCC only reads workspace files into a local index and copies context to the clipboard; it never writes workspace files or executes workspace content. In untrusted workspaces the optional git-recency metadata is disabled (repo-controlled git configuration is not exercised there); indexing and context generation are fully functional."
     },
     "virtualWorkspaces": {
       "supported": false,

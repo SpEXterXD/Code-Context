@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { RelationshipGraph, traverse } from "./graph";
 import type { FileEntry } from "./model";
 import { sha256Hex } from "../shared/ids";
+import { mulberry32 } from "../testing/prng";
 
 /** Minimal entry factory: file with importsEdges already encoded as internalRelations. */
 function entry(
@@ -115,5 +116,78 @@ describe("traverse (hard depth limit)", () => {
     graph.upsertEntry(entry("b.ts", []));
     const result = traverse(graph, ["file:a.ts"], 3, (e) => e.kind !== "imports");
     expect(result.nodes).toEqual(["file:a.ts"]);
+  });
+
+  it("M3-hardening: incremental externalPackages equals a full derivation under fuzzed ops", () => {
+    // Public-API oracle: exactly what the old O(N) full derivation computed —
+    // external targets of edges whose SOURCE is a file node.
+    const oracle = (graph: RelationshipGraph): string[] => {
+      const set = new Set<string>();
+      for (const node of graph.nodes()) {
+        if (!node.startsWith("file:")) continue;
+        for (const e of graph.edgesFrom(node)) {
+          if (e.target.startsWith("external:")) set.add(e.target.slice("external:".length));
+        }
+      }
+      return [...set].sort();
+    };
+
+    const prng = mulberry32(20261025);
+    const files = Array.from({ length: 12 }, (_, i) => `src/m${i}.ts`);
+    const externals = Array.from({ length: 6 }, (_, i) => `pkg${i}`);
+    const buildEntry = (path: string): FileEntry => {
+      // 0-2 external imports, possibly shared between files, so removals do
+      // not always empty an external node's incoming list.
+      const rels: FileEntry["internalRelations"] = [];
+      const count = Math.floor(prng() * 3);
+      for (let i = 0; i < count; i++) {
+        const pkg = externals[Math.floor(prng() * externals.length)]!;
+        rels.push({
+          source: `file:${path}`,
+          target: `external:${pkg}`,
+          kind: prng() < 0.5 ? "imports" : "references",
+          provenance: "STATIC_EXACT",
+        });
+      }
+      if (prng() < 0.3) {
+        const other = files[Math.floor(prng() * files.length)]!;
+        rels.push(importsEdge(path, other));
+      }
+      return entry(path, rels);
+    };
+
+    const graph = new RelationshipGraph();
+    const live = new Set<string>();
+    for (let step = 0; step < 400; step++) {
+      const path = files[Math.floor(prng() * files.length)]!;
+      if (live.has(path) && prng() < 0.35) {
+        graph.removeFile(path);
+        live.delete(path);
+      } else {
+        graph.upsertEntry(buildEntry(path));
+        live.add(path);
+      }
+      expect(graph.allExternalPackages()).toEqual(oracle(graph));
+    }
+    // And a from-scratch rebuild in one pass matches the fuzzed end state.
+    const fresh = new RelationshipGraph();
+    for (const path of [...live].sort()) fresh.upsertEntry(buildEntryFresh(path));
+    function buildEntryFresh(p: string): FileEntry {
+      const rels: FileEntry["internalRelations"] = [];
+      const count = Math.floor(prng() * 3);
+      for (let i = 0; i < count; i++) {
+        const pkg = externals[Math.floor(prng() * externals.length)]!;
+        rels.push({
+          source: `file:${p}`,
+          target: `external:${pkg}`,
+          kind: "imports",
+          provenance: "STATIC_EXACT",
+        });
+      }
+      return entry(p, rels);
+    }
+    // (The rebuild uses fresh random relations, so only the mechanism is
+    // exercised again; the oracle invariant is the assertion.)
+    expect(fresh.allExternalPackages()).toEqual(oracle(fresh));
   });
 });

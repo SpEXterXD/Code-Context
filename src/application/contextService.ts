@@ -48,6 +48,14 @@ export class OccApplication {
   private readonly git = new GitMetadata();
   private builder: ContextBuilder | null = null;
   private builderDirty = true;
+  /**
+   * Extension-layer trust veto (M3-hardening): git features stay off in
+   * untrusted workspaces because repo-controlled git configuration can be
+   * hostile. The domain layer never imports vscode; the extension sets
+   * this from workspace trust. Defaults to allowed so headless/eval use
+   * (and pre-trust-availability tests) behave as before.
+   */
+  private gitRecencyAllowed = true;
 
   constructor(
     readonly rootPath: string,
@@ -76,6 +84,27 @@ export class OccApplication {
     });
   }
 
+  /**
+   * Extension-layer trust gate for git features. When disallowed, the
+   * recency bonus is disabled and no git process is ever spawned. Flipping
+   * it invalidates the cached builder so the next package reflects it.
+   */
+  setGitRecencyAllowed(allowed: boolean): void {
+    if (this.gitRecencyAllowed === allowed) return;
+    this.gitRecencyAllowed = allowed;
+    this.builderDirty = true;
+  }
+
+  /**
+   * Asynchronously prefetches git recency data (never blocks; fail-soft).
+   * The extension layer calls this on activation, on trust grant, and after
+   * indexing — retrieval only ever reads the cache.
+   */
+  refreshGitRecency(): Promise<void> {
+    if (!this.config.enableGitRecency || !this.gitRecencyAllowed) return Promise.resolve();
+    return this.git.refreshRecencyOrder(this.rootPath);
+  }
+
   /** Loads persisted index state; call once at startup. */
   initialize(): void {
     this.indexing.initialize();
@@ -95,7 +124,7 @@ export class OccApplication {
           secretPolicy: this.config.secretPolicy,
           redactSecrets: this.config.redactSecrets,
         },
-        enableGitRecency: this.config.enableGitRecency,
+        enableGitRecency: this.config.enableGitRecency && this.gitRecencyAllowed,
         readFile: (p: string) => fs.readFileSync(path.join(this.rootPath, p), "utf8"),
       });
       this.builderDirty = false;

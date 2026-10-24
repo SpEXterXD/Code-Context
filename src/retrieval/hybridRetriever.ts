@@ -380,9 +380,9 @@ export class HybridRetriever {
   }
 
   private recencyOrder(): string[] {
-    if (this.recencyCache === null) {
-      this.recencyCache = this.git.recencyOrder(this.rootPath);
-    }
+    // Cache-only, never spawns: the order is refreshed asynchronously (and
+    // trust-gated) by the extension layer via GitMetadata.refreshRecencyOrder.
+    this.recencyCache = this.git.recencyOrderSync(this.rootPath);
     return this.recencyCache;
   }
 }

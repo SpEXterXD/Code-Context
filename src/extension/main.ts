@@ -26,6 +26,36 @@ export function activate(context: vscode.ExtensionContext): void {
   app = new OccApplication(root, storeRoot, config);
   app.initialize();
 
+  // ---- git trust gate (see docs/SECURITY.md) ----
+  // Repo-controlled git configuration (core.fsmonitor, hooks, ext:: transport)
+  // is only safe to exercise where VS Code trusts the workspace. Git features
+  // (currently: the optional recency bonus) are skipped entirely in
+  // untrusted workspaces, with a visible status note until trust is granted.
+  // `!== false` keeps headless/mock environments (no trust API) permissive.
+  const gitTrusted = vscode.workspace.isTrusted !== false;
+  app.setGitRecencyAllowed(gitTrusted);
+  if (gitTrusted) void app.refreshGitRecency();
+  let trustNote: vscode.StatusBarItem | null = null;
+  const showTrustNote = (): void => {
+    if (trustNote || !config.enableGitRecency) return;
+    trustNote = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 99);
+    trustNote.text = "$(shield) OCC: git metadata off (untrusted workspace)";
+    trustNote.tooltip =
+      "Git-based recency metadata is disabled because this workspace is not trusted. It enables automatically when you trust the workspace.";
+    trustNote.show();
+  };
+  if (config.enableGitRecency && !gitTrusted) showTrustNote();
+  if (typeof vscode.workspace.onDidGrantWorkspaceTrust === "function") {
+    context.subscriptions.push(
+      vscode.workspace.onDidGrantWorkspaceTrust(() => {
+        app?.setGitRecencyAllowed(true);
+        void app?.refreshGitRecency();
+        trustNote?.dispose();
+        trustNote = null;
+      }),
+    );
+  }
+
   // ---- UI wiring ----
   const statusView = new IndexStatusView();
   const tree = vscode.window.createTreeView("offlineCodeContext.indexStatus", {

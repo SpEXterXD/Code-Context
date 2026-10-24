@@ -13,7 +13,7 @@ Honest, current as of v0.3.0.
   incomplete graphs.
 - **Call graph is name-based within resolved scopes**: a call resolves
   STATIC_EXACT when the callee is a local symbol or a verified import;
-  otherwise a *unique* global exported-name match is STATIC_HEURISTIC;
+  otherwise a _unique_ global exported-name match is STATIC_HEURISTIC;
   anything else is unmodeled. Overloads, `apply/call`, and duck typing are
   not tracked.
 - **Test relationships are a naming-convention heuristic**
@@ -36,6 +36,14 @@ Honest, current as of v0.3.0.
 - **Prefix matching** (≥4 chars) can surface files sharing a prefix with a
   query term (e.g. "user" ~ "username"); the coordination factor and idf
   scaling mitigate but do not eliminate this.
+- **Git recency is prefetch-only** (M3 hardening): the order is refreshed
+  asynchronously ahead of retrieval; a package built before the prefetch
+  completes (or in an untrusted workspace, where git is never spawned) is
+  ranked without recency. Recency remains off by default.
+- **Startup load is linear but read-bound**: ≈5.5 s for a 5,000-entry store
+  on the reference Windows machine (one JSON file per entry; per-file open
+  overhead dominates). Shard batching is designed, not implemented (ADR-005
+  draft).
 
 ## Context output
 
@@ -66,6 +74,6 @@ Honest, current as of v0.3.0.
 
 ## Explicitly out of scope (v1)
 
-- Reading file *contents* into the index (only hashes/paths/symbols are
+- Reading file _contents_ into the index (only hashes/paths/symbols are
   persisted), multi-root workspaces, remote/WSRP workspaces, and any form of
   network/telemetry.

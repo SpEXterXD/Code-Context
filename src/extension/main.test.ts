@@ -35,6 +35,9 @@ const state = vi.hoisted(() => ({
   cancelled: false,
   executed: [] as string[],
   configOverrides: {} as Record<string, unknown>,
+  workspaceTrusted: true,
+  trustListeners: [] as Array<() => void>,
+  statusItems: [] as Array<{ text: string; disposed: boolean }>,
 }));
 
 function fileUri(p: string): { scheme: string; path: string; fsPath: string } {
@@ -134,14 +137,21 @@ vi.mock("vscode", () => {
       }) => {
         state.shownTextDocuments.push(doc.fileName ?? doc.fsPath ?? doc.uri?.fsPath ?? "(doc)");
       },
-      createStatusBarItem: () => ({
-        text: "",
-        tooltip: "",
-        command: "",
-        show: () => state.statusShown++,
-        hide: () => state.statusHidden++,
-        dispose: () => undefined,
-      }),
+      createStatusBarItem: () => {
+        const item = {
+          text: "",
+          tooltip: "",
+          command: "",
+          disposed: false,
+          show: () => state.statusShown++,
+          hide: () => state.statusHidden++,
+          dispose: () => {
+            item.disposed = true;
+          },
+        };
+        state.statusItems.push(item);
+        return item;
+      },
       createTreeView: (id: string) => {
         state.treeViews.push(id);
         return { dispose() {} };
@@ -186,6 +196,13 @@ vi.mock("vscode", () => {
         cb: (e: { affectsConfiguration: (key: string) => boolean }) => void,
       ) => {
         state.configChangeListeners.push(cb);
+        return { dispose() {} };
+      },
+      get isTrusted() {
+        return state.workspaceTrusted;
+      },
+      onDidGrantWorkspaceTrust: (cb: () => void) => {
+        state.trustListeners.push(cb);
         return { dispose() {} };
       },
     },
@@ -281,6 +298,9 @@ beforeEach(async () => {
   state.configChangeListeners = [];
   state.outputLines = [];
   state.executed = [];
+  state.statusItems = [];
+  state.trustListeners = [];
+  state.workspaceTrusted = true;
   state.configOverrides = {};
   state.cancelled = false;
 
@@ -750,5 +770,67 @@ describe("activation audit (real activate(), mocked vscode)", () => {
     expect(indexRes.status).toBe("fulfilled");
     expect(taskRes.status).toBe("fulfilled");
     expect(countStoreEntries(storageDir)).toBe(6);
+  });
+
+  it("M3-hardening: untrusted workspace shows the git-off note, trust grant re-enables", async () => {
+    // This suite's beforeEach activated with the default (trusted) mock;
+    // simulate the untrusted path with a dedicated activation.
+    const rmWithRetry = (p: string): void => {
+      for (let attempt = 0; attempt < 5; attempt++) {
+        try {
+          fs.rmSync(p, { recursive: true, force: true });
+          return;
+        } catch {
+          // Windows can EPERM briefly on freshly-written dirs (AV/handle
+          // races); wait and retry, same pattern as indexStore rename waits.
+          Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 250);
+        }
+      }
+    };
+    state.root = null;
+    rmWithRetry(root);
+    rmWithRetry(storageDir);
+    state.workspaceTrusted = false;
+    state.configOverrides.enableGitRecency = true;
+    state.statusItems.length = 0;
+    state.trustListeners.length = 0;
+    root = fs.mkdtempSync(path.join(os.tmpdir(), "occ-activate-"));
+    for (const [rel, content] of Object.entries(WORKSPACE)) {
+      fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
+      fs.writeFileSync(path.join(root, rel), content);
+    }
+    state.root = root;
+    storageDir = path.join(path.dirname(root), path.basename(root) + "-storage");
+    const context = {
+      subscriptions: [] as Array<{ dispose(): void }>,
+      storageUri: fileUri(storageDir),
+      globalStorageUri: fileUri(path.join(storageDir, "global")),
+      asAbsolutePath: (p: string) => p,
+    };
+    activate(context as never);
+
+    // Visible status note while untrusted; the app was constructed with the
+    // recency veto on (observable: no git note disappears, veto is internal).
+    const note = state.statusItems.find((i) => i.text.includes("untrusted workspace"));
+    expect(note).toBeDefined();
+    expect(note!.disposed).toBe(false);
+    expect(state.trustListeners.length).toBe(1);
+
+    // Trust granted: note is disposed; the veto lifts (subsequent packages
+    // may use recency) — behavioral observable is the disposed note.
+    state.trustListeners[0]!();
+    expect(note!.disposed).toBe(true);
+
+    state.configOverrides = {};
+    state.workspaceTrusted = true;
+    // Self-cleanup so afterEach's removal sees only an already-gone path.
+    rmWithRetry(root);
+    rmWithRetry(storageDir);
+    state.root = null;
+  });
+
+  it("M3-hardening: trusted workspaces show no git-off note by default", () => {
+    const note = state.statusItems.find((i) => i.text.includes("untrusted workspace"));
+    expect(note).toBeUndefined(); // enableGitRecency defaults off, workspace trusted
   });
 });
