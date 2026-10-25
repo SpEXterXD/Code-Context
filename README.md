@@ -1,4 +1,4 @@
-# Offline Code Context Compiler (OCC)
+# Offline Code Context Compiler (OCC) <!-- doc-style-ignore -->
 
 Compiles repository source code and structural metadata into token-budgeted context packages for LLMs, entirely on your machine.
 
@@ -8,7 +8,7 @@ Compiles repository source code and structural metadata into token-budgeted cont
 
 OCC runs locally inside VS Code. It indexes repository files, extracts declared symbols and dependency edges, ranks files relevant to a development task, redacts detected secrets, and copies a formatted plain-text package to your clipboard for pasting into chat models.
 
-## Problem and Overview
+## Problem and overview
 
 Developers working with external chat interfaces or API models face three manual hurdles:
 1. Manual File Selection: Identifying relevant files, imports, and interface definitions across multi-module projects requires tedious file-tree navigation and manual copying.
@@ -17,7 +17,7 @@ Developers working with external chat interfaces or API models face three manual
 
 OCC automates context selection using local static analysis. It parses workspace source files into an AST relationship graph, retrieves relevant implementation and dependency files within hard token limits, runs heuristic secret detection with automatic redaction, and produces an explainable, deterministic context package.
 
-## What a Context Package Contains
+## What a context package contains
 
 The compiled context package conforms to Wire Format v1 (`CONTEXT_VERSION: 1`) and contains eight structured sections:
 - Header: Workspace name, twelve-character index state digest, included file count, and token estimate.
@@ -30,25 +30,25 @@ The compiled context package conforms to Wire Format v1 (`CONTEXT_VERSION: 1`) a
 - `## SOURCE`: Source code blocks enclosed in dynamic Markdown fences with original line numbers, isolated below an inert data banner.
 - `## CONTEXT METADATA`: Final token estimates, security findings count, truncation log, and budget parameters.
 
-## When OCC Fits and When It Does Not
+## When OCC fits and when it does not
 
-### Where OCC Fits
+### Where OCC fits
 - Preparing bounded context packages for pasting into external LLM chat interfaces (such as Claude, ChatGPT, or local models).
 - Projects requiring strict offline operation where code cannot be sent to third-party indexing servers.
 - Workspaces where deterministic, explainable context selection is preferred over opaque embeddings.
 
-### Where OCC Does Not Fit
+### Where OCC does not fit
 - Autonomous Agents: OCC does not edit repository files, execute shell commands, or run automated test loops.
 - Semantic Vector Search: OCC does not generate vector embeddings or neural semantic search. Ranking is strictly lexical and structural.
 - Non-TS/JS Codebases: Full AST parsing and call-graph derivation are provided for TypeScript and JavaScript only (with structural parsing for JSON and Markdown). All other file types receive metadata-only indexing.
 
-## Requirements and Installation
+## Requirements and installation
 
 ### Requirements
 - VS Code version 1.85.0 or later.
 - Local filesystem access (virtual file systems are unsupported).
 
-### Installation from GitHub Release
+### Installation from GitHub release
 The extension is distributed as a `.vsix` package:
 1. Download `offline-code-context-compiler-0.3.1.vsix` from [GitHub Releases](https://github.com/SpEXterXD/Code-Context/releases).
 2. Install via command line:
@@ -59,7 +59,7 @@ The extension is distributed as a `.vsix` package:
 
 Note: Direct installation from the Visual Studio Marketplace will be available after publisher account registration.
 
-## Quick Start
+## Quick start
 
 1. Open a workspace folder in VS Code. Background indexing begins automatically. The status bar displays `OCC: <n> files` when complete.
 2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and run `OCC: Generate Task Context`.
@@ -71,7 +71,7 @@ Additional Context Entry Points:
 - Right-click an Explorer folder: `OCC: Generate Project Context` or `OCC: Copy Project Context to Clipboard`.
 - Right-click an editor tab or file: `OCC: Generate File Context` or `OCC: Copy File Context to Clipboard`.
 
-## Output Example
+### Output example
 
 Excerpt generated on `demo-project` for task "Add rate limiting to the login endpoint" (full package in [docs/examples/demo-task-context.txt](docs/examples/demo-task-context.txt)):
 
@@ -104,13 +104,13 @@ Add rate limiting to the login endpoint
 ```
 1: /** Rate limit configuration. */
 2: export interface RateLimitConfig {
-3: maxRequests: number;
-4: windowSeconds: number;
+3:   maxRequests: number;
+4:   windowSeconds: number;
 5: }
 6: 
 7: export const defaultRateLimitConfig: RateLimitConfig = {
-8: maxRequests: 100,
-9: windowSeconds: 60,
+8:   maxRequests: 100,
+9:   windowSeconds: 60,
 10: };
 ```
 
@@ -124,11 +124,11 @@ Truncation: none
 Budgets: maxFiles=40, maxChars=120000, maxLines=3000, maxTokens=30000 (token counts are estimates)
 ```
 
-## How Files Are Chosen
+## How files are chosen
 
 Candidate files are scored using a deterministic hybrid ranking pipeline. Lexical matching scores query terms across indexed fields (symbol names, file paths, imports, docblock summaries, code identifiers, and code body tokens with BM25F length normalization). Content-score fusion multiplies lexical matches by 2.0 to ensure text-relevant files outrank peripheral graph neighbors. Relationship graph traversal adds bounded structural bonuses for direct dependencies (0.6), direct dependents (0.5), callers (0.5), and companion test files (0.7), capped at 1.0 per file. Candidates are sorted descending by score, and the packer fills context budgets in rank-priority order using a four-step degradation ladder (full file, symbol blocks, declarations, metadata only).
 
-## Privacy and Security Summary
+## Privacy and security summary
 
 - Local Execution: All indexing, parsing, and formatting run locally on the CPU. The extension imports no network modules and transmits zero telemetry.
 - Secret Scanning: Candidate files are scanned against pattern families (AWS keys, GitHub tokens, Slack tokens, Stripe keys, private keys, JWTs) and Shannon entropy heuristics.
@@ -137,7 +137,7 @@ Candidate files are scored using a deterministic hybrid ranking pipeline. Lexica
 - Workspace Trust: In untrusted workspaces, git subprocesses are completely disabled. Indexing and packaging continue safely without git metadata.
 - Index Storage: Index metadata is stored locally under VS Code workspace storage (`context.storageUri`). File content is not persisted in the store. Before token extraction, secret spans are blanked with whitespace. Versions up to 0.3.1 persisted secret-like tokens in local index shards; schema version 3 clears older stores on first run. Details: [docs/SECURITY.md](docs/SECURITY.md).
 
-## Measured Context Quality
+## Measured context quality
 
 Retrieval quality is evaluated using commit-mined benchmarks (task = commit message, gold = modified files) across 300 held-out tasks from five open-source repositories (`hono`, `zod`, `undici`, `axios`, `fastify`). Metrics are reported with paired bootstrap 95% confidence intervals comparing OCC against an Okapi BM25 baseline over raw file contents (source: `docs/eval/results-holdout.json`, commit `c0df0ba79d24`):
 
@@ -150,9 +150,9 @@ Retrieval quality is evaluated using commit-mined benchmarks (task = commit mess
 | MRR | 0.483 [0.437, 0.530] | 0.345 [0.308, 0.383] | +0.138 [0.086, 0.189] (significant advantage) |
 | Package Recall | 0.458 [0.414, 0.501] | 0.412 [0.367, 0.458] | +0.046 [-0.004, 0.100] (statistical parity) |
 
-Context: In earlier milestone evaluations (M3), OCC was significantly behind BM25 on package recall (-0.102 deficit). Implementing rank-priority packaging in milestone M3b closed this deficit, bringing package recall to statistical parity with BM25 (+0.046 with 95% confidence interval spanning zero). Complete methodology and slice breakdowns are documented in [docs/EVALUATION.md](docs/EVALUATION.md).
+Context: In earlier milestone evaluations (M3), OCC was significantly behind BM25 on package recall (-0.102 deficit). Implementing rank-priority packaging in milestone M3b closed this deficit, bringing package recall to statistical parity with BM25 (+0.046 with 95% confidence interval spanning zero). Package recall on the tuning split compares a 14.5-file OCC package with a baseline scored at 8 files, so it is not size-matched; only the holdout comparison is size-matched (7.9 files versus Recall@8). Complete methodology and slice breakdowns are documented in [docs/EVALUATION.md](docs/EVALUATION.md).
 
-## Known Limitations
+## Known limitations
 
 - Language Parsing: Deep AST analysis and relationship extraction are supported for TypeScript, JavaScript, JSON, and Markdown. Other languages receive metadata-only indexing.
 - Semantic Retrieval: Ranking is lexical and structural; vector embeddings are not used.
@@ -160,7 +160,7 @@ Context: In earlier milestone evaluations (M3), OCC was significantly behind BM2
 - Single-Root Only: Single-root workspaces are supported; multi-root workspaces index the primary root only.
 - Full details: [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
 
-## Configuration Reference
+## Configuration reference
 
 Settings are configured under the `offlineCodeContext.*` namespace:
 
@@ -180,7 +180,7 @@ Settings are configured under the `offlineCodeContext.*` namespace:
 
 Complete reference for all 20 settings: [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 
-## Documentation Index
+## Documentation index
 
 - [User Guide](docs/USER_GUIDE.md): Detailed workflows, preview inspection, and context modes.
 - [Configuration Reference](docs/CONFIGURATION.md): Complete guide to all 20 settings.
@@ -191,6 +191,7 @@ Complete reference for all 20 settings: [docs/CONFIGURATION.md](docs/CONFIGURATI
 - [Security Model](docs/SECURITY.md): Threat matrix, secret detection, and git hardening.
 - [Evaluation Methodology](docs/EVALUATION.md): Commit-mined benchmarks, metrics, and results.
 - [Developer Guide](docs/DEVELOPMENT.md): Setup, scripts, quality gates, and contribution checklists.
+- [Documentation Style Guide](docs/STYLE_GUIDE.md): Writing rules, vocabulary constraints, and style checks.
 - [Testing Guide](docs/TESTING.md): Suite matrix (27 suites, 292 tests) and property-based testing.
 - [Troubleshooting](docs/TROUBLESHOOTING.md): Error codes and diagnostic workflows.
 - [Limitations](docs/LIMITATIONS.md): Technical boundaries and platform constraints.
@@ -203,7 +204,7 @@ Complete reference for all 20 settings: [docs/CONFIGURATION.md](docs/CONFIGURATI
 
 Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and the [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) guide before opening pull requests.
 
-## Security Reporting
+## Security reporting
 
 To report a vulnerability in this extension, use GitHub Private Vulnerability Reporting:
 1. Navigate to `https://github.com/SpEXterXD/Code-Context/security/advisories`.
