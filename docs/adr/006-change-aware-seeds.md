@@ -156,7 +156,7 @@ diagnostic, stackFrame }`), disabled entirely by an `--ablate seeds`
   roadmap item (task repetition, OMITTED BUT RELEVANT, repo conventions,
   symbol-level slicing). Consumers that do not know the section simply see
   one more inert section; the fence-safety fix applies to every diff block.
-  Section order: after `## DEVELOPER TASK`, before `## PROJECT STRUCTURE` , 
+  Section order: after `## DEVELOPER TASK`, before `## PROJECT STRUCTURE`,
   the user's working state is the second-most-important context after the
   task.
 - Determinism: same repo state + same `SeedSet` ⇒ byte-identical payload
@@ -173,7 +173,7 @@ failure is the existing budget-unreachable error, unchanged.
 
 ## Evaluation design (simulation; stated limits first)
 
-**What this CANNOT show:** real editor, selection, or diagnostics seeds , 
+**What this CANNOT show:** real editor, selection, or diagnostics seeds,
 commit-message tasks carry no working-tree state. Those get unit tests,
 an integration test with a temp git repo, and a manual test checklist.
 **What the simulation CAN show:** whether OCC propagates from partial
@@ -337,7 +337,7 @@ named constant `neighborBoost`) were run on the full tuning split
 
 | Arm                                    | Hidden-gold package recall | dPkg vs unseeded                | Top-1 |
 | -------------------------------------- | -------------------------- | ------------------------------- | ----- |
-| unseeded                               | 0.597                      | - | 0.325 |
+| unseeded                               | 0.597                      | -                               | 0.325 |
 | seeded (M4 slots policy)               | 0.564                      | −0.033 [−0.053, −0.015]\*       | 0.325 |
 | **S1 signal-only**                     | 0.612                      | **+0.015 [−0.007, 0.040]** n.s. | 0.325 |
 | **S2 signal-only + neighborBoost 0.4** | 0.616                      | **+0.019 [−0.012, 0.048]** n.s. | 0.346 |

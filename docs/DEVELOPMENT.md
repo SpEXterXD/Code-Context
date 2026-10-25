@@ -81,10 +81,10 @@ The test suite contains 27 test files covering 292 tests across four testing cat
 2. Integration Tests: Validate end-to-end context generation (`contextService.test.ts`), index store crash recovery and reconciliation (`indexStore.test.ts`), and git execution hardening (`safeGit.test.ts`).
 3. Property-Based Tests: Seeded PRNG stress tests (`src/property/invariants.test.ts`) that execute randomized sequences of file creations, modifications, deletions, and renames to verify index consistency.
 4. Contract and Sync Verification:
-   - `scripts/check-docs-sync.ts`: Asserts that test counts published in `docs/TESTING.md` and `README.md` match the Vitest JSON reporter output.
-   - `scripts/check-doc-links.ts`: Verifies that every Markdown link and anchor resolves to an existing file or heading.
-   - `scripts/check-reference-docs.ts`: Confirms that all 20 settings and 16 commands in `package.json` are documented with matching defaults in `docs/CONFIGURATION.md` and `docs/COMMANDS.md`.
-   - `scripts/check-doc-style.ts`: Enforces strict documentation voice guidelines.
+ - `scripts/check-docs-sync.ts`: Asserts that test counts published in `docs/TESTING.md` and `README.md` match the Vitest JSON reporter output.
+ - `scripts/check-doc-links.ts`: Verifies that every Markdown link and anchor resolves to an existing file or heading.
+ - `scripts/check-reference-docs.ts`: Confirms that all 20 settings and 16 commands in `package.json` are documented with matching defaults in `docs/CONFIGURATION.md` and `docs/COMMANDS.md`.
+ - `scripts/check-doc-style.ts`: Enforces strict documentation voice guidelines.
 
 ### Runtime-Assembled Secret Fixtures
 To prevent committed test files from containing literal credentials that trigger repository secret scanners, all secret fixtures in tests are assembled at runtime from string fragments.
@@ -124,10 +124,10 @@ CI runs on GitHub Actions across Ubuntu, macOS, and Windows runners (`.github/wo
 1. Layer Boundaries: Layers below `src/extension/` must never import `vscode`. Domain logic runs in headless Node.
 2. Zero Network I/O: No networking modules (`http`, `https`, `net`, `dns`) may be imported in `src/`.
 3. Determinism:
-   - Output must be a pure function of repository state, configuration, and user task text.
-   - No wall-clock timestamps or pseudo-random values may appear in output text.
-   - All directory traversals, candidate sets, and postings maps must be sorted stably before consumption.
-   - Use POSIX forward slashes for internal paths across all operating systems.
+ - Output must be a pure function of repository state, configuration, and user task text.
+ - No wall-clock timestamps or pseudo-random values may appear in output text.
+ - All directory traversals, candidate sets, and postings maps must be sorted stably before consumption.
+ - Use POSIX forward slashes for internal paths across all operating systems.
 4. TypeScript Strict Mode: Strict type checking is enforced. The `any` type is prohibited by ESLint.
 
 ## Commit Message Conventions

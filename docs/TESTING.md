@@ -85,14 +85,14 @@ What it validates:
 2. Creates an isolated temporary environment with fresh `user-data-dir` and `extensions-dir`.
 3. Installs only the specified `.vsix` into the clean environment (never `--disable-extensions`).
 4. Launches VS Code opening `demo-project/` and asserts:
-   - Extension `offline-code-context.offline-code-context-compiler` is found and actively running.
-   - All 16 commands declared under `contributes.commands` in `package.json` are registered with the extension host.
-   - Shipped configuration defaults match `package.json` (`changeSeeds: false`, `maxFiles: 40`, and full property schema).
-   - `offlineCodeContext.indexWorkspace` executes without errors.
-   - Index status reports indexed files (> 0) verified via storage `manifest.json`.
+ - Extension `offline-code-context.offline-code-context-compiler` is found and actively running.
+ - All 16 commands declared under `contributes.commands` in `package.json` are registered with the extension host.
+ - Shipped configuration defaults match `package.json` (`changeSeeds: false`, `maxFiles: 40`, and full property schema).
+ - `offlineCodeContext.indexWorkspace` executes without errors.
+ - Index status reports indexed files (> 0) verified via storage `manifest.json`.
 5. Cleans up all temporary directories and exits non-zero on any failure.
 
 ## Not automated here
 
 - Real OS clipboard and real git are mocked by design
-  (`ClipboardExporter`, `GitMetadata`).
+ (`ClipboardExporter`, `GitMetadata`).

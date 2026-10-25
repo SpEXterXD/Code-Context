@@ -28,13 +28,13 @@ OCC errors carry a programmatic `code` property (`src/shared/errors.ts`):
 ### 2. An Expected File Is Missing from the Generated Package
 - Symptom: A relevant file does not appear in the `## SOURCE` section of the context package.
 - Step-by-Step Diagnostic:
-  1. Inspect `## WHY THESE FILES WERE SELECTED`: Look for the file heading. If it appears with `[source not included]`, read the note:
-     - `Note: excluded by security policy (block)`: The file contains a secret-like token and `secretPolicy` is set to `block`.
-     - `Note: excluded by token budget`: Higher-ranked files exhausted `maxTokens` or `maxFiles`.
-  2. Inspect `## CONTEXT METADATA`: Check the `Truncation:` line. If the file is listed under degraded files, it was truncated along the ladder (full file, symbol blocks, declarations, metadata only).
-  3. Check Exclusion Settings: Verify whether the file path matches patterns in `offlineCodeContext.excludePatterns` or `.gitignore`.
-  4. Check File Size Limit: Files exceeding `offlineCodeContext.maxFileSizeBytes` (default 1 MiB) are skipped during indexing and recorded as `SKIPPED_TOO_LARGE`.
-  5. Check File Type: Non-text binary files are detected via NUL bytes and recorded as `SKIPPED_BINARY`.
+ 1. Inspect `## WHY THESE FILES WERE SELECTED`: Look for the file heading. If it appears with `[source not included]`, read the note:
+ - `Note: excluded by security policy (block)`: The file contains a secret-like token and `secretPolicy` is set to `block`.
+ - `Note: excluded by token budget`: Higher-ranked files exhausted `maxTokens` or `maxFiles`.
+ 2. Inspect `## CONTEXT METADATA`: Check the `Truncation:` line. If the file is listed under degraded files, it was truncated along the ladder (full file, symbol blocks, declarations, metadata only).
+ 3. Check Exclusion Settings: Verify whether the file path matches patterns in `offlineCodeContext.excludePatterns` or `.gitignore`.
+ 4. Check File Size Limit: Files exceeding `offlineCodeContext.maxFileSizeBytes` (default 1 MiB) are skipped during indexing and recorded as `SKIPPED_TOO_LARGE`.
+ 5. Check File Type: Non-text binary files are detected via NUL bytes and recorded as `SKIPPED_BINARY`.
 
 ### 3. Slow Initial Indexing
 - Symptom: First-time indexing of a large repository takes several seconds.

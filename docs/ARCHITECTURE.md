@@ -34,16 +34,16 @@ graph TD
 1. `src/extension/`: The only layer permitted to import the `vscode` module. Manages command registration, status bar updates, preview webviews/editors, and configuration event listeners.
 2. `src/application/`: Orchestration services (`OccApplication`, `IndexingService`, `ContextService`). Coordinates scanning, indexing, retrieval, and packaging. Does not import `vscode`.
 3. Domain Engines:
-   - `src/workspace/`: Directory traversal, file filtering, binary detection, and ignore rule evaluation.
-   - `src/parser/`: AST parsing for TypeScript, JavaScript, JSON, and Markdown.
-   - `src/analysis/`: Module resolution and dependency graph edge derivation.
-   - `src/index/`: Sharded disk persistence and cache reconciliation.
-   - `src/retrieval/`: Inverted lexical index, BM25 scoring, and structural graph traversal.
-   - `src/context/`: Budget packing, truncation ladder execution, and wire formatting.
-   - `src/security/`: Secret pattern scanning, entropy evaluation, redaction, and final leak gating.
-   - `src/git/`: Safe, read-only git metadata extraction.
-   - `src/clipboard/`: System clipboard writing and error formatting.
-   - `src/seeds/`: Working-tree and editor seed collection.
+ - `src/workspace/`: Directory traversal, file filtering, binary detection, and ignore rule evaluation.
+ - `src/parser/`: AST parsing for TypeScript, JavaScript, JSON, and Markdown.
+ - `src/analysis/`: Module resolution and dependency graph edge derivation.
+ - `src/index/`: Sharded disk persistence and cache reconciliation.
+ - `src/retrieval/`: Inverted lexical index, BM25 scoring, and structural graph traversal.
+ - `src/context/`: Budget packing, truncation ladder execution, and wire formatting.
+ - `src/security/`: Secret pattern scanning, entropy evaluation, redaction, and final leak gating.
+ - `src/git/`: Safe, read-only git metadata extraction.
+ - `src/clipboard/`: System clipboard writing and error formatting.
+ - `src/seeds/`: Working-tree and editor seed collection.
 4. `src/domain/`: Core types, graph definitions, and model interfaces (`model.ts`, `graph.ts`). Does not import any higher layers.
 5. `src/shared/`: Primitive helpers for hashing, cancellation tokens, text processing, and error codes.
 
@@ -92,7 +92,7 @@ graph LR
 
 ### Stage 2: Parse and Index
 - Inputs: Changed or unindexed files from Stage 1.
-- Operation: `ParserRegistry` routes files to the appropriate parser. TypeScript and JavaScript files are parsed via the TypeScript compiler API into symbols, call sites, and import specifiers. Secret tokens are blanked prior to token extraction. Results are saved as atomic JSON entries in `IndexStore`. `AnalysisEngine` updates cross-file graph edges.
+- Operation: `ParserRegistry` routes files to the appropriate parser. TypeScript and JavaScript files are parsed via the TypeScript compiler API into symbols, call sites, and import specifiers. Secret tokens are blanked before token extraction. Results are saved as atomic JSON entries in `IndexStore`. `AnalysisEngine` updates cross-file graph edges.
 - Outputs: In-memory `DependencyGraph` and persisted index shards.
 - Complexity: O(M * S) where M is changed files and S is average file size.
 - Determinism: AST traversals and token harvesting follow source file text order.
@@ -107,10 +107,10 @@ graph LR
 ### Stage 4: Budget Packing and Degradation Ladder
 - Inputs: Ranked candidate list, user budgets (`maxFiles`, `maxChars`, `maxLines`, `maxTokens`).
 - Operation: `ContextBuilder` iterates candidates in rank priority order. Fits files into available budgets using a four-step degradation ladder:
-  1. Full file: Entire source text included.
-  2. Symbol blocks: Excerpts focused around relevant symbols.
-  3. Declarations: Signatures and interfaces only.
-  4. Metadata only: File path and summary retained; source body omitted.
+ 1. Full file: Entire source text included.
+ 2. Symbol blocks: Excerpts focused around relevant symbols.
+ 3. Declarations: Signatures and interfaces only.
+ 4. Metadata only: File path and summary retained; source body omitted.
 - Outputs: Structured context package string conforming to Wire Format v1.
 - Complexity: O(C) where C is candidate file count.
 - Determinism: Candidates are evaluated in strict rank order; formatting uses fixed templates.
@@ -160,7 +160,7 @@ Each entry shard JSON file contains:
 
 ### Secret-Token Filtering in Index Shards
 
-Prior to extracting `identifiers`, `bodyTokens`, and `fileSummary`, file content is scanned using `SecretScanner.scanSpans()`. All spans matching known secret patterns (API keys, private tokens, high-entropy credential assignments) are blanked with whitespace characters. This guarantees that credentials matching the secret scanner are never persisted in on-disk index shards.
+Before extracting `identifiers`, `bodyTokens`, and `fileSummary`, file content is scanned using `SecretScanner.scanSpans()`. All spans matching known secret patterns (API keys, private tokens, high-entropy credential assignments) are blanked with whitespace characters. This guarantees that credentials matching the secret scanner are never persisted in on-disk index shards.
 
 Stated Limit: Filtering blanks only values flagged by the secret scanner. Values that the scanner does not flag, such as short passwords or low-entropy credentials, are still tokenized. Furthermore, word-like fragments such as key-type prefixes (for example, `AKIA` or `sk_live`) remain in token lists. Versions up to 0.3.1 persisted raw secret tokens in the local index; schema version 3 clears older stores to eliminate legacy shards.
 

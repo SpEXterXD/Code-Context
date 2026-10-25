@@ -9,7 +9,7 @@ Offline Code Context Compiler (OCC) runs entirely on the local machine without o
 | Repository Credentials (API keys, tokens, private keys) | Exfiltration via generated context pasted into external LLM interfaces | Automated pattern scanning, Shannon entropy detection, BLOCK/WARN/ALLOW policies, deterministic redaction, and fail-closed leak gate | Novel credential formats, short or low-entropy secrets, and multi-token fragmented secrets may pass undetected |
 | Developer Environment | Remote code execution via malicious repository configuration when spawning git | `safeGit` execution hardening with disabled fsmonitor, hooks, diff drivers, textconv filters, and external transports; trust gating | Git features must be enabled by user; untrusted workspaces disable git entirely |
 | LLM Reasoning Integrity | Prompt injection via malicious repository comments or files (for example, "Ignore previous instructions") | Repository source code is strictly segregated inside the `## SOURCE` section under an inert data banner with dynamic fence lengths | The external model reading the exported package is responsible for distinguishing data from system instructions |
-| Local Disk Index Storage | Persistence of sensitive credentials in on-disk index shards | Prior to token harvesting, secret spans matching scanner patterns are blanked with whitespace | Values not flagged by the scanner (such as low-entropy passwords) remain tokenized; key-type prefixes remain |
+| Local Disk Index Storage | Persistence of sensitive credentials in on-disk index shards | Before token harvesting, secret spans matching scanner patterns are blanked with whitespace | Values not flagged by the scanner (such as low-entropy passwords) remain tokenized; key-type prefixes remain |
 | Supply Chain Dependencies | Malicious dependencies executing during extension activation | The only runtime dependency is `typescript`; zero network dependencies; ESLint boundary rules prohibit network modules | Vulnerabilities in VS Code core extension host or upstream TypeScript compiler |
 
 ## Privacy and Network Isolation
@@ -21,7 +21,7 @@ OCC operates under strict network isolation:
 
 ## Secret Detection and Redaction Engine
 
-Files selected for a context package are evaluated by `SecretScanner` (`src/security/secretScanner.ts`) prior to budget packing:
+Files selected for a context package are evaluated by `SecretScanner` (`src/security/secretScanner.ts`) before budget packing:
 
 ### Pattern Families
 The scanner matches known high-risk token structures:
@@ -78,7 +78,7 @@ OCC runs git for read-only metadata: commit recency (`enableGitRecency`) and wor
 To prevent malicious repositories from executing arbitrary code via git hooks or configuration, all invocations pass through `safeGit` (`src/git/safeGit.ts`) with hard execution boundaries:
 
 1. Global Execution Overrides: Every git invocation injects configuration flags to neutralize execution hooks:
-   `-c core.fsmonitor=false -c core.hooksPath=<emptyDir> -c gc.auto=0 -c core.pager=cat -c protocol.ext.allow=never`
+ `-c core.fsmonitor=false -c core.hooksPath=<emptyDir> -c gc.auto=0 -c core.pager=cat -c protocol.ext.allow=never`
 2. Diff Driver Overrides: Diff operations explicitly pass `--no-ext-diff --no-textconv` to neutralize repository-configured `diff.external` and `textconv` binaries.
 3. No Shell Spawning: Processes are launched via `child_process.execFile` with argument arrays. No shell interpreter is invoked.
 4. Process Timeouts: Commands enforce strict timeouts and run with `GIT_OPTIONAL_LOCKS=0` and `GIT_TERMINAL_PROMPT=0`.

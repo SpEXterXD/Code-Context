@@ -215,13 +215,13 @@ External packages referenced:
 ### LINES: 1-10
 ```
 1: export interface RateLimitConfig {
-2:   maxRequests: number;
-3:   windowSeconds: number;
+2: maxRequests: number;
+3: windowSeconds: number;
 4: }
 5: 
 6: export const defaultConfig: RateLimitConfig = {
-7:   maxRequests: 100,
-8:   windowSeconds: 60,
+7: maxRequests: 100,
+8: windowSeconds: 60,
 9: };
 ```
 
@@ -231,10 +231,10 @@ External packages referenced:
 1: import { RateLimitConfig } from "../config/rateLimit";
 2: 
 3: export function rateLimiter(config: RateLimitConfig) {
-4:   return (req: any, res: any, next: any) => {
-5:     // Middleware logic
-6:     next();
-7:   };
+4: return (req: any, res: any, next: any) => {
+5: // Middleware logic
+6: next();
+7: };
 8: }
 ```
 

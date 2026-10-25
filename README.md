@@ -104,13 +104,13 @@ Add rate limiting to the login endpoint
 ```
 1: /** Rate limit configuration. */
 2: export interface RateLimitConfig {
-3:   maxRequests: number;
-4:   windowSeconds: number;
+3: maxRequests: number;
+4: windowSeconds: number;
 5: }
 6: 
 7: export const defaultRateLimitConfig: RateLimitConfig = {
-8:   maxRequests: 100,
-9:   windowSeconds: 60,
+8: maxRequests: 100,
+9: windowSeconds: 60,
 10: };
 ```
 
@@ -135,7 +135,7 @@ Candidate files are scored using a deterministic hybrid ranking pipeline. Lexica
 - Policy Enforcement: Under the default `block` policy, files containing detected credentials have source code excluded from output while remaining listed in WHY entries. Under `warn`, secrets are deterministically redacted (`[REDACTED:<type>:<hash8>]`).
 - Fail-Closed Leak Gate: The finalized context package is scanned immediately before clipboard writing. If any raw credential value survived redaction, export aborts with a `SECURITY_BLOCKED` error.
 - Workspace Trust: In untrusted workspaces, git subprocesses are completely disabled. Indexing and packaging continue safely without git metadata.
-- Index Storage: Index metadata is stored locally under VS Code workspace storage (`context.storageUri`). File content is not persisted in the store. Prior to token extraction, secret spans are blanked with whitespace. Versions up to 0.3.1 persisted secret-like tokens in local index shards; schema version 3 clears older stores on first run. Details: [docs/SECURITY.md](docs/SECURITY.md).
+- Index Storage: Index metadata is stored locally under VS Code workspace storage (`context.storageUri`). File content is not persisted in the store. Before token extraction, secret spans are blanked with whitespace. Versions up to 0.3.1 persisted secret-like tokens in local index shards; schema version 3 clears older stores on first run. Details: [docs/SECURITY.md](docs/SECURITY.md).
 
 ## Measured Context Quality
 

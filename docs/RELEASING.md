@@ -12,9 +12,9 @@ Published git tags are never moved or deleted. If a defect is discovered in a pu
 1. Create a release branch off `main`: `git checkout -b release/v0.x.y`.
 2. Update the `version` field in `package.json`.
 3. Update `CHANGELOG.md`:
-   - Rename the `## [Unreleased]` section to `## [0.x.y] - YYYY-MM-DD`.
-   - Add a fresh, empty `## [Unreleased]` section above it.
-   - Summarize additions, changes, fixes, and security updates following Keep a Changelog format.
+ - Rename the `## [Unreleased]` section to `## [0.x.y] - YYYY-MM-DD`.
+ - Add a fresh, empty `## [Unreleased]` section above it.
+ - Summarize additions, changes, fixes, and security updates following Keep a Changelog format.
 4. Run documentation synchronization and verification:
    ```bash
    npm run test:docs-sync
@@ -48,17 +48,17 @@ Do not distribute locally packaged binaries. Distribute the verified build artif
 1. Navigate to the GitHub Actions run for the release commit on `main`.
 2. Download the `vsix-ubuntu-latest` artifact archive and extract `offline-code-context-compiler-0.x.y.vsix`.
 3. Calculate and record the SHA-256 checksum of the downloaded file:
-   - Linux/macOS: `sha256sum offline-code-context-compiler-0.x.y.vsix`
-   - Windows PowerShell: `Get-FileHash offline-code-context-compiler-0.x.y.vsix -Algorithm SHA256`
+ - Linux/macOS: `sha256sum offline-code-context-compiler-0.x.y.vsix`
+ - Windows PowerShell: `Get-FileHash offline-code-context-compiler-0.x.y.vsix -Algorithm SHA256`
 4. Run the clean-profile smoke test against the exact downloaded file:
    ```bash
    npm run smoke:vsix -- "/path/to/offline-code-context-compiler-0.x.y.vsix"
    ```
 5. Perform manual verification in VS Code:
-   - Install the `.vsix` archive: `code --install-extension offline-code-context-compiler-0.x.y.vsix`.
-   - Open a test workspace (such as `demo-project`).
-   - Run `OCC: Generate Task Context` and verify that the preview opens and generates expected content.
-   - Run `OCC: Copy Context to Clipboard` and verify that content copies cleanly to the clipboard.
+ - Install the `.vsix` archive: `code --install-extension offline-code-context-compiler-0.x.y.vsix`.
+ - Open a test workspace (such as `demo-project`).
+ - Run `OCC: Generate Task Context` and verify that the preview opens and generates expected content.
+ - Run `OCC: Copy Context to Clipboard` and verify that content copies cleanly to the clipboard.
 
 ### 5. Tagging and GitHub Release
 1. Create a signed, annotated git tag on the release commit:
@@ -67,8 +67,8 @@ Do not distribute locally packaged binaries. Distribute the verified build artif
    git push origin v0.x.y
    ```
 2. Attach the verified `.vsix` binary to the GitHub Release. Use either the GitHub web interface or the GitHub CLI with an explicit personal access token. Never read credentials from a git credential helper.
-   - Web UI: Navigate to `https://github.com/SpEXterXD/Code-Context/releases/new`, select tag `v0.x.y`, paste release notes, and upload the `.vsix` file.
-   - GitHub CLI:
+ - Web UI: Navigate to `https://github.com/SpEXterXD/Code-Context/releases/new`, select tag `v0.x.y`, paste release notes, and upload the `.vsix` file.
+ - GitHub CLI:
      ```bash
      $env:GH_TOKEN = "your-personal-access-token"
      gh release create v0.x.y "offline-code-context-compiler-0.x.y.vsix" --title "v0.x.y" --notes-file RELEASE_NOTES.md
