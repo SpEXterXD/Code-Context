@@ -1,7 +1,7 @@
 {
   "split": "tuning",
   "weight": 0.6,
-  "occCommit": "9cf55a9b7067c69caff36267c96a16976241bae0",
+  "occCommit": "c0e4c8a1b4eb4a1edafd00ea6531b3def669ab36",
   "workingTreeClean": false,
   "tasksScored": 234,
   "arms": {},
@@ -48,6 +48,70 @@
         }
       }
     },
+    "s1": {
+      "mean": {
+        "top1": 0.3247863247863248,
+        "recall8": 0.49501424501424507,
+        "recall10": 0.6232193732193732,
+        "mrr": 0.4448276415251714,
+        "packageRecall": 0.6121794871794872
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 234,
+          "meanDiff": 0.014957264957264958,
+          "ciLow": -0.007122507122507123,
+          "ciHigh": 0.039886039886039885,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 234,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 234,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "s2": {
+      "mean": {
+        "top1": 0.34615384615384615,
+        "recall8": 0.49928774928774927,
+        "recall10": 0.6246438746438746,
+        "mrr": 0.4575984824271115,
+        "packageRecall": 0.6164529914529915
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 234,
+          "meanDiff": 0.01923076923076923,
+          "ciLow": -0.012108262108262107,
+          "ciHigh": 0.04843304843304844,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 234,
+          "meanDiff": 0.0014245014245014233,
+          "ciLow": -0.019943019943019943,
+          "ciHigh": 0.024216524216524215,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 234,
+          "meanDiff": 0.021367521367521368,
+          "ciLow": 0,
+          "ciHigh": 0.04700854700854701,
+          "excludesZero": false
+        }
+      }
+    },
     "bm25names": {
       "mean": {
         "top1": 0.11538461538461539,
@@ -86,15 +150,15 @@
         "recall8": 0.4850427350427351,
         "recall10": 0.6132478632478632,
         "mrr": 0.4353986303688246,
-        "packageRecall": 0.5765669515669515
+        "packageRecall": 0.5957977207977208
       },
       "pairedVsUnseeded": {
         "packageRecall": {
           "n": 234,
-          "meanDiff": -0.020655270655270657,
-          "ciLow": -0.03703703703703703,
-          "ciHigh": -0.007834757834757835,
-          "excludesZero": true
+          "meanDiff": -0.0014245014245014241,
+          "ciLow": -0.01851851851851852,
+          "ciHigh": 0.013532763532763534,
+          "excludesZero": false
         },
         "recall10": {
           "n": 234,
@@ -118,15 +182,15 @@
         "recall8": 0.4864672364672365,
         "recall10": 0.6196581196581196,
         "mrr": 0.4404165813677526,
-        "packageRecall": 0.565883190883191
+        "packageRecall": 0.6086182336182335
       },
       "pairedVsUnseeded": {
         "packageRecall": {
           "n": 234,
-          "meanDiff": -0.03133903133903134,
-          "ciLow": -0.05128205128205129,
-          "ciHigh": -0.013532763532763534,
-          "excludesZero": true
+          "meanDiff": 0.011396011396011397,
+          "ciLow": -0.013532763532763533,
+          "ciHigh": 0.03632478632478633,
+          "excludesZero": false
         },
         "recall10": {
           "n": 234,
@@ -150,15 +214,15 @@
         "recall8": 0.48076923076923084,
         "recall10": 0.6196581196581196,
         "mrr": 0.4345046597200524,
-        "packageRecall": 0.5758547008547008
+        "packageRecall": 0.5922364672364673
       },
       "pairedVsUnseeded": {
         "packageRecall": {
           "n": 234,
-          "meanDiff": -0.021367521367521368,
-          "ciLow": -0.037037037037037035,
-          "ciHigh": -0.009259259259259259,
-          "excludesZero": true
+          "meanDiff": -0.004985754985754985,
+          "ciLow": -0.019230769230769232,
+          "ciHigh": 0.00641025641025641,
+          "excludesZero": false
         },
         "recall10": {
           "n": 234,
@@ -252,6 +316,70 @@
         }
       }
     },
+    "s1": {
+      "mean": {
+        "top1": 0.3275862068965517,
+        "recall8": 0.5007183908045978,
+        "recall10": 0.6300287356321839,
+        "mrr": 0.4486623625728022,
+        "packageRecall": 0.6188936781609196
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 232,
+          "meanDiff": 0.015086206896551725,
+          "ciLow": -0.010775862068965511,
+          "ciHigh": 0.041666666666666664,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 232,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 232,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "s2": {
+      "mean": {
+        "top1": 0.34913793103448276,
+        "recall8": 0.505028735632184,
+        "recall10": 0.6314655172413792,
+        "mrr": 0.4615432969307935,
+        "packageRecall": 0.6232040229885057
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 232,
+          "meanDiff": 0.019396551724137928,
+          "ciLow": -0.010057471264367816,
+          "ciHigh": 0.04956896551724138,
+          "excludesZero": false
+        },
+        "recall10": {
+          "n": 232,
+          "meanDiff": 0.001436781609195401,
+          "ciLow": -0.017959770114942535,
+          "ciHigh": 0.02442528735632184,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 232,
+          "meanDiff": 0.021551724137931036,
+          "ciLow": -0.004310344827586207,
+          "ciHigh": 0.05172413793103448,
+          "excludesZero": false
+        }
+      }
+    },
     "bm25names": {
       "mean": {
         "top1": 0.11637931034482758,
@@ -290,15 +418,15 @@
         "recall8": 0.49066091954022995,
         "recall10": 0.619971264367816,
         "mrr": 0.4391520668375214,
-        "packageRecall": 0.5829741379310346
+        "packageRecall": 0.6023706896551725
       },
       "pairedVsUnseeded": {
         "packageRecall": {
           "n": 232,
-          "meanDiff": -0.020833333333333336,
-          "ciLow": -0.03735632183908046,
-          "ciHigh": -0.00646551724137931,
-          "excludesZero": true
+          "meanDiff": -0.001436781609195402,
+          "ciLow": -0.017959770114942528,
+          "ciHigh": 0.014367816091954023,
+          "excludesZero": false
         },
         "recall10": {
           "n": 232,
@@ -322,15 +450,15 @@
         "recall8": 0.49209770114942536,
         "recall10": 0.6264367816091954,
         "mrr": 0.44421327603471594,
-        "packageRecall": 0.5721982758620691
+        "packageRecall": 0.6153017241379312
       },
       "pairedVsUnseeded": {
         "packageRecall": {
           "n": 232,
-          "meanDiff": -0.03160919540229885,
-          "ciLow": -0.05459770114942529,
-          "ciHigh": -0.013649425287356323,
-          "excludesZero": true
+          "meanDiff": 0.01149425287356322,
+          "ciLow": -0.01293103448275862,
+          "ciHigh": 0.03735632183908046,
+          "excludesZero": false
         },
         "recall10": {
           "n": 232,
@@ -354,15 +482,15 @@
         "recall8": 0.4863505747126437,
         "recall10": 0.6264367816091954,
         "mrr": 0.43825038954522527,
-        "packageRecall": 0.5822557471264368
+        "packageRecall": 0.5987787356321839
       },
       "pairedVsUnseeded": {
         "packageRecall": {
           "n": 232,
-          "meanDiff": -0.021551724137931036,
-          "ciLow": -0.035919540229885055,
-          "ciHigh": -0.008620689655172414,
-          "excludesZero": true
+          "meanDiff": -0.005028735632183907,
+          "ciLow": -0.02011494252873563,
+          "ciHigh": 0.00574712643678161,
+          "excludesZero": false
         },
         "recall10": {
           "n": 232,

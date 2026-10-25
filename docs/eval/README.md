@@ -272,3 +272,15 @@ The keep rule failed, no confirmation pools were run, and
 `offlineCodeContext.changeSeeds` ships default false. Details and the
 mechanism (seed slot cost vs weak gold coupling) in
 [ADR-006](../adr/006-change-aware-seeds.md).
+
+## M4b: slot-policy experiments (signal-only) — no recall gain
+
+After the M4 negative result, M4b tested whether seeds help when they do
+NOT consume package slots (`slotPolicy: "signal-only"` — seeds fire
+signals and originate graph expansion but are never pinned and are
+excluded from content slots) with and without a SEED_NEIGHBOR boost for
+one-hop graph neighbors of seeds. On the full 234-task tuning split both
+variants reversed the direction (S1 +0.015 [−0.007, 0.040]; S2 +0.019
+[−0.012, 0.048]) with no decoy/unseeded regressions, but the paired CIs
+include 0: the keep rule is not met and S3 was not run. Arm table in
+ADR-006; per-task records in `.eval-cache/seeds-sim/` (git-ignored).

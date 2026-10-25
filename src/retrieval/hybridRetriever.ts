@@ -52,6 +52,22 @@ export const M4_SEED_WEIGHTS = {
   openEditor: 0.3,
   diagnostic: 0.4,
   stackFrame: 0.4,
+  /**
+   * M4b/S1: how seeded files interact with package slots.
+   *  - "slots" (M4 behavior): seeded files are pinned candidates that may
+   *    consume content slots. The M4 tuning sweep measured this as
+   *    significantly harmful to hidden-gold package recall (ADR-006).
+   *  - "signal-only" (M4b/S1): seeds fire signals and originate graph
+   *    expansion, but are NOT pinned, are excluded from content slots
+   *    (they surface as path-only WHY entries and via CURRENT CHANGES),
+   *    freeing their slots for everything else.
+   */
+  slotPolicy: "slots" as "slots" | "signal-only",
+  /**
+   * M4b/S2: weight for SEED_NEIGHBOR — one-hop graph neighbors (imports,
+   * dependents, tests) of seeded files. 0 disables. Untuned default.
+   */
+  neighborBoost: 0,
 };
 
 export interface RetrievalOptions {
@@ -399,6 +415,30 @@ export class HybridRetriever {
           detail: hint.detail ?? "",
         });
       }
+      // M4b/S2: one-hop graph neighbors of DIFF_TOUCHED seeds fire
+      // SEED_NEIGHBOR with the named neighborBoost weight (0 disables).
+      if (M4_SEED_WEIGHTS.neighborBoost > 0) {
+        const neighborSeen = new Set<string>();
+        for (const hint of options.seedHints ?? []) {
+          if (hint.kind !== "DIFF_TOUCHED" || neighborSeen.has(hint.path)) continue;
+          neighborSeen.add(hint.path);
+          const fileNode = `file:${hint.path}`;
+          const neighbors = new Set<string>();
+          for (const e of this.graph.edgesFrom(fileNode)) {
+            if (e.target.startsWith("file:")) neighbors.add(e.target.slice(5));
+          }
+          for (const e of this.graph.edgesTo(fileNode)) {
+            if (e.source.startsWith("file:")) neighbors.add(e.source.slice(5));
+          }
+          for (const n of [...neighbors].sort(compareStrings)) {
+            bump(n, {
+              kind: "SEED_NEIGHBOR",
+              weight: M4_SEED_WEIGHTS.neighborBoost,
+              detail: hint.path,
+            });
+          }
+        }
+      }
     }
 
     const ranked: ScoredFile[] = [...contributions.entries()]
@@ -411,19 +451,22 @@ export class HybridRetriever {
       .sort((a, b) => b.score - a.score || compareStrings(a.path, b.path))
       .slice(0, limit);
 
-    // Seeds also act as pins: they survive zero-signal retrieval.
+    // Seeds also act as pins: they survive zero-signal retrieval. In
+    // M4b signal-only mode seed hints are NOT pinned (no guaranteed slot).
     for (const pinned of options.pinnedPaths ?? []) {
       if (!ranked.some((r) => r.path === pinned)) {
         ranked.push({ path: pinned, score: 0, signals: [] });
       }
     }
-    for (const hint of options.seedHints ?? []) {
-      if (!ranked.some((r) => r.path === hint.path)) {
-        ranked.push({
-          path: hint.path,
-          score: 0,
-          signals: [],
-        });
+    if (M4_SEED_WEIGHTS.enabled && M4_SEED_WEIGHTS.slotPolicy === "slots") {
+      for (const hint of options.seedHints ?? []) {
+        if (!ranked.some((r) => r.path === hint.path)) {
+          ranked.push({
+            path: hint.path,
+            score: 0,
+            signals: [],
+          });
+        }
       }
     }
 

@@ -49,10 +49,20 @@ const SCRATCH_ROOT = path.join(ROOT, ".eval-cache", "seeds-sim");
 const SEED = 20260918;
 
 type Arm =
-  "unseeded" | "seeded" | "bm25names" | "decoy-samedir" | "mixed" | "random-decoy" | "realdiff";
+  | "unseeded"
+  | "seeded"
+  | "s1"
+  | "s2"
+  | "bm25names"
+  | "decoy-samedir"
+  | "mixed"
+  | "random-decoy"
+  | "realdiff";
 const ARMS: Arm[] = [
   "unseeded",
   "seeded",
+  "s1",
+  "s2",
   "bm25names",
   "decoy-samedir",
   "mixed",
@@ -205,7 +215,7 @@ async function main(): Promise<void> {
         });
 
       const arms = {} as TaskOut["arms"];
-      // unseeded + seeded + decoys + mixed
+      // unseeded + seeded + decoys + mixed + M4b S1/S2
       const samedir = sameDirDecoys(snapshotPaths, revealed, t.gold, revealed.length, t.id);
       const mixed = [
         ...revealed.slice(0, Math.ceil(revealed.length / 2)),
@@ -215,16 +225,25 @@ async function main(): Promise<void> {
       const plan: Array<{
         arm: Arm;
         seeds: string[];
-        diff?: { sections: Array<{ path: string; diff: string }> };
+        slotPolicy: "slots" | "signal-only";
+        neighborBoost: number;
       }> = [
-        { arm: "unseeded", seeds: [] },
-        { arm: "seeded", seeds: revealed },
-        { arm: "decoy-samedir", seeds: samedir },
-        { arm: "mixed", seeds: mixed },
-        { arm: "random-decoy", seeds: rnd },
+        { arm: "unseeded", seeds: [], slotPolicy: "slots", neighborBoost: 0 },
+        { arm: "seeded", seeds: revealed, slotPolicy: "slots", neighborBoost: 0 },
+        { arm: "s1", seeds: revealed, slotPolicy: "signal-only", neighborBoost: 0 },
+        { arm: "s2", seeds: revealed, slotPolicy: "signal-only", neighborBoost: 0.4 },
+        { arm: "decoy-samedir", seeds: samedir, slotPolicy: "signal-only", neighborBoost: 0 },
+        { arm: "mixed", seeds: mixed, slotPolicy: "signal-only", neighborBoost: 0 },
+        { arm: "random-decoy", seeds: rnd, slotPolicy: "signal-only", neighborBoost: 0 },
       ];
       for (const p of plan) {
+        const wasPolicy = M4_SEED_WEIGHTS.slotPolicy;
+        const wasBoost = M4_SEED_WEIGHTS.neighborBoost;
+        M4_SEED_WEIGHTS.slotPolicy = p.slotPolicy;
+        M4_SEED_WEIGHTS.neighborBoost = p.neighborBoost;
         const ctx = build(p.seeds);
+        M4_SEED_WEIGHTS.slotPolicy = wasPolicy;
+        M4_SEED_WEIGHTS.neighborBoost = wasBoost;
         arms[p.arm] = {
           ranked: (ctx.retrieval?.ranked ?? []).map((r) => ({ path: r.path, score: r.score })),
           packageFiles: [

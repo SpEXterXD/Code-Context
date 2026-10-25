@@ -311,3 +311,31 @@ be enabled for experimentation. A future attempt should change the
 mechanism, not the weight: e.g. seeds influence only the CURRENT CHANGES
 section (no ranking/packaging participation), or co-change-coupled
 neighbors instead of graph neighbors.
+
+## M4b OUTCOME (2026-10-25): S1/S2 tested — direction reversed but keep rule still not met
+
+S1 (seeds as signal + graph-expansion origin only, never pinned, excluded
+from content slots — their ~1.6 freed slots go to other files) and S2
+(S1 + one-hop graph neighbors of seeds boosted via a SEED_NEIGHBOR signal,
+named constant `neighborBoost`) were run on the full tuning split
+(234 qualifying tasks, paired CIs vs unseeded):
+
+| Arm                                    | Hidden-gold package recall | dPkg vs unseeded                | Top-1 |
+| -------------------------------------- | -------------------------- | ------------------------------- | ----- |
+| unseeded                               | 0.597                      | —                               | 0.325 |
+| seeded (M4 slots policy)               | 0.564                      | −0.033 [−0.053, −0.015]\*       | 0.325 |
+| **S1 signal-only**                     | 0.612                      | **+0.015 [−0.007, 0.040]** n.s. | 0.325 |
+| **S2 signal-only + neighborBoost 0.4** | 0.616                      | **+0.019 [−0.012, 0.048]** n.s. | 0.346 |
+| decoy-samedir (signal-only)            | 0.596                      | −0.001 n.s.                     | 0.316 |
+| mixed (signal-only)                    | 0.609                      | +0.011 n.s.                     | 0.321 |
+| random-decoy (signal-only)             | 0.592                      | −0.005 n.s.                     | 0.312 |
+
+Direction reversed (slot-policy fix turned −0.033\* into +0.015/+0.019 and
+removed all significant regressions, decoy arms clean), but the primary
+metric's CI still includes 0: **the keep rule is not met**. S3 (query-term
+expansion from seeded symbols) was therefore not run. Final state:
+`slotPolicy` stays `"slots"` in the constant (the extension default is
+`changeSeeds: false` anyway — behavior unchanged unless enabled), the
+policies ship as named, ablatable constants, and the honest conclusion
+stands: **tested, no recall gain; the CURRENT CHANGES diff section still
+provides direct context for the LLM.**
