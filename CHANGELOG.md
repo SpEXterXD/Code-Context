@@ -4,6 +4,18 @@
 
 (nothing yet)
 
+## 0.3.1 (2026-10-25)
+
+Packaging and legal notices patch release superseding v0.3.0 (which was tagged on origin before packaging loose-ends landed). Zero behavior change or wire format drift.
+
+### Packaging & Notice Fixes
+
+- **VSIX packaging hygiene**: `.vscodeignore` now explicitly excludes `.gitignore` and `RELEASE_NOTES.md`. The packaged vsix contains only necessary runtime and notice files (exactly 6 files: `dist/extension.js`, `package.json`, `README.md`, `CHANGELOG.md`, `LICENSE`, `THIRD_PARTY_NOTICES.md`).
+- **Third-party notices**: Added `THIRD_PARTY_NOTICES.md` containing the full verbatim Apache License 2.0 text and Microsoft copyright notice for the bundled `typescript` dependency.
+- **Startup wording corrected**: Startup index load descriptions aligned with exact measured ranges on the test machine (median changed from 8,163 ms to 5,465 ms across 3 runs; before: 5,472–10,279 ms; after: 4,592–9,213 ms; quadratic step accounted for ~24% of the load profile).
+- **Minified bundle parity verified**: Minified bundle verified payload-identical to unminified on `demo-project` (matching SHA-256 and matching committed reference example).
+- **No behavior change**: Retrieval algorithms, ranking, secret detection policies, and wire format are identical to 0.3.0.
+
 ## 0.3.0 (2026-10-25)
 
 M1 through M4b, integrated. This release makes the compiled context package

@@ -6,7 +6,7 @@
 
 ## Install & use in 30 seconds
 
-1. Get `offline-code-context-compiler-0.3.0.vsix` from [Releases](https://github.com/SpEXterXD/Code-Context/releases) and install it: `code --install-extension offline-code-context-compiler-0.3.0.vsix` (or Extensions view → `...` → _Install from VSIX..._).
+1. Get `offline-code-context-compiler-0.3.1.vsix` from [Releases](https://github.com/SpEXterXD/Code-Context/releases) and install it: `code --install-extension offline-code-context-compiler-0.3.1.vsix` (or Extensions view → `...` → _Install from VSIX..._).
 2. Open a folder — OCC indexes it in the background (status bar shows `OCC: <n> files` when ready).
 3. Command Palette (`Ctrl+Shift+P`) → **OCC: Generate Task Context** → type your task, e.g. `Add rate limiting to the login endpoint`.
 4. Review the preview, then **OCC: Copy Context to Clipboard** and paste into your LLM chat.

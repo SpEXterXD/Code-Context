@@ -33,3 +33,4 @@ docs/**
 .eval-cache/**
 extension/.gitignore
 .gitignore
+RELEASE_NOTES.md
