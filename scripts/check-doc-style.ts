@@ -24,7 +24,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-type Severity = "error" | "warn";
+type Severity = "error" | "warn" | "note";
 
 interface Finding {
   file: string;
@@ -518,7 +518,7 @@ function checkFile(file: string, prep: Prepared): { findings: Finding[]; words: 
     if (/[:?]$/.test(text)) {
       add(i + 1, 1, "heading-punctuation", "warn", "Heading ends with a colon or question mark.");
     }
-    if (looksTitleCase(text)) {
+    if (level > 1 && looksTitleCase(text)) {
       add(i + 1, 1, "heading-case", "warn", "Heading looks like Title Case. Use sentence case.");
     }
     if (VAGUE_HEADING.test(text.trim())) {
@@ -621,7 +621,7 @@ function checkFile(file: string, prep: Prepared): { findings: Finding[]; words: 
         1,
         1,
         "uniform-rhythm",
-        "warn",
+        "note",
         `Sentence lengths are very uniform (mean ${mean.toFixed(1)}, variation ${(std / mean).toFixed(2)}). Vary the rhythm.`,
       );
     }
@@ -706,7 +706,13 @@ function main(): void {
   }
 
   const all: Finding[] = [];
-  const summary: Array<{ file: string; words: number; errors: number; warnings: number }> = [];
+  const summary: Array<{
+    file: string;
+    words: number;
+    errors: number;
+    warnings: number;
+    notes: number;
+  }> = [];
   let fixed = 0;
 
   for (const file of files) {
@@ -726,14 +732,18 @@ function main(): void {
       words,
       errors: findings.filter((f) => f.severity === "error").length,
       warnings: findings.filter((f) => f.severity === "warn").length,
+      notes: findings.filter((f) => f.severity === "note").length,
     });
   }
 
   const errors = all.filter((f) => f.severity === "error").length;
-  const warnings = all.length - errors;
+  const warnings = all.filter((f) => f.severity === "warn").length;
+  const notes = all.filter((f) => f.severity === "note").length;
 
   if (asJson) {
-    console.log(JSON.stringify({ fixed, errors, warnings, summary, findings: all }, null, 2));
+    console.log(
+      JSON.stringify({ fixed, errors, warnings, notes, summary, findings: all }, null, 2),
+    );
   } else {
     for (const f of all) {
       console.log(`${f.file}:${f.line}:${f.col}  ${f.severity.padEnd(5)}  ${f.rule}  ${f.message}`);
@@ -763,7 +773,11 @@ function main(): void {
     if (fix) {
       console.log(`Applied ${fixed} mechanical fix(es).`);
     }
-    console.log(`${summary.length} file(s) checked: ${errors} error(s), ${warnings} warning(s).`);
+    let countMsg = `${summary.length} file(s) checked: ${errors} error(s), ${warnings} warning(s)`;
+    if (notes > 0) {
+      countMsg += `, ${notes} note(s)`;
+    }
+    console.log(countMsg + ".");
   }
 
   if (errors > 0 || (strict && warnings > 0)) {
