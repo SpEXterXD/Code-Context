@@ -38,7 +38,7 @@ Dataset Filtering Rules:
 ### Splits
 - Eval Split: 500 tasks (100 per repo, dataset hash `7d7187b6`, seed 20260918).
 - Tuning Split: 300 tasks (60 per repo, dataset hash `ec50ab4f`, seed 20260918).
-- Holdout Split: 300 tasks (60 per repo, dataset hash `ec50ab4f`, seed 20260918). Unsampled tasks drawn from the same pool.
+- Holdout Split: 300 tasks (60 per repo, dataset hash `7da65d58`, seed 20260918). Unsampled tasks drawn from the same pool.
 
 ## Metrics and Definitions
 

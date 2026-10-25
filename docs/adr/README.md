@@ -8,7 +8,7 @@ During project development, duplicate sequence numbers were assigned to two pair
 - ADR 005: `005-context-budgeting.md` (Context Budgeting, accepted 2026-09-11) and `005-startup-shard-batching.md` (Startup Shard Batching design, draft 2026-10-25).
 - ADR 006: `006-security-boundary.md` (Security Boundary, accepted 2026-09-11) and `006-change-aware-seeds.md` (Change-Aware Seeds, implemented/experimental 2026-10-25).
 
-Per project policy, existing filenames are preserved to maintain link integrity across documentation and commit history. Future ADRs should be numbered starting from ADR 009.
+Per project policy, existing filenames are preserved to maintain link integrity across documentation and commit history. New ADRs should be numbered from 007 (or sequentially after existing records).
 
 ## Index of Decisions
 
