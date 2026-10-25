@@ -8,6 +8,7 @@ import { createDefaultParserRegistry } from "../parser/parserRegistry";
 import { makeTempDir, removeRepo, writeRepo } from "../testing/fixtures";
 import { CancellationSource } from "../shared/cancellation";
 import { entryRelativePath } from "../index/schema";
+import { SecretScanner } from "../security/secretScanner";
 
 const registry = createDefaultParserRegistry();
 
@@ -260,5 +261,216 @@ describe("IndexingService (integration)", () => {
     const run = await service.indexWorkspace(CancellationSource.never());
     expect(run.scan.files.map((f) => f.path)).toEqual(["src/a.ts"]);
     expect(service.getEntries().size).toBe(1);
+  });
+
+  describe("secret token filtering (v3 store)", () => {
+    // Generate fixture secrets at runtime via fragment concatenation
+    function createSecretFixtures(): Array<{ family: string; secret: string; key?: string }> {
+      return [
+        { family: "aws-access-key", secret: "AK" + "IA" + "IOSFODNN7EXAMPLE" },
+        { family: "private-key-block", secret: "-----" + "BEGIN RSA PRIVATE " + "KEY-----" },
+        { family: "github-token", secret: "gh" + "p_" + "0123456789abcdefghijklmnopqrstuvwxyzAB" },
+        { family: "slack-token", secret: "xo" + "xb-123456789012-" + "abcdef" },
+        { family: "google-api-key", secret: "AI" + "zaSyD-1a2b3c4d5e6f7g8h9i0jK_" + "lmnopqrstuv" },
+        { family: "stripe-live-key", secret: "sk_" + "live_" + "a1b2c3d4e5f6g7h8" },
+        { family: "openai-style-key", secret: "sk-" + "proj-a1b2c3d4e5f6g7h8i9j0" },
+        {
+          family: "jwt",
+          secret:
+            "ey" +
+            "JhbGciOiJIUzI1NiIsInR5cCI6eyJ9." +
+            "eyJzdWIiOiIxIn0." +
+            "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        },
+        {
+          family: "basic-auth-url",
+          secret: "postgres" + "://admin:" + "S3cr3tValue" + "@db.internal:5432/app",
+        },
+        { family: "bearer-token", secret: "Bearer " + "abc123def456ghi789jkl012" },
+        {
+          family: "generic-credential",
+          key: "api_" + "key",
+          secret: "J8s2kLq" + "9zX1pQw7vR3mNtYu5",
+        },
+        { family: "env-credential", key: "AUTH_" + "TOKEN", secret: "mK9vP2x" + "L5nQ8wR1tY3" },
+      ];
+    }
+
+    function buildSecretRepoFiles(
+      fixtures: ReturnType<typeof createSecretFixtures>,
+    ): Record<string, string> {
+      // 1. String literals
+      const stringLit = [
+        'export const dummy = "test";',
+        ...fixtures.map((f) =>
+          f.key
+            ? `export const ${f.key} = "${f.secret}";`
+            : `export const lit_${f.family.replace(/-/g, "_")} = "${f.secret}";`,
+        ),
+      ].join("\n");
+
+      // 2. Comments (inline + JSDoc docblock)
+      const comments = [
+        "/**",
+        " * File leading comment.",
+        ...fixtures.map((f) =>
+          f.key ? ` * JSDoc: ${f.key} = "${f.secret}"` : ` * JSDoc: ${f.secret}`,
+        ),
+        " */",
+        'export const dummyComment = "test";',
+        ...fixtures.map((f) => (f.key ? `// ${f.key} = "${f.secret}"` : `// Comment: ${f.secret}`)),
+      ].join("\n");
+
+      // 3. Object properties
+      const objProps = [
+        "export const cfg = {",
+        ...fixtures.map(
+          (f) => `  ${f.key ?? `prop_${f.family.replace(/-/g, "_")}`}: "${f.secret}",`,
+        ),
+        "};",
+      ].join("\n");
+
+      // 4. Template strings
+      const templateStrings = [
+        'export const dummyTpl = "test";',
+        ...fixtures.map((f) =>
+          f.key
+            ? `export const tpl_${f.family.replace(/-/g, "_")} = \`${f.key} = "${f.secret}"\`;`
+            : `export const tpl_${f.family.replace(/-/g, "_")} = \`prefix "${f.secret}" suffix\`;`,
+        ),
+      ].join("\n");
+
+      // 5. JSON values
+      const jsonValues: Record<string, string> = {};
+      for (const f of fixtures) jsonValues[f.key ?? `sec_${f.family}`] = f.secret;
+
+      // 6. Markdown code block
+      const mdGuide = [
+        "# Guide",
+        "",
+        "```typescript",
+        ...fixtures.map((f) =>
+          f.key ? `const ${f.key} = "${f.secret}";` : `const sec = "${f.secret}";`,
+        ),
+        "```",
+        "",
+      ].join("\n");
+
+      return {
+        "src/stringLiterals.ts": stringLit,
+        "src/comments.ts": comments,
+        "src/objectProperties.ts": objProps,
+        "src/templateStrings.ts": templateStrings,
+        "data/secrets.json": JSON.stringify(jsonValues, null, 2),
+        "docs/guide.md": mdGuide,
+      };
+    }
+
+    it("filters secret tokens across all pattern families and positions (whole-store clean)", async () => {
+      root = makeTempDir();
+      const fixtures = createSecretFixtures();
+      writeRepo(root, buildSecretRepoFiles(fixtures));
+
+      const service = makeService(root);
+      const run = await service.indexWorkspace(CancellationSource.never());
+      expect(run.totalFiles).toBe(6);
+
+      const scanner = new SecretScanner();
+      const storeRoot = path.join(root, ".occ-store");
+      const entriesDir = path.join(storeRoot, "entries");
+
+      // 1. Whole-store scan: scan every JSON file in the store
+      const walkShards = (dir: string): string[] => {
+        const files: string[] = [];
+        for (const d of fs.readdirSync(dir, { withFileTypes: true })) {
+          const full = path.join(dir, d.name);
+          if (d.isDirectory()) files.push(...walkShards(full));
+          else files.push(full);
+        }
+        return files;
+      };
+
+      const shardFiles = walkShards(entriesDir);
+      expect(shardFiles.length).toBe(6);
+
+      for (const shard of shardFiles) {
+        const content = fs.readFileSync(shard, "utf8");
+        const entry = JSON.parse(content);
+
+        // Check identifiers
+        const idText = (entry.identifiers ?? []).join("\n");
+        const idFindings = scanner.scan(`${entry.meta.path}#identifiers`, idText);
+        expect(idFindings).toHaveLength(0);
+
+        // Check bodyTokens
+        const bodyText = (entry.bodyTokens ?? []).map((t: { term: string }) => t.term).join("\n");
+        const bodyFindings = scanner.scan(`${entry.meta.path}#bodyTokens`, bodyText);
+        expect(bodyFindings).toHaveLength(0);
+
+        // Check summary
+        const summaryText = entry.fileSummary ?? "";
+        const sumFindings = scanner.scan(`${entry.meta.path}#summary`, summaryText);
+        expect(sumFindings).toHaveLength(0);
+
+        // Check signatures & docComments
+        for (const s of entry.symbols ?? []) {
+          if (s.docComment) {
+            expect(scanner.scan(`${entry.meta.path}#docComment`, s.docComment)).toHaveLength(0);
+          }
+          if (s.signature) {
+            expect(scanner.scan(`${entry.meta.path}#signature`, s.signature)).toHaveLength(0);
+          }
+        }
+      }
+
+      // 2. In-memory entries verification: assert no fixture secret survived in tokens
+      for (const entry of service.getEntries().values()) {
+        const idSet = new Set(entry.identifiers ?? []);
+        const bodyTerms = new Set((entry.bodyTokens ?? []).map((t) => t.term));
+        for (const f of fixtures) {
+          expect(idSet.has(f.secret)).toBe(false);
+          expect(bodyTerms.has(f.secret.toLowerCase())).toBe(false);
+          if (entry.fileSummary) {
+            expect(entry.fileSummary.includes(f.secret)).toBe(false);
+          }
+        }
+      }
+    });
+
+    it("produces byte-identical store builds across repeated runs", async () => {
+      root = makeTempDir();
+      const fixtures = createSecretFixtures();
+      writeRepo(root, buildSecretRepoFiles(fixtures));
+
+      const service1 = makeService(root);
+      await service1.indexWorkspace(CancellationSource.never());
+      const bytes1 = storeBytes(root);
+
+      // Rebuild in place
+      await service1.rebuild(CancellationSource.never());
+      const bytes2 = storeBytes(root);
+      expect(bytes2).toBe(bytes1);
+    });
+
+    it("incremental reindex is idempotent when secret tokens are filtered", async () => {
+      root = makeTempDir();
+      const fixtures = createSecretFixtures();
+      writeRepo(root, buildSecretRepoFiles(fixtures));
+
+      const service = makeService(root);
+      const run1 = await service.indexWorkspace(CancellationSource.never());
+      expect(run1.reparsed).toBe(6);
+      expect(run1.reused).toBe(0);
+
+      const bytes1 = storeBytes(root);
+      service.resetParseCounter();
+
+      const run2 = await service.indexWorkspace(CancellationSource.never());
+      expect(run2.reparsed).toBe(0);
+      expect(run2.reused).toBe(6);
+
+      const bytes2 = storeBytes(root);
+      expect(bytes2).toBe(bytes1);
+    });
   });
 });

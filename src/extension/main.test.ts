@@ -352,7 +352,7 @@ describe("activation audit (real activate(), mocked vscode)", () => {
     const manifestPath = path.join(storageDir, "manifest.json");
     expect(fs.existsSync(manifestPath)).toBe(true);
     const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-    expect(manifest.schemaVersion).toBe(2); // v2 (M3/E1): bodyTokens field
+    expect(manifest.schemaVersion).toBe(3); // v3: secret token filtering
     expect(manifest.entryCount).toBe(6);
     expect(Object.keys(manifest.files).sort()).toEqual([
       "README.md",

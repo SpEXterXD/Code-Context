@@ -13,8 +13,10 @@ import { Sha256FileHasher, type FileHasher } from "../workspace/fileHasher";
 import { detectLanguage, isTestFile } from "../workspace/languageDetection";
 import type { ParsedFile, SourceParser } from "../parser/parser";
 import { BODY_TOKEN_TOP_N, extractBodyTokens, type BodyTokens } from "../parser/bodyTokens";
+import { extractIdentifiers } from "../parser/typescriptParser";
 import { AnalysisEngine } from "../analysis/analysisEngine";
 import { JsonIndexStore, fingerprintForRoot, type IndexStore } from "../index/indexStore";
+import { SecretScanner, blankSpans } from "../security/secretScanner";
 import { toPosixPath } from "../shared/ids";
 import { logger } from "../shared/logging";
 import type { CancellationSignal } from "../shared/cancellation";
@@ -69,6 +71,7 @@ export class IndexingService {
   private readonly hasher: FileHasher = new Sha256FileHasher();
   private readonly options: IndexingOptions;
   private readonly rootPath: string;
+  private readonly scanner = new SecretScanner();
 
   private queue: Promise<unknown> = Promise.resolve();
   private _status: IndexStatus = { state: "empty", fileCount: 0 };
@@ -314,10 +317,17 @@ export class IndexingService {
             isTest: file.isTest,
             parseStatus: "PARSED",
           };
+          const spans = this.scanner.scanSpans(content);
+          const sanitizedContent = spans.length > 0 ? blankSpans(content, spans) : content;
+          const parsed = this.sanitizeParsed(
+            this.parserFor(file.path).parse(file.path, content),
+            sanitizedContent,
+            spans.length > 0,
+          );
           fresh.push({
             meta,
-            parsed: this.parserFor(file.path).parse(file.path, content),
-            body: extractBodyTokens(content, BODY_TOKEN_TOP_N),
+            parsed,
+            body: extractBodyTokens(sanitizedContent, BODY_TOKEN_TOP_N),
           });
           this.parseCounter++;
         } catch (e) {
@@ -445,7 +455,13 @@ export class IndexingService {
       parseStatus: "PARSED",
     };
     try {
-      const parsed = this.parserFor(rel).parse(rel, content);
+      const spans = this.scanner.scanSpans(content);
+      const sanitizedContent = spans.length > 0 ? blankSpans(content, spans) : content;
+      const parsed = this.sanitizeParsed(
+        this.parserFor(rel).parse(rel, content),
+        sanitizedContent,
+        spans.length > 0,
+      );
       this.parseCounter++;
       const knownFiles = new Set([...this.entries.keys(), rel]);
       const staged = new Map(this.entries);
@@ -459,7 +475,7 @@ export class IndexingService {
       staged.set(rel, { ...entry, internalRelations: [] });
       analysis.setEntriesView(staged);
       const final = analysis.buildFileEntry(meta, parsed);
-      const body = extractBodyTokens(content, BODY_TOKEN_TOP_N);
+      const body = extractBodyTokens(sanitizedContent, BODY_TOKEN_TOP_N);
       return { ...final, bodyTokens: body.terms, bodyLength: body.total };
     } catch (e) {
       logger.warn(`single-file analysis failed for ${rel}: ${(e as Error).message}`);
@@ -472,6 +488,37 @@ export class IndexingService {
         internalRelations: [],
       };
     }
+  }
+
+  private sanitizeParsed(
+    parsed: ParsedFile,
+    sanitizedContent: string,
+    hasSpans: boolean,
+  ): ParsedFile {
+    if (hasSpans && parsed.identifiers) {
+      parsed.identifiers = extractIdentifiers(sanitizedContent);
+    }
+    if (parsed.fileSummary) {
+      const sumSpans = this.scanner.scanSpans(parsed.fileSummary);
+      if (sumSpans.length > 0) {
+        parsed.fileSummary = blankSpans(parsed.fileSummary, sumSpans).replace(/\s+/g, " ").trim();
+      }
+    }
+    for (const s of parsed.symbols) {
+      if (s.docComment) {
+        const docSpans = this.scanner.scanSpans(s.docComment);
+        if (docSpans.length > 0) {
+          s.docComment = blankSpans(s.docComment, docSpans).replace(/\s+/g, " ").trim();
+        }
+      }
+      if (s.signature) {
+        const sigSpans = this.scanner.scanSpans(s.signature);
+        if (sigSpans.length > 0) {
+          s.signature = blankSpans(s.signature, sigSpans).replace(/\s+/g, " ").trim();
+        }
+      }
+    }
+    return parsed;
   }
 
   private commitEntries(committed: FileEntry[]): void {
