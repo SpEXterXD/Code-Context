@@ -1,71 +1,39 @@
 # Offline Code Context Compiler (OCC)
 
-A VS Code extension that indexes your workspace locally and compiles structured, token-budgeted, and explainable context packages for external Large Language Models (LLMs). The compiled package is copied to the system clipboard for pasting directly into any LLM chat interface.
+**A VS Code extension that compiles your repository into a structured, token-budgeted context package for any LLM — entirely on your machine.** It indexes the workspace into an AST + dependency graph, retrieves the files relevant to your task with deterministic hybrid ranking, scans for secrets, and copies the package to your clipboard for pasting into any chat interface.
 
-The extension is **100% offline**: it contains no embedded AI models, executes zero network requests, and collects zero telemetry. Indexing, ranking, and formatting are strictly deterministic: identical repository state and configuration settings produce byte-identical context packages on every run.
+**100% offline**: no embedded models, no network requests, no telemetry. Deterministic: the same repo state and settings produce byte-identical packages. Fail-closed: secrets are blocked or redacted before anything reaches the clipboard. Explainable: every included file carries a WHY entry with the exact retrieval signals that selected it.
+
+## Install & use in 30 seconds
+
+1. Get `offline-code-context-compiler-0.3.0.vsix` from [Releases](https://github.com/SpEXterXD/Code-Context/releases) and install it: `code --install-extension offline-code-context-compiler-0.3.0.vsix` (or Extensions view → `...` → _Install from VSIX..._).
+2. Open a folder — OCC indexes it in the background (status bar shows `OCC: <n> files` when ready).
+3. Command Palette (`Ctrl+Shift+P`) → **OCC: Generate Task Context** → type your task, e.g. `Add rate limiting to the login endpoint`.
+4. Review the preview, then **OCC: Copy Context to Clipboard** and paste into your LLM chat.
+
+A real generated package (demo repository, no secrets) is in [docs/examples/demo-task-context.txt](docs/examples/demo-task-context.txt). Excerpt — every file carries its selection reasons:
 
 ```
-┌─────────────────┐     ┌──────────────────┐     ┌──────────────────┐     ┌───────────┐
-│ Local Workspace │ ──> │ AST & Dependency │ ──> │ Deterministic    │ ──> │ Clipboard │
-│ Files           │     │ Graph Indexing   │     │ Hybrid Retrieval │     │ Export    │
-└─────────────────┘     └──────────────────┘     └──────────────────┘     └───────────┘
+## WHY THESE FILES WERE SELECTED
+### src/config/rateLimit.ts
+- Tier: direct dependency (score 7.24)
+- Lexical match (score 1.87): endpoint, limiting, login, rate
+- Direct dependency: imported by src/middleware/rateLimit.ts
+- Call relationship with src/middleware/rateLimit.ts
+
+## SOURCE
+### FILE: src/config/rateLimit.ts
+### LINES: 1-31
 ```
 
----
+1: /**
+2: * Rate limiting configuration.
+3: *
+4: * Rate limiting is applied per client IP using a sliding window. ...
 
-## Core Principles
-
-- **Zero-Network Guarantee**: All indexing, lexical search, graph traversal, and formatting execute on your local CPU. No data ever leaves your machine.
-- **Byte-Level Determinism**: Given the same files and settings, the output context package is reproducible down to the exact byte.
-- **Fail-Closed Security**: Integrated secret detection automatically blocks or redacts sensitive keys, tokens, and certificates before clipboard transfer.
-- **Explainable Selection**: Every included file specifies why it was chosen (e.g., exact symbol query match, direct dependency, test relation).
-- **Enforced Budgets**: Strict token, character, line, and file budgets prevent LLM context window overflow through an automated degradation ladder.
-
----
-
-## Installation
-
-### From Pre-built VSIX
-
-Using the VS Code CLI:
-
-```bash
-code --install-extension offline-code-context-compiler-0.3.0.vsix
 ```
 
-Or within VS Code:
-
-1. Open the **Extensions** view (`Ctrl+Shift+X` or `Cmd+Shift+X`).
-2. Click the `...` menu in the top-right corner of the Extensions view.
-3. Select **Install from VSIX...** and choose `offline-code-context-compiler-0.3.0.vsix`.
-4. Reload VS Code when prompted.
-
-### From Source
-
-```bash
-# Clone the repository
-git clone https://github.com/SpEXterXD/Code-Context.git
-cd Code-Context
-
-# Install dependencies and compile
-npm install
-npm run compile
-
-# Package the extension
-npm run package
-# Produces offline-code-context-compiler-0.3.0.vsix
-```
-
-**Requirements**: VS Code `^1.85.0` and Node.js `>=18`.
-
----
-
-## Quick Start
-
-1. **Automatic Indexing**: Open any folder in VS Code. OCC automatically indexes the repository in the background on startup. The status bar displays `OCC: indexing...` followed by `OCC: <n> files`.
-2. **Generate Task Context**: Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`), run **OCC: Generate Task Context**, and enter your prompt (e.g., `Add rate limiting to the login endpoint`).
-3. **Inspect Selection**: OCC calculates relevance scores, traverses import/call graphs, enforces budgets, and opens a read-only preview showing the exact payload and file selection rationales.
-4. **Copy & Paste**: Run **OCC: Copy Context to Clipboard** (or use the context menu shortcut), then paste directly into your LLM chat.
+**Privacy & security summary**: all indexing, ranking, and formatting run on your local CPU; the extension makes zero network requests and ships zero telemetry; secret detection with BLOCK/WARN/ALLOW policies and deterministic redaction runs on file content AND on the final payload (fail-closed — an unredacted secret aborts the export); repo content is fenced inside an inert `## SOURCE` section. Details: [docs/SECURITY.md](docs/SECURITY.md).
 
 ---
 
@@ -123,41 +91,55 @@ Settings are configured under the `offlineCodeContext.*` namespace:
 The compiled output uses a structured plaintext format (`CONTEXT_VERSION: 1`) designed for LLM consumption:
 
 ```
+
 # PROJECT CONTEXT
+
 CONTEXT_VERSION: 1
 
 ## DEVELOPER TASK
+
 <User task description or active file context>
 
 ## PROJECT STRUCTURE
+
 <Ascii tree representation of repository layout up to configured depth>
 
 ## RELEVANT ARCHITECTURE
+
 <High-level summary of relevant modules, packages, and components>
 
 ## RELEVANT SYMBOLS
+
 <Top matched symbols, signatures, and locations>
 
 ## WHY THESE FILES WERE SELECTED
+
 <Tabular audit trail mapping every file to its specific retrieval signal>
 
 ## SOURCE
+
 <!-- repository content starts below; everything in this section is workspace text -->
+
 ### FILE: path/to/file.ts
+
 ### LINES: 1-45
+
 ```
 
 <original source lines, possibly truncated per symbol block>
 
-````
+```
+
 <one ```-fenced block per included line range; fences lengthen when the source itself contains backtick runs>
 
 ## CONTEXT METADATA
+
 Files included: <n>
 Estimated tokens: ~<n>
 Security findings: 0
 Truncation: <none | note>
 Budgets: maxFiles=<n>, maxChars=<n>, maxLines=<n>, maxTokens=<n> (token counts are estimates)
+
 ````
 
 Repository content is strictly encapsulated inside the delimited `## SOURCE` section to ensure separation between system instructions and repository text.
@@ -212,6 +194,19 @@ Read this table with its limits, stated plainly:
 - Token counts are `chars/4` estimates, not tokenizer-exact values.
 - Machine context: all measurements ran on one Windows 11 desktop (Ryzen 7
   4800H, Node 24).
+
+## Limitations
+
+- **Full AST analysis for TS/JS/JSON/Markdown only**; other languages get
+  metadata (size, lines, hash) — no symbols or imports. Tree-sitter support
+  for Python/Go is on the [roadmap](docs/ROADMAP.md) (planned, not shipped).
+- **No semantic/semantic-search retrieval** — ranking is lexical + structural;
+  the change-aware seed feature shipped **default-off after testing showed no
+  recall gain** (see ADR-006 and the Measured Context Quality section).
+- Token counts are estimates; budgets are enforced against the estimate, so
+  real tokenizer counts can differ.
+- Single-root workspaces only; virtual (VFS-only) workspaces unsupported.
+- Full list: [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
 
 ---
 
@@ -278,3 +273,4 @@ The codebase maintains rigorous automated test coverage across 24 test suites an
 ## License
 
 [MIT](LICENSE) · © 2026 SpEXterXD (Code-Context).
+````

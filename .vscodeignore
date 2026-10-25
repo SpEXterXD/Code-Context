@@ -29,3 +29,5 @@ coverage/**
 .vscode-test/**
 .dbg/**
 *.vsix
+docs/**
+.eval-cache/**

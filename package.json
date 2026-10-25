@@ -14,9 +14,8 @@
     "node": ">=18"
   },
   "categories": [
-    "Other",
     "Programming Languages",
-    "Linters"
+    "Other"
   ],
   "keywords": [
     "context",
@@ -329,7 +328,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
     "format:check": "prettier --check \"src/**/*.ts\" \"scripts/**/*.ts\"",
-    "build:ext": "esbuild src/extension/main.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --target=node18",
+    "build:ext": "esbuild src/extension/main.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --target=node18 --minify",
     "compile": "npm run typecheck && npm run build:ext",
     "package": "npm run compile && npx @vscode/vsce package --no-git-tag-version --allow-missing-repository",
     "test": "vitest run",
@@ -363,5 +362,7 @@
     "tsx": "^4.16.2",
     "typescript-eslint": "^7.16.0",
     "vitest": "^2.0.3"
-  }
+  },
+  "bugs": "https://github.com/SpEXterXD/Code-Context/issues",
+  "homepage": "https://github.com/SpEXterXD/Code-Context#readme"
 }

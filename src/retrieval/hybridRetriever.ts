@@ -53,16 +53,15 @@ export const M4_SEED_WEIGHTS = {
   diagnostic: 0.4,
   stackFrame: 0.4,
   /**
-   * M4b/S1: how seeded files interact with package slots.
-   *  - "slots" (M4 behavior): seeded files are pinned candidates that may
-   *    consume content slots. The M4 tuning sweep measured this as
-   *    significantly harmful to hidden-gold package recall (ADR-006).
-   *  - "signal-only" (M4b/S1): seeds fire signals and originate graph
-   *    expansion, but are NOT pinned, are excluded from content slots
-   *    (they surface as path-only WHY entries and via CURRENT CHANGES),
-   *    freeing their slots for everything else.
+   * M4b/S1: how seeded files interact with package slots. Default
+   * "signal-only" (v0.3 decision, ADR-006): seeds fire signals and originate
+   * graph expansion, but are NOT pinned and are excluded from content slots
+   * (they surface as path-only WHY entries and via CURRENT CHANGES). The
+   * measured "slots" behavior (M4) was significantly harmful to
+   * hidden-gold package recall; "signal-only" reversed the direction but
+   * did not produce a significant gain either (ADR-006, M4b outcome).
    */
-  slotPolicy: "slots" as "slots" | "signal-only",
+  slotPolicy: "signal-only" as "slots" | "signal-only",
   /**
    * M4b/S2: weight for SEED_NEIGHBOR — one-hop graph neighbors (imports,
    * dependents, tests) of seeded files. 0 disables. Untuned default.
