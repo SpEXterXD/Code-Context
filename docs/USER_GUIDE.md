@@ -12,7 +12,7 @@ From a terminal:
 code --install-extension offline-code-context-compiler-0.3.1.vsix
 ```
 
-Or: Extensions view (`Ctrl+Shift+X`) → `…` menu → **Install from VSIX…** →
+Or: Extensions view (`Ctrl+Shift+X`) → `…` menu → **Install from VSIX...** →
 pick the `.vsix` file → reload the window.
 
 To build from source instead: `npm install && npm run package`, then install
