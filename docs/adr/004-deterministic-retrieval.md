@@ -1,4 +1,4 @@
-# ADR-004: Deterministic Retrieval & Ranking
+# ADR-004: Deterministic retrieval and ranking
 
 Date: 2026-09-11 · Status: Accepted
 
@@ -28,10 +28,9 @@ Signals and their provenance:
  specificity (idf/ln(1+N)): an exact hit on a rare term beats one on
  "user". Local variables and fields are excluded.
 - LEXICAL: tf-idf over fields symbol(3.0) > path(2.0) = imports/exports
- names(2.0) > summary(1.2) > identifiers(0.8), with sublinear tf (1+ln tf),
- a prefix-match rule (four or more characters, 0.7 weight; "authentication"
- matches "auth"), and a coordination factor (0.6 + 0.4 x coverage): files
- matching more distinct query terms outrank files repeating one term.
+ names(2.0) > summary(1.2) > identifiers(0.8), with sublinear tf (1+ln tf).
+ A prefix-match rule scores terms of four or more characters at 0.7 weight ("authentication" matches "auth").
+ A coordination factor (0.6 + 0.4 x coverage) ensures files matching more distinct query terms outrank files repeating one term.
 - Structural: bidirectional depth-limited graph expansion around
  content-based seeds. Dependency 0.6, dependent 0.5, call edge 0.5, test 0.7,
  inheritance 0.6, same-directory 0.2. The per-file structural total is

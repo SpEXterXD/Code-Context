@@ -1,4 +1,4 @@
-# ADR-003: Parser Abstraction & Engine Choice (ADR-1 of the spec)
+# ADR-003: Parser abstraction and engine choice (ADR-1 of the spec)
 
 Date: 2026-09-11 · Status: Accepted
 

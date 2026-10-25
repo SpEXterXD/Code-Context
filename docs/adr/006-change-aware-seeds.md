@@ -11,13 +11,12 @@ Status: implemented, experimental, off by default; benchmark showed no gain in r
 
 Feed OCC the developer's _current_ state, what is already changing, what is
 open, what is selected, what is broken, as retrieval seeds and a wire
-section, so the context package leads with the files the user is actually
-working on. This is the milestone the M2 audit ranked as the highest
+section, so the context package leads with the files the user is currently working on. This is the milestone the M2 audit ranked as the highest
 context-quality gain for a local tool.
 
 ## Decision
 
-### Seed Scope
+### Seed scope
 
 ### a) Working-tree changes (extension layer, trust-gated)
 
@@ -27,41 +26,29 @@ flags, async, timeout):
 - `status --porcelain=v1 -z`, the authoritative map: staged/unstaged/
   untracked, renames (`R  new\0old\0`), deletions, and untracked files.
 - `diff --no-ext-diff --no-textconv --name-only` and
-  `diff --no-ext-diff --no-textconv --cached --name-only`, the cross-check
-  for staged vs unstaged. **`--no-ext-diff` and `--no-textconv` are
-  mandatory on every diff invocation**: an external diff driver
-  (`diff.external`, git-config(1)) or a textconv filter is
-  repo-configurable ARBITRARY COMMAND EXECUTION, exactly like fsmonitor.
-  `npm run eval:seed-hazard-repro` reproduces this for `diff.external`,
-  a textconv driver, and a clean/smudge filter, each run raw and through
-  safeGit, for both `status` and `diff`. MEASURED (git 2.53, 2026-10-25):
-  raw `status` executes the CLEAN filter (index refresh) but safeGit's
-  `GIT_OPTIONAL_LOCKS=0` prevents it; a PLAIN `diff` executes the external
-  driver, the textconv filter AND the clean filter, raw AND through
-  safeGit's global flags, which do not cover diff drivers, while the
-  collector's exact form (`diff --no-ext-diff --no-textconv`) still runs
-  the CLEAN filter (there is no git flag to disable filters on diff).
-  Therefore: diff content collection can never be made hazard-free by
-  flags alone; it is protected by (1) the collector always passing
-  `--no-ext-diff --no-textconv` (kills the two RCE-prone drivers), and
-  (2) the workspace-trust gate, in untrusted workspaces the collector is
-  never invoked (tested in seedProvider.test.ts). A plumbing-based
-  self-computed diff (cat-file vs disk, no filters) is the future
-  hardening if this is ever revisited.
+  `diff --no-ext-diff --no-textconv --cached --name-only`: the cross-check for staged vs unstaged changes.
+  Both `--no-ext-diff` and `--no-textconv` are mandatory on every diff invocation.
+  An external diff driver (`diff.external`, git-config(1)) or textconv filter introduces repository-configurable command execution risks.
 
-Handling rules: untracked files are path-only seeds by default; their
-add-diff is rendered under the size cap only when the file is small enough
-(read from disk, never via diff content), blocked paths never reach that
-step; deleted paths are seeds for _retrieval only_ (never read), and their
-REMOVED LINES in a diff are content and are scanned like any other diff
-text; renames seed both paths; binary files (NUL sniff, same rule as the
-scanner) are path-only seeds; diff content extraction skips files above
-`maxFileSizeBytes`; submodule paths (gitlink entries in status) are
-path-only seeds; CRLF is irrelevant to path seeds and content passes
-through unchanged (deterministic bytes); a diff larger than the
-`CURRENT CHANGES` budget is truncated per-file round-robin (deterministic
-order) with a truncation note. **Gated on `vscode.workspace.isTrusted`**
-exactly like recency: untrusted workspaces skip git entirely.
+`npm run eval:seed-hazard-repro` reproduces this behavior for `diff.external`, textconv drivers, and clean/smudge filters.
+Measurements with git 2.53 on 2026-10-25 show that raw `status` invokes the clean filter during index refreshes, whereas safeGit flags (`GIT_OPTIONAL_LOCKS=0`) prevent it.
+A plain `diff` runs the external driver, textconv filter, and clean filter.
+SafeGit global flags do not cover diff drivers, while the collector form (`diff --no-ext-diff --no-textconv`) neutralizes external diff and textconv drivers.
+
+Diff collection is protected through two mechanisms:
+1. The collector always passes `--no-ext-diff --no-textconv` to neutralize driver execution.
+2. The workspace-trust gate prevents collector invocation in untrusted workspaces (`seedProvider.test.ts`). A plumbing-based self-computed diff (`cat-file` vs disk, no filters) remains the future hardening path.
+
+Handling rules for changes:
+- Untracked files act as path-only seeds by default. When small enough, their added content is rendered from disk under the size cap. Blocked paths never reach that step.
+- Deleted paths provide seeds for retrieval only and are never read. Removed lines in a diff are treated as content and scanned like other diff text.
+- Renames seed both the old and new paths.
+- Binary files detected via NUL bytes act as path-only seeds.
+- Diff content extraction skips files exceeding `maxFileSizeBytes`.
+- Submodule paths (gitlink entries in status) act as path-only seeds.
+- Line endings pass through unchanged with deterministic bytes.
+- A diff larger than the `CURRENT CHANGES` budget is truncated per-file round-robin in deterministic order with a truncation note.
+- Change collection is gated on `vscode.workspace.isTrusted`. Untrusted workspaces skip git execution entirely.
 
 **Flood control**: changed-path seeds are capped (default 20,
 `changeSeeds.maxPaths`), ordered deterministically, state priority
@@ -129,16 +116,12 @@ fixtures of all five formats.
 
 ### e) Retrieval integration
 
-- Seeds become **pinned candidates** (they survive zero-signal retrieval,
-  like user pins today) and fire new signals with named, ablatable
-  constants (one object, `M4_SEED_WEIGHTS = { diffTouched, openEditor,
-diagnostic, stackFrame }`), disabled entirely by an `--ablate seeds`
-  harness switch and a settings toggle. **Only `diffTouched` is tuned** by
-  the simulation (see below); `openEditor`/`diagnostic`/`stackFrame` ship
-  with conservative untuned defaults (0.3/0.4/0.4), documented as untuned,
-  and their seed sources are **off by default** behind settings
-  (`offlineCodeContext.seedEditors`, `seedDiagnostics`, `seedStackTraces`,
-  and `changeSeeds`, all default false; `changeSeeds` has `maxPaths: 20`).
+- Seeds become pinned candidates and survive zero-signal retrieval, similar to user pins.
+  They fire signals defined by named constants (`M4_SEED_WEIGHTS = { diffTouched, openEditor, diagnostic, stackFrame }`).
+  These signals can be disabled via the `--ablate seeds` flag or settings toggles.
+  Only `diffTouched` is tuned by the simulation.
+  The parameters `openEditor`, `diagnostic`, and `stackFrame` ship with conservative untuned defaults (0.3, 0.4, 0.4).
+  Their seed sources remain disabled by default behind configuration settings (`offlineCodeContext.seedEditors`, `seedDiagnostics`, `seedStackTraces`, and `changeSeeds`, with `changeSeeds.maxPaths: 20`).
 - WHY reasons are derived from the fired signals (existing
   explainSignals machinery), so the "signal is real" test verifies each
   new reason against actual seed data.
@@ -154,7 +137,7 @@ diagnostic, stackFrame }`), disabled entirely by an `--ablate seeds`
 - `## CURRENT CHANGES` is **additive and optional** (present only when diff
   content exists). **`CONTEXT_VERSION` stays 1**, "v2" is reserved for the
   roadmap item (task repetition, OMITTED BUT RELEVANT, repo conventions,
-  symbol-level slicing). Consumers that do not know the section simply see
+  symbol-level slicing). Consumers that do not know the section see
   one more inert section; the fence-safety fix applies to every diff block.
   Section order: after `## DEVELOPER TASK`, before `## PROJECT STRUCTURE`,
   the user's working state is the second-most-important context after the
@@ -173,13 +156,11 @@ failure is the existing budget-unreachable error, unchanged.
 
 ## Evaluation design (simulation; stated limits first)
 
-**What this CANNOT show:** real editor, selection, or diagnostics seeds,
-commit-message tasks carry no working-tree state. Those get unit tests,
-an integration test with a temp git repo, and a manual test checklist.
-**What the simulation CAN show:** whether OCC propagates from partial
-change information (seeded files → their graph/lexical neighbors) better
-than lexical-only retrieval, and whether seeds hurt when they are
-irrelevant.
+Commit-message benchmark tasks do not carry working-tree state.
+Consequently, the simulation cannot measure real editor, selection, or diagnostic seeds.
+Those capabilities rely on unit tests, an integration test against a temporary git repository, and manual checklists.
+The simulation tests whether OCC propagates partial change information to graph and lexical neighbors better than lexical retrieval alone.
+It also tests whether seeds reduce accuracy when they are irrelevant.
 
 - **Qualifying tasks**: gold with k ≥ 2 regular source files. Tuning:
   234/300 tasks; eval: 379/500 (measured 2026-10-25). Multi-gold tasks are
@@ -192,21 +173,17 @@ irrelevant.
   each arm's ranked list AND from its delivered package before any
   hidden-gold metric is computed, no arm can score a hidden gold file it
   holds in hand, and no arm benefits or suffers from revealed files
-  occupying ranked slots. This removal is a pure harness function,
+  occupying ranked slots. This removal is a pure evaluation tooling function,
   unit-tested. The same removal applies to the `## CURRENT CHANGES`
   comparison arms.
-- **Conditions**: (1) OCC unseeded; (2) OCC seeded with revealed gold paths
-  (paths only, snapshots have no working tree, so no diff content);
-  (3) BM25 with the revealed file names appended to the query text
-  (lexical-equivalent advantage); (4) **same-directory decoy control**:
-  the same count of non-gold files picked deterministically from a gold
-  file's directory; (5) **mixed-precision arm**: ~50% revealed gold +
-  ~50% same-directory non-gold decoys; (6) **random-decoy arm**: the same
-  count of random non-gold snapshot files; (7) **real-diff arm**: OCC
-  seeded as in (2) PLUS the revealed files' REAL commit diff (from the
-  pinned clone) rendered as `## CURRENT CHANGES`, measures token cost,
-  effect on (hidden) package recall, secret handling and determinism of
-  the full pipeline, reported separately.
+- Evaluated arms and conditions:
+  1. OCC unseeded baseline.
+  2. OCC seeded with revealed gold paths (paths only, snapshots have no working tree, so no diff content).
+  3. BM25 with revealed file names appended to the query text for lexical-equivalent comparison.
+  4. Same-directory decoy control: matching count of non-gold files picked deterministically from a gold file's directory.
+  5. Mixed-precision arm: approximately 50% revealed gold and 50% same-directory non-gold decoys.
+  6. Random-decoy arm: matching count of random non-gold snapshot files.
+  7. Real-diff arm: OCC seeded paths plus commit diffs rendered in `## CURRENT CHANGES` to measure token cost, hidden package recall, and secret handling.
 - **Tuning scope**: ONLY `DIFF_TOUCHED` is tuned by simulation, its weight
   is swept on the tuning split and chosen to maximize hidden-gold gain
   subject to the MIXED arm not significantly regressing.
@@ -224,18 +201,13 @@ irrelevant.
   unseeded) AND unseeded-task metrics (k=1 tasks, which receive no seeds)
   do not significantly regress AND the mixed/random-decoy arms do not
   significantly degrade hidden-gold recall.
-- **Datasets**: tune on the tuning split only. Final confirmation runs ONCE
-  per pool, from a clean committed tree, on TWO disjoint pools:
-  (a) **pool A**, eval-stream picks 161–220 per repo: drawn from the same
-  seeded stream, asserted in code to be disjoint from the committed eval
-  sample (picks 1–100), from the M3b holdout (picks 101–160, reproduced
-  and asserted), and from the tuning half by construction;
-  (b) **pool B**, 2–3 NEW TS/JS repositories never used before, pinned and
-  recorded in `repos.json` as an independent confirmation pool.
-  If upstream repos have advanced enough past the pins, post-pin tasks are
-  preferred for pool A and labeled; otherwise unsampled tasks as above.
+- Datasets: tuning runs on the tuning split only.
+  Final confirmation runs once per pool from a clean committed tree across two disjoint pools:
+  - Pool A (eval-stream picks 161 to 220 per repo): drawn from the same seeded stream, verified disjoint from the committed eval sample (picks 1 to 100) and the M3b holdout (picks 101 to 160).
+  - Pool B: two to three new TypeScript and JavaScript repositories recorded in `repos.json` as an independent confirmation pool.
+  If upstream repositories advance past pinned commits, post-pin tasks are used for Pool A; otherwise unsampled tasks are used.
 - **Determinism**: fixed seeds everywhere (task-id-derived sampler seed;
-  the harness seed for bootstrap); same dataset + same commit ⇒ identical
+  the runner seed for bootstrap); same dataset + same commit ⇒ identical
   metric sections; per-task checkpoint/resume as in the existing runner.
 
 ## Risks
@@ -271,26 +243,22 @@ irrelevant.
 
 ## Amendments (approved at implementation start, 2026-10-25)
 
-The ten changes approved at CHECKPOINT 1 are incorporated above; the
-load-bearing ones: fairness removal of revealed files in every arm (unit-
-tested), mixed-precision and random-decoy arms, DIFF_TOUCHED-only tuning
-with untuned OFF-by-default editor/diagnostic/stack signals, mandatory
-`--no-ext-diff --no-textconv` plus the seed-hazard repro for
-`diff.external`/textconv/clean-smudge filters, sensitive-path BLOCK before
-diff content is read, deleted-line scanning, untracked add-diff under the
-cap, NO CONTEXT_VERSION bump (v2 stays a roadmap item), flood control
-(cap 20, state-then-path order, lockfile/generated exclusion,
-merge/rebase note, 500-file test), the real-diff budget arm, two disjoint
-confirmation pools (picks 161–220 asserted + 2–3 new repos) with
-**hidden-gold package recall pre-registered as the single primary
-metric**, and a linear-time, length-capped (64 KB) stack-trace parser with
-adversarial and timing tests.
+The ten changes approved at CHECKPOINT 1 are incorporated above.
+Key additions include fairness removal of revealed files across all arms and mixed-precision and random-decoy comparison arms.
+Tuning is restricted to `DIFF_TOUCHED`, with editor, diagnostic, and stack signals disabled by default.
+Diff invocations mandate `--no-ext-diff --no-textconv` to neutralize external drivers, verified by the seed-hazard test suite.
+Sensitive-path blocking occurs before diff content is read.
+Deleted lines are scanned for secrets, and untracked file additions are rendered under the token budget.
+Wire format `CONTEXT_VERSION` remains 1.
+Flood control enforces a 20-path cap with state-then-path ordering and lockfile exclusions.
+Stack traces are parsed via a linear-time, 64 KB capped parser with adversarial and timing tests.
+Finally, hidden-gold package recall was pre-registered as the single primary evaluation metric across two disjoint confirmation pools (picks 161 to 220 plus two to three new repositories).
 
 ## Consequences
 
-### Evaluation Outcome (Measured 2026-10-25): Keep Rule Failed, seeds ship default-OFF
+### Evaluation outcome (measured 2026-10-25): keep rule failed, seeds ship default-off
 
-The corrected simulation (weight actually applied; traversal hints appended
+In the corrected simulation, the weight was applied and traversal hints were appended
 after content seeds per the semantics above) ran the full tuning split
 (234 qualifying tasks) at three DIFF_TOUCHED weights. Hidden-gold package
 recall (seeded − unseeded, paired 95% CI):
@@ -327,13 +295,11 @@ mechanism, not the weight: e.g. seeds influence only the CURRENT CHANGES
 section (no ranking/packaging participation), or co-change-coupled
 neighbors instead of graph neighbors.
 
-## M4b OUTCOME (2026-10-25): S1/S2 tested, direction reversed but keep rule still not met
+## M4b outcome (2026-10-25): S1/S2 tested, direction reversed but keep rule still not met
 
-S1 (seeds as signal + graph-expansion origin only, never pinned, excluded
-from content slots, their ~1.6 freed slots go to other files) and S2
-(S1 + one-hop graph neighbors of seeds boosted via a SEED_NEIGHBOR signal,
-named constant `neighborBoost`) were run on the full tuning split
-(234 qualifying tasks, paired CIs vs unseeded):
+Two additional arms were evaluated on the full tuning split (234 qualifying tasks, paired CIs vs unseeded).
+Under S1 (signal-only), seeds provide retrieval signals and graph origins but are never pinned, freeing roughly 1.6 package slots.
+Under S2 (signal-only plus neighbor boost), one-hop graph neighbors receive an additional boost via `neighborBoost = 0.4`:
 
 | Arm                                    | Hidden-gold package recall | dPkg vs unseeded                | Top-1 |
 | -------------------------------------- | -------------------------- | ------------------------------- | ----- |

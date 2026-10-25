@@ -1,4 +1,4 @@
-# ADR-007: Clipboard Export & Byte-Exact Preview
+# ADR-007: Clipboard export and byte-exact preview
 
 Date: 2026-09-11 · Status: Accepted
 
