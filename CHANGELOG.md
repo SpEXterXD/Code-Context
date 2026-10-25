@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+(nothing yet)
+
+## 0.3.0 (2026-10-25)
+
+M1 through M4b, integrated. This release makes the compiled context package
+measurably better at including the right files: OCC is significantly ahead
+of a BM25-over-contents baseline on Top-1, Recall@5/10 and MRR (holdout,
+paired 95% CIs) and at **parity** on package recall — the earlier
+significant deficit was closed by the rank-priority packaging change.
+Change-aware seeds were fully implemented and then measured to provide **no
+recall gain** (significantly harmful without the M4b slot-policy fix, not
+significant with it), so the feature ships **experimental and OFF by
+default**; the CURRENT CHANGES diff section still provides direct context
+for the LLM when enabled. The extension is hardened: git runs only through
+a single safeGit spawn point with repo-side config neutralized, is
+workspace-trust gated, and startup index load is ~33% faster.
+
 ### Added (M4: change-aware seeds — machinery shipped, DEFAULT OFF after a negative result)
 
 - **Working-tree change seeds** (`src/seeds/`, trust-gated, behind

@@ -302,6 +302,12 @@ this benchmark: gold sets are small (2–3 files) and weakly coupled — hidden
 gold is rarely a graph neighbor of revealed gold beyond what the task text
 already retrieves.
 
+v0.3 decision: the default `slotPolicy` for the (default-off) feature is
+**"signal-only"** — if a user enables change seeds, the measured-harmful
+"slots" behavior must not be what they get; "signal-only" reversed the
+direction and removed all regressions even though its own gain was not
+significant. Documented here and in the constant's doc comment.
+
 Decision per the keep rule: **no confirmation pools were run** (they would
 measure a known-harmful configuration); `offlineCodeContext.changeSeeds`
 ships **default false**; `M4_SEED_WEIGHTS.diffTouched` stays 0.6 as an

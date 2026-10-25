@@ -514,27 +514,33 @@ describe("ContextBuilder", () => {
       return app2;
     }
 
-    it("DIFF_TOUCHED pins the seed, fires a real signal, and labels the tier", async () => {
-      const app = await makeSeedApp();
-      const result = app.buildContext("task", {
-        taskText: "unrelated query with no lexical overlap whatsoever",
-        seedSet: {
-          changedPaths: [{ path: "src/gizmo.ts", state: "unstaged" }],
-          diffSections: [],
-          openEditors: [],
-          diagnostics: [],
-          stackFrames: [],
-          notes: [],
-        },
-      });
-      const gizmo = result.retrieval?.ranked.find((r) => r.path === "src/gizmo.ts");
-      expect(gizmo).toBeDefined();
-      expect(gizmo!.signals.some((s) => s.kind === "DIFF_TOUCHED")).toBe(true);
-      const why = result.rankedForDisplay.find((w) => w.path === "src/gizmo.ts");
-      expect(why?.tierLabel).toContain("changed in your working tree");
-      expect(why?.reasons.some((r) => r.startsWith("Changed in your working tree"))).toBe(true);
-      const source = extractSection(result.payload, "SOURCE");
-      expect(source).toContain("src/gizmo.ts");
+    it("DIFF_TOUCHED pins the seed (slots policy), fires a real signal, and labels the tier", async () => {
+      const wasPolicy = M4_SEED_WEIGHTS.slotPolicy;
+      M4_SEED_WEIGHTS.slotPolicy = "slots"; // this test covers the slots interaction
+      try {
+        const app = await makeSeedApp();
+        const result = app.buildContext("task", {
+          taskText: "unrelated query with no lexical overlap whatsoever",
+          seedSet: {
+            changedPaths: [{ path: "src/gizmo.ts", state: "unstaged" }],
+            diffSections: [],
+            openEditors: [],
+            diagnostics: [],
+            stackFrames: [],
+            notes: [],
+          },
+        });
+        const gizmo = result.retrieval?.ranked.find((r) => r.path === "src/gizmo.ts");
+        expect(gizmo).toBeDefined();
+        expect(gizmo!.signals.some((s) => s.kind === "DIFF_TOUCHED")).toBe(true);
+        const why = result.rankedForDisplay.find((w) => w.path === "src/gizmo.ts");
+        expect(why?.tierLabel).toContain("changed in your working tree");
+        expect(why?.reasons.some((r) => r.startsWith("Changed in your working tree"))).toBe(true);
+        const source = extractSection(result.payload, "SOURCE");
+        expect(source).toContain("src/gizmo.ts");
+      } finally {
+        M4_SEED_WEIGHTS.slotPolicy = wasPolicy;
+      }
     });
 
     it("renders CURRENT CHANGES after DEVELOPER TASK with content-aware fences", async () => {
