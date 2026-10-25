@@ -1,8 +1,18 @@
-# Offline Code Context Compiler (OCC) v0.3.0
+# Offline Code Context Compiler (OCC) v0.3.1
+
+> **Notice**: v0.3.1 is a packaging and hygiene patch release that **supersedes v0.3.0**. The v0.3.0 tag was created on origin before final packaging and third-party notices landed. v0.3.1 provides the complete packaging fixes with zero functional or wire format changes.
 
 M1 through M4b, integrated. This release makes the compiled context package measurably better at including the right files: OCC is significantly ahead of a BM25-over-contents baseline on Top-1, Recall@5/10 and MRR (holdout, paired 95% CIs) and at **parity** on package recall — the earlier significant deficit was closed by the rank-priority packaging change.
 
 Change-aware seeds were fully implemented and then measured to provide **no recall gain** (significantly harmful without the M4b slot-policy fix, not significant with it), so the feature ships **experimental and OFF by default**; the CURRENT CHANGES diff section still provides direct context for the LLM when enabled. The extension is hardened: git runs only through a single safeGit spawn point with repo-side config neutralized, is workspace-trust gated, and for startup index load we removed a quadratic step that accounted for ~24% of the load profile; median startup on the test machine changed from 8,163 ms to 5,465 ms over 3 runs (before: 5,472-10,279 ms; after: 4,592-9,213 ms).
+
+## What Changed in v0.3.1 (Patch Release)
+
+- **VSIX Packaging Hygiene**: Added `RELEASE_NOTES.md` and `.gitignore` to `.vscodeignore` to exclude them from the published `.vsix`. The extension package now cleanly contains exactly 6 runtime and legal files (`dist/extension.js`, `package.json`, `README.md`, `CHANGELOG.md`, `LICENSE`, `THIRD_PARTY_NOTICES.md`).
+- **Third-Party Notices**: Added `THIRD_PARTY_NOTICES.md` with full verbatim Apache License 2.0 text and Microsoft copyright notice for the bundled `typescript 5.9.3` dependency.
+- **Startup Performance Claims**: Corrected startup index load descriptions across all documentation to match the exact measured test ranges (median 5,465 ms vs 8,163 ms across 3 runs; before: 5,472–10,279 ms; after: 4,592–9,213 ms; quadratic step accounted for ~24% of the load profile).
+- **Bundle Parity Verification**: Verified that minified bundle output produces byte-for-byte payload parity with unminified builds (identical SHA-256 on `demo-project`).
+- **No Functional Changes**: Retrieval algorithms, ranking, secret detection policies, and wire format (`CONTEXT_VERSION: 1`) are completely unchanged from v0.3.0.
 
 ## Measured Context Quality (Holdout)
 
