@@ -25,6 +25,12 @@ jobs:
       - run: npm run test:docs-sync
       - run: npm run compile
       - run: npm run package
+      - name: Smoke test packaged VSIX (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run -a npm run smoke:vsix
+      - name: Smoke test packaged VSIX (Windows / macOS)
+        if: runner.os != 'Linux'
+        run: npm run smoke:vsix
       - uses: actions/upload-artifact@v4
         with:
           name: vsix-${{ matrix.os }}
