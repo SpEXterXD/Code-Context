@@ -49,7 +49,7 @@ export function readSeedSettings(): {
     return typeof value === "number" && Number.isFinite(value) ? Math.floor(value) : fallback;
   };
   return {
-    changeSeeds: bool("changeSeeds", true),
+    changeSeeds: bool("changeSeeds", false),
     changeSeedsMaxPaths: int("changeSeedsMaxPaths", 20),
     seedEditors: bool("seedEditors", false),
     seedDiagnostics: bool("seedDiagnostics", false),

@@ -454,7 +454,6 @@ describe("ContextBuilder", () => {
           maxCodeLinesPerFile: 400,
           structureDepth: 4,
           currentChangesMaxTokens: 1500,
-          currentChangesMaxTokens: 1500,
         };
         M3B_RANK_PRIORITY.enabled = false;
         const tierFirst = new OccApplication(root, path.join(root, ".occ-store"), tight);

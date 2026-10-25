@@ -1,11 +1,13 @@
 # Roadmap
 
-Planned work, with scope exactly as designed. Nothing below is shipped in
-the current release; shipped retrieval/packaging work is described in
-[docs/eval/README.md](eval/README.md) and the CHANGELOG.
+Planned work, with scope exactly as designed. Unshipped and experimental
+features are documented with their status below; shipped retrieval/packaging
+work is described in [docs/eval/README.md](eval/README.md) and the CHANGELOG.
 
-## Change-aware context — Planned (not shipped)
+## Change-aware context — Implemented, experimental, off by default; benchmark showed no gain in recall
 
+Implemented, experimental, off by default; benchmark showed no gain in recall
+(see [ADR-006](adr/006-change-aware-seeds.md) and [docs/eval/README.md](eval/README.md)).
 Seeds from the developer's current state, fed into retrieval as pinned
 candidates and scoring signals:
 

@@ -88,6 +88,7 @@ npm run package
 | `offlineCodeContext.copyContext`                   | OCC: Copy Context to Clipboard         | Yes     | —                               |
 | `offlineCodeContext.securityScan`                  | OCC: Security Scan                     | Yes     | —                               |
 | `offlineCodeContext.clearIndex`                    | OCC: Clear Local Index                 | Yes     | —                               |
+| `offlineCodeContext.seedFromStackTrace`            | OCC: Seed From Clipboard Stack Trace   | Yes     | —                               |
 
 _Note_: Commands prefixed with `Generate` open the read-only preview editor. Commands prefixed with `Copy` write the payload directly to the clipboard and display a summary notification.
 
@@ -113,6 +114,7 @@ Settings are configured under the `offlineCodeContext.*` namespace:
 | `maxFileSizeBytes`    | `integer` | `1048576`    | Skip indexing files larger than this threshold (1 MiB default).                                              |
 | `excludePatterns`     | `array`   | _(standard)_ | Glob patterns excluded from indexing (`node_modules`, `dist`, `.git`, `.env*`, etc.).                        |
 | `statusBar`           | `boolean` | `true`       | Display current index status in the VS Code status bar.                                                      |
+| `changeSeeds`         | `boolean` | `false`      | Implemented, experimental, off by default; benchmark showed no gain in recall.                               |
 
 ---
 

@@ -710,7 +710,7 @@ export class ContextBuilder {
     // current-changes cap, truncated at a line boundary; sections whose
     // share is fully consumed are dropped deterministically.
     const maxChars = this.deps.budget.currentChangesMaxTokens * 4;
-    let sections: Array<{ path: string; diff: string }> = [];
+    const sections: Array<{ path: string; diff: string }> = [];
     let truncated = false;
     if (accepted.length > 0 && maxChars > 0) {
       const share = Math.floor(maxChars / accepted.length);

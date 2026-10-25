@@ -1,7 +1,6 @@
-# ADR 006: Change-aware seeds (M4) — DESIGN, NOT IMPLEMENTED
+# ADR 006: Change-aware seeds (M4) — Implemented, experimental, off by default
 
-Status: design approved for implementation planning; no source code exists
-for this yet. Shipped retrieval behavior is unchanged.
+Status: implemented, experimental, off by default; benchmark showed no gain in recall (see negative outcome and keep-rule failure below). Shipped default retrieval behavior is unchanged.
 
 ## Goal
 
@@ -131,8 +130,8 @@ diagnostic, stackFrame }`), disabled entirely by an `--ablate seeds`
   the simulation (see below); `openEditor`/`diagnostic`/`stackFrame` ship
   with conservative untuned defaults (0.3/0.4/0.4), documented as untuned,
   and their seed sources are **off by default** behind settings
-  (`offlineCodeContext.seedEditors`, `seedDiagnostics`, `seedStackTraces` —
-  all false; `changeSeeds` itself defaults on with `maxPaths: 20`).
+  (`offlineCodeContext.seedEditors`, `seedDiagnostics`, `seedStackTraces`,
+  and `changeSeeds` — all default false; `changeSeeds` has `maxPaths: 20`).
 - WHY reasons are derived from the fired signals (existing
   explainSignals machinery), so the "signal is real" test verifies each
   new reason against actual seed data.
