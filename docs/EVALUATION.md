@@ -1,23 +1,22 @@
-# Retrieval Evaluation Methodology and Results
+# Retrieval evaluation methodology and results
 
 This document describes the evaluation framework, dataset construction, metric definitions, baselines, statistical analysis, milestone results, and threats to validity for Offline Code Context Compiler (OCC).
 
-## Evaluation Question and Method
+## Evaluation question and method
 
-The core evaluation question is:
-Given a developer task description in plain text, can OCC accurately identify and rank the repository files that must be modified to complete that task, and does it assemble a context package that covers those files within realistic token budgets?
+The evaluation measures how accurately OCC identifies and ranks repository files modified by a commit when given the commit message in plain text, and whether it covers those files within realistic token budgets.
 
 To measure retrieval performance without synthetic queries, OCC uses commit-mined tasks. Each evaluation task is derived from an actual merged commit in an open-source repository:
 - Task input: The developer commit message.
 - Gold answer: The set of repository files modified by that commit.
 
-### Contamination Handling and Parent-Snapshot Rule
+### Contamination handling and parent-snapshot rule
 To prevent contamination between task descriptions and file contents, evaluation tasks are evaluated against repository snapshots taken at the commit parent:
 1. Ground Truth Alignment: The repository state indexed for each task represents the exact tree state before the commit landed.
 2. New File Exclusion: Files introduced for the first time by the commit do not exist in the parent snapshot and cannot be discovered. They are excluded from the gold set before scoring.
-3. Run-Once Guard: Holdout evaluation splits are guarded by run-once markers in the evaluation harness (`scripts/eval-retrieval.ts`). A split marked as holdout cannot be evaluated repeatedly during tuning.
+3. Run-Once Guard: Holdout evaluation splits are guarded by run-once markers in the evaluation runner (`scripts/eval-retrieval.ts`). A split marked as holdout cannot be evaluated repeatedly during tuning.
 
-## Evaluation Datasets
+## Evaluation datasets
 
 The evaluation suite uses five active open-source TypeScript and JavaScript repositories pinned to fixed commits (`docs/eval/dataset.json`):
 
@@ -40,7 +39,7 @@ Dataset Filtering Rules:
 - Tuning Split: 300 tasks (60 per repo, dataset hash `ec50ab4f`, seed 20260918).
 - Holdout Split: 300 tasks (60 per repo, dataset hash `7da65d58`, seed 20260918). Unsampled tasks drawn from the same pool.
 
-## Metrics and Definitions
+## Metrics and definitions
 
 Retrieval quality is measured across six standard Information Retrieval metrics:
 
@@ -51,7 +50,7 @@ Retrieval quality is measured across six standard Information Retrieval metrics:
 5. Mean Reciprocal Rank (MRR): Average of reciprocal ranks (`1 / rank`) for the first gold file encountered.
 6. Package Recall: Fraction of gold files included inside the finalized context package (extracted from `### FILE:` headings in the `## SOURCE` section).
 
-### Gold Evaluation Slices
+### Gold evaluation slices
 Every evaluation reports numbers across two distinct gold file slices:
 - Full Gold slice (`overall` in JSON): Evaluates against all modified files, including configuration, documentation, and build scripts.
 - Source-Only slice (`overallSourceOnly` in JSON): Evaluates against files parsed with full AST analysis (TypeScript and JavaScript files).
@@ -63,13 +62,13 @@ OCC is evaluated against three reference systems:
 2. `filename`: Ranks files purely by lexical match between the query and relative file paths.
 3. `random`: Selects files by seeded pseudorandom sampling from the repository file list.
 
-## Statistical Analysis
+## Statistical analysis
 
 All metrics are reported as mean values accompanied by 95% bootstrap confidence intervals computed using 2,000 paired bootstrap draws (`pairedBootstrap` in JSON). Differences between systems are calculated per task pair (OCC minus baseline). An advantage is statistically significant at alpha = 0.05 when the 95% confidence interval of the difference excludes zero.
 
-## Evaluation Results
+## Evaluation results
 
-### Tuning Split Results (300 Tasks)
+### Tuning split results (300 tasks)
 Source file: `docs/eval/results-tuning.json`, OCC commit `0d66d834760c6cc2b9e36a3ddb2af70b7f860601`.
 
 Full Gold Slice (`overall`):
@@ -90,9 +89,9 @@ Source-Only Slice (`overallSourceOnly`):
 | `filename` | 0.203 [0.153, 0.247] | 0.227 [0.187, 0.264] | 0.324 [0.281, 0.362] | 0.163 [0.123, 0.203] | 0.307 [0.263, 0.350] |
 | `random` | 0.030 [0.013, 0.050] | 0.041 [0.028, 0.055] | 0.089 [0.067, 0.112] | 0.023 [0.007, 0.043] | 0.098 [0.078, 0.120] |
 
-On the tuning split, OCC generated packages averaged 25,593.5 tokens and 14.517 files included per task.
+On the tuning split, OCC generated packages averaged 25,593.5 tokens and 14.517 files included per task. Package recall on the tuning split compares a 14.5-file OCC package with a baseline scored at 8 files, so it is not size-matched; only the holdout comparison is size-matched. Never present tuning package recall as OCC beating BM25.
 
-### Holdout Split Results (300 Tasks)
+### Holdout split results (300 tasks)
 Source file: `docs/eval/results-holdout.json`, OCC commit `c0df0ba79d24797b2702635a291cb75d0d8209c9`.
 
 Full Gold Slice (`overall`):
@@ -115,19 +114,19 @@ Source-Only Slice (`overallSourceOnly`):
 
 On the holdout split, OCC generated packages averaged 27,403.1 tokens and 7.933 files included per task. In paired comparisons, OCC outranked BM25 on Top-1 by +0.103 [0.040, 0.170]. Package recall difference was +0.046 [-0.004, 0.100], representing statistical parity.
 
-### Secret-Token Filtering Verification
+### Secret-token filtering verification
 Following the implementation of secret-token blanking in index shards, verified facts are as follows:
 - Ranking metrics remained identical across both the full gold and source-only slices.
 - Package contents were byte-identical for 298 out of 300 tuning tasks.
 - Exactly two tasks exhibited token length differences (40 tokens and 80 tokens respectively), with the exact mechanism not established.
 
-### Negative Results: Change-Aware Seeds Experiments
+### Negative results: change-aware seeds experiments
 During development milestone M4 (ADR-006), working-tree change seeds were evaluated via simulation (`results-seeds-sim-tuning-*.json`):
 - Across all tested weights (w=0.3, w=0.6, w=1.2), injecting change seeds reduced package recall on hidden gold files compared to unseeded retrieval.
 - Seeded files displaced relevant unseeded candidates from token budgets.
 - Outcome: The feature was designated experimental and shipped default OFF (`changeSeeds: false`, slotPolicy: `signal-only`).
 
-## Threats to Validity
+## Threats to validity
 
 1. Commit Messages as Task Proxies: Commit messages are written retrospectively by authors who already know what they changed. Real user prompts are often vaguer or express high-level behavioral goals.
 2. Homogeneous Tech Stack: All five benchmark repositories are written in TypeScript and JavaScript. Performance on other languages (which receive metadata-only parsing) is not measured by this benchmark.
@@ -135,7 +134,7 @@ During development milestone M4 (ADR-006), working-tree change seeds were evalua
 4. Single Test Machine: Indexing benchmarks and evaluation runs were executed on a single developer machine (AMD Ryzen 7 4800H, Windows 11, Node 24).
 5. Holdout Pool: The holdout split was drawn from the same pool of mined commits because upstream repositories had not advanced significantly since the initial pin date.
 
-## Reproduction Instructions
+## Reproduction instructions
 
 To reproduce evaluation results from scratch:
 

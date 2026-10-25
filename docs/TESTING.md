@@ -35,7 +35,7 @@ against a real `vitest run` and fails CI on drift.
 | `eval/seeds-sim.test.ts` (7) | Seed simulation (M4) | reveal sampler (ceil(k/2), deterministic, task-id seeded, disjoint hidden); fairness removal of revealed files from rankings and packages; same-dir and random decoy pickers (deterministic, gold/revealed-excluded) |
 | `extension/watcherService.test.ts` (5) | Watcher debounce | fake-timer determinism: single event flushes at the window edge; bursts coalesce to the latest paths; continuous save streams still flush within one window (F6 starvation regression); a new flush is scheduled after a completed one; create/delete routing |
 | `property/invariants.test.ts` (3) | Invariants (seeded PRNG) | 60-step random create/edit/delete/rename keeps index consistent with disk with no stale records; unchanged files never re-parsed across repeated runs; ignored paths never indexed |
-| `eval/lib.test.ts` (19) | Eval harness filters | task-text cleaning (trailers, URLs, issue refs, cherry-picks); word counting; path classification (test/source/lockfile/docs/CI + OCC-fully-parsed slice extensions); bot authors; version-bump/format/revert/docs-only/lockfile-only rejection reasons; gold localizability (new files excluded); time-split sampling determinism incl. disjoint tuning-half sampling |
+| `eval/lib.test.ts` (19) | Evaluation suite filters | task-text cleaning (trailers, URLs, issue refs, cherry-picks); word counting; path classification (test/source/lockfile/docs/CI + OCC-fully-parsed slice extensions); bot authors; version-bump/format/revert/docs-only/lockfile-only rejection reasons; gold localizability (new files excluded); time-split sampling determinism incl. disjoint tuning-half sampling |
 | `eval/dataset.test.ts` (11) | Eval dataset assembly | per-reason rejection funnel; duplicate task-text dedupe keeping the earliest commit; seeded sample bounded and deterministic; tuning-half split samples the earlier half disjoint from the eval sample; sorted gold + excluded-new-file counts; dataset hash stability/mutation sensitivity; mode-based gold filter (symlink/gitlink/missing buckets, empty-gold task exclusion, TS/JS hard stop, per-parent tree caching) |
 | `eval/gitminer.test.ts` (6) | Eval git stream parsers | `log --format` metadata records; `--name-status` modify/add/delete/rename/copy with scores; malformed-line tolerance; `ls-tree -r -z` parsing of regular/symlink/gitlink entries with raw paths; regular-file mode classification |
 | `eval/metrics.test.ts` (11) | Eval metrics | Top-1/Recall@k/AllGold Acc@k/MRR arithmetic on fixed rankings; empty-gold vacuous cases; seeded bootstrap CI percentile bounds and determinism; paired-difference bootstrap (reproducibility, exact mean diff, constant-difference CI excluding zero, straddling differences, misaligned-input guard) |
@@ -65,16 +65,12 @@ npm run ci                                    # typecheck + lint + format + test
 
 ## Regression policy
 
-Bugs land as: failing test, fix, passing test, permanent coverage. Bugs
-caught this way during development and now regression-locked: store
-self-indexing, interior `./` path normalization, call sites in arrow
-initializer expressions, dynamic import capture, exact-count regex
-boundaries in secret patterns, tf accumulation across symbol names, hub
-score inflation, test-local variables polluting exact symbol matches,
-trailing punctuation in query terms, file-extension fragments diluting
-file-mode queries.
+Bugs follow four steps: failing test, fix, passing test, and permanent coverage.
+Bugs caught this way include store self-indexing, interior `./` path normalization, and call sites in arrow initializer expressions.
+Other regression-locked fixes include dynamic import capture, exact-count regex boundaries in secret patterns, and term frequency accumulation across symbol names.
+Finally, hub score inflation, test-local variables polluting exact symbol matches, trailing punctuation in query terms, and file-extension fragments diluting file-mode queries remain covered.
 
-## VSIX Clean-Profile Smoke Test
+## VSIX clean-profile smoke test
 
 The post-packaging smoke test (`scripts/smoke-vsix.ts`, invoked via `npm run smoke:vsix [-- path/to/file.vsix]`) validates the packaged `.vsix` artifact inside a real VS Code extension host using `@vscode/test-electron` (pinned version `3.1.0`, MIT License, © Microsoft Corporation).
 
