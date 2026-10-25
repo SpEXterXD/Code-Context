@@ -54,6 +54,23 @@ export class JsonIndexStore implements IndexStore {
   }
 
   load(): { manifest: IndexManifest; entries: Map<string, FileEntry> } {
+    const manifestPath = path.join(this.storeRoot, "manifest.json");
+    if (fs.existsSync(manifestPath)) {
+      try {
+        const raw = fs.readFileSync(manifestPath, "utf8");
+        const parsed = JSON.parse(raw) as IndexManifest;
+        if (parsed.schemaVersion !== STORE_SCHEMA_VERSION) {
+          logger.warn(
+            `index schema ${parsed.schemaVersion} ≠ ${STORE_SCHEMA_VERSION}; rebuilding store`,
+          );
+          this.clear();
+          return { manifest: { ...this.manifest }, entries: new Map() };
+        }
+      } catch {
+        /* unreadable manifest will be handled downstream */
+      }
+    }
+
     const entries = new Map<string, FileEntry>();
     const entriesDir = path.join(this.storeRoot, "entries");
 
@@ -91,9 +108,11 @@ export class JsonIndexStore implements IndexStore {
       const parsed = JSON.parse(raw) as IndexManifest;
       if (parsed.schemaVersion !== STORE_SCHEMA_VERSION) {
         logger.warn(
-          `index schema ${parsed.schemaVersion} ≠ ${STORE_SCHEMA_VERSION}; rebuilding manifest`,
+          `index schema ${parsed.schemaVersion} ≠ ${STORE_SCHEMA_VERSION}; rebuilding store`,
         );
-        return this.rebuildManifest(entries);
+        this.clear();
+        entries.clear();
+        return this.manifest;
       }
       // Reconcile: the entries directory is the source of truth. Any drift
       // (crash between entry and manifest writes, dropped corrupt entries,
