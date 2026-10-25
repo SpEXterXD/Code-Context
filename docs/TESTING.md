@@ -76,7 +76,7 @@ file-mode queries.
 
 ## VSIX Clean-Profile Smoke Test
 
-The post-packaging smoke test (`scripts/smoke-vsix.ts`, invoked via `npm run smoke:vsix [-- path/to/file.vsix]`) validates the packaged `.vsix` artifact inside a real VS Code extension host using `@vscode/test-electron` (pinned version `2.5.2`, MIT License, © Microsoft Corporation).
+The post-packaging smoke test (`scripts/smoke-vsix.ts`, invoked via `npm run smoke:vsix [-- path/to/file.vsix]`) validates the packaged `.vsix` artifact inside a real VS Code extension host using `@vscode/test-electron` (pinned version `3.1.0`, MIT License, © Microsoft Corporation).
 
 This is a standalone verification script and is **not** part of the vitest test count assertions.
 
