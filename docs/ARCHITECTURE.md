@@ -2,7 +2,7 @@
 
 Offline Code Context Compiler (OCC) compiles repository source code and structural metadata into token-budgeted context packages for large language models. This document describes the system architecture, layers, data model, pipeline stages, index storage layout, and security boundaries.
 
-## System Layers and Import Boundaries
+## System layers and import boundaries
 
 The codebase follows a strict layered architecture where dependencies point downward only. The boundaries are enforced by ESLint rules (`boundaries/dependencies` and `no-restricted-imports` in `eslint.config.mjs`).
 
@@ -29,7 +29,7 @@ graph TD
     DOM --> SHD["Shared Utilities (src/shared/)"]
 ```
 
-### Layer Boundary Rules
+### Layer boundary rules
 
 1. `src/extension/`: The only layer permitted to import the `vscode` module. Manages command registration, status bar updates, preview webviews/editors, and configuration event listeners.
 2. `src/application/`: Orchestration services (`OccApplication`, `IndexingService`, `ContextService`). Coordinates scanning, indexing, retrieval, and packaging. Does not import `vscode`.
@@ -49,7 +49,7 @@ graph TD
 
 Because layers below `src/extension/` never import `vscode`, all domain logic, retrieval algorithms, and parsing run headlessly under Node in unit and property tests.
 
-## Module Map
+## Module map
 
 The codebase is organized into fifteen modules under `src/`:
 
@@ -71,7 +71,7 @@ The codebase is organized into fifteen modules under `src/`:
 | `src/shared/` | SHA-256 helpers, cancellation, and error constants | Pure utility functions with zero side effects |
 | `src/workspace/` | Filesystem walking, `.gitignore` parsing, and size checks | Sorted directory traversal; explicit recording of skipped files |
 
-## Pipeline Architecture
+## Pipeline architecture
 
 Context generation proceeds through five distinct pipeline stages:
 
@@ -83,28 +83,28 @@ graph LR
     PACK --> GATE["5. Security Leak Gate"]
 ```
 
-### Stage 1: Workspace Scan
+### Stage 1: workspace scan
 - Inputs: Workspace root directory, `excludePatterns`, `respectGitignore`, `maxFileSizeBytes`.
 - Operation: `WorkspaceScanner` traverses directories in lexicographical order. Computes SHA-256 hashes of file contents, sniffs for binary bytes, and filters out excluded paths.
 - Outputs: List of active files with size, content hash, and inclusion status.
 - Complexity: O(N) where N is total file count.
 - Determinism: Directory entries are sorted alphabetically before traversal.
 
-### Stage 2: Parse and Index
+### Stage 2: parse and index
 - Inputs: Changed or unindexed files from Stage 1.
 - Operation: `ParserRegistry` routes files to the appropriate parser. TypeScript and JavaScript files are parsed via the TypeScript compiler API into symbols, call sites, and import specifiers. Secret tokens are blanked before token extraction. Results are saved as atomic JSON entries in `IndexStore`. `AnalysisEngine` updates cross-file graph edges.
 - Outputs: In-memory `DependencyGraph` and persisted index shards.
 - Complexity: O(M * S) where M is changed files and S is average file size.
 - Determinism: AST traversals and token harvesting follow source file text order.
 
-### Stage 3: Retrieval and Ranking
+### Stage 3: retrieval and ranking
 - Inputs: Query text or seed file, user parameters (`maxGraphDepth`, `enableGitRecency`).
 - Operation: `QueryAnalyzer` tokenizes query text. `InvertedIndex` scores files across symbol names (weight 3.0), file paths (weight 2.0), imports/exports (weight 2.0), summaries (weight 1.2), identifiers (weight 0.8), and body terms (weight 0.5). `HybridRetriever` merges lexical scores with graph structural expansion (dependency 0.6, dependent 0.5, calls 0.5, tests 0.7, inheritance 0.6).
 - Outputs: Ranked list of candidate files with individual signal scores and WHY explanations.
 - Complexity: O(T + E) where T is matching terms and E is traversed graph edges.
 - Determinism: Ties are broken by POSIX relative file path.
 
-### Stage 4: Budget Packing and Degradation Ladder
+### Stage 4: budget packing and degradation ladder
 - Inputs: Ranked candidate list, user budgets (`maxFiles`, `maxChars`, `maxLines`, `maxTokens`).
 - Operation: `ContextBuilder` iterates candidates in rank priority order. Fits files into available budgets using a four-step degradation ladder:
  1. Full file: Entire source text included.
@@ -115,14 +115,14 @@ graph LR
 - Complexity: O(C) where C is candidate file count.
 - Determinism: Candidates are evaluated in strict rank order; formatting uses fixed templates.
 
-### Stage 5: Security Leak Gate
+### Stage 5: security leak gate
 - Inputs: Final compiled context package string.
 - Operation: Scans the complete finalized package for high-entropy tokens and secret patterns. If an unredacted secret is detected, packaging aborts with an error rather than exporting.
 - Outputs: Verified context package or security error.
 - Complexity: O(P) where P is context package length in characters.
 - Determinism: Pure regex and Shannon entropy calculation.
 
-## Local Index Storage Layout
+## Local index storage layout
 
 The local index is stored on the local file system inside VS Code workspace storage (`context.storageUri.fsPath`). For headless CLI runs and tests, the store path defaults to a `.occ-store` directory under the repository root.
 
@@ -136,7 +136,7 @@ The local index is stored on the local file system inside VS Code workspace stor
       ffe120...4d.json
 ```
 
-### Storage Characteristics
+### Storage characteristics
 
 1. Schema Version: `STORE_SCHEMA_VERSION = 3`. If the store on disk was generated with an older schema (such as schema 1 or 2), the entire store is automatically cleared and rebuilt on first load.
 2. Manifest (`manifest.json`): Contains `schemaVersion`, `projectFingerprint` (SHA-256 hash of the normalized workspace root path), `entryCount`, and a sorted map of workspace-relative paths to content hashes.
@@ -144,7 +144,7 @@ The local index is stored on the local file system inside VS Code workspace stor
 4. Atomic Writes: Every entry shard and the manifest are written to a temporary file (`<target>.tmp.<pid>.<timestamp>`) and renamed into place using `fs.renameSync`. This prevents partial writes if the process terminates unexpectedly.
 5. Invalidation and Rebuild: On startup, `IndexStore` verifies that `projectFingerprint` matches the active workspace and `schemaVersion` equals 3. If either check fails or the manifest is missing, the store wipes stale entries and re-indexes.
 
-### Stored Fields in `FileEntry`
+### Stored fields in `FileEntry`
 
 Each entry shard JSON file contains:
 - `meta`: File path, language identifier, size in bytes, line count, SHA-256 content hash, test flag, and parse status.
@@ -158,13 +158,13 @@ Each entry shard JSON file contains:
 - `bodyLength`: Total body token count before term frequency capping.
 - `internalRelations`: Internal symbol relationships (extends, implements, calls).
 
-### Secret-Token Filtering in Index Shards
+### Secret-token filtering in index shards
 
 Before extracting `identifiers`, `bodyTokens`, and `fileSummary`, file content is scanned using `SecretScanner.scanSpans()`. All spans matching known secret patterns (API keys, private tokens, high-entropy credential assignments) are blanked with whitespace characters. This guarantees that credentials matching the secret scanner are never persisted in on-disk index shards.
 
 Stated Limit: Filtering blanks only values flagged by the secret scanner. Values that the scanner does not flag, such as short passwords or low-entropy credentials, are still tokenized. Furthermore, word-like fragments such as key-type prefixes (for example, `AKIA` or `sk_live`) remain in token lists. Versions up to 0.3.1 persisted raw secret tokens in the local index; schema version 3 clears older stores to eliminate legacy shards.
 
-## Git Integration and Hardening
+## Git integration and hardening
 
 OCC interacts with git exclusively through `safeGit` (`src/git/safeGit.ts`). Git interactions are strictly read-only and designed to avoid command execution hazards:
 

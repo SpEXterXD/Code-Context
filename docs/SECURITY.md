@@ -1,4 +1,4 @@
-# Security Policy and Threat Model
+# Security policy and threat model
 
 Offline Code Context Compiler (OCC) runs entirely on the local machine without outbound network connections, third-party analytics, or background telemetry. This document defines the threat model, security boundaries, secret detection mechanisms, git execution hardening, and vulnerability reporting procedures.
 
@@ -19,12 +19,12 @@ OCC operates under strict network isolation:
 2. Zero Telemetry: No telemetry pings, error tracking services, or usage analytics are included.
 3. User-Initiated Egress: The sole export mechanism is the manual copy command that writes text to the local system clipboard. OCC never transmits context packages automatically.
 
-## Secret Detection and Redaction Engine
+## Secret detection and redaction engine
 
 Files selected for a context package are evaluated by `SecretScanner` (`src/security/secretScanner.ts`) before budget packing:
 
 ### Pattern Families
-The scanner matches known high-risk token structures:
+The scanner matches known high-risk token structures across multiple credential categories.
 - AWS access key IDs (`AKIA[0-9A-Z]{16}`)
 - GitHub personal access tokens (`ghp_[0-9A-Za-z]{30,}`, `gho_`, `ghu_`, `ghs_`, `ghr_`)
 - Slack bot and user tokens (`xox[baprs]-[0-9A-Za-z-]{10,}`)
@@ -59,19 +59,19 @@ Files matching sensitive path conventions are excluded from indexing and context
 
 If a file matching these patterns is requested directly, sensitive path rules intercept the request and block the content from being read.
 
-## Local Index Storage and Secret Token Blanking
+## Local index storage and secret token blanking
 
-The local index store persists parsed syntax structures and lexical tokens to local disk inside the VS Code workspace storage directory.
+The local index store persists parsed syntax structures and lexical tokens to local disk inside the VS Code workspace storage directory. Storage is local.
 
 ### Secret-Token Blanking
 In versions 0.3.2 and later, file text is screened using `SecretScanner.scanSpans()` before tokenization. Spans matching credential patterns are overwritten with whitespace before harvesting `identifiers`, `bodyTokens`, and `fileSummary`. This guarantees that high-entropy credentials do not enter on-disk index shards.
 
-### Stated Limit of Token Filtering
+### Stated limit of token filtering
 Token filtering blanks only patterns identified by the scanner. Values that the scanner does not flag, such as low-entropy passwords, custom tokens, or split credentials, are still tokenized. Furthermore, word-like fragments such as key-type prefixes (for example, `AKIA`, `ghp`, or `sk_live`) remain in the index.
 
 Versions up to 0.3.1 persisted secret-bearing tokens in the local index store. To address this, schema version 3 (`STORE_SCHEMA_VERSION = 3`) clears and rebuilds any existing store from earlier versions on first run.
 
-## Git Hardening and Execution Hazards
+## Git hardening and execution hazards
 
 OCC runs git for read-only metadata: commit recency (`enableGitRecency`) and working-tree change detection (`changeSeeds`).
 
@@ -83,28 +83,28 @@ To prevent malicious repositories from executing arbitrary code via git hooks or
 3. No Shell Spawning: Processes are launched via `child_process.execFile` with argument arrays. No shell interpreter is invoked.
 4. Process Timeouts: Commands enforce strict timeouts and run with `GIT_OPTIONAL_LOCKS=0` and `GIT_TERMINAL_PROMPT=0`.
 
-### Empirical Hazard Verification
+### Empirical hazard verification
 Running `npm run eval:fsmonitor-repro` and `npm run eval:seed-hazard-repro` demonstrates the efficacy of these mitigations:
 - `core.fsmonitor`: Raw `git status` executes repository-configured fsmonitor binaries (`MARKER WRITTEN`); `safeGit` neutralizes the hazard (`no marker`, exit code 0).
 - `diff.external`: Raw `status` and `diff` execute external diff drivers (`EXECUTED`); `safeGit` with `--no-ext-diff` neutralizes execution (`not executed`).
 - `textconv`: Raw status executes textconv converters (`EXECUTED`); `safeGit` with `--no-textconv` neutralizes execution (`not executed`).
 - `clean` and `smudge` filters: Neutralized by `safeGit` argument flags (`not executed`).
 
-## Workspace Trust Behavior
+## Workspace trust behavior
 
 OCC declares limited untrusted workspace support (`untrustedWorkspaces.supported: "limited"` in `package.json`):
 - Untrusted Workspaces: If a workspace is not trusted (`vscode.workspace.isTrusted === false`), all git features are completely disabled. No git child processes are spawned under any circumstances. Indexing, AST parsing, and context generation remain fully operational.
 - Trust Granted: When the user grants workspace trust via `onDidGrantWorkspaceTrust`, git features become available if enabled in settings.
 
-## Supported Versions Policy
+## Supported versions policy
 
 - Extension Versions: Security fixes and maintenance patches are provided for the latest released minor version. Published git tags are never moved; fixes ship as new patch versions.
 - VS Code Compatibility: Requires VS Code engine version 1.85.0 or later.
 - Node Compatibility: Tested on Node versions 18, 20, and 24 across Linux, macOS, and Windows.
 
-## Vulnerability Reporting
+## Vulnerability reporting
 
-If you identify a security vulnerability in Offline Code Context Compiler, do not submit a public issue or discussion.
+If you identify a security vulnerability in Offline Code Context Compiler, do not submit a public issue or discussion. Please disclose privately.
 
 Use GitHub Private Vulnerability Reporting:
 1. Navigate to the repository on GitHub: `https://github.com/SpEXterXD/Code-Context`.

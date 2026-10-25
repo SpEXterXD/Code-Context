@@ -1,4 +1,4 @@
-# Context Package Wire Format
+# Context package wire format
 
 Offline Code Context Compiler (OCC) compiles repository content and structural metadata into a structured, plain-text context package designed for consumption by large language models. This document specifies the v1 wire format (`CONTEXT_VERSION: 1`), its deterministic rendering rules, and section structure.
 
@@ -40,12 +40,12 @@ ESTIMATED_TOKENS: ~<tokens>
 
 ## Section Details
 
-### 1. Developer Task (`## DEVELOPER TASK`)
+### 1. Developer task (`## DEVELOPER TASK`)
 Contains the literal text entered into the task prompt. If no task was specified (such as in project or file overview modes), emits `(no task specified)`.
 
-### 2. Current Changes (`## CURRENT CHANGES`)
+### 2. Current changes (`## CURRENT CHANGES`)
 Emitted only when `offlineCodeContext.changeSeeds` is true and uncommitted changes exist in the local working tree:
-```
+````
 ## CURRENT CHANGES
 ### DIFF: src/middleware/rateLimit.ts
 ```diff
@@ -53,10 +53,10 @@ Emitted only when `offlineCodeContext.changeSeeds` is true and uncommitted chang
 +++ b/src/middleware/rateLimit.ts
 @@ -10,3 +10,4 @@
 ```
-```
+````
 If the diff output exceeds `offlineCodeContext.currentChangesMaxTokens` (default 1500), the section is truncated and marked with `(truncated to the current-changes budget)`.
 
-### 3. Project Structure (`## PROJECT STRUCTURE`)
+### 3. Project structure (`## PROJECT STRUCTURE`)
 Renders the directory layout up to `offlineCodeContext.structureDepth` (default 4):
 ```
 ## PROJECT STRUCTURE
@@ -68,13 +68,13 @@ Renders the directory layout up to `offlineCodeContext.structureDepth` (default 
 ```
 If directories extend deeper than the configured depth, a summary note indicates collapsed child counts.
 
-### 4. Relevant Architecture (`## RELEVANT ARCHITECTURE`)
+### 4. Relevant architecture (`## RELEVANT ARCHITECTURE`)
 Lists module structural properties:
 - `Directories`: Directory paths sorted descending by file count.
 - `Hub files (most connected)`: Top connected files by incoming and outgoing dependency edges.
 - `External packages referenced`: Third-party packages imported by the indexed codebase.
 
-### 5. Relevant Symbols (`## RELEVANT SYMBOLS`)
+### 5. Relevant symbols (`## RELEVANT SYMBOLS`)
 Lists key declarations associated with retrieved files:
 ```
 ## RELEVANT SYMBOLS
@@ -82,7 +82,7 @@ Lists key declarations associated with retrieved files:
 - src/middleware/rateLimit.ts:15 function createRateLimiter: function createRateLimiter(config: RateLimitConfig)
 ```
 
-### 6. Why These Files Were Selected (`## WHY THESE FILES WERE SELECTED`)
+### 6. Why these files were selected (`## WHY THESE FILES WERE SELECTED`)
 Each candidate file receives an explicit selection record:
 ```
 ### src/config/rateLimit.ts
@@ -98,7 +98,7 @@ If a file was considered during retrieval but its source body was withheld due t
 - Note: excluded by security policy (block)
 ```
 
-### 7. Repository Source (`## SOURCE`)
+### 7. Repository source (`## SOURCE`)
 Encapsulates all workspace source code. The section opens with an inert data banner:
 ```
 ## SOURCE
@@ -111,14 +111,14 @@ Every included file is emitted under a distinct file heading and line range head
 ### LINES: 1-20
 ```
 
-#### Content-Aware Fence Rules
+#### Content-aware fence rules
 Code blocks are enclosed in Markdown backtick fences. To prevent repository source text containing backticks (such as Markdown documentation or template literals) from prematurely closing a fence, fence length is computed dynamically:
 ```
 fence_length = Math.max(3, max_backticks_in_block + 1)
 ```
 The opening and closing fences use identical lengths.
 
-#### Line Numbering
+#### Line numbering
 Every emitted line is prefixed with its 1-based line number from the original file:
 ```
 1: /** Rate limit configuration. */
@@ -128,7 +128,7 @@ Every emitted line is prefixed with its 1-based line number from the original fi
 5: }
 ```
 
-### 8. Context Metadata (`## CONTEXT METADATA`)
+### 8. Context metadata (`## CONTEXT METADATA`)
 Concludes the package with operational stats and active budget parameters:
 ```
 ## CONTEXT METADATA
@@ -143,20 +143,20 @@ Budgets: maxFiles=40, maxChars=120000, maxLines=3000, maxTokens=30000 (token cou
 
 Given identical repository contents, identical settings, and identical task inputs, OCC guarantees byte-identical output across platforms.
 
-### Factors That Ensure Determinism
+### Factors that ensure determinism
 1. Sorted File Iteration: Directory discovery, inverted index postings, and candidate lists are sorted using POSIX-normalized relative paths.
 2. Fixed Normalization Constants: Lexical body normalization uses a fixed reference length (2000 tokens) rather than corpus-dependent averages.
 3. Stable Signal Explanations: Selection reasons in WHY entries are sorted by signal weight descending, with ties broken alphabetically by signal name.
 4. Deterministic Redaction: Secret replacements use deterministic hashes (`[REDACTED:<type>:<hash8>]`).
 5. Normalized Line Endings: Files with Windows CRLF endings are converted to POSIX LF before length counting and emission.
 
-### Factors That Alter Output
+### Factors that alter output
 - File modifications or newly created files in the workspace.
 - Changes to budget or exclusion settings in `settings.json`.
 - Changes to task query text.
 - Running on a git repository with `enableGitRecency: true` when recent commit timestamps advance.
 
-## Complete Example from Demo Project
+## Complete example from demo project
 
 Below is a complete, minimal context package generated on `demo-project` for the task "Add rate limiting to the login endpoint":
 
