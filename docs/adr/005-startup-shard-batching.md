@@ -7,9 +7,11 @@ option is designed before anyone reaches for it.
 
 ## Problem
 
-`initialize()` on a persisted 5,001-entry store takes ≈5.5 s (median of 3,
-2026-10-25, Ryzen 7 4800H / Node 24 / Windows; was ≈8.2 s before the
-external-packages fix). The CPU profile is dominated by `readFileUtf8`
+`initialize()` on a persisted 5,001-entry store: the external-packages fix
+(M3 hardening) removed a quadratic step that accounted for ~24% of the load
+profile; median startup on the test machine (Ryzen 7 4800H / Node 24 /
+Windows) changed from 8,163 ms to 5,465 ms over 3 runs (before:
+5,472-10,279 ms; after: 4,592-9,213 ms; measured 2026-10-25). The CPU profile is dominated by `readFileUtf8`
 (≈78%): ADR-002 persists **one JSON file per entry** (atomic per-entry
 writes), so startup performs 5,001 `fs.readFileSync` calls — per-file open
 syscall overhead dominates on Windows, not JSON parsing.

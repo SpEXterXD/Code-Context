@@ -40,10 +40,12 @@ Honest, current as of v0.3.0.
   asynchronously ahead of retrieval; a package built before the prefetch
   completes (or in an untrusted workspace, where git is never spawned) is
   ranked without recency. Recency remains off by default.
-- **Startup load is linear but read-bound**: ≈5.5 s for a 5,000-entry store
-  on the reference Windows machine (one JSON file per entry; per-file open
-  overhead dominates). Shard batching is designed, not implemented (ADR-005
-  draft).
+- **Startup load is linear but read-bound**: for a 5,000-entry store on the
+  reference Windows machine we removed a quadratic step that accounted for
+  ~24% of the load profile; median startup changed from 8,163 ms to 5,465 ms
+  over 3 runs (before: 5,472-10,279 ms; after: 4,592-9,213 ms). One JSON file
+  per entry remains; per-file open overhead dominates. Shard batching is
+  designed, not implemented (ADR-005 draft).
 
 ## Context output
 

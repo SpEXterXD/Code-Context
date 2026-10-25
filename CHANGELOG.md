@@ -17,7 +17,7 @@ significant with it), so the feature ships **experimental and OFF by
 default**; the CURRENT CHANGES diff section still provides direct context
 for the LLM when enabled. The extension is hardened: git runs only through
 a single safeGit spawn point with repo-side config neutralized, is
-workspace-trust gated, and startup index load is ~33% faster.
+workspace-trust gated, and for startup index load we removed a quadratic step that accounted for ~24% of the load profile; median startup on the test machine changed from 8,163 ms to 5,465 ms over 3 runs (before: 5,472-10,279 ms; after: 4,592-9,213 ms).
 
 ### Added (M4: change-aware seeds — machinery shipped, DEFAULT OFF after a negative result)
 
@@ -75,9 +75,9 @@ workspace-trust gated, and startup index load is ~33% faster.
 
 - **Startup load**: the external-package set on the relationship graph is
   maintained incrementally on edge add/remove instead of being re-derived
-  from the whole graph per entry (O(N²) → O(N); it was 24% of the startup
-  profile). `initialize()` on a 5,001-entry store: median 8163 → 5465 ms
-  (3 runs, Windows reference machine). Equivalence to the old derivation is
+  from the whole graph per entry — we
+  removed a quadratic step (it accounted for ~24% of the load profile; median `initialize()` on a 5,001-entry store changed from 8,163 ms to 5,465 ms over 3 runs (before: 5,472-10,279 ms; after: 4,592-9,213 ms)).
+  Equivalence to the old derivation is
   fuzz-tested (400 seeded operations vs a full-derivation oracle). The
   remaining startup cost is per-entry shard reads — designed, not
   implemented, in ADR-005 (draft).
