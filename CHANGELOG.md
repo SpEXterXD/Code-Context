@@ -32,6 +32,15 @@
   the feature ships default-OFF for experimentation only. Root cause:
   seeded paths consume package slots while gold sets in these repos are
   too weakly coupled for neighbor propagation to pay the cost.
+- **M4b (slot-policy experiments)**: making seeds signal-only (never
+  pinned, excluded from content slots — their ~1.6 consumed slots freed
+  for other files) plus an optional SEED_NEIGHBOR boost for one-hop graph
+  neighbors reversed the direction (S1 +0.015, S2 +0.019) and removed all
+  significant regressions, but the paired CIs still include 0: no recall
+  gain at the 95% level, S3 not run, feature stays default-off. Tested,
+  no recall gain; the CURRENT CHANGES diff section still provides direct
+  context for the LLM. Both policies ship as named ablatable constants
+  (`M4_SEED_WEIGHTS.slotPolicy`, `neighborBoost`).
 - `npm run eval:seed-hazard-repro` measures repo-configured git code
   execution (`diff.external`, textconv, clean/smudge filters) raw vs
   through safeGit: clean filters run even under `--no-ext-diff
