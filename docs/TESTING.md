@@ -74,10 +74,25 @@ score inflation, test-local variables polluting exact symbol matches,
 trailing punctuation in query terms, file-extension fragments diluting
 file-mode queries.
 
+## VSIX Clean-Profile Smoke Test
+
+The post-packaging smoke test (`scripts/smoke-vsix.ts`, invoked via `npm run smoke:vsix [-- path/to/file.vsix]`) validates the packaged `.vsix` artifact inside a real VS Code extension host using `@vscode/test-electron` (pinned version `2.5.2`, MIT License, © Microsoft Corporation).
+
+This is a standalone verification script and is **not** part of the vitest test count assertions.
+
+What it validates:
+1. Computes and logs the VSIX SHA-256 hash and byte size.
+2. Creates an isolated temporary environment with fresh `user-data-dir` and `extensions-dir`.
+3. Installs only the specified `.vsix` into the clean environment (never `--disable-extensions`).
+4. Launches VS Code opening `demo-project/` and asserts:
+   - Extension `offline-code-context.offline-code-context-compiler` is found and actively running.
+   - All 16 commands declared under `contributes.commands` in `package.json` are registered with the extension host.
+   - Shipped configuration defaults match `package.json` (`changeSeeds: false`, `maxFiles: 40`, and full property schema).
+   - `offlineCodeContext.indexWorkspace` executes without errors.
+   - Index status reports indexed files (> 0) verified via storage `manifest.json`.
+5. Cleans up all temporary directories and exits non-zero on any failure.
+
 ## Not automated here
 
-- E2E inside a real VS Code extension host (`@vscode/test-electron`
-  installed, harness not run: requires a VS Code binary download and a
-  display). The extension layer is a thin adapter; the domain runs headless.
 - Real OS clipboard and real git are mocked by design
   (`ClipboardExporter`, `GitMetadata`).
