@@ -9,6 +9,9 @@ import { renderSourceFileSection } from "./contextFormatter";
 import { CancellationSource } from "../shared/cancellation";
 import { M3B_RANK_PRIORITY, M4_SEED_WEIGHTS } from "./contextBuilder";
 
+const AWS_ALT_KEY = "AKIA" + "QW8Z7XP6M5L4K3J2";
+const GENERIC_KEY = "J8s2kLq9" + "zX1pQw7v" + "R3mNtYu5";
+
 const FIXTURE: Record<string, string> = {
   "package.json": JSON.stringify({ name: "ctx-fixture", version: "1.0.0" }) + "\n",
   "README.md": "# ctx-fixture\n\nAuthentication demo repo for context tests.\n",
@@ -78,16 +81,12 @@ const FIXTURE: Record<string, string> = {
   // a file with TWO findings on the same line (different kinds): the findings
   // sort is the only thing that decides their order in the WHY reasons.
   "src/leak2.ts": [
-    'const API_KEY = "AKIAQW8Z7XP6M5L4K3J2"; // key material',
+    `const API_KEY = "${AWS_ALT_KEY}"; // key material`,
     "export const use = API_KEY;",
     "",
   ].join("\n"),
   // a file with a fake secret for the security test
-  "src/leak.ts": [
-    "const apiKey = 'J8s2kLq9zX1pQw7vR3mNtYu5';",
-    "export const use = apiKey;",
-    "",
-  ].join("\n"),
+  "src/leak.ts": [`const apiKey = '${GENERIC_KEY}';`, "export const use = apiKey;", ""].join("\n"),
 };
 
 function extractSection(payload: string, header: string): string {
@@ -281,7 +280,7 @@ describe("ContextBuilder", () => {
     expect(
       result.security.blockedFiles.has("src/leak.ts") || result.security.safeFindings.length > 0,
     ).toBe(true);
-    expect(result.payload).not.toContain("J8s2kLq9zX1pQw7vR3mNtYu5");
+    expect(result.payload).not.toContain(GENERIC_KEY);
     const sourceSection = extractSection(result.payload, "SOURCE");
     expect(sourceSection).not.toContain("### FILE: src/leak.ts");
   });
@@ -290,7 +289,7 @@ describe("ContextBuilder", () => {
     app = await makeApp({ secretPolicy: "warn", redactSecrets: true });
     const result = app.buildContext("task", { taskText: "leak apiKey environment" });
     expect(result.payload).toContain("### FILE: src/leak.ts");
-    expect(result.payload).not.toContain("J8s2kLq9zX1pQw7vR3mNtYu5");
+    expect(result.payload).not.toContain(GENERIC_KEY);
     expect(result.payload).toContain("[REDACTED:");
   });
 
@@ -576,7 +575,7 @@ describe("ContextBuilder", () => {
         taskText: "anything",
         seedSet: {
           changedPaths: [{ path: ".env", state: "untracked" }],
-          diffSections: [{ path: ".env", diff: "+API_KEY=AKIAQW8Z7XP6M5L4K3J2" + NL }],
+          diffSections: [{ path: ".env", diff: "+API_KEY=" + AWS_ALT_KEY + NL }],
           openEditors: [],
           diagnostics: [],
           stackFrames: [],
@@ -586,7 +585,7 @@ describe("ContextBuilder", () => {
       const why = result.rankedForDisplay.find((w) => w.path === ".env");
       expect(why).toBeDefined();
       expect(why?.note).toContain("diff withheld by security policy");
-      expect(result.payload).not.toContain("AKIAQW8Z7XP6M5L4K3J2");
+      expect(result.payload).not.toContain(AWS_ALT_KEY);
       expect(result.payload).not.toContain("### DIFF: .env");
     });
 
@@ -595,7 +594,7 @@ describe("ContextBuilder", () => {
       const seedSet = {
         changedPaths: [{ path: "src/gizmo.ts", state: "unstaged" as const }],
         diffSections: [
-          { path: "src/gizmo.ts", diff: "+const apiKey = 'AKIAQW8Z7XP6M5L4K3J2';" + NL },
+          { path: "src/gizmo.ts", diff: "+const apiKey = '" + AWS_ALT_KEY + "';" + NL },
         ],
         openEditors: [],
         diagnostics: [],
@@ -606,7 +605,7 @@ describe("ContextBuilder", () => {
       const r2 = app.buildContext("task", { taskText: "t", seedSet });
       expect(r1.payload).toBe(r2.payload);
       expect(r1.payload).toContain("[REDACTED:");
-      expect(r1.payload).not.toContain("AKIAQW8Z7XP6M5L4K3J2");
+      expect(r1.payload).not.toContain(AWS_ALT_KEY);
     });
 
     it("unseeded requests stay byte-identical to the pre-M4 format", async () => {
