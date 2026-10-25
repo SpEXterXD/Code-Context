@@ -31,3 +31,5 @@ coverage/**
 *.vsix
 docs/**
 .eval-cache/**
+extension/.gitignore
+.gitignore
