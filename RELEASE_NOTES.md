@@ -1,4 +1,4 @@
-# Offline Code Context Compiler (OCC) v0.3.1 <!-- doc-style-ignore -->
+# Offline Code Context Compiler (OCC) v0.3.1
 
 > **Notice**: v0.3.1 is a packaging and hygiene patch release that **supersedes v0.3.0**. The v0.3.0 tag was created on origin before final packaging and third-party notices landed. v0.3.1 provides the complete packaging fixes with zero functional or wire format changes.
 
@@ -51,4 +51,4 @@ Change-aware seeds were implemented and measured to provide no recall gain. With
 
 ### Verification and test suite
 
-- 27 suites, 292 tests pass across Ubuntu, macOS, and Windows on GitHub Actions CI.
+- 27 suites, 286 tests pass across Ubuntu, macOS, and Windows on GitHub Actions CI.

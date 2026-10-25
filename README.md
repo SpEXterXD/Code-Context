@@ -1,4 +1,4 @@
-# Offline Code Context Compiler (OCC) <!-- doc-style-ignore -->
+# Offline Code Context Compiler (OCC)
 
 Compiles repository source code and structural metadata into token-budgeted context packages for LLMs, entirely on your machine.
 
