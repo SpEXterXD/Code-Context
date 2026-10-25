@@ -19,6 +19,7 @@ import process from "node:process";
 
 import { OccApplication } from "../src/application/contextService";
 import { CancellationSource } from "../src/shared/cancellation";
+import { M4_SEED_WEIGHTS } from "../src/retrieval/hybridRetriever";
 
 import type { Snapshot } from "./eval/baselines";
 import { bm25Baseline } from "./eval/baselines";
@@ -121,6 +122,10 @@ async function main(): Promise<void> {
   const split = argValue("--split") ?? "tuning";
   const weight = Number(argValue("--weight") ?? "0.6");
   const limit = Number(argValue("--limit") ?? "0");
+  // The swept knob: the seeded arm's DIFF_TOUCHED weight (M4_SEED_WEIGHTS is
+  // the same mutable named constant the extension uses; tuning sets it per
+  // run so the sweep actually varies the signal strength).
+  M4_SEED_WEIGHTS.diffTouched = weight;
   const repos = loadReposFile();
   const dataset = loadDataset(split, repos);
   const qualifying = dataset.tasks.filter((t) => t.gold.length >= 2);

@@ -240,9 +240,9 @@ export class HybridRetriever {
       .sort((a, b) => b.score - a.score || compareStrings(a.path, b.path))
       .slice(0, seedCount)
       .map((s) => s.path);
-    // M4: DIFF_TOUCHED seed hints are traversal seeds FIRST — the developer's
-    // current changes are the strongest intent signal, and their graph
-    // neighbors are exactly what change-aware retrieval should surface.
+    // M4: DIFF_TOUCHED seed hints JOIN graph expansion AFTER content seeds
+    // (ADR-006 semantics: pinned candidates + signal — they must never
+    // displace lexical seeds, which the tuning split confirmed as harmful).
     const hintPaths = M4_SEED_WEIGHTS.enabled
       ? [
           ...new Set(
@@ -250,10 +250,7 @@ export class HybridRetriever {
           ),
         ].filter((p) => this.entriesRef.has(p))
       : [];
-    const seeds = [...new Set([...hintPaths, ...contentSeeds])].slice(
-      0,
-      Math.max(seedCount, hintPaths.length),
-    );
+    const seeds = [...new Set([...contentSeeds, ...hintPaths])].slice(0, seedCount);
 
     // Aggregate structural contributions per (kind, counterpart) to avoid
     // inflating scores with many parallel edges.
