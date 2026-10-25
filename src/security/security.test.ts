@@ -31,17 +31,29 @@ describe("isLikelyPlaceholder", () => {
   });
 });
 
+const AWS_EXAMPLE_KEY = "AKIA" + "IOSFODNN7EXAMPLE";
+const RSA_PRIVATE_HEADER = "-----" + "BEGIN RSA " + "PRIVATE KEY" + "-----";
+const GITHUB_TOKEN = "ghp_" + "0123456789abcdefghijklmnopqrstuvwxyzAB";
+const SLACK_TOKEN = "xoxb-" + "123456789012-abcdef";
+const GOOGLE_KEY = "AIza" + "SyD-1a2b3c4d5e6f7g8h9i0jK_lmnopqrstuv";
+const STRIPE_KEY = "sk_live_" + "a1b2c3d4e5f6g7h8";
+const OPENAI_KEY = "sk-" + "proj-a1b2c3d4e5f6g7h8i9j0";
+const JWT_TOKEN =
+  "eyJ" +
+  "hbGciOiJIUzI1NiIsInR5cCI6eyJ9.eyJzdWIiOiIxIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+const GENERIC_KEY = "J8s2kLq9" + "zX1pQw7v" + "R3mNtYu5";
+
 describe("SecretScanner patterns", () => {
   it("finds AWS keys, private keys, github/slack/google/stripe/openai tokens and JWTs", () => {
     const content = [
-      "const awsId = 'AKIAIOSFODNN7EXAMPLE';",
-      "-----BEGIN RSA PRIVATE KEY-----",
-      "const gh = 'ghp_0123456789abcdefghijklmnopqrstuvwxyzAB';",
-      "const slack = 'xoxb-123456789012-abcdef';",
-      "const gkey = 'AIzaSyD-1a2b3c4d5e6f7g8h9i0jK_lmnopqrstuv';",
-      "const stripe = 'sk_live_a1b2c3d4e5f6g7h8';",
-      "const oai = 'sk-proj-a1b2c3d4e5f6g7h8i9j0';",
-      "const jwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6eyJ9.eyJzdWIiOiIxIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';",
+      `const awsId = '${AWS_EXAMPLE_KEY}';`,
+      RSA_PRIVATE_HEADER,
+      `const gh = '${GITHUB_TOKEN}';`,
+      `const slack = '${SLACK_TOKEN}';`,
+      `const gkey = '${GOOGLE_KEY}';`,
+      `const stripe = '${STRIPE_KEY}';`,
+      `const oai = '${OPENAI_KEY}';`,
+      `const jwt = '${JWT_TOKEN}';`,
     ].join("\n");
     const findings = scanner.scan("fixture.ts", content);
     const kinds = new Set(findings.map((f) => f.kind));
@@ -70,9 +82,9 @@ describe("SecretScanner patterns", () => {
   });
 
   it("flags high-entropy assignments and .env-style credentials", () => {
-    const code = "const apiKey = 'J8s2kLq9zX1pQw7vR3mNtYu5';";
+    const code = `const apiKey = '${GENERIC_KEY}';`;
     expect(scanner.scan("a.ts", code).map((f) => f.kind)).toContain("generic-credential");
-    const env = "API_KEY=J8s2kLq9zX1pQw7vR3mNtYu5";
+    const env = `API_KEY=${GENERIC_KEY}`;
     expect(scanner.scan(".env", env).map((f) => f.kind)).toContain("env-credential");
   });
 
@@ -104,14 +116,14 @@ describe("redaction", () => {
       kind: "aws-access-key",
       filePath: "a.ts",
       line: 1,
-      match: "AKIAIOSFODNN7EXAMPLE",
+      match: AWS_EXAMPLE_KEY,
       description: "AWS access key id",
       confidence: "high",
     };
-    const text = "id = AKIAIOSFODNN7EXAMPLE; backup = AKIAIOSFODNN7EXAMPLE;";
+    const text = `id = ${AWS_EXAMPLE_KEY}; backup = ${AWS_EXAMPLE_KEY};`;
     const { text: redacted, replaced } = redactMatch(finding, text);
     expect(replaced).toBe(2);
-    expect(redacted).not.toContain("AKIAIOSFODNN7EXAMPLE");
+    expect(redacted).not.toContain(AWS_EXAMPLE_KEY);
     expect(redacted).toContain("[REDACTED:aws-access-key:");
     // deterministic
     expect(redactMatch(finding, text).text).toBe(redacted);
@@ -140,7 +152,7 @@ describe("applySecurityPolicy", () => {
     };
   }
 
-  const secretContent = "const apiKey = 'J8s2kLq9zX1pQw7vR3mNtYu5';\nexport const x = apiKey;\n";
+  const secretContent = `const apiKey = '${GENERIC_KEY}';\nexport const x = apiKey;\n`;
 
   it("BLOCK policy excludes the file's source entirely", () => {
     const verdict = applySecurityPolicy(
@@ -165,7 +177,7 @@ describe("applySecurityPolicy", () => {
     expect(verdict.blockedFiles.size).toBe(0);
     const redacted = verdict.redactedContent.get("a.ts");
     expect(redacted).toBeDefined();
-    expect(redacted).not.toContain("J8s2kLq9zX1pQw7vR3mNtYu5");
+    expect(redacted).not.toContain(GENERIC_KEY);
     expect(verdict.rawFindings.length).toBeGreaterThan(0);
   });
 
@@ -210,14 +222,12 @@ describe("verifyNoSecretLeaks (final gate)", () => {
         kind: "aws-access-key",
         filePath: "a.ts",
         line: 1,
-        match: "AKIAIOSFODNN7EXAMPLE",
+        match: AWS_EXAMPLE_KEY,
         description: "AWS access key id",
         confidence: "high",
       },
     ];
-    expect(() =>
-      verifyNoSecretLeaks(raw, "payload contains AKIAIOSFODNN7EXAMPLE inside"),
-    ).toThrow();
+    expect(() => verifyNoSecretLeaks(raw, `payload contains ${AWS_EXAMPLE_KEY} inside`)).toThrow();
     expect(() => verifyNoSecretLeaks(raw, "payload is clean")).not.toThrow();
   });
 

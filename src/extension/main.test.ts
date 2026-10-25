@@ -224,6 +224,8 @@ const { CancellationSource } = await import("../shared/cancellation");
 const { PREVIEW_SCHEME, ContextPreviewProvider } = await import("./previewProvider");
 const { entryRelativePath } = await import("../index/schema");
 
+const SECRET_VALUE = "J8s2kLq9" + "zX1pQw7v" + "R3mNtYu5";
+
 const WORKSPACE: Record<string, string> = {
   "package.json": JSON.stringify({ name: "activation-audit", version: "0.0.1" }) + "\n",
   "src/app/index.ts": [
@@ -239,11 +241,9 @@ const WORKSPACE: Record<string, string> = {
     "",
   ].join("\n"),
   "src/shared/util.ts": ["/** Shared utility. */", "export const util = () => 2;", ""].join("\n"),
-  "src/app/leak.ts": [
-    "const apiKey = 'J8s2kLq9zX1pQw7vR3mNtYu5';",
-    "export const use = apiKey;",
-    "",
-  ].join("\n"),
+  "src/app/leak.ts": [`const apiKey = '${SECRET_VALUE}';`, "export const use = apiKey;", ""].join(
+    "\n",
+  ),
   "README.md": "# activation audit fixture\n",
 };
 
@@ -444,7 +444,7 @@ describe("activation audit (real activate(), mocked vscode)", () => {
     state.inputBox = "api leak apiKey environment";
     await state.commands.get("offlineCodeContext.generateTaskContext")!();
     await state.commands.get("offlineCodeContext.copyContext")!();
-    expect(state.clipboard).not.toContain("J8s2kLq9zX1pQw7vR3mNtYu5");
+    expect(state.clipboard).not.toContain(SECRET_VALUE);
     expect(state.clipboard).toContain("### FILE: src/app/api.ts");
     await state.commands.get("offlineCodeContext.securityScan")!();
     expect(state.outputLines.some((l) => l.includes("blocked") || l.includes("finding"))).toBe(

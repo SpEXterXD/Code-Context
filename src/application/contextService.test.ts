@@ -12,6 +12,8 @@ import { CancellationSource } from "../shared/cancellation";
  * constrains the candidate set at the retrieval boundary. Determinism,
  * budgeting, security screening, and the wire format must be unaffected.
  */
+const SECRET_VALUE = "J8s2kLq9" + "zX1pQw7v" + "R3mNtYu5";
+
 const FIXTURE: Record<string, string> = {
   "package.json": JSON.stringify({ name: "scope-fixture", version: "1.0.0" }) + "\n",
   "src/app/index.ts": [
@@ -28,7 +30,7 @@ const FIXTURE: Record<string, string> = {
     "",
   ].join("\n"),
   "src/app/secret.ts": [
-    "const apiKey = 'J8s2kLq9zX1pQw7vR3mNtYu5';",
+    `const apiKey = '${SECRET_VALUE}';`,
     "export const leak = apiKey;",
     "",
   ].join("\n"),
@@ -39,8 +41,6 @@ const FIXTURE: Record<string, string> = {
   ].join("\n"),
   "src/other/thing.ts": ["/** Unrelated module. */", "export const thing = 1;", ""].join("\n"),
 };
-
-const SECRET_VALUE = "J8s2kLq9zX1pQw7vR3mNtYu5";
 
 function sourceFilesOf(payload: string): string[] {
   const source = payload.slice(payload.indexOf("## SOURCE"));
