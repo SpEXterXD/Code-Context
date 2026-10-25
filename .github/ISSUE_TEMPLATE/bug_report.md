@@ -29,7 +29,7 @@ Please list any customized settings under `offlineCodeContext.*` (e.g. `maxFiles
 }
 ```
 
-## Redacted Context Package Header
+## Redacted context package header
 If applicable, paste the header and metadata sections from the generated preview (omit or redact any sensitive workspace names):
 ```
 # PROJECT CONTEXT

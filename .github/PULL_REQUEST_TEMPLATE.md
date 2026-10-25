@@ -1,4 +1,4 @@
-## Summary
+## Proposed changes
 Brief description of the changes introduced by this pull request.
 
 ## Related Issues
