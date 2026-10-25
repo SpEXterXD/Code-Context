@@ -13,6 +13,8 @@ export interface ContextBudgetConfig {
   maxGraphDepth: number;
   maxCodeLinesPerFile: number;
   structureDepth: number;
+  /** M4: token cap for the optional ## CURRENT CHANGES section. */
+  currentChangesMaxTokens: number;
 }
 
 export const DEFAULT_BUDGET: ContextBudgetConfig = {
@@ -23,6 +25,7 @@ export const DEFAULT_BUDGET: ContextBudgetConfig = {
   maxGraphDepth: 3,
   maxCodeLinesPerFile: 400,
   structureDepth: 4,
+  currentChangesMaxTokens: 1500,
 };
 
 export function validateBudget(config: ContextBudgetConfig): void {
@@ -34,6 +37,7 @@ export function validateBudget(config: ContextBudgetConfig): void {
     [config.maxGraphDepth >= 1, "maxGraphDepth must be >= 1"],
     [config.maxCodeLinesPerFile >= 10, "maxCodeLinesPerFile must be >= 10"],
     [config.structureDepth >= 1, "structureDepth must be >= 1"],
+    [config.currentChangesMaxTokens >= 0, "currentChangesMaxTokens must be >= 0"],
   ];
   for (const [ok, message] of checks) {
     if (!ok) throw new OccError("BUDGET_INVALID", message);

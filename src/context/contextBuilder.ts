@@ -33,6 +33,10 @@ import {
 import { sha256Hex } from "../shared/ids";
 import { OccError } from "../shared/errors";
 import { compareStrings } from "../shared/text";
+import type { SeedSet } from "../seeds/seedSet";
+import { sensitivePathCheck } from "../security/sensitivePathRules";
+import { SecretScanner } from "../security/secretScanner";
+import { redactMatch } from "../security/redactor";
 
 export type ContextMode = "project" | "file" | "task" | "selection";
 
@@ -63,6 +67,13 @@ export interface ContextRequest {
   candidateLimit?: number;
   /** Optional folder/file entry-point scope (right-click commands). */
   scope?: ContextScope;
+  /**
+   * M4 change-aware seeds (working tree, open editors, diagnostics, stack
+   * frames). Pinned candidates + seed signals in retrieval; diff content
+   * becomes the optional ## CURRENT CHANGES section (security-screened,
+   * budget-capped). Absent = unseeded behavior, byte-identical to pre-M4.
+   */
+  seedSet?: SeedSet;
 }
 
 export type TruncationLevel = "FULL" | "SYMBOLS" | "SIGNATURES" | "METADATA";
@@ -137,9 +148,16 @@ export class ContextBuilder {
   build(request: ContextRequest): ContextBuildResult {
     const { entries, graph, budget } = this.deps;
     const ledger = new BudgetLedger(budget);
-    const pinnedPaths = this.resolvePinned(request);
-    const retrieval = this.retrieveForMode(request, pinnedPaths);
-    const candidates = assignTiers(retrieval.ranked, pinnedPaths);
+    const seedState = this.prepareSeedState(request.seedSet);
+    // Seed hints pin into retrieval (survive zero-signal) but do NOT get the
+    // USER_SELECTED tier: their own seed signals give them CHANGE_SEED.
+    const userPins = this.resolvePinned(request);
+    const retrieval = this.retrieveForMode(
+      request,
+      [...userPins, ...seedState.hints.map((h) => h.path)],
+      seedState.hints,
+    );
+    const candidates = assignTiers(retrieval.ranked, userPins);
 
     // Security screen BEFORE budgeting: blocked files never consume budget.
     const security = this.screenCandidates(candidates);
@@ -249,6 +267,26 @@ export class ContextBuilder {
         note: "source withheld by security policy",
       });
     }
+    // Seed diffs withheld by the sensitive-path/secret screen: path-only WHY
+    // (updates an existing metadata-only entry — the security reason wins).
+    for (const w of seedState.withheldDiffs) {
+      const existing = why.find((entry) => entry.path === w.path);
+      if (existing) {
+        existing.tierLabel = "excluded by security policy";
+        existing.reasons = [w.reason];
+        existing.included = false;
+        existing.note = "diff withheld by security policy";
+        continue;
+      }
+      why.push({
+        path: w.path,
+        tierLabel: "excluded by security policy",
+        score: 0,
+        reasons: [w.reason],
+        included: false,
+        note: "diff withheld by security policy",
+      });
+    }
 
     // Assemble + verify with a deterministic degrade loop: if the exact
     // payload exceeds the budget, demote the lowest-priority included file to
@@ -274,6 +312,7 @@ export class ContextBuilder {
       budget,
       truncation,
       noteFor,
+      seedState.currentChanges,
     );
     let rendered = renderWithTokenConvergence(model);
     while (
@@ -301,6 +340,7 @@ export class ContextBuilder {
         budget,
         truncation,
         noteFor,
+        seedState.currentChanges,
       );
       rendered = renderWithTokenConvergence(model);
     }
@@ -333,6 +373,7 @@ export class ContextBuilder {
         score: w.score,
         reasons: w.reasons,
         included: w.included,
+        note: w.note,
       })),
       retrieval,
     };
@@ -349,11 +390,13 @@ export class ContextBuilder {
     budget: ContextBudgetConfig,
     truncation: Array<{ path: string; level: TruncationLevel }>,
     noteFor: (levels: Array<{ path: string; level: TruncationLevel }>) => string | undefined,
+    currentChanges: ContextModel["currentChanges"],
   ): ContextModel {
     return {
       projectName: this.deps.projectName,
       indexVersion: this.deps.indexVersion,
       task: request.taskText,
+      currentChanges,
       tree: tree.text,
       treeNote: tree.truncated ? `tree truncated at depth ${budget.structureDepth}` : undefined,
       architecture,
@@ -378,7 +421,11 @@ export class ContextBuilder {
     return [];
   }
 
-  private retrieveForMode(request: ContextRequest, pinnedPaths: string[]): RetrievalResult {
+  private retrieveForMode(
+    request: ContextRequest,
+    pinnedPaths: string[],
+    seedHints: ReturnType<ContextBuilder["prepareSeedState"]>["hints"],
+  ): RetrievalResult {
     // The retrieval `limit` is a candidate cap, not a final selection cap: it
     // must not prevent `maxFiles` from binding. Derive it from the configured
     // budget (with generous headroom for tier-based selection) instead of a
@@ -387,6 +434,7 @@ export class ContextBuilder {
       maxGraphDepth: this.deps.budget.maxGraphDepth,
       enableGitRecency: this.deps.enableGitRecency,
       pinnedPaths,
+      seedHints,
       limit: request.candidateLimit ?? Math.max(60, this.deps.budget.maxFiles * 2),
     };
     if (request.mode === "project") {
@@ -583,6 +631,108 @@ export class ContextBuilder {
   }
 
   // ---- helpers ----
+
+  /**
+   * M4: turns a SeedSet into retrieval hints + the ## CURRENT CHANGES
+   * section. Security order (ADR-006): the sensitive-path veto runs BEFORE
+   * any diff content is used; surviving sections go through the same secret
+   * scanner and policy as source files (BLOCK withholds the whole diff to a
+   * path-only WHY entry, WARN redacts deterministically). The section text
+   * is capped at currentChangesMaxTokens (chars/4) with a deterministic
+   * round-robin per-file share.
+   */
+  private prepareSeedState(seedSet?: SeedSet): {
+    hints: Array<{
+      path: string;
+      kind: "DIFF_TOUCHED" | "OPEN_EDITOR" | "DIAGNOSTIC" | "STACK_FRAME";
+      detail?: string;
+    }>;
+    currentChanges?: { sections: Array<{ path: string; diff: string }>; truncated: boolean };
+    withheldDiffs: Array<{ path: string; reason: string }>;
+    notes: string[];
+  } {
+    if (!seedSet) return { hints: [], withheldDiffs: [], notes: [] };
+    const kindPriority = {
+      DIFF_TOUCHED: 0,
+      DIAGNOSTIC: 1,
+      STACK_FRAME: 2,
+      OPEN_EDITOR: 3,
+    } as const;
+    type HintKind = keyof typeof kindPriority;
+    const hintByPath = new Map<string, { path: string; kind: HintKind; detail?: string }>();
+    const addHint = (rawPath: string, kind: HintKind, detail?: string): void => {
+      const p = rawPath.replace(/\\/g, "/");
+      if (!this.deps.entries.has(p) || hintByPath.has(p)) return;
+      hintByPath.set(p, { path: p, kind, detail });
+    };
+    for (const c of seedSet.changedPaths) addHint(c.path, "DIFF_TOUCHED", c.state);
+    for (const d of seedSet.diagnostics) addHint(d.path, "DIAGNOSTIC", d.message.slice(0, 60));
+    for (const f of seedSet.stackFrames ?? []) addHint(f.path, "STACK_FRAME", `line ${f.line}`);
+    for (const o of seedSet.openEditors)
+      addHint(o.path, "OPEN_EDITOR", o.active ? "active editor" : "");
+    const hints = [...hintByPath.values()].sort(
+      (a, b) => kindPriority[a.kind] - kindPriority[b.kind] || compareStrings(a.path, b.path),
+    );
+
+    const withheldDiffs: Array<{ path: string; reason: string }> = [];
+    const accepted: Array<{ path: string; diff: string }> = [];
+    const scanner = new SecretScanner();
+    for (const section of [...seedSet.diffSections].sort((a, b) =>
+      compareStrings(a.path, b.path),
+    )) {
+      // Sensitive-path veto FIRST — the diff content of a blocked path is
+      // never read, scanned, or rendered here (the collector also enforces
+      // this before reading; this is the enforcement point for callers that
+      // construct SeedSets directly, e.g. the eval harness).
+      const pathFinding = sensitivePathCheck(section.path);
+      if (pathFinding) {
+        withheldDiffs.push({ path: section.path, reason: `sensitive path: ${pathFinding.reason}` });
+        continue;
+      }
+      let text = section.diff;
+      const findings = scanner.scan(section.path, text);
+      if (findings.length > 0) {
+        if (this.deps.security.secretPolicy === "block") {
+          withheldDiffs.push({
+            path: section.path,
+            reason: `${findings[0]!.description} (${findings[0]!.kind})`,
+          });
+          continue;
+        }
+        if (this.deps.security.redactSecrets) {
+          for (const finding of findings) text = redactMatch(finding, text).text;
+        }
+      }
+      accepted.push({ path: section.path, diff: text });
+    }
+
+    // Round-robin budget: every accepted section gets an equal share of the
+    // current-changes cap, truncated at a line boundary; sections whose
+    // share is fully consumed are dropped deterministically.
+    const maxChars = this.deps.budget.currentChangesMaxTokens * 4;
+    const sections: Array<{ path: string; diff: string }> = [];
+    let truncated = false;
+    if (accepted.length > 0 && maxChars > 0) {
+      const share = Math.floor(maxChars / accepted.length);
+      const bounded = accepted.map((s) => {
+        const t = truncateDiffToBytes(s.diff, Math.max(64, share));
+        if (t.truncated) truncated = true;
+        return { path: s.path, diff: t.text };
+      });
+      let used = 0;
+      for (const s of bounded) {
+        const cost = s.diff.length + s.path.length + 16;
+        if (used + cost > maxChars) {
+          truncated = true;
+          continue;
+        }
+        used += cost;
+        sections.push(s);
+      }
+    }
+    const currentChanges = sections.length > 0 ? { sections, truncated } : undefined;
+    return { hints, currentChanges, withheldDiffs, notes: seedSet.notes };
+  }
 
   private screenCandidates(candidates: RankedCandidate[]): SecurityVerdict {
     const toScan = candidates
@@ -825,3 +975,12 @@ export function computeIndexVersion(entries: Map<string, FileEntry>): string {
 }
 
 export { TIER_ORDER_SIGNAL_WEIGHT };
+
+/** Truncates diff text at a line boundary under a byte cap (deterministic). */
+function truncateDiffToBytes(text: string, maxBytes: number): { text: string; truncated: boolean } {
+  const buf = Buffer.from(text, "utf8");
+  if (buf.length <= maxBytes) return { text, truncated: false };
+  const cut = buf.subarray(0, maxBytes).toString("utf8");
+  const lastNl = cut.lastIndexOf("\n");
+  return { text: lastNl > 0 ? cut.slice(0, lastNl + 1) : cut, truncated: true };
+}

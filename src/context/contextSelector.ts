@@ -17,6 +17,7 @@ import type { ScoredFile } from "../retrieval/relevanceScorer";
 export const SELECTION_TIERS = [
   "USER_SELECTED",
   "EXACT_SYMBOL",
+  "CHANGE_SEED",
   "DIRECT_DEPENDENCY",
   "DIRECT_DEPENDENT",
   "RELEVANT_TESTS",
@@ -30,6 +31,7 @@ export type SelectionTier = (typeof SELECTION_TIERS)[number];
 export const TIER_LABELS: Record<SelectionTier, string> = {
   USER_SELECTED: "explicitly selected by user",
   EXACT_SYMBOL: "exact symbol match",
+  CHANGE_SEED: "changed in your working tree",
   DIRECT_DEPENDENCY: "direct dependency",
   DIRECT_DEPENDENT: "direct dependent",
   RELEVANT_TESTS: "relevant test",
@@ -58,7 +60,14 @@ export function assignTiers(ranked: ScoredFile[], pinnedPaths: string[]): Ranked
     const kinds = new Set(r.signals.map((s) => s.kind));
     let tier: SelectionTier = "LOWER_CONFIDENCE";
     if (kinds.has("EXACT_SYMBOL")) tier = "EXACT_SYMBOL";
-    else if (kinds.has("DIRECT_DEPENDENCY")) tier = "DIRECT_DEPENDENCY";
+    else if (
+      kinds.has("DIFF_TOUCHED") ||
+      kinds.has("OPEN_EDITOR") ||
+      kinds.has("DIAGNOSTIC") ||
+      kinds.has("STACK_FRAME")
+    ) {
+      tier = "CHANGE_SEED";
+    } else if (kinds.has("DIRECT_DEPENDENCY")) tier = "DIRECT_DEPENDENCY";
     else if (kinds.has("DIRECT_DEPENDENT")) tier = "DIRECT_DEPENDENT";
     else if (kinds.has("TEST_OF")) tier = "RELEVANT_TESTS";
     else if (

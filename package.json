@@ -116,6 +116,11 @@
         "command": "offlineCodeContext.clearIndex",
         "title": "OCC: Clear Local Index",
         "category": "Offline Code Context"
+      },
+      {
+        "command": "offlineCodeContext.seedFromStackTrace",
+        "title": "OCC: Seed From Clipboard Stack Trace",
+        "category": "Offline Code Context"
       }
     ],
     "viewsContainers": {
@@ -282,6 +287,40 @@
           "type": "boolean",
           "default": true,
           "description": "Show the index status bar item."
+        },
+        "offlineCodeContext.changeSeeds": {
+          "type": "boolean",
+          "default": false,
+          "description": "M4: seed retrieval with the current working-tree changes. DEFAULT OFF: the M4 seed simulation (ADR-006) measured significantly WORSE hidden-gold package recall with seeds on the tuning split at every tested weight — enable only for experimentation. Collection is trust-gated and goes through the hardened git helper."
+        },
+        "offlineCodeContext.changeSeedsMaxPaths": {
+          "type": "integer",
+          "default": 20,
+          "minimum": 1,
+          "maximum": 200,
+          "description": "Maximum number of changed-path seeds (deterministic order: state priority, then path; lockfiles/generated paths excluded)."
+        },
+        "offlineCodeContext.seedEditors": {
+          "type": "boolean",
+          "default": false,
+          "description": "M4 (untuned, off by default): also seed from open editor tabs and the active selection."
+        },
+        "offlineCodeContext.seedDiagnostics": {
+          "type": "boolean",
+          "default": false,
+          "description": "M4 (untuned, off by default): also seed from files with errors/warnings in the problems panel."
+        },
+        "offlineCodeContext.seedStackTraces": {
+          "type": "boolean",
+          "default": false,
+          "description": "M4 (untuned, off by default): include stack frames captured via 'OCC: Seed From Clipboard Stack Trace'."
+        },
+        "offlineCodeContext.currentChangesMaxTokens": {
+          "type": "integer",
+          "default": 1500,
+          "minimum": 0,
+          "maximum": 20000,
+          "description": "Token budget for the optional CURRENT CHANGES diff section (counts against the package budget)."
         }
       }
     }
@@ -303,7 +342,9 @@
     "ci": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run test:docs-sync && npm run compile",
     "eval:fsmonitor-repro": "tsx scripts/eval/fsmonitor-repro.ts",
     "eval:diagnose": "tsx scripts/eval/eval-diagnose.ts",
-    "eval:compare": "tsx scripts/eval/eval-compare.ts"
+    "eval:compare": "tsx scripts/eval/eval-compare.ts",
+    "eval:seed-hazard-repro": "tsx scripts/eval/seed-hazard-repro.ts",
+    "eval:seeds-sim": "tsx scripts/eval-seeds-sim.ts"
   },
   "dependencies": {
     "typescript": "^5.5.4"

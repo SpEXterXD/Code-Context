@@ -60,6 +60,7 @@ vi.mock("vscode", () => {
         maxGraphDepth: 3,
         maxCodeLinesPerFile: 400,
         structureDepth: 4,
+        currentChangesMaxTokens: 1500,
         excludePatterns: [],
         maxFileSizeBytes: 1048576,
         secretPolicy: "block",
@@ -329,8 +330,8 @@ afterEach(() => {
 });
 
 describe("activation audit (real activate(), mocked vscode)", () => {
-  it("registers all 15 commands, the tree view, and the preview provider on activation", () => {
-    expect(state.commands.size).toBe(15);
+  it("registers all 16 commands, the tree view, and the preview provider on activation", () => {
+    expect(state.commands.size).toBe(16);
     expect(state.commands.has("offlineCodeContext.indexWorkspace")).toBe(true);
     expect(state.commands.has("offlineCodeContext.rebuildIndex")).toBe(true);
     expect(state.commands.has("offlineCodeContext.generateTaskContext")).toBe(true);

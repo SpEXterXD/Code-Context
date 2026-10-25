@@ -88,6 +88,7 @@ npm run package
 | `offlineCodeContext.copyContext`                   | OCC: Copy Context to Clipboard         | Yes     | —                               |
 | `offlineCodeContext.securityScan`                  | OCC: Security Scan                     | Yes     | —                               |
 | `offlineCodeContext.clearIndex`                    | OCC: Clear Local Index                 | Yes     | —                               |
+| `offlineCodeContext.seedFromStackTrace`            | OCC: Seed From Clipboard Stack Trace   | Yes     | —                               |
 
 _Note_: Commands prefixed with `Generate` open the read-only preview editor. Commands prefixed with `Copy` write the payload directly to the clipboard and display a summary notification.
 
@@ -113,6 +114,7 @@ Settings are configured under the `offlineCodeContext.*` namespace:
 | `maxFileSizeBytes`    | `integer` | `1048576`    | Skip indexing files larger than this threshold (1 MiB default).                                              |
 | `excludePatterns`     | `array`   | _(standard)_ | Glob patterns excluded from indexing (`node_modules`, `dist`, `.git`, `.env*`, etc.).                        |
 | `statusBar`           | `boolean` | `true`       | Display current index status in the VS Code status bar.                                                      |
+| `changeSeeds`         | `boolean` | `false`      | Implemented, experimental, off by default; benchmark showed no gain in recall.                               |
 
 ---
 
@@ -236,7 +238,7 @@ npm run lint
 # Check code formatting with Prettier
 npm run format:check
 
-# Run test suite with Vitest (24 suites, 256 tests)
+# Run test suite with Vitest (27 suites, 283 tests)
 npm test
 
 # Verify documentation synchronization with test reports
@@ -265,7 +267,7 @@ The codebase maintains rigorous automated test coverage across 24 test suites an
 - [Architecture & Layering](docs/ARCHITECTURE.md)
 - [Security Model & Threat Boundaries](docs/SECURITY.md)
 - [User Guide & Workflows](docs/USER_GUIDE.md)
-- [Testing Guide & Metrics](docs/TESTING.md) (24 suites, 256 tests)
+- [Testing Guide & Metrics](docs/TESTING.md) (27 suites, 283 tests)
 - [Contributing Guidelines](docs/CONTRIBUTING.md)
 - [Technical Limitations](docs/LIMITATIONS.md)
 - [Architectural Decision Records (ADRs)](docs/adr/)

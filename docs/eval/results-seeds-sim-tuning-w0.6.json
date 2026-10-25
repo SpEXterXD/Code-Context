@@ -1,0 +1,416 @@
+{
+  "split": "tuning",
+  "weight": 0.6,
+  "occCommit": "9cf55a9b7067c69caff36267c96a16976241bae0",
+  "workingTreeClean": false,
+  "tasksScored": 234,
+  "arms": {},
+  "fullSlice": {
+    "unseeded": {
+      "mean": {
+        "top1": 0.3247863247863248,
+        "recall8": 0.49501424501424507,
+        "recall10": 0.6232193732193732,
+        "mrr": 0.4448276415251714,
+        "packageRecall": 0.5972222222222222
+      },
+      "pairedVsUnseeded": {}
+    },
+    "seeded": {
+      "mean": {
+        "top1": 0.3247863247863248,
+        "recall8": 0.49501424501424507,
+        "recall10": 0.6232193732193732,
+        "mrr": 0.4448276415251714,
+        "packageRecall": 0.5644586894586895
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 234,
+          "meanDiff": -0.03276353276353276,
+          "ciLow": -0.05270655270655271,
+          "ciHigh": -0.014957264957264958,
+          "excludesZero": true
+        },
+        "recall10": {
+          "n": 234,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 234,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "bm25names": {
+      "mean": {
+        "top1": 0.11538461538461539,
+        "recall8": 0.28098290598290593,
+        "recall10": 0.4800569800569801,
+        "mrr": 0.24630547168850458,
+        "packageRecall": 0.38497150997151003
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 234,
+          "meanDiff": -0.21225071225071226,
+          "ciLow": -0.27564102564102566,
+          "ciHigh": -0.1502849002849003,
+          "excludesZero": true
+        },
+        "recall10": {
+          "n": 234,
+          "meanDiff": -0.14316239316239315,
+          "ciLow": -0.2108262108262108,
+          "ciHigh": -0.07692307692307693,
+          "excludesZero": true
+        },
+        "top1": {
+          "n": 234,
+          "meanDiff": -0.2094017094017094,
+          "ciLow": -0.28205128205128205,
+          "ciHigh": -0.14102564102564102,
+          "excludesZero": true
+        }
+      }
+    },
+    "decoy-samedir": {
+      "mean": {
+        "top1": 0.3162393162393162,
+        "recall8": 0.4850427350427351,
+        "recall10": 0.6132478632478632,
+        "mrr": 0.4353986303688246,
+        "packageRecall": 0.5765669515669515
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 234,
+          "meanDiff": -0.020655270655270657,
+          "ciLow": -0.03703703703703703,
+          "ciHigh": -0.007834757834757835,
+          "excludesZero": true
+        },
+        "recall10": {
+          "n": 234,
+          "meanDiff": -0.00997150997150997,
+          "ciLow": -0.019230769230769232,
+          "ciHigh": -0.002136752136752137,
+          "excludesZero": true
+        },
+        "top1": {
+          "n": 234,
+          "meanDiff": -0.008547008547008548,
+          "ciLow": -0.021367521367521368,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "mixed": {
+      "mean": {
+        "top1": 0.32051282051282054,
+        "recall8": 0.4864672364672365,
+        "recall10": 0.6196581196581196,
+        "mrr": 0.4404165813677526,
+        "packageRecall": 0.565883190883191
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 234,
+          "meanDiff": -0.03133903133903134,
+          "ciLow": -0.05128205128205129,
+          "ciHigh": -0.013532763532763534,
+          "excludesZero": true
+        },
+        "recall10": {
+          "n": 234,
+          "meanDiff": -0.003561253561253561,
+          "ciLow": -0.009259259259259259,
+          "ciHigh": 0,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 234,
+          "meanDiff": -0.004273504273504274,
+          "ciLow": -0.01282051282051282,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "random-decoy": {
+      "mean": {
+        "top1": 0.31196581196581197,
+        "recall8": 0.48076923076923084,
+        "recall10": 0.6196581196581196,
+        "mrr": 0.4345046597200524,
+        "packageRecall": 0.5758547008547008
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 234,
+          "meanDiff": -0.021367521367521368,
+          "ciLow": -0.037037037037037035,
+          "ciHigh": -0.009259259259259259,
+          "excludesZero": true
+        },
+        "recall10": {
+          "n": 234,
+          "meanDiff": -0.003561253561253561,
+          "ciLow": -0.009259259259259259,
+          "ciHigh": 0,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 234,
+          "meanDiff": -0.01282051282051282,
+          "ciLow": -0.029914529914529916,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "realdiff": {
+      "mean": {
+        "top1": 0.3247863247863248,
+        "recall8": 0.49501424501424507,
+        "recall10": 0.6232193732193732,
+        "mrr": 0.4448276415251714,
+        "packageRecall": 0.5544871794871795
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 234,
+          "meanDiff": -0.04273504273504274,
+          "ciLow": -0.06339031339031341,
+          "ciHigh": -0.022792022792022793,
+          "excludesZero": true
+        },
+        "recall10": {
+          "n": 234,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 234,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    }
+  },
+  "sourceOnlySlice": {
+    "unseeded": {
+      "mean": {
+        "top1": 0.3275862068965517,
+        "recall8": 0.5007183908045978,
+        "recall10": 0.6300287356321839,
+        "mrr": 0.4486623625728022,
+        "packageRecall": 0.6038074712643678
+      },
+      "pairedVsUnseeded": {}
+    },
+    "seeded": {
+      "mean": {
+        "top1": 0.3275862068965517,
+        "recall8": 0.5007183908045978,
+        "recall10": 0.6300287356321839,
+        "mrr": 0.4486623625728022,
+        "packageRecall": 0.5707614942528736
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 232,
+          "meanDiff": -0.03304597701149425,
+          "ciLow": -0.05387931034482758,
+          "ciHigh": -0.015804597701149423,
+          "excludesZero": true
+        },
+        "recall10": {
+          "n": 232,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 232,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "bm25names": {
+      "mean": {
+        "top1": 0.11637931034482758,
+        "recall8": 0.28412356321839083,
+        "recall10": 0.4849137931034483,
+        "mrr": 0.24828079541168563,
+        "packageRecall": 0.38900862068965525
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 232,
+          "meanDiff": -0.21479885057471265,
+          "ciLow": -0.27298850574712646,
+          "ciHigh": -0.15732758620689657,
+          "excludesZero": true
+        },
+        "recall10": {
+          "n": 232,
+          "meanDiff": -0.14511494252873566,
+          "ciLow": -0.21264367816091956,
+          "ciHigh": -0.07471264367816094,
+          "excludesZero": true
+        },
+        "top1": {
+          "n": 232,
+          "meanDiff": -0.21120689655172414,
+          "ciLow": -0.2801724137931034,
+          "ciHigh": -0.13793103448275862,
+          "excludesZero": true
+        }
+      }
+    },
+    "decoy-samedir": {
+      "mean": {
+        "top1": 0.31896551724137934,
+        "recall8": 0.49066091954022995,
+        "recall10": 0.619971264367816,
+        "mrr": 0.4391520668375214,
+        "packageRecall": 0.5829741379310346
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 232,
+          "meanDiff": -0.020833333333333336,
+          "ciLow": -0.03735632183908046,
+          "ciHigh": -0.00646551724137931,
+          "excludesZero": true
+        },
+        "recall10": {
+          "n": 232,
+          "meanDiff": -0.010057471264367814,
+          "ciLow": -0.02011494252873563,
+          "ciHigh": -0.0021551724137931034,
+          "excludesZero": true
+        },
+        "top1": {
+          "n": 232,
+          "meanDiff": -0.008620689655172414,
+          "ciLow": -0.021551724137931036,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "mixed": {
+      "mean": {
+        "top1": 0.3232758620689655,
+        "recall8": 0.49209770114942536,
+        "recall10": 0.6264367816091954,
+        "mrr": 0.44421327603471594,
+        "packageRecall": 0.5721982758620691
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 232,
+          "meanDiff": -0.03160919540229885,
+          "ciLow": -0.05459770114942529,
+          "ciHigh": -0.013649425287356323,
+          "excludesZero": true
+        },
+        "recall10": {
+          "n": 232,
+          "meanDiff": -0.0035919540229885053,
+          "ciLow": -0.009339080459770114,
+          "ciHigh": 0,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 232,
+          "meanDiff": -0.004310344827586207,
+          "ciLow": -0.01293103448275862,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "random-decoy": {
+      "mean": {
+        "top1": 0.3146551724137931,
+        "recall8": 0.4863505747126437,
+        "recall10": 0.6264367816091954,
+        "mrr": 0.43825038954522527,
+        "packageRecall": 0.5822557471264368
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 232,
+          "meanDiff": -0.021551724137931036,
+          "ciLow": -0.035919540229885055,
+          "ciHigh": -0.008620689655172414,
+          "excludesZero": true
+        },
+        "recall10": {
+          "n": 232,
+          "meanDiff": -0.0035919540229885053,
+          "ciLow": -0.009339080459770114,
+          "ciHigh": 0,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 232,
+          "meanDiff": -0.01293103448275862,
+          "ciLow": -0.03017241379310345,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    },
+    "realdiff": {
+      "mean": {
+        "top1": 0.3275862068965517,
+        "recall8": 0.5007183908045978,
+        "recall10": 0.6300287356321839,
+        "mrr": 0.4486623625728022,
+        "packageRecall": 0.5607040229885057
+      },
+      "pairedVsUnseeded": {
+        "packageRecall": {
+          "n": 232,
+          "meanDiff": -0.04310344827586208,
+          "ciLow": -0.06609195402298851,
+          "ciHigh": -0.023706896551724133,
+          "excludesZero": true
+        },
+        "recall10": {
+          "n": 232,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        },
+        "top1": {
+          "n": 232,
+          "meanDiff": 0,
+          "ciLow": 0,
+          "ciHigh": 0,
+          "excludesZero": false
+        }
+      }
+    }
+  }
+}

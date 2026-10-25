@@ -55,7 +55,11 @@ export interface RankingSignal {
     | "SAME_DIRECTORY"
     | "RECENCY"
     | "ENTRY_POINT"
-    | "HUB";
+    | "HUB"
+    | "DIFF_TOUCHED"
+    | "OPEN_EDITOR"
+    | "DIAGNOSTIC"
+    | "STACK_FRAME";
   weight: number;
   detail: string;
 }
@@ -97,6 +101,14 @@ export function explainSignals(scored: ScoredFile): string[] {
           return `Project entry point`;
         case "HUB":
           return `Hub file (most connected): ${s.detail}`;
+        case "DIFF_TOUCHED":
+          return `Changed in your working tree (${s.detail})`;
+        case "OPEN_EDITOR":
+          return `Open in your editor${s.detail ? ` (${s.detail})` : ""}`;
+        case "DIAGNOSTIC":
+          return `Has a diagnostic: ${s.detail}`;
+        case "STACK_FRAME":
+          return `Appears in the parsed stack trace (${s.detail})`;
       }
     });
 }
