@@ -111,8 +111,24 @@ describe("JsonIndexStore", () => {
     parsed.schemaVersion = STORE_SCHEMA_VERSION + 5;
     fs.writeFileSync(manifestPath, JSON.stringify(parsed));
     const store2 = new JsonIndexStore(root, "fp");
-    const { manifest } = store2.load();
+    const { manifest, entries } = store2.load();
     expect(manifest.schemaVersion).toBe(STORE_SCHEMA_VERSION);
+    expect(entries.size).toBe(0);
+  });
+
+  it("migrates older store versions by clearing stale entries to trigger a rebuild", () => {
+    root = makeTempDir();
+    const store = new JsonIndexStore(root, "fp");
+    store.upsertEntries([fakeEntry("a.ts")]);
+    const manifestPath = path.join(root, "manifest.json");
+    const parsed = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    parsed.schemaVersion = 2; // older v2 store
+    fs.writeFileSync(manifestPath, JSON.stringify(parsed));
+
+    const store2 = new JsonIndexStore(root, "fp");
+    const { manifest, entries } = store2.load();
+    expect(manifest.schemaVersion).toBe(STORE_SCHEMA_VERSION);
+    expect(entries.size).toBe(0);
   });
 
   it("rejects a foreign project fingerprint by rebuilding the manifest (F5)", () => {

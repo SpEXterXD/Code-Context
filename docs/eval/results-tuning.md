@@ -1,6 +1,6 @@
 # Retrieval Evaluation Results — TUNING SPLIT
 
-Dataset hash `ec50ab4f` · 300 tasks · seed 20260918 · split **tuning** · OCC commit `80a7b5e9ab03` · working tree clean at run start: NO
+Dataset hash `ec50ab4f` · 300 tasks · seed 20260918 · split **tuning** · OCC commit `0d66d834760c` · working tree clean at run start: yes
 
 ## Overall (mean [95% bootstrap CI], per task)
 
@@ -98,8 +98,8 @@ OCC = fraction of gold files inside the generated package (parsed from its `### 
 
 - **hono:8b0f189a3fab**
   - deno_dist/middleware/pretty-json/index.ts (source): OCC rank not in candidates, BM25 rank 9
-  - src/context.test.ts (test): OCC rank 37, BM25 rank 6
-  - src/middleware/pretty-json/index.ts (source): OCC rank 38, BM25 rank 8
+  - src/context.test.ts (test): OCC rank 36, BM25 rank 6
+  - src/middleware/pretty-json/index.ts (source): OCC rank 37, BM25 rank 8
 
 - **hono:90da1961930b**
   - deno_test/middleware.test.tsx (test): OCC rank 14, BM25 rank 6
@@ -255,4 +255,4 @@ Mined 2935, accepted 494, sampled 60, evaluated 60 (dropped for empty effective 
 
 {"node":"v24.15.0","platform":"win32 10.0.26300","cpu":"AMD Ryzen 7 4800H with Radeon Graphics         ","totalMemGB":15.4}
 
-timings (ms): {"snapshotMs":58981.585300000035,"indexMs":225245.45910000018,"occMs":25360.56899999979,"baselinesMs":40510.38269999982}
+timings (ms): {"snapshotMs":77417.55159999998,"indexMs":227678.90079999977,"occMs":27446.58699999997,"baselinesMs":43067.03399999984}

@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-(nothing yet)
+### Security
+
+- **Index secret token filtering (`STORE_SCHEMA_VERSION` 3)**: On-disk index shards (`entries/xx/<hash>.json`) no longer persist tokens flagged by `SecretScanner`. Matched secret spans are blanked before extracting `identifiers` (lexical search terms) and `bodyTokens` (BM25 term frequencies), and any secret matches in `fileSummary`, symbol `docComment`, or symbol `signature` are blanked. The filter applies for all `secretPolicy` values, including `allow`. Older stores automatically clear stale entries and rebuild once on next load. Values the scanner does not flag in the source file (such as short passwords or low-entropy strings not assigned to credential keys) are still tokenized.
 
 ## 0.3.1 (2026-10-25)
 
