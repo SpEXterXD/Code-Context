@@ -4,6 +4,7 @@ import {
   isLikelyPlaceholder,
   SecretScanner,
   shannonEntropy,
+  blankSpans,
   type SecretFinding,
 } from "./secretScanner";
 import { redactMatch, assertSecretsAbsent } from "./redactor";
@@ -248,5 +249,25 @@ describe("verifyNoSecretLeaks (final gate)", () => {
     ];
     // "k=v" is too short to trust as a leak indicator in arbitrary output.
     expect(() => verifyNoSecretLeaks(shortMedium, "payload k=v clean")).not.toThrow();
+  });
+});
+
+describe("scanSpans and blankSpans", () => {
+  it("extracts exact character offset spans of matches and blanks them", () => {
+    const text = 'const key = "AK' + "IA" + 'IOSFODNN7EXAMPLE";\nexport const x = 1;';
+    const spans = scanner.scanSpans(text);
+    expect(spans).toHaveLength(1);
+    expect(text.slice(spans[0].start, spans[0].end)).toBe("AK" + "IA" + "IOSFODNN7EXAMPLE");
+    const blanked = blankSpans(text, spans);
+    expect(blanked.length).toBe(text.length);
+    expect(blanked).not.toContain("AK" + "IA" + "IOSFODNN7EXAMPLE");
+    expect(blanked).toContain("export const x = 1;");
+  });
+
+  it("preserves newlines inside multi-line spans", () => {
+    const text = "line1\nline2\nline3";
+    const blanked = blankSpans(text, [{ start: 3, end: 14 }]);
+    expect(blanked.length).toBe(text.length);
+    expect(blanked.split("\n")).toHaveLength(3);
   });
 });

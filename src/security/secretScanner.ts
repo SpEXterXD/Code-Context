@@ -129,22 +129,41 @@ export interface SecretScanOptions {
 
 const DEFAULT_ENTROPY_THRESHOLD = 3.3;
 
+export interface SecretSpan {
+  start: number;
+  end: number;
+}
+
 export class SecretScanner {
   constructor(private readonly options: SecretScanOptions = {}) {}
 
-  /** Scans one file's content; returns findings with line numbers. */
-  scan(filePath: string, content: string): SecretFinding[] {
-    const findings: SecretFinding[] = [];
+  private scanMatches(content: string): Array<{
+    kind: SecretKind;
+    start: number;
+    end: number;
+    match: string;
+    description: string;
+    confidence: "high" | "medium";
+  }> {
+    const matches: Array<{
+      kind: SecretKind;
+      start: number;
+      end: number;
+      match: string;
+      description: string;
+      confidence: "high" | "medium";
+    }> = [];
     const threshold = this.options.entropyThreshold ?? DEFAULT_ENTROPY_THRESHOLD;
 
     for (const def of PATTERNS) {
       for (const match of content.matchAll(def.regex)) {
         const text = match[0];
         if (def.validate && !def.validate(text)) continue;
-        findings.push({
+        const start = match.index ?? 0;
+        matches.push({
           kind: def.kind,
-          filePath,
-          line: lineOfIndex(content, match.index ?? 0),
+          start,
+          end: start + text.length,
           match: text,
           description: def.description,
           confidence: def.confidence,
@@ -156,10 +175,11 @@ export class SecretScanner {
       const value = match[2];
       if (isLikelyPlaceholder(value)) continue;
       if (shannonEntropy(value) >= threshold) {
-        findings.push({
+        const start = match.index ?? 0;
+        matches.push({
           kind: "generic-credential",
-          filePath,
-          line: lineOfIndex(content, match.index ?? 0),
+          start,
+          end: start + match[0].length,
           match: match[0],
           description: `high-entropy value assigned to "${match[1]}"`,
           confidence: "medium",
@@ -171,10 +191,11 @@ export class SecretScanner {
       const value = match[2];
       if (isLikelyPlaceholder(value)) continue;
       if (shannonEntropy(value) >= threshold) {
-        findings.push({
+        const start = match.index ?? 0;
+        matches.push({
           kind: "env-credential",
-          filePath,
-          line: lineOfIndex(content, match.index ?? 0),
+          start,
+          end: start + match[0].length,
           match: match[0],
           description: `env-style credential "${match[1]}"`,
           confidence: "high",
@@ -182,8 +203,61 @@ export class SecretScanner {
       }
     }
 
+    return matches;
+  }
+
+  /** Scans one file's content; returns findings with line numbers. */
+  scan(filePath: string, content: string): SecretFinding[] {
+    const findings: SecretFinding[] = this.scanMatches(content).map((m) => ({
+      kind: m.kind,
+      filePath,
+      line: lineOfIndex(content, m.start),
+      match: m.match,
+      description: m.description,
+      confidence: m.confidence,
+    }));
     return findings.sort((a, b) => a.line - b.line || compareStrings(a.kind, b.kind));
   }
+
+  /**
+   * Scans content and returns character offset spans [start, end) of flagged matches.
+   * Minimal span-returning function reusing the exact same scanner rules and patterns.
+   */
+  scanSpans(content: string): SecretSpan[] {
+    return this.scanMatches(content)
+      .map((m) => ({ start: m.start, end: m.end }))
+      .sort((a, b) => a.start - b.start || a.end - b.end);
+  }
+}
+
+/**
+ * Blanks identified spans in content by replacing matched characters with spaces.
+ * Preserves newlines and overall character count/offsets.
+ */
+export function blankSpans(content: string, spans: readonly SecretSpan[]): string {
+  if (spans.length === 0) return content;
+  const sorted = [...spans].sort((a, b) => a.start - b.start || a.end - b.end);
+  let result = "";
+  let lastIndex = 0;
+  for (const span of sorted) {
+    if (span.end <= lastIndex) continue;
+    const start = Math.max(0, Math.max(span.start, lastIndex));
+    if (start > lastIndex) {
+      result += content.slice(lastIndex, start);
+    }
+    const end = Math.min(content.length, span.end);
+    let blanked = "";
+    for (let i = start; i < end; i++) {
+      const ch = content[i];
+      blanked += ch === "\n" || ch === "\r" ? ch : " ";
+    }
+    result += blanked;
+    lastIndex = end;
+  }
+  if (lastIndex < content.length) {
+    result += content.slice(lastIndex);
+  }
+  return result;
 }
 
 const PLACEHOLDER_WORDS = [
