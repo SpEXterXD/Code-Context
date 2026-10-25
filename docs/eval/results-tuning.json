@@ -3,8 +3,8 @@
   "ablations": [],
   "evalSplitRunsIncludingThis": null,
   "seed": 20260918,
-  "occCommit": "80a7b5e9ab03309c57d210c581a51b4189fb4345",
-  "workingTreeClean": false,
+  "occCommit": "4b88cdafc7c0e2075126088558de250f103011cb",
+  "workingTreeClean": true,
   "datasetHash": "ec50ab4f",
   "tasks": 300,
   "skippedTasks": [],
@@ -37,9 +37,9 @@
         },
         "mrr": {
           "n": 300,
-          "mean": 0.6209663158079067,
-          "ciLow": 0.576716695308268,
-          "ciHigh": 0.6648552407209688
+          "mean": 0.6209535563451474,
+          "ciLow": 0.5767333619749346,
+          "ciHigh": 0.6648369257026538
         }
       },
       "perRepo": {
@@ -70,9 +70,9 @@
           },
           "mrr": {
             "n": 60,
-            "mean": 0.6040069223899148,
+            "mean": 0.6039153472983397,
             "ciLow": 0.5065579710144926,
-            "ciHigh": 0.7025241147741147
+            "ciHigh": 0.7024325396825396
           }
         },
         "fastify": {
@@ -134,8 +134,8 @@
           },
           "mrr": {
             "n": 60,
-            "mean": 0.514575998075998,
-            "ciLow": 0.42311556036556025,
+            "mean": 0.5146037758537757,
+            "ciLow": 0.423143338143338,
             "ciHigh": 0.6101142376142377
           }
         },
@@ -231,9 +231,9 @@
         },
         "mrr": {
           "n": 300,
-          "mean": 0.6209663158079067,
-          "ciLow": 0.576716695308268,
-          "ciHigh": 0.6648552407209688
+          "mean": 0.6209535563451474,
+          "ciLow": 0.5767333619749346,
+          "ciHigh": 0.6648369257026538
         }
       },
       "packageRecall": {
@@ -243,7 +243,7 @@
         "ciHigh": 0.7059841269841267
       },
       "packageStats": {
-        "meanTokens": 25593.9,
+        "meanTokens": 25585.166666666668,
         "meanFilesIncluded": 14.516666666666667
       }
     },
@@ -1020,9 +1020,9 @@
       },
       "mrr": {
         "n": 300,
-        "meanDiff": 0.16128757844810598,
-        "ciLow": 0.11147110383090805,
-        "ciHigh": 0.21059770932721994,
+        "meanDiff": 0.16127481898534654,
+        "ciLow": 0.11144002934983357,
+        "ciHigh": 0.21060326488277548,
         "excludesZero": true
       },
       "packageRecall": {
@@ -1064,8 +1064,8 @@
       },
       "mrr": {
         "n": 300,
-        "meanDiff": 0.16295424511477263,
-        "ciLow": 0.11306163923819211,
+        "meanDiff": 0.16294148565201322,
+        "ciLow": 0.11303056475711763,
         "ciHigh": 0.21125135753620197,
         "excludesZero": true
       },
@@ -1133,7 +1133,7 @@
           {
             "path": "Gruntfile.js",
             "type": "source",
-            "occRank": 13,
+            "occRank": 14,
             "bm25Rank": 1,
             "inOccCandidates": true
           }
@@ -1253,14 +1253,14 @@
           {
             "path": "src/context.test.ts",
             "type": "test",
-            "occRank": 37,
+            "occRank": 36,
             "bm25Rank": 6,
             "inOccCandidates": true
           },
           {
             "path": "src/middleware/pretty-json/index.ts",
             "type": "source",
-            "occRank": 38,
+            "occRank": 37,
             "bm25Rank": 8,
             "inOccCandidates": true
           }
@@ -2694,7 +2694,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.07692307692307693,
+        "mrr": 0.07142857142857142,
         "packageRecall": 1
       },
       "sourceOnly": {
@@ -2702,7 +2702,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.07692307692307693,
+        "mrr": 0.07142857142857142,
         "packageRecall": 1
       }
     },
@@ -4594,7 +4594,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.04,
+        "mrr": 0.041666666666666664,
         "packageRecall": 0.3333333333333333
       },
       "sourceOnly": {
@@ -4602,7 +4602,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.04,
+        "mrr": 0.041666666666666664,
         "packageRecall": 0.3333333333333333
       }
     },
@@ -7708,10 +7708,10 @@
     }
   ],
   "timingMs": {
-    "snapshotMs": 58981.585300000035,
-    "indexMs": 225245.45910000018,
-    "occMs": 25360.56899999979,
-    "baselinesMs": 40510.38269999982
+    "snapshotMs": 91418.96509999977,
+    "indexMs": 277993.2655999998,
+    "occMs": 31030.34000000021,
+    "baselinesMs": 49031.18289999924
   },
   "environment": {
     "node": "v24.15.0",
