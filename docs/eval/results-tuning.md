@@ -1,6 +1,6 @@
 # Retrieval Evaluation Results — TUNING SPLIT
 
-Dataset hash `ec50ab4f` · 300 tasks · seed 20260918 · split **tuning** · OCC commit `4b88cdafc7c0` · working tree clean at run start: yes
+Dataset hash `ec50ab4f` · 300 tasks · seed 20260918 · split **tuning** · OCC commit `0d66d834760c` · working tree clean at run start: yes
 
 ## Overall (mean [95% bootstrap CI], per task)
 
@@ -11,7 +11,7 @@ Dataset hash `ec50ab4f` · 300 tasks · seed 20260918 · split **tuning** · OCC
 | bm25 | 0.293 [0.243, 0.350] | 0.427 [0.380, 0.475] | 0.592 [0.547, 0.636] | 0.373 [0.317, 0.430] | 0.460 [0.415, 0.502] |
 | random | 0.030 [0.013, 0.050] | 0.041 [0.028, 0.055] | 0.089 [0.066, 0.111] | 0.023 [0.007, 0.043] | 0.098 [0.078, 0.120] |
 
-OCC generated package: mean 25585 tokens, mean 14.5 files included per task.
+OCC generated package: mean 25594 tokens, mean 14.5 files included per task.
 
 ## Source-only gold slice (OCC-fully-parsed gold)
 
@@ -74,7 +74,7 @@ OCC = fraction of gold files inside the generated package (parsed from its `### 
   - README.md (docs): OCC rank 30, BM25 rank 2
 
 - **axios:e0b1bb6d0ba9**
-  - Gruntfile.js (source): OCC rank 14, BM25 rank 1
+  - Gruntfile.js (source): OCC rank 13, BM25 rank 1
 
 - **fastify:42ac663bb175**
   - docs/Server.md (docs): OCC rank 34, BM25 rank 1
@@ -144,7 +144,7 @@ OCC = fraction of gold files inside the generated package (parsed from its `### 
 Mined 2036, accepted 540, sampled 60, evaluated 60 (dropped for empty effective gold: 0; tasks with partially dropped gold: 0; gold files dropped by mode: symlink 0, gitlink 0, missing 0), duplicates 11, non-localizable gold files excluded from accepted tasks: 83. Top rejections: bot-author=474, ci-only=117, docs-only=321, file-count=125, format-only=5.
 | System | Top-1 | Recall@5 | Recall@10 | AllGold Acc@10 | MRR |
 |---|---|---|---|---|---|
-| occ | 0.483 [0.367, 0.600] | 0.520 [0.420, 0.615] | 0.685 [0.589, 0.772] | 0.500 [0.367, 0.617] | 0.604 [0.507, 0.702] |
+| occ | 0.483 [0.367, 0.600] | 0.520 [0.420, 0.615] | 0.685 [0.589, 0.772] | 0.500 [0.367, 0.617] | 0.604 [0.507, 0.703] |
 | filename | 0.217 [0.117, 0.317] | 0.191 [0.119, 0.271] | 0.241 [0.159, 0.327] | 0.100 [0.033, 0.183] | 0.292 [0.195, 0.397] |
 | bm25 | 0.200 [0.100, 0.300] | 0.384 [0.277, 0.492] | 0.542 [0.445, 0.648] | 0.350 [0.233, 0.483] | 0.359 [0.271, 0.457] |
 | random | 0.033 [0.000, 0.083] | 0.040 [0.013, 0.072] | 0.088 [0.042, 0.143] | 0.017 [0.000, 0.050] | 0.086 [0.048, 0.140] |
@@ -255,4 +255,4 @@ Mined 2935, accepted 494, sampled 60, evaluated 60 (dropped for empty effective 
 
 {"node":"v24.15.0","platform":"win32 10.0.26300","cpu":"AMD Ryzen 7 4800H with Radeon Graphics         ","totalMemGB":15.4}
 
-timings (ms): {"snapshotMs":91418.96509999977,"indexMs":277993.2655999998,"occMs":31030.34000000021,"baselinesMs":49031.18289999924}
+timings (ms): {"snapshotMs":77417.55159999998,"indexMs":227678.90079999977,"occMs":27446.58699999997,"baselinesMs":43067.03399999984}

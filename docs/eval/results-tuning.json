@@ -3,7 +3,7 @@
   "ablations": [],
   "evalSplitRunsIncludingThis": null,
   "seed": 20260918,
-  "occCommit": "4b88cdafc7c0e2075126088558de250f103011cb",
+  "occCommit": "0d66d834760c6cc2b9e36a3ddb2af70b7f860601",
   "workingTreeClean": true,
   "datasetHash": "ec50ab4f",
   "tasks": 300,
@@ -37,9 +37,9 @@
         },
         "mrr": {
           "n": 300,
-          "mean": 0.6209535563451474,
+          "mean": 0.6209718713634623,
           "ciLow": 0.5767333619749346,
-          "ciHigh": 0.6648369257026538
+          "ciHigh": 0.6648552407209688
         }
       },
       "perRepo": {
@@ -70,9 +70,9 @@
           },
           "mrr": {
             "n": 60,
-            "mean": 0.6039153472983397,
+            "mean": 0.6040069223899148,
             "ciLow": 0.5065579710144926,
-            "ciHigh": 0.7024325396825396
+            "ciHigh": 0.7025241147741147
           }
         },
         "fastify": {
@@ -231,9 +231,9 @@
         },
         "mrr": {
           "n": 300,
-          "mean": 0.6209535563451474,
+          "mean": 0.6209718713634623,
           "ciLow": 0.5767333619749346,
-          "ciHigh": 0.6648369257026538
+          "ciHigh": 0.6648552407209688
         }
       },
       "packageRecall": {
@@ -243,7 +243,7 @@
         "ciHigh": 0.7059841269841267
       },
       "packageStats": {
-        "meanTokens": 25585.166666666668,
+        "meanTokens": 25593.5,
         "meanFilesIncluded": 14.516666666666667
       }
     },
@@ -1020,8 +1020,8 @@
       },
       "mrr": {
         "n": 300,
-        "meanDiff": 0.16127481898534654,
-        "ciLow": 0.11144002934983357,
+        "meanDiff": 0.16129313400366155,
+        "ciLow": 0.1114766593864636,
         "ciHigh": 0.21060326488277548,
         "excludesZero": true
       },
@@ -1064,8 +1064,8 @@
       },
       "mrr": {
         "n": 300,
-        "meanDiff": 0.16294148565201322,
-        "ciLow": 0.11303056475711763,
+        "meanDiff": 0.16295980067032823,
+        "ciLow": 0.11306719479374767,
         "ciHigh": 0.21125135753620197,
         "excludesZero": true
       },
@@ -1133,7 +1133,7 @@
           {
             "path": "Gruntfile.js",
             "type": "source",
-            "occRank": 14,
+            "occRank": 13,
             "bm25Rank": 1,
             "inOccCandidates": true
           }
@@ -2694,7 +2694,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.07142857142857142,
+        "mrr": 0.07692307692307693,
         "packageRecall": 1
       },
       "sourceOnly": {
@@ -2702,7 +2702,7 @@
         "recall5": 0,
         "recall10": 0,
         "allGoldAcc10": 0,
-        "mrr": 0.07142857142857142,
+        "mrr": 0.07692307692307693,
         "packageRecall": 1
       }
     },
@@ -7708,10 +7708,10 @@
     }
   ],
   "timingMs": {
-    "snapshotMs": 91418.96509999977,
-    "indexMs": 277993.2655999998,
-    "occMs": 31030.34000000021,
-    "baselinesMs": 49031.18289999924
+    "snapshotMs": 77417.55159999998,
+    "indexMs": 227678.90079999977,
+    "occMs": 27446.58699999997,
+    "baselinesMs": 43067.03399999984
   },
   "environment": {
     "node": "v24.15.0",
