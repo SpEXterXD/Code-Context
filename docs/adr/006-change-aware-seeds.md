@@ -279,3 +279,36 @@ confirmation pools (picks 161–220 asserted + 2–3 new repos) with
 **hidden-gold package recall pre-registered as the single primary
 metric**, and a linear-time, length-capped (64 KB) stack-trace parser with
 adversarial and timing tests.
+
+## OUTCOME (measured, 2026-10-25): the keep rule FAILED — seeds ship default-OFF
+
+The corrected simulation (weight actually applied; traversal hints appended
+after content seeds per the semantics above) ran the full tuning split
+(234 qualifying tasks) at three DIFF_TOUCHED weights. Hidden-gold package
+recall (seeded − unseeded, paired 95% CI):
+
+| Weight | Seeded dPkg                   | Mixed dPkg                | Random-decoy dPkg         |
+| ------ | ----------------------------- | ------------------------- | ------------------------- |
+| 0.3    | **−0.016 [−0.030, −0.006]\*** | −0.019 [−0.034, −0.006]\* | (not better)              |
+| 0.6    | **−0.033 [−0.053, −0.015]\*** | −0.031 [−0.051, −0.014]\* | −0.021 [−0.037, −0.009]\* |
+| 1.2    | **−0.031 [−0.051, −0.013]\*** | −0.033 [−0.055, −0.015]\* | (similar)                 |
+
+Every weight is significantly NEGATIVE; even the random-decoy arm (pure
+slot cost, no plausible relevance) loses package recall. Top-1/MRR/R@8/R@10
+are unchanged in every arm. The mechanism: seeded paths enter the ranking
+at a flat weight and consume content slots in the ~8-file package,
+displacing ranked gold; the neighbor-propagation benefit only fires when
+content seeds are scarce, and never pays back the slot cost. Root cause on
+this benchmark: gold sets are small (2–3 files) and weakly coupled — hidden
+gold is rarely a graph neighbor of revealed gold beyond what the task text
+already retrieves.
+
+Decision per the keep rule: **no confirmation pools were run** (they would
+measure a known-harmful configuration); `offlineCodeContext.changeSeeds`
+ships **default false**; `M4_SEED_WEIGHTS.diffTouched` stays 0.6 as an
+untuned default documented as "no tested weight met the keep rule". All
+machinery remains, is fully tested, ablatable (`--ablate seeds`), and can
+be enabled for experimentation. A future attempt should change the
+mechanism, not the weight: e.g. seeds influence only the CURRENT CHANGES
+section (no ranking/packaging participation), or co-change-coupled
+neighbors instead of graph neighbors.

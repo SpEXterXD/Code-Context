@@ -236,7 +236,7 @@ npm run lint
 # Check code formatting with Prettier
 npm run format:check
 
-# Run test suite with Vitest (24 suites, 256 tests)
+# Run test suite with Vitest (27 suites, 283 tests)
 npm test
 
 # Verify documentation synchronization with test reports
@@ -265,7 +265,7 @@ The codebase maintains rigorous automated test coverage across 24 test suites an
 - [Architecture & Layering](docs/ARCHITECTURE.md)
 - [Security Model & Threat Boundaries](docs/SECURITY.md)
 - [User Guide & Workflows](docs/USER_GUIDE.md)
-- [Testing Guide & Metrics](docs/TESTING.md) (24 suites, 256 tests)
+- [Testing Guide & Metrics](docs/TESTING.md) (27 suites, 283 tests)
 - [Contributing Guidelines](docs/CONTRIBUTING.md)
 - [Technical Limitations](docs/LIMITATIONS.md)
 - [Architectural Decision Records (ADRs)](docs/adr/)

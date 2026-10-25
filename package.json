@@ -290,8 +290,8 @@
         },
         "offlineCodeContext.changeSeeds": {
           "type": "boolean",
-          "default": true,
-          "description": "M4: seed retrieval with the current working-tree changes (staged, unstaged, untracked, renamed, deleted paths) collected through the hardened git helper. Trust-gated; off in untrusted workspaces."
+          "default": false,
+          "description": "M4: seed retrieval with the current working-tree changes. DEFAULT OFF: the M4 seed simulation (ADR-006) measured significantly WORSE hidden-gold package recall with seeds on the tuning split at every tested weight — enable only for experimentation. Collection is trust-gated and goes through the hardened git helper."
         },
         "offlineCodeContext.changeSeedsMaxPaths": {
           "type": "integer",

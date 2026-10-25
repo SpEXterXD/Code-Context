@@ -4,7 +4,7 @@ Run everything with `npm test` (Vitest, no VS Code required). Run one suite
 with `npx vitest run src/path/to/suite.test.ts`. `npm run ci` adds
 typecheck, lint, format check, compile, and packaging.
 
-Current counts: **24 suites, 256 tests**, all passing. Counts in this file
+Current counts: **27 suites, 283 tests**, all passing. Counts in this file
 were captured from a full run; update them together with the suite table
 when adding tests. `scripts/check-docs-sync.ts` verifies these numbers
 against a real `vitest run` and fails CI on drift.
@@ -30,6 +30,9 @@ against a real `vitest run` and fails CI on drift.
 | `extension/main.test.ts` (27) | Activation audit | real `activate()` against a mocked `vscode`: config wiring, command registration, preview scheme registration, status bar and tree view updates, watcher-driven create/change/delete/rename indexing, events outside the workspace root ignored, background warm-up cancellation, dispose paths; search depth follows the configured `maxGraphDepth` (F13) |
 | `clipboard/clipboard.test.ts` (6) | Clipboard abstraction | exact copy, simulated failure, empty payload, 2 MB payload, Unicode preservation, no VS Code dependency |
 | `git/safeGit.test.ts` (9) | Git hardening (M3) | child_process import guard (safeGit.ts is the only spawn point in src/); exact hardening flag set with empty hooks dir; async execFile run and SafeGitError rejection; recency prefetch from a real temp repo with cache-only reads and per-workspace isolation; fail-soft on git failure; recency-log parsing (newest-first, posix normalization) |
+| `seeds/seeds.test.ts` (11) | Change-aware seeds (M4) | flood control (state-then-path order, cap, lockfile/generated exclusion, 500-file determinism, caller exclusions); stack-trace parsing (Node/Go/Java/Python/plain, dedupe, match and 64 KB input caps, adversarial + timing bounds); git collector on a real temp repo (staged/unstaged/untracked/deleted/renamed, untracked add-diff, deleted path-only, sensitive-path veto BEFORE diff read, merge note, fail-soft outside a repo); status `-z` parsing; SeedSet normalization |
+| `extension/seedProvider.test.ts` (4) | Seed collection (M4) | untrusted workspaces never invoke the git collector; trusted merge path; collector failure degrades to an empty set with a note; stack frames resolve to indexed paths only (absolute suffix match; non-indexed/outside paths dropped) |
+| `eval/seeds-sim.test.ts` (7) | Seed simulation (M4) | reveal sampler (ceil(k/2), deterministic, task-id seeded, disjoint hidden); fairness removal of revealed files from rankings and packages; same-dir and random decoy pickers (deterministic, gold/revealed-excluded) |
 | `extension/watcherService.test.ts` (5) | Watcher debounce | fake-timer determinism: single event flushes at the window edge; bursts coalesce to the latest paths; continuous save streams still flush within one window (F6 starvation regression); a new flush is scheduled after a completed one; create/delete routing |
 | `property/invariants.test.ts` (3) | Invariants (seeded PRNG) | 60-step random create/edit/delete/rename keeps index consistent with disk with no stale records; unchanged files never re-parsed across repeated runs; ignored paths never indexed |
 | `eval/lib.test.ts` (19) | Eval harness filters | task-text cleaning (trailers, URLs, issue refs, cherry-picks); word counting; path classification (test/source/lockfile/docs/CI + OCC-fully-parsed slice extensions); bot authors; version-bump/format/revert/docs-only/lockfile-only rejection reasons; gold localizability (new files excluded); time-split sampling determinism incl. disjoint tuning-half sampling |

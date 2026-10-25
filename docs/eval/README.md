@@ -20,11 +20,11 @@ pipeline **headlessly** for every task in `dataset.json`:
 1. Each task's **parent commit** (the state a developer would see before making
    the change) is materialized into a scratch directory with git plumbing
    only — `read-tree` into a temporary `GIT_INDEX_FILE`, `update-index
-   --force-remove` for non-regular-file entries, `checkout-index -a` into the
+--force-remove` for non-regular-file entries, `checkout-index -a` into the
    scratch dir — from a pinned, git-ignored clone. The user's repository is
    never touched, and no tar is involved.
 2. The **file universe** of every snapshot is decided by `git ls-tree -r
-   <parent>` modes, not by what a filesystem happens to create: only regular
+<parent>` modes, not by what a filesystem happens to create: only regular
    files (git modes `100644`/`100755`) are materialized and indexed; symlinks
    (`120000`) and gitlinks/submodules (`160000`) are excluded — from the
    snapshot AND from gold — identically on Windows, macOS and Linux
@@ -45,8 +45,8 @@ pipeline **headlessly** for every task in `dataset.json`:
    structured parser: TS/JS, JSON/JSONC, Markdown; `isOccParsedPath`).
    Tasks whose source-only slice is empty are excluded from that slice's
    aggregation and counted in `goldSliceStats`.
-7. **Package recall**: the fraction of gold files inside OCC's *delivered
-   answer* — the generated package, parsed from its `### FILE:` headings —
+7. **Package recall**: the fraction of gold files inside OCC's _delivered
+   answer_ — the generated package, parsed from its `### FILE:` headings —
    versus Recall@8 for the baselines (8 ≈ OCC's mean package size).
 8. **Paired bootstrap**: seeded CIs over per-task differences (OCC − BM25)
    for every metric, resampling task indices jointly so within-task
@@ -259,3 +259,16 @@ hash recorded in results-holdout.json. The single holdout run also
 computes the paired OCC(M3b) − OCC(M3, P1 ablated in-process) comparison
 so no second run is needed.
 
+## M4 change-aware seeds: simulation outcome (negative)
+
+The seed simulation (`npm run eval:seeds-sim`, tuning split, 234 qualifying
+tasks with k>=2 gold) measured hidden-gold package recall with
+ceil(k/2)-of-gold revealed as seeds, revealed files stripped from every arm
+before scoring. Result: significantly NEGATIVE at every tested
+DIFF_TOUCHED weight (0.3: −0.016 [−0.030, −0.006]; 0.6: −0.033
+[−0.053, −0.015]; 1.2: −0.031 [−0.051, −0.013]; even random-decoy seeds:
+−0.021). Ranking metrics (Top-1/MRR/Recall) were unchanged in all arms.
+The keep rule failed, no confirmation pools were run, and
+`offlineCodeContext.changeSeeds` ships default false. Details and the
+mechanism (seed slot cost vs weak gold coupling) in
+[ADR-006](../adr/006-change-aware-seeds.md).
