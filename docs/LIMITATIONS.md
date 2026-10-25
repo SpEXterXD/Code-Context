@@ -1,81 +1,35 @@
-# Limitations
+# Technical limitations
 
-Honest, current as of v0.3.1.
+This document lists the technical boundaries and known limitations of Offline Code Context Compiler (OCC) as of version 0.3.1.
 
-## Analysis depth
+## Language and analysis depth
 
-- **Static analysis ≠ full semantics.** We extract what the TypeScript
-  compiler and light parsers can see. Type inference across generics,
-  runtime reflection, monkey-patching, and metaprogramming are not modeled.
-- **Dynamic imports and reflection**: `import(variable)` is recorded as
-  UNRESOLVED; by design we never fabricate a destination. Specifiers built
-  at runtime, `require` with computed strings, and DI containers produce
-  incomplete graphs.
-- **Call graph is name-based within resolved scopes**: a call resolves
-  STATIC_EXACT when the callee is a local symbol or a verified import;
-  otherwise a _unique_ global exported-name match is STATIC_HEURISTIC;
-  anything else is unmodeled. Overloads, `apply/call`, and duck typing are
-  not tracked.
-- **Test relationships are a naming-convention heuristic**
-  (`<name>.test.<ext>`), explicitly labeled STATIC_HEURISTIC and never claimed
-  as complete.
-- **Non-TS/JS/JSON/MD languages** get metadata only (size, lines, hash). No
-  symbols, no imports, no deep claims.
-- **Nested `.gitignore` handling** treats patterns as root-relative and
-  supports a documented subset of gitignore syntax; parent-directory
-  exclusion wins over later negation (documented deviation).
+1. TypeScript and JavaScript Focus: Full AST parsing and symbol relationship extraction are implemented exclusively for TypeScript and JavaScript (`.ts`, `.tsx`, `.js`, `.jsx`, `.mts`, `.cjs`), plus structural parsing for JSON (`.json`, `.jsonc`) and Markdown (`.md`).
+2. Other Languages Metadata-Only: Files in Python, Go, Rust, C/C++, Java, and other languages are indexed with metadata only (file path, line count, file size, content SHA-256 hash). Call graphs, symbol declarations, and imports are not extracted for these formats.
+3. Static Analysis Scope: Analysis does not evaluate runtime reflection, dynamic imports (`import(variable)`), dependency injection containers, or monkey-patching. Dynamic imports are recorded with unresolved status.
+4. Call Graph Heuristics: Call relationships are resolved to local symbols or verified imports (`STATIC_EXACT`). Unique global export name matches are categorized as `STATIC_HEURISTIC`. Overloaded signatures, indirect invocations via `apply`/`call`, and duck typing are unmodeled.
+5. Test File Association: Test relationships are derived from file naming conventions (such as `<name>.test.<ext>` or `tests/<name>.<ext>`) with `STATIC_HEURISTIC` provenance.
 
-## Retrieval
+## Retrieval and Ranking
 
-- **No semantic understanding.** Ranking is lexical + structural. Queries
-  whose vocabulary differs from the code's (pure synonyms, cross-language
-  concepts) may miss; explanations show exactly which signals fired so a
-  miss is diagnosable.
-- **Ranking weights are empirical** (documented in ADR-004). The eval suite
-  reports actual numbers; behavior may change if you change weights.
-- **Prefix matching** (≥4 chars) can surface files sharing a prefix with a
-  query term (e.g. "user" ~ "username"); the coordination factor and idf
-  scaling mitigate but do not eliminate this.
-- **Git recency is prefetch-only** (M3 hardening): the order is refreshed
-  asynchronously ahead of retrieval; a package built before the prefetch
-  completes (or in an untrusted workspace, where git is never spawned) is
-  ranked without recency. Recency remains off by default.
-- **Startup load is linear but read-bound**: for a 5,000-entry store on the
-  reference Windows machine we removed a quadratic step that accounted for
-  ~24% of the load profile; median startup changed from 8,163 ms to 5,465 ms
-  over 3 runs (before: 5,472-10,279 ms; after: 4,592-9,213 ms). One JSON file
-  per entry remains; per-file open overhead dominates. Shard batching is
-  designed, not implemented (ADR-005 draft).
+1. Lexical and Structural Only: Retrieval relies on tokenized lexical matches and structural dependency graph expansion. Semantic vector embeddings and neural search models are not included. Queries expressing abstract goals without matching domain vocabulary may fail to retrieve distant implementation files.
+2. Coordinate and Prefix Matches: Prefix matching (length >= 4 characters) can return files sharing common prefixes with query terms. Term frequency damping and IDF scaling mitigate but do not eliminate this behavior.
+3. Git Recency Dependency: Git recency scoring requires local git history. In untrusted workspaces or environments without git, recency scoring is automatically disabled.
+4. Startup Load on Large Repositories: On a 5,000-entry index store on the reference machine (AMD Ryzen 7 4800H, Windows 11, Node 24), startup load reads 5,001 separate JSON shard files. We removed a quadratic step that accounted for about 24% of the load profile; over three runs on one machine, median startup changed from 8,163 ms to 5,465 ms (before: 5,472 to 10,279 ms; after: 4,592 to 9,213 ms). Because before and after ranges overlap, this is not a claimed speedup. Shard batching is designed as a draft option (ADR-005) but is not implemented.
 
-## Context output
+## Context packaging and token estimation
 
-- **Token counts are estimates** (~chars/4), labeled as such everywhere. They
-  vary by model tokenizer, sometimes by 20 percent or more.
-- **Truncation degrades by design** (full → symbols → signatures →
-  metadata). A metadata-only entry means "considered, did not fit"; the
-  budget, not importance, excluded it.
-- The PROJECT STRUCTURE tree and directory summary are depth/entry-capped.
+1. Token Count Estimates: Token counts are estimated using the ratio of 4 characters per token (`chars / 4`). Actual tokenizer counts (such as OpenAI cl100k_base or Anthropic Claude tokenizers) typically vary by 10 to 25 percent depending on code indentation and syntax density.
+2. Truncation Ladder: When budgets are tight, files degrade along the truncation ladder (full file, symbol blocks, declarations, metadata only). Metadata-only entries indicate the file was considered by the retriever but could not fit within budget limits.
 
-## Security
+## Security and git boundaries
 
-- **Secret detection is heuristic.** Patterns + entropy catch common
-  formats; novel encodings, short/low-entropy secrets, and split secrets can
-  pass. Review the preview before pasting; that is its purpose. We do not
-  claim detection completeness.
-- **The `.gitignore` subset** may mis-handle exotic patterns.
+1. Heuristic Secret Detection: Secret scanning relies on regex patterns and Shannon entropy heuristics. Novel credential formats, short passwords, split tokens, and custom authentication headers can pass undetected. Developers must inspect the context preview before pasting packages into external services.
+2. Secret Filtering Scope in Index: Token filtering blanks credentials flagged by the secret scanner before extracting index tokens. Unflagged strings (such as low-entropy credentials) remain tokenized, and word-like fragments such as key-type prefixes (`AKIA`, `sk_live`) remain in index shards.
+3. Git Ignore Subset: OCC supports a deterministic subset of `.gitignore` syntax (wildcards, directory anchoring, negation). Exotic gitignore patterns may not evaluate identically to native git.
 
-## Platform
+## Environment and platform
 
-- Windows rename-over-existing is retried and falls back to a verified
-  in-place write; under pathological antivirus interference an index write
-  could theoretically fail; the error surfaces (STORE_CORRUPT / IO), and
-  the next run reconciles.
-- Benchmarks are reported for the machine that ran them (node v24.15.0,
-  Windows_NT 10.0.26300, AMD Ryzen 7 4800H, 15 GB RAM); your numbers will
-  differ.
-
-## Explicitly out of scope (v1)
-
-- Reading file _contents_ into the index (only hashes/paths/symbols are
-  persisted), multi-root workspaces, remote/WSRP workspaces, and any form of
-  network/telemetry.
+1. Single-Root Workspaces Only: OCC operates on single-root workspaces. In multi-root configurations, only the primary root directory is indexed.
+2. Virtual Workspaces Unsupported: OCC requires direct local filesystem access (`vscode.workspace.fs` with file schemes). Virtual filesystems and remote virtual file providers are unsupported.
+3. Windows Antivirus Interference: On Windows, atomic file replacement uses temporary files and rename calls. In rare instances where antivirus scanners lock newly written temporary files, file replacement falls back to verified in-place writes.

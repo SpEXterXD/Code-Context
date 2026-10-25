@@ -21,21 +21,21 @@ no HTTP client can be imported from `src/`.
 ## Alternatives
 
 - Optional cloud enrichment (embeddings, hosted search): rejected. It
-  violates the core promise, adds keys and credentials, and makes outputs
-  non-deterministic.
+ violates the core promise, adds keys and credentials, and makes outputs
+ non-deterministic.
 - Local LLM assistance: rejected. The tool must run on any machine, and a
-  local model would dominate memory and CPU for no determinism gain.
+ local model would dominate memory and CPU for no determinism gain.
 
 ## Trade-offs
 
 - Ranking is lexical and structural only, with no semantic understanding.
-  Explanations always cite the concrete signals that fired.
+ Explanations always cite the concrete signals that fired.
 - Some relevance quality a semantic system might have is deliberately traded
-  for determinism, privacy, and instant offline operation.
+ for determinism, privacy, and instant offline operation.
 
 ## Consequences
 
 - Same repo state + config + task ⇒ byte-identical output. Test-enforced.
 - No telemetry means no usage data; issues arrive from users directly.
 - SECURITY.md documents the true boundary: after the user copies the payload,
-  what they do with it is outside the program's control.
+ what they do with it is outside the program's control.

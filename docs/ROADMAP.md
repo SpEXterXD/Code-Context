@@ -1,52 +1,43 @@
-# Roadmap
+# Project Roadmap
 
-Planned work, with scope exactly as designed. Unshipped and experimental
-features are documented with their status below; shipped retrieval/packaging
-work is described in [docs/eval/README.md](eval/README.md) and the CHANGELOG.
+This document outlines planned improvements and experimental features for Offline Code Context Compiler (OCC). Features marked experimental or off by default are explicitly identified.
 
-## Change-aware context — Implemented, experimental, off by default; benchmark showed no gain in recall
+## Change-Aware Context: Implemented, Experimental, Off by Default
 
-Implemented, experimental, off by default; benchmark showed no gain in recall
-(see [ADR-006](adr/006-change-aware-seeds.md) and [docs/eval/README.md](eval/README.md)).
-Seeds from the developer's current state, fed into retrieval as pinned
-candidates and scoring signals:
+Change-aware seeds are implemented, experimental, and off by default. Seed simulation benchmarks showed no gain in package recall on the tuning split (see [ADR-006](adr/006-change-aware-seeds.md) and [docs/eval/README.md](eval/README.md)).
 
-- Working-tree changes: uncommitted and staged files (status/diff via the
-  hardened `safeGit` helper), including renames, deletions, untracked and
-  binary files; a bounded `CURRENT CHANGES` wire section that passes through
-  the same secret scanner and redaction as source files and counts against
-  the token budget.
-- Editor state, supplied by the extension layer through a typed, vscode-free
-  `SeedSet` interface: open editor tabs, the active file, the selection and
-  its containing symbol, and diagnostics for seeded files.
-- Stack-trace / error-text parsing (pure function; Node, Python, Java, Go
-  and TypeScript formats) mapped to workspace files.
-- New signals (`DIFF_TOUCHED`, `OPEN_EDITOR`, `DIAGNOSTIC`, `STACK_FRAME`)
-  with named, ablatable weights and WHY reasons, integrated with
-  rank-priority packaging and the budget; every failure mode (no repo,
-  detached HEAD, untrusted workspace, git timeout, huge diff) degrades to
-  unseeded behavior with a visible note.
+When enabled by the developer (`offlineCodeContext.changeSeeds: true`), retrieval is seeded from the active working state:
+- Working-tree modifications: Staged and unstaged files gathered via `safeGit`, formatted into the optional `## CURRENT CHANGES` section.
+- Editor state: Files open in active editor tabs and current editor selections (`offlineCodeContext.seedEditors`).
+- Diagnostics: Files displaying compiler diagnostics in the problems panel (`offlineCodeContext.seedDiagnostics`).
+- Stack traces: File locations captured from clipboard stack traces (`offlineCodeContext.seedStackTraces`).
 
-## Wire format v2 — Planned (not shipped)
+Slot Policy: The implementation uses a `signal-only` policy where seeds supply retrieval signals and graph neighbors but do not pin package content slots.
 
-- The developer task repeated at the start and the end of the payload.
-- An `OMITTED BUT RELEVANT` section (ranked files that did not fit, with
-  their reasons).
-- A repository-conventions section (agent instructions, test framework,
-  run commands).
-- Symbol-level slicing: matched symbol bodies first, callee signatures and
-  used types next, so more distinct relevant files fit in the same budget.
+## Wire Format v2: Planned (Not Shipped)
 
-## More languages — Planned (not shipped)
+A planned update to the context package format:
+- Task repetition: Developer task restated at both opening and closing of the context payload.
+- Omitted files section: Structured list of ranked candidates that could not fit within configured token budgets.
+- Repository conventions: Automated extraction of package scripts, test runners, and developer instructions.
+- Fine-grained symbol slicing: Emitting symbol implementations while truncating uncalled companion methods.
 
-Tree-sitter (WASM) structured parsing starting with **Python** and **Go**,
-then more languages. Today non-TS/JS/JSON/MD files get metadata-only
-indexing (size, lines, hash) — see `docs/LIMITATIONS.md`.
+## Additional Language Parsers: Planned (Not Shipped)
 
-## Headless CLI and MCP server — Planned (not shipped)
+Integration of WebAssembly Tree-sitter parsers to support full AST analysis and symbol extraction for additional languages:
+- Python (`.py`)
+- Go (`.go`)
+- Rust (`.rs`)
+- Java (`.java`)
 
-A CLI and a stdio MCP server wrapping the same engine core, still 100%
-offline and byte-identical to the extension output for the same inputs.
+Currently, files in these languages receive metadata-only indexing (line counts, file size, content SHA-256 hash). See [docs/LIMITATIONS.md](LIMITATIONS.md).
+
+## Headless CLI and MCP Server: Planned (Not Shipped)
+
+A standalone command-line interface and Model Context Protocol (MCP) stdio server wrapping the domain engine:
+- Operates headlessly without requiring a running VS Code instance.
+- Produces byte-identical packages for identical repository commits, settings, and task inputs.
+- Preserves full offline execution and zero-network security guarantees.
 
 ---
 

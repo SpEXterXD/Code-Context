@@ -1,65 +1,28 @@
-# ADR 005 (DRAFT — not implemented): Startup load shard batching
+# ADR 005: Startup load shard batching
 
-Status: draft, design only. The M3-hardening milestone removed the O(N²)
-external-package re-derivation from startup; what remains is the cost this
-ADR would address. **It is not implemented** — this note exists so the
-option is designed before anyone reaches for it.
+Status: Draft (Design Only, Not Implemented)
+Date: 2026-10-25
 
-## Problem
+## Context
 
-`initialize()` on a persisted 5,001-entry store: the external-packages fix
-(M3 hardening) removed a quadratic step that accounted for ~24% of the load
-profile; median startup on the test machine (Ryzen 7 4800H / Node 24 /
-Windows) changed from 8,163 ms to 5,465 ms over 3 runs (before:
-5,472-10,279 ms; after: 4,592-9,213 ms; measured 2026-10-25). The CPU profile is dominated by `readFileUtf8`
-(≈78%): ADR-002 persists **one JSON file per entry** (atomic per-entry
-writes), so startup performs 5,001 `fs.readFileSync` calls — per-file open
-syscall overhead dominates on Windows, not JSON parsing.
+During startup `initialize()` on a persisted 5,001-entry store:
+The external-packages fix (M3 hardening) removed a quadratic step that accounted for about 24% of the load profile. Across three runs on the reference test machine (AMD Ryzen 7 4800H, Node 24, Windows 11), median startup changed from 8,163 ms to 5,465 ms. The measured ranges were 5,472 to 10,279 ms before the fix, and 4,592 to 9,213 ms after the fix. Because before and after ranges overlap, this is not a claimed speedup.
 
-## Option: batched read shards
+The CPU profile is dominated by `readFileUtf8` (approximately 78% of startup time): ADR-002 persists one JSON file per entry (atomic per-entry writes), so startup performs 5,001 `fs.readFileSync` calls. Per-file open syscall overhead dominates on Windows, not JSON parsing.
 
-Persist entries in **read shards** — e.g. groups of ~64 entries per shard
-file (~80 shards for 5,001 entries) — while KEEPING per-entry semantics at
-the write path. Two sub-designs:
+## Decision (design options)
 
-1. **Read-optimized shard + per-entry write journal.** Writes stay
-   per-entry (append a line to a journal + upsert into the current shard
-   lazily); startup reads only the shards. A compaction step (rare) rewrites
-   shards from the journal. Startup opens ~80 files instead of 5,001.
-2. **Pure shards with whole-shard rewrite on change.** Any entry change
-   rewrites its shard. Simpler, but a hot file edit rewrites up to 63 other
-   entries' JSON each time; write amplification grows with shard size.
+This ADR designs but does not implement batched read shards. Persisting entries in read shards (for example, groups of approximately 64 entries per shard file, yielding approximately 80 shards for 5,001 entries) while preserving per-entry write semantics was evaluated under two sub-designs:
 
-Expected effect: startup ≈5.5 s → well under 1 s (23 MB of JSON parses in
-~300–500 ms; the rest is per-open overhead). Indexing write cost unchanged
-under (1), mildly regressed under (2) for hot files.
+1. Read-optimized shard with per-entry write journal: Writes remain per-entry by appending a line to a journal and upserting into the active shard lazily. Startup reads only the 80 shard files. A compaction step rewrites shards from the journal when needed.
+2. Pure shards with whole-shard rewrite on change: Any entry change rewrites its corresponding shard. This is simpler to implement, but editing a hot file repeatedly rewrites up to 63 unrelated entries, increasing write amplification.
 
-## Effect on ADR-002 guarantees (crash safety, atomicity)
+Recommendation: If startup latency requires optimization in the future, implement Design 1 behind the existing `IndexStore` interface.
 
-ADR-002 today: "one entry = one atomic transaction unit; an entry file is
-either fully written or not replaced at all." Consequences per design:
+## Consequences
 
-- **Design 1 keeps the guarantee** at the record level: the append-only
-  journal makes every commit atomic (a torn final line is detectable and
-  dropped, exactly like the eval harness's checkpoint resume). Shard files
-  become a **cache** of the journal; corruption of a shard is recoverable by
-  replaying the journal (same rebuild path as today's manifest-drift
-  rebuild). Cost: two files to reason about, plus a compaction trigger.
-- **Design 2 weakens the guarantee** from "entry atomic" to "shard atomic":
-  a crash mid-rewrite loses the whole shard's latest state and must fall
-  back to the previous shard version (write-to-temp + rename keeps it
-  atomic, but a hot-spotted shard is rewritten far more often, widening the
-  crash window for co-sharded entries).
-
-Either way `STORE_SCHEMA_VERSION` must bump and old stores rebuild once.
-
-## Recommendation
-
-If startup time matters for adoption, implement **Design 1** (journal +
-read shards + compaction) behind the existing `IndexStore` interface, so
-`IndexingService` and every test see no API change. Measure with the same
-3-run `initialize()` protocol and the fuzzed store tests. Do not implement
-before there is a user-visible complaint: the extension indexes in the
-background, and 5.5 s is amortized; the correctness risk of a second
-persistence format is real and the M2 startup profile already drove one
-cheap fix (external packages) worth more than the remaining tail.
+- If implemented, startup latency on 5,001 files is estimated to drop from approximately 5.5 seconds to under 1 second.
+- Design 1 preserves record-level atomicity: the append-only journal ensures every commit is atomic, and torn records are detectable. Shard files act as a derived cache recoverable by replaying the journal.
+- Design 2 weakens atomicity to shard-level atomicity, widening the crash window during hot-file writes.
+- Either design requires bumping `STORE_SCHEMA_VERSION` and rebuilding existing index stores.
+- Current Status: This design is not implemented. Startup runs in the background and 5.5 seconds is amortized. The stability risk of a dual-format persistence format currently outweighs the latency improvement.

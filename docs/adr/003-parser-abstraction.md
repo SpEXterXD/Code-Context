@@ -1,4 +1,4 @@
-# ADR-003: Parser Abstraction & Engine Choice (ADR-1 of the spec)
+# ADR-003: Parser abstraction and engine choice (ADR-1 of the spec)
 
 Date: 2026-09-11 · Status: Accepted
 
@@ -17,31 +17,31 @@ plus **lightweight purpose-built parsers** for JSON and Markdown, behind a
 parser. Downstream code never depends on a concrete parser.
 
 - TS Compiler API is error-tolerant: malformed files still yield partial
-  symbols; parse errors are recorded (`parseError`), never thrown.
+ symbols; parse errors are recorded (`parseError`), never thrown.
 - We extract what the compiler gives us exactly: import specifiers (incl.
-  `export ... from`, dynamic `import()`, CJS `require()`), named/default
-  exports, classes with members, interfaces, type aliases, enums,
-  namespaces, top-level functions/consts, heritage clauses, and call sites
-  with their enclosing symbol.
+ `export ... from`, dynamic `import()`, CJS `require()`), named/default
+ exports, classes with members, interfaces, type aliases, enums,
+ namespaces, top-level functions/consts, heritage clauses, and call sites
+ with their enclosing symbol.
 
 ## Alternatives
 
 - Tree-sitter (native or WASM): uniform grammars and incremental parsing,
-  but a second parser stack (native build risk or WASM loading) whose TS/JS
-  grammar is less accurate than the compiler API for import and export
-  resolution. Rejected for v1; two stacks cost more than they buy for four
-  languages.
+ but a second parser stack (native build risk or WASM loading) whose TS/JS
+ grammar is less accurate than the compiler API for import and export
+ resolution. Rejected for v1; two stacks cost more than they buy for four
+ languages.
 - Regex-only parsing: fastest to write, unacceptable accuracy for nested
-  classes, re-exports, and generics.
+ classes, re-exports, and generics.
 
 ## Trade-offs
 
 - `typescript` is a runtime dependency, bundled by esbuild. The packaged
-  VSIX is 1.62 MB total.
+ VSIX is 1.62 MB total.
 - The JSON and Markdown parsers are ours to maintain. They are small and
-  tested, including JSONC leniency and fence-aware heading extraction.
+ tested, including JSONC leniency and fence-aware heading extraction.
 
 ## Consequences
 
 - Adding a language = implementing one `SourceParser` + registering it; no
-  downstream change.
+ downstream change.

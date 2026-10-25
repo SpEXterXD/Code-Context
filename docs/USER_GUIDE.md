@@ -12,7 +12,7 @@ From a terminal:
 code --install-extension offline-code-context-compiler-0.3.1.vsix
 ```
 
-Or: Extensions view (`Ctrl+Shift+X`) → `…` menu → **Install from VSIX…** →
+Or: Extensions view (`Ctrl+Shift+X`) → `…` menu → **Install from VSIX...** →
 pick the `.vsix` file → reload the window.
 
 To build from source instead: `npm install && npm run package`, then install
@@ -44,23 +44,23 @@ file in the local index. Later runs re-parse only files whose hash changed.
 The main flow, using Task context:
 
 1. Command Palette → **OCC: Generate Task Context** → type the task, for
-   example `Add rate limiting to the login endpoint.`
+ example `Add rate limiting to the login endpoint.`
 2. **OCC: Preview Context** opens a read-only editor with the exact text
-   that Copy will export. Nothing has been copied yet.
+ that Copy will export. Nothing has been copied yet.
 3. **OCC: Copy Context to Clipboard**. A toast confirms the size
-   (`OCC: copied task context: 12 files, 1204 lines, ~18430 tokens`).
+ (`OCC: copied task context: 12 files, 1204 lines, ~18430 tokens`).
 4. Paste into any LLM chat.
 
 Both steps also exist as right-click commands:
 
 - Explorer, right-click a folder: **OCC: Generate Project Context** /
-  **OCC: Copy Project Context to Clipboard**. The package covers that
-  folder's subtree; imports that cross the folder boundary still appear as
-  selection reasons.
+ **OCC: Copy Project Context to Clipboard**. The package covers that
+ folder's subtree; imports that cross the folder boundary still appear as
+ selection reasons.
 - Editor or editor tab, right-click: **OCC: Generate File Context** /
-  **OCC: Copy File Context to Clipboard**. The package is seeded from that
-  exact file (works on background tabs) and expanded with its direct
-  dependencies, dependents, callers, and tests.
+ **OCC: Copy File Context to Clipboard**. The package is seeded from that
+ exact file (works on background tabs) and expanded with its direct
+ dependencies, dependents, callers, and tests.
 
 Generate variants always open the preview. Copy variants never do; they
 write the clipboard and show the summary toast. Identical inputs produce
@@ -122,11 +122,11 @@ high-entropy assignments). The `offlineCodeContext.secretPolicy` setting
 decides what happens:
 
 - `block` (default): the file's source is withheld from the output. The WHY
-  section still lists the file with the reason, so nothing is silently
-  dropped.
+ section still lists the file with the reason, so nothing is silently
+ dropped.
 - `warn`: the source is included but every detected value is replaced with
-  `[REDACTED:<kind>:<hash8>]` when `redactSecrets` is on (default). The
-  replacement is not reversible.
+ `[REDACTED:<kind>:<hash8>]` when `redactSecrets` is on (default). The
+ replacement is not reversible.
 - `allow`: findings are ignored. Not recommended.
 
 Independent of the policy, the exact payload is re-checked before preview
@@ -167,13 +167,13 @@ No default keybindings exist. Bind commands via Keyboard Shortcuts
 ## Index management
 
 - Editing, creating, deleting, and renaming files update the index
-  automatically (debounced). No manual re-index needed for normal work.
+ automatically (debounced). No manual re-index needed for normal work.
 - **OCC: Index Current File** re-indexes the active file immediately.
 - **OCC: Rebuild Index** wipes the index and re-scans. Use this after
-  changing `excludePatterns` or if results look stale.
+ changing `excludePatterns` or if results look stale.
 - **OCC: Clear Local Index** deletes the stored index after confirmation.
 - **OCC: Show Index Status** (or clicking the status bar item) opens the
-  live status view with the last run's numbers.
+ live status view with the last run's numbers.
 
 ## Search
 

@@ -19,35 +19,35 @@ A **sharded JSON KV store** (`JsonIndexStore`):
 ```
 
 - Each entry is written via `write-temp → rename` (atomic per file, with
-  Windows EPERM retry and verified in-place fallback).
+ Windows EPERM retry and verified in-place fallback).
 - **Entries are the source of truth; the manifest is a derived cache.** Any
-  inconsistency (crash between entry and manifest writes, corrupt entry,
-  schema bump) is repaired at load time by rebuilding or dropping the single
-  affected entry. This is a tested code path, not prose.
+ inconsistency (crash between entry and manifest writes, corrupt entry,
+ schema bump) is repaired at load time by rebuilding or dropping the single
+ affected entry. This is a tested code path, not prose.
 
 ## Alternatives
 
 - Native SQLite (`better-sqlite3`): the strongest query power, but the
-  prebuilt binding must match the exact Electron ABI of every VS Code build,
-  a recurring install-time failure mode we cannot control from a VSIX.
-  Rejected for v1. The `IndexStore` interface keeps a SQLite backend
-  replaceable without touching callers.
+ prebuilt binding must match the exact Electron ABI of every VS Code build,
+ a recurring install-time failure mode we cannot control from a VSIX.
+ Rejected for v1. The `IndexStore` interface keeps a SQLite backend
+ replaceable without touching callers.
 - WASM SQLite (`sql.js`): no ABI risk, but the whole database must be
-  serialized to persist, which makes per-file incremental commits awkward
-  and large indexes memory-heavy.
+ serialized to persist, which makes per-file incremental commits awkward
+ and large indexes memory-heavy.
 - **Single JSON file**: atomic via rename, but every single-file watcher
-  update rewrites the entire index, O(index) per keystroke debounce.
+ update rewrites the entire index, O(index) per keystroke debounce.
 
 ## Trade-offs
 
 - No SQL queries; aggregations happen in memory. Loading and rebuilding the
-  graph + inverted index from a persisted store is O(entries-forfiles) work:
-  measured ≈ 5–6 s for a 5,000-file store on the audit machine
-  (node v24.15.0, Windows_NT 10.0.26300, AMD Ryzen 7 4800H, 15 GB RAM).
+ graph + inverted index from a persisted store is O(entries-forfiles) work:
+ measured ≈ 5–6 s for a 5,000-file store on the audit machine
+ (node v24.15.0, Windows_NT 10.0.26300, AMD Ryzen 7 4800H, 15 GB RAM).
 - More inodes for large repos; acceptable (one small file per indexed file).
 
 ## Consequences
 
 - A crash mid-index leaves the previously committed state valid (tested).
 - A kill mid-transaction never yields partial relationship data: an entry is
-  either fully replaced or not (tested).
+ either fully replaced or not (tested).
