@@ -67,7 +67,8 @@ export function assignTiers(ranked: ScoredFile[], pinnedPaths: string[]): Ranked
       kinds.has("STACK_FRAME")
     ) {
       tier = "CHANGE_SEED";
-    } else if (kinds.has("DIRECT_DEPENDENCY")) tier = "DIRECT_DEPENDENCY";
+    } else if (kinds.has("SEED_NEIGHBOR")) tier = "STRONG_LEXICAL";
+    else if (kinds.has("DIRECT_DEPENDENCY")) tier = "DIRECT_DEPENDENCY";
     else if (kinds.has("DIRECT_DEPENDENT")) tier = "DIRECT_DEPENDENT";
     else if (kinds.has("TEST_OF")) tier = "RELEVANT_TESTS";
     else if (

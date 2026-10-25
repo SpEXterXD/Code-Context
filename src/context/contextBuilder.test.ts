@@ -7,7 +7,7 @@ import { OccApplication } from "../application/contextService";
 import { makeTempDir, removeRepo, writeRepo } from "../testing/fixtures";
 import { renderSourceFileSection } from "./contextFormatter";
 import { CancellationSource } from "../shared/cancellation";
-import { M3B_RANK_PRIORITY } from "./contextBuilder";
+import { M3B_RANK_PRIORITY, M4_SEED_WEIGHTS } from "./contextBuilder";
 
 const FIXTURE: Record<string, string> = {
   "package.json": JSON.stringify({ name: "ctx-fixture", version: "1.0.0" }) + "\n",
@@ -608,6 +608,57 @@ describe("ContextBuilder", () => {
       const result = app.buildContext("task", { taskText: "gizmo widget" });
       expect(result.payload).not.toContain("## CURRENT CHANGES");
       expect(result.payload).toContain("CONTEXT_VERSION: 1");
+    });
+
+    describe("M4b slot policy (S1 signal-only, ablatable)", () => {
+      const wasPolicy = M4_SEED_WEIGHTS.slotPolicy;
+      afterEach(() => {
+        M4_SEED_WEIGHTS.slotPolicy = wasPolicy;
+      });
+
+      it("excludes seeded files from content slots and frees them for other candidates", async () => {
+        root = makeTempDir();
+        writeRepo(root, {
+          "package.json": JSON.stringify({ name: "s1", version: "1.0.0" }) + "\n",
+          "src/seeded.ts": "/** Seeded file, unrelated to the task. */\nexport const seeded = 1;\n",
+          "src/cand1.ts":
+            "/** Alpha widget candidate with distinctive vocabulary. */\nexport const alpha = 1;\n",
+          "src/cand2.ts":
+            "/** Beta widget candidate with distinct secondary vocabulary. */\nexport const beta = 2;\n",
+        });
+        const app = new OccApplication(root, path.join(root, ".occ-store"), {
+          maxFiles: 2,
+          maxChars: 120000,
+          maxLines: 3000,
+          maxTokens: 30000,
+          maxGraphDepth: 3,
+          maxCodeLinesPerFile: 400,
+          structureDepth: 4,
+          currentChangesMaxTokens: 1500,
+          secretPolicy: "block",
+          redactSecrets: true,
+        });
+        await app.indexing.indexWorkspace(CancellationSource.never());
+        const seedSet = {
+          changedPaths: [{ path: "src/seeded.ts", state: "unstaged" as const }],
+          diffSections: [],
+          openEditors: [],
+          diagnostics: [],
+          stackFrames: [],
+          notes: [],
+        };
+        M4_SEED_WEIGHTS.slotPolicy = "slots";
+        const slotsMode = app.buildContext("task", { taskText: "alpha widget", seedSet });
+        expect(slotsMode.payload).toContain("### FILE: src/seeded.ts"); // seeded file consumes a slot
+        expect(slotsMode.filesIncluded).toBe(2);
+
+        M4_SEED_WEIGHTS.slotPolicy = "signal-only";
+        const signalOnly = app.buildContext("task", { taskText: "alpha widget", seedSet });
+        expect(signalOnly.payload).not.toContain("### FILE: src/seeded.ts"); // no content slot
+        expect(signalOnly.payload).toContain("change seed: not packaged"); // path-only WHY
+        expect(signalOnly.payload).toContain("### FILE: src/cand1.ts");
+        expect(signalOnly.payload).toContain("### FILE: src/cand2.ts"); // freed slot used
+      });
     });
   });
 });

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { analyzeQuery } from "./queryAnalyzer";
 import { InvertedIndex, M3_BODY_FIELD } from "./invertedIndex";
-import { HybridRetriever, M3_CONTENT_FUSION } from "./hybridRetriever";
+import { HybridRetriever, M3_CONTENT_FUSION, M4_SEED_WEIGHTS } from "./hybridRetriever";
 import { GitMetadata } from "../git/gitMetadata";
 import { RelationshipGraph } from "../domain/graph";
 import type { FileEntry } from "../domain/model";
@@ -289,6 +289,84 @@ describe("HybridRetriever ranking + explanations", () => {
         }
       } finally {
         M3_CONTENT_FUSION.enabled = wasEnabled;
+      }
+    });
+  });
+
+  describe("M4b seed signals", () => {
+    function seedFixture(): { retriever: HybridRetriever } {
+      const seededFile = entryWith("src/auth/handler.ts", { symbols: ["handleLogin"] });
+      const neighbor = entryWith("src/auth/service.ts", {});
+      neighbor.internalRelations = [
+        {
+          source: "file:src/auth/handler.ts",
+          target: "file:src/auth/service.ts",
+          kind: "imports",
+          provenance: "STATIC_EXACT",
+        },
+      ];
+      const unrelated = entryWith("src/other/util.ts", {});
+      const graph = new RelationshipGraph();
+      const map = new Map<string, FileEntry>();
+      for (const e of [seededFile, neighbor, unrelated]) {
+        map.set(e.meta.path, e);
+        graph.upsertEntry(e);
+      }
+      const retriever = new HybridRetriever("/tmp", graph, new GitMetadata(), map);
+      retriever.rebuild();
+      return { retriever };
+    }
+
+    it("S1 signal-only: seed fires DIFF_TOUCHED without pinning, neighbors get SEED_NEIGHBOR (S2)", () => {
+      const wasPolicy = M4_SEED_WEIGHTS.slotPolicy;
+      const wasBoost = M4_SEED_WEIGHTS.neighborBoost;
+      try {
+        const { retriever } = seedFixture();
+        const hints = [
+          { path: "src/auth/handler.ts", kind: "DIFF_TOUCHED" as const, detail: "unstaged" },
+        ];
+        M4_SEED_WEIGHTS.slotPolicy = "signal-only";
+        M4_SEED_WEIGHTS.neighborBoost = 0.4;
+        const result = retriever.retrieve("nothing matches this vocabulary", {
+          maxGraphDepth: 2,
+          seedHints: hints,
+        });
+        const seeded = result.ranked.find((r) => r.path === "src/auth/handler.ts");
+        expect(seeded?.signals.some((s) => s.kind === "DIFF_TOUCHED")).toBe(true);
+        const nb = result.ranked.find((r) => r.path === "src/auth/service.ts");
+        expect(nb?.signals.some((s) => s.kind === "SEED_NEIGHBOR")).toBe(true);
+        expect(nb?.signals.find((s) => s.kind === "SEED_NEIGHBOR")?.weight).toBe(0.4);
+        expect(result.ranked.find((r) => r.path === "src/other/util.ts")).toBeUndefined();
+        // A hint with no signal source must NOT be pinned into results in
+        // signal-only mode (pinning is the "slots" policy behavior).
+        expect(
+          retriever
+            .retrieve("zzz nothing", { maxGraphDepth: 1, seedHints: hints })
+            .ranked.find((r) => r.path === "src/auth/handler.ts"),
+        ).toBeDefined(); // DIFF_TOUCHED 0.6 keeps it ranked
+      } finally {
+        M4_SEED_WEIGHTS.slotPolicy = wasPolicy;
+        M4_SEED_WEIGHTS.neighborBoost = wasBoost;
+      }
+    });
+
+    it("S1: signal-only seeds are NOT pinned (zero-signal hint absent from results)", () => {
+      const wasPolicy = M4_SEED_WEIGHTS.slotPolicy;
+      const wasEnabled = M4_SEED_WEIGHTS.enabled;
+      try {
+        const { retriever } = seedFixture();
+        // With seeds disabled entirely, a hint path must not be pinned in
+        // signal-only mode (the old "slots" policy pinned every hint path).
+        M4_SEED_WEIGHTS.enabled = false;
+        M4_SEED_WEIGHTS.slotPolicy = "signal-only";
+        const result = retriever.retrieve("zzz nothing", {
+          maxGraphDepth: 1,
+          seedHints: [{ path: "src/auth/handler.ts", kind: "DIFF_TOUCHED" as const }],
+        });
+        expect(result.ranked.find((r) => r.path === "src/auth/handler.ts")).toBeUndefined();
+      } finally {
+        M4_SEED_WEIGHTS.enabled = wasEnabled;
+        M4_SEED_WEIGHTS.slotPolicy = wasPolicy;
       }
     });
   });

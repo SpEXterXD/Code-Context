@@ -1,7 +1,11 @@
 import type { FileEntry } from "../domain/model";
 import type { RelationshipGraph } from "../domain/graph";
 import { traverseBidirectional } from "../domain/graph";
-import { HybridRetriever, type RetrievalResult } from "../retrieval/hybridRetriever";
+import {
+  HybridRetriever,
+  M4_SEED_WEIGHTS,
+  type RetrievalResult,
+} from "../retrieval/hybridRetriever";
 import type { ScoredFile, RankingSignal } from "../retrieval/relevanceScorer";
 import {
   assignTiers,
@@ -151,17 +155,25 @@ export class ContextBuilder {
     const seedState = this.prepareSeedState(request.seedSet);
     // Seed hints pin into retrieval (survive zero-signal) but do NOT get the
     // USER_SELECTED tier: their own seed signals give them CHANGE_SEED.
+    // M4b/S1 signal-only: seeds are NOT pinned (no guaranteed slot).
+    const signalOnly = M4_SEED_WEIGHTS.slotPolicy === "signal-only";
     const userPins = this.resolvePinned(request);
     const retrieval = this.retrieveForMode(
       request,
-      [...userPins, ...seedState.hints.map((h) => h.path)],
+      signalOnly ? userPins : [...userPins, ...seedState.hints.map((h) => h.path)],
       seedState.hints,
     );
     const candidates = assignTiers(retrieval.ranked, userPins);
 
     // Security screen BEFORE budgeting: blocked files never consume budget.
     const security = this.screenCandidates(candidates);
-    const eligibleAll = candidates.filter((c) => !security.blockedFiles.has(c.path));
+    const seedContentExcluded = new Set<string>();
+    if (signalOnly) {
+      for (const h of seedState.hints) seedContentExcluded.add(h.path);
+    }
+    const eligibleAll = candidates.filter(
+      (c) => !security.blockedFiles.has(c.path) && !seedContentExcluded.has(c.path),
+    );
     // M3b/P1: the top-N retrieval-ranked eligible files take content slots in
     // rank order first; everything else keeps the tier-then-score order.
     let eligible = eligibleAll;
@@ -286,6 +298,22 @@ export class ContextBuilder {
         included: false,
         note: "diff withheld by security policy",
       });
+    }
+    // M4b/S1 signal-only: seeded files never take content slots. Any seeded
+    // candidate not otherwise in the WHY list gets a path-only entry (its
+    // diff, if any, already renders in ## CURRENT CHANGES).
+    if (signalOnly) {
+      for (const h of [...seedState.hints].sort((a, b) => compareStrings(a.path, b.path))) {
+        if (why.some((entry) => entry.path === h.path)) continue;
+        why.push({
+          path: h.path,
+          tierLabel: TIER_LABELS.CHANGE_SEED,
+          score: 0,
+          reasons: ["Changed in your working tree"],
+          included: false,
+          note: "change seed: not packaged (signal-only mode; diff in CURRENT CHANGES)",
+        });
+      }
     }
 
     // Assemble + verify with a deterministic degrade loop: if the exact
@@ -974,7 +1002,7 @@ export function computeIndexVersion(entries: Map<string, FileEntry>): string {
   return sha256Hex(lines.join("\n")).slice(0, 12);
 }
 
-export { TIER_ORDER_SIGNAL_WEIGHT };
+export { TIER_ORDER_SIGNAL_WEIGHT, M4_SEED_WEIGHTS };
 
 /** Truncates diff text at a line boundary under a byte cap (deterministic). */
 function truncateDiffToBytes(text: string, maxBytes: number): { text: string; truncated: boolean } {
