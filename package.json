@@ -338,6 +338,7 @@
     "check:doc-links": "tsx scripts/check-doc-links.ts",
     "check:ref-docs": "tsx scripts/check-reference-docs.ts",
     "check:doc-style": "tsx scripts/check-doc-style.ts",
+    "check:doc-style:strict": "tsx scripts/check-doc-style.ts --strict",
     "bench": "tsx scripts/benchmark.ts",
     "bench:small": "tsx scripts/benchmark.ts --max 500",
     "eval:build-dataset": "tsx scripts/eval-build-dataset.ts",
