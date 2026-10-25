@@ -24,7 +24,7 @@ OCC operates under strict network isolation:
 Files selected for a context package are evaluated by `SecretScanner` (`src/security/secretScanner.ts`) before budget packing:
 
 ### Pattern Families
-The scanner matches known high-risk token structures across multiple credential categories.
+The scanner matches known high-risk token structures:
 - AWS access key IDs (`AKIA[0-9A-Z]{16}`)
 - GitHub personal access tokens (`ghp_[0-9A-Za-z]{30,}`, `gho_`, `ghu_`, `ghs_`, `ghr_`)
 - Slack bot and user tokens (`xox[baprs]-[0-9A-Za-z-]{10,}`)
@@ -61,7 +61,7 @@ If a file matching these patterns is requested directly, sensitive path rules in
 
 ## Local index storage and secret token blanking
 
-The local index store persists parsed syntax structures and lexical tokens to local disk inside the VS Code workspace storage directory. Storage is local.
+The local index store persists parsed syntax structures and lexical tokens to local disk inside the VS Code workspace storage directory.
 
 ### Secret-Token Blanking
 In versions 0.3.2 and later, file text is screened using `SecretScanner.scanSpans()` before tokenization. Spans matching credential patterns are overwritten with whitespace before harvesting `identifiers`, `bodyTokens`, and `fileSummary`. This guarantees that high-entropy credentials do not enter on-disk index shards.
@@ -104,7 +104,7 @@ OCC declares limited untrusted workspace support (`untrustedWorkspaces.supported
 
 ## Vulnerability reporting
 
-If you identify a security vulnerability in Offline Code Context Compiler, do not submit a public issue or discussion. Please disclose privately.
+If you identify a security vulnerability in Offline Code Context Compiler, do not submit a public issue or discussion.
 
 Use GitHub Private Vulnerability Reporting:
 1. Navigate to the repository on GitHub: `https://github.com/SpEXterXD/Code-Context`.
