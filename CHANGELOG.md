@@ -1,10 +1,18 @@
 # Changelog
 
-## [Unreleased]
+## [0.3.2] - 2026-10-26
 
 ### Security
 
 - **Index secret token filtering (`STORE_SCHEMA_VERSION` 3)**: On-disk index shards (`entries/xx/<hash>.json`) no longer persist tokens flagged by `SecretScanner`. Matched secret spans are blanked before extracting `identifiers` (lexical search terms) and `bodyTokens` (BM25 term frequencies), and any secret matches in `fileSummary`, symbol `docComment`, or symbol `signature` are blanked. The filter applies for all `secretPolicy` values, including `allow`. Older stores automatically clear stale entries and rebuild once on next load. Versions up to 0.3.1 persisted such tokens in the local index. Stated limit: values the scanner does not flag in the source file, such as short passwords or low-entropy strings, are still tokenized, and word-like fragments such as key-type prefixes remain.
+- **Runtime-assembled test fixtures**: Test secret fixtures are assembled at runtime from string fragments across test suites (`security.test.ts`, `contextBuilder.test.ts`, `contextService.test.ts`, `main.test.ts`) so raw secret tokens are not stored as literals in test source files.
+
+### Added
+
+- Added `scripts/smoke-vsix.ts` and `npm run smoke:vsix` using `@vscode/test-electron` (pinned to 3.1.0) to install the packaged `.vsix` into an isolated clean profile and verify activation, configuration defaults, and workspace indexing.
+- Added clean-profile VSIX smoke test execution under Linux (`xvfb-run`) and Windows/macOS to the GitHub Actions CI workflow (`.github/workflows/ci.yml`).
+- Added `docs/STYLE_GUIDE.md` and technical documentation across architecture, commands, configuration, developer workflows, commit-mined evaluation, glossary, limitations, operational guides, threat model/security, testing, and ADR index (ADRs 001 through 008).
+- Added automated quality gate scripts (`scripts/check-doc-links.ts`, `scripts/check-reference-docs.ts`, `scripts/check-doc-style.ts`) and `npm run check:doc-style:strict` to validate links, reference synchronization, and style guide rules.
 
 ## [0.3.1] - 2026-10-25
 
