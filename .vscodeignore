@@ -34,3 +34,4 @@ docs/**
 extension/.gitignore
 .gitignore
 RELEASE_NOTES.md
+SECURITY.md
