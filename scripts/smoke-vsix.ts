@@ -107,8 +107,16 @@ async function main(): Promise<void> {
 
   try {
     // 1. Resolve VS Code binary
-    console.log("[smoke:vsix] Resolving VS Code via @vscode/test-electron...");
-    const vscodeExecutablePath = await downloadAndUnzipVSCode();
+    const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")) as {
+      version?: string;
+      engines?: { vscode?: string };
+    };
+    let vscodeVersion = process.env.SMOKE_VSCODE_VERSION || "stable";
+    if (vscodeVersion === "minimum" || vscodeVersion === "min") {
+      vscodeVersion = pkg.engines?.vscode?.replace(/^[^0-9]*/, "") || "1.85.0";
+    }
+    console.log(`[smoke:vsix] Resolving VS Code (${vscodeVersion}) via @vscode/test-electron...`);
+    const vscodeExecutablePath = await downloadAndUnzipVSCode(vscodeVersion);
     const [cli, ...cliArgs] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath, {
       reuseMachineInstall: true,
     });
@@ -142,7 +150,7 @@ async function main(): Promise<void> {
         name: "occ-smoke-harness",
         publisher: "test",
         version: "1.0.0",
-        engines: { vscode: "^1.85.0" },
+        engines: { vscode: pkg.engines?.vscode || "^1.85.0" },
       }),
     );
 
