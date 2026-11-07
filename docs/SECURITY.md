@@ -69,7 +69,7 @@ In versions 0.3.2 and later, file text is screened using `SecretScanner.scanSpan
 ### Stated limit of token filtering
 Token filtering blanks only patterns identified by the scanner. Values that the scanner does not flag, such as low-entropy passwords, custom tokens, or split credentials, are still tokenized. Furthermore, word-like fragments such as key-type prefixes (for example, `AKIA`, `ghp`, or `sk_live`) remain in the index.
 
-Versions up to 0.3.1 persisted secret-bearing tokens in the local index store. To address this, schema version 3 (`STORE_SCHEMA_VERSION = 3`) clears and rebuilds any existing store from earlier versions on first run.
+Versions up to 0.3.1 persisted secret-bearing tokens in the local index store. To address this, schema version 3 clears and rebuilds any existing store from earlier versions on first run. Schema version 4 additionally sanitizes structural strings (symbol names, ids, exports, imports, calls, parse-error text) at parse time, so credential material flagged by the scanner cannot survive in persisted metadata through any field.
 
 ## Git hardening and execution hazards
 
@@ -84,11 +84,11 @@ To prevent malicious repositories from executing arbitrary code via git hooks or
 4. Process Timeouts: Commands enforce strict timeouts and run with `GIT_OPTIONAL_LOCKS=0` and `GIT_TERMINAL_PROMPT=0`.
 
 ### Empirical hazard verification
-Running `npm run eval:fsmonitor-repro` and `npm run eval:seed-hazard-repro` demonstrates the efficacy of these mitigations:
+Running `npm run eval:fsmonitor-repro` and `npm run eval:seed-hazard-repro` demonstrates the efficacy of these mitigations. The seed-hazard repro configures each hazard in its OWN isolated victim repo and measures raw git vs safeGit vs the collector's exact diff form:
 - `core.fsmonitor`: Raw `git status` executes repository-configured fsmonitor binaries (`MARKER WRITTEN`); `safeGit` neutralizes the hazard (`no marker`, exit code 0).
-- `diff.external`: Raw `status` and `diff` execute external diff drivers (`EXECUTED`); `safeGit` with `--no-ext-diff` neutralizes execution (`not executed`).
-- `textconv`: Raw status executes textconv converters (`EXECUTED`); `safeGit` with `--no-textconv` neutralizes execution (`not executed`).
-- `clean` and `smudge` filters: Neutralized by `safeGit` argument flags (`not executed`).
+- `diff.external`: Fires on raw plain `diff` (raw AND safeGit); the collector's form (`diff --no-ext-diff --no-textconv`) does NOT execute it.
+- `textconv`: Does not fire for a plain working-tree diff fixture; the collector's form additionally passes `--no-textconv`.
+- `clean` and `smudge` filters: EXECUTE during diff operations even through `safeGit` with `--no-ext-diff --no-textconv` — no git flag disables filters. This is the documented residual risk, mitigated by the workspace-trust gate only (git features are never invoked in untrusted workspaces; see ADR-006).
 
 ## Workspace trust behavior
 

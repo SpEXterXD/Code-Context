@@ -162,7 +162,7 @@ Each entry shard JSON file contains:
 
 Before extracting `identifiers`, `bodyTokens`, and `fileSummary`, file content is scanned using `SecretScanner.scanSpans()`. All spans matching known secret patterns (API keys, private tokens, high-entropy credential assignments) are blanked with whitespace characters. This guarantees that credentials matching the secret scanner are never persisted in on-disk index shards.
 
-Stated Limit: Filtering blanks only values flagged by the secret scanner. Values that the scanner does not flag, such as short passwords or low-entropy credentials, are still tokenized. Furthermore, word-like fragments such as key-type prefixes (for example, `AKIA` or `sk_live`) remain in token lists. Versions up to 0.3.1 persisted raw secret tokens in the local index; schema version 3 clears older stores to eliminate legacy shards.
+Stated Limit: Filtering blanks only values flagged by the secret scanner. Values that the scanner does not flag, such as short passwords or low-entropy credentials, are still tokenized. Furthermore, word-like fragments such as key-type prefixes (for example, `AKIA` or `sk_live`) remain in token lists. Versions up to 0.3.1 persisted raw secret tokens in the local index; schema version 3 clears older stores to eliminate legacy shards, and schema version 4 additionally sanitizes structural strings (symbol names, ids, exports, imports, calls, parse-error text) at parse time.
 
 ## Git integration and hardening
 

@@ -50,10 +50,10 @@ The compiled context package conforms to Wire Format v1 (`CONTEXT_VERSION: 1`) a
 
 ### Installation from GitHub release
 The extension is distributed as a `.vsix` package:
-1. Download `offline-code-context-compiler-0.3.1.vsix` from [GitHub Releases](https://github.com/SpEXterXD/Code-Context/releases).
+1. Download `offline-code-context-compiler-0.3.2.vsix` from [GitHub Releases](https://github.com/SpEXterXD/Code-Context/releases).
 2. Install via command line:
    ```bash
-   code --install-extension offline-code-context-compiler-0.3.1.vsix
+   code --install-extension offline-code-context-compiler-0.3.2.vsix
    ```
 3. Or install via the VS Code interface: open the Extensions view (`Ctrl+Shift+X` / `Cmd+Shift+X`), click `...` (More Actions), select `Install from VSIX...`, and choose the downloaded file.
 
@@ -135,7 +135,7 @@ Candidate files are scored using a deterministic hybrid ranking pipeline. Lexica
 - Policy Enforcement: Under the default `block` policy, files containing detected credentials have source code excluded from output while remaining listed in WHY entries. Under `warn`, secrets are deterministically redacted (`[REDACTED:<type>:<hash8>]`).
 - Fail-Closed Leak Gate: The finalized context package is scanned immediately before clipboard writing. If any raw credential value survived redaction, export aborts with a `SECURITY_BLOCKED` error.
 - Workspace Trust: In untrusted workspaces, git subprocesses are completely disabled. Indexing and packaging continue safely without git metadata.
-- Index Storage: Index metadata is stored locally under VS Code workspace storage (`context.storageUri`). File content is not persisted in the store. Before token extraction, secret spans are blanked with whitespace. Versions up to 0.3.1 persisted secret-like tokens in local index shards; schema version 3 clears older stores on first run. Details: [docs/SECURITY.md](docs/SECURITY.md).
+- Index Storage: Index metadata is stored locally under VS Code workspace storage (`context.storageUri`). File content is not persisted in the store. Before token extraction, secret spans are blanked with whitespace. Versions up to 0.3.1 persisted secret-like tokens in local index shards; schema version 3 clears older stores on first run, and schema version 4 additionally sanitizes structural strings at parse time. Details: [docs/SECURITY.md](docs/SECURITY.md).
 
 ## Measured context quality
 
@@ -192,7 +192,7 @@ Complete reference for all 20 settings: [docs/CONFIGURATION.md](docs/CONFIGURATI
 - [Evaluation Methodology](docs/EVALUATION.md): Commit-mined benchmarks, metrics, and results.
 - [Developer Guide](docs/DEVELOPMENT.md): Setup, scripts, quality gates, and contribution checklists.
 - [Documentation Style Guide](docs/STYLE_GUIDE.md): Writing rules, vocabulary constraints, and style checks.
-- [Testing Guide](docs/TESTING.md): Suite matrix (27 suites, 300 tests) and property-based testing.
+- [Testing Guide](docs/TESTING.md): Suite matrix (29 suites, 340 tests) and property-based testing.
 - [Troubleshooting](docs/TROUBLESHOOTING.md): Error codes and diagnostic workflows.
 - [Limitations](docs/LIMITATIONS.md): Technical boundaries and platform constraints.
 - [Roadmap](docs/ROADMAP.md): Planned improvements and experimental features.

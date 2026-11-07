@@ -1,6 +1,6 @@
 # Technical limitations
 
-This document lists the technical boundaries and known limitations of Offline Code Context Compiler (OCC) as of version 0.3.1.
+This document lists the technical boundaries and known limitations of Offline Code Context Compiler (OCC) as of version 0.3.2.
 
 ## Language and analysis depth
 

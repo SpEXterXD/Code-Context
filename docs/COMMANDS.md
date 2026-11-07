@@ -78,7 +78,7 @@ Complete reference for all 16 commands provided by Offline Code Context Compiler
 ### `offlineCodeContext.generateSelectionContext`
 - Title: `OCC: Generate Selection Context`
 - Availability: Command Palette
-- Description: Compiles a package focused on the active editor selection. Prompts whether to include graph neighbors (imports, callers, tests) or restrict the package to the selected file content only.
+- Description: Compiles a package focused on the active editor selection. Prompts whether to include graph neighbors (imports, callers, tests) or restrict the package to the selected file content only. Opens the result in the read-only preview editor.
 
 ### `offlineCodeContext.previewContext`
 - Title: `OCC: Preview Context`

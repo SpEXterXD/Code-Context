@@ -22,7 +22,7 @@ Lexical scoring uses an in-memory inverted index (`InvertedIndex`). Terms are ma
 | `identifier` | `0.8` | Code identifiers harvested during AST parsing |
 | `body` | `0.5` | Body, comment, and string-literal tokens with length normalization |
 
-Occurrences within a field are subject to sublinear term frequency damping (`1 + ln(tf)`), capped at `MAX_TF_PER_FIELD = 10`.
+Occurrences within a field are subject to sublinear term frequency damping (`1 + ln(tf)`), capped at `MAX_TF_PER_FIELD = 10`. Prefix matching (terms of ≥ 4 characters hit index keys by prefix) participates in scoring with an effective IDF: a prefix-only term (no exact corpus occurrence) contributes the best prefix key's IDF to the denominator, so prefix queries are neither free nor invisible.
 
 ### Body field length normalization
 
@@ -76,6 +76,7 @@ When `offlineCodeContext.enableGitRecency` is enabled (default `false`), `safeGi
 ### Change-aware seed signals
 
 When `offlineCodeContext.changeSeeds` is enabled (default `false`, experimental), working-tree changes inject additional seed signals (`M4_SEED_WEIGHTS`):
+- `SELECTION`: `0.8` (explicit editor selection — strongest intent signal; consumed from `SeedSet.selection`)
 - `DIFF_TOUCHED`: `0.6` (tuned by seed simulation in ADR-006)
 - `OPEN_EDITOR`: `0.3` (untuned default)
 - `DIAGNOSTIC`: `0.4` (untuned default)
