@@ -229,10 +229,10 @@ describe("HybridRetriever ranking + explanations", () => {
     function fusionFixture(): { retriever: HybridRetriever; paths: [string, string, string] } {
       const seed = entryWith("src/seed.ts", { symbols: ["gizmo"] });
       // Graph-proximate but content-free: only the imports edge fires (0.5).
-      const neighbor = entryWith("src/neighbor.ts", {});
+      const neighbor = entryWith("lib/neighbor.ts", {});
       neighbor.internalRelations = [
         {
-          source: "file:src/neighbor.ts",
+          source: "file:lib/neighbor.ts",
           target: "file:src/seed.ts",
           kind: "imports",
           provenance: "STATIC_EXACT",
@@ -246,7 +246,7 @@ describe("HybridRetriever ranking + explanations", () => {
       ];
       return {
         retriever: makeRetriever([seed, neighbor, lexical]),
-        paths: ["src/seed.ts", "src/neighbor.ts", "other/panel.ts"],
+        paths: ["src/seed.ts", "lib/neighbor.ts", "other/panel.ts"],
       };
     }
     const rankOf = (r: ReturnType<HybridRetriever["retrieve"]>, path: string): number =>

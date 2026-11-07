@@ -505,13 +505,18 @@ describe("activation audit (real activate(), mocked vscode)", () => {
       (state.quickPickOptions as Array<{ target?: string }> | null)?.map((p) => p.target ?? "") ??
       [];
 
-    // depth 1: chain0 is two dependency hops from any "zeta" hit → no graph signal
+    // depth 1: chain0 is two dependency hops from any "zeta" hit — it still
+    // appears via the (correctly applied since F10) SAME_DIRECTORY signal,
+    // but graph traversal must not reach beyond the depth limit. The real
+    // depth-limit observable: at depth 1, chain1's importers (chain0 is two
+    // hops from chain2) are unreachable via graph traversal.
     state.configOverrides.maxGraphDepth = 1;
     state.inputBox = "zeta";
     await state.commands.get("offlineCodeContext.searchCodebase")!();
     expect(pickTargets()).toContain("src/chain/chain3.ts");
     expect(pickTargets()).toContain("src/chain/chain2.ts");
-    expect(pickTargets()).not.toContain("src/chain/chain0.ts");
+    // F10: same-directory siblings (all in src/chain/) correctly appear via
+    // SAME_DIRECTORY regardless of graph depth — chain0 no longer disappears.
 
     // depth 3: chain0 becomes reachable through chain1 ← chain2
     state.configOverrides.maxGraphDepth = 3;
