@@ -69,7 +69,8 @@ export class IndexingService {
   private readonly entries = new Map<string, FileEntry>();
   private readonly parserFor: (path: string) => SourceParser;
   private readonly hasher: FileHasher = new Sha256FileHasher();
-  private readonly options: IndexingOptions;
+  private options: IndexingOptions;
+  private storeExclusion?: string;
   private readonly rootPath: string;
   private readonly scanner = new SecretScanner();
 
@@ -97,6 +98,7 @@ export class IndexingService {
     const relStore = toPosixPath(path.relative(rootPath, storeRoot));
     if (relStore && !relStore.startsWith("..")) {
       this.options.excludePatterns = [...(this.options.excludePatterns ?? []), relStore];
+      this.storeExclusion = relStore;
     }
   }
 
@@ -158,6 +160,24 @@ export class IndexingService {
       this.entries.clear();
       this.graph.clear();
       return this.runIncremental(cancellation, progress, true);
+    });
+  }
+
+  /**
+   * F05: swaps discovery options atomically. The swap is serialized through
+   * the internal queue so in-flight scans finish against the previous
+   * options; the next scan/rebuild picks up the new ones.
+   */
+  updateOptions(next: IndexingOptions): Promise<void> {
+    return this.enqueue(() => {
+      // Re-apply the store exclusion preserved from construction.
+      this.options = { ...next };
+      if (this.storeExclusion) {
+        this.options.excludePatterns = [
+          ...(this.options.excludePatterns ?? []),
+          this.storeExclusion,
+        ];
+      }
     });
   }
 

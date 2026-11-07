@@ -773,6 +773,36 @@ describe("activation audit (real activate(), mocked vscode)", () => {
     expect(countStoreEntries(storageDir)).toBe(6);
   });
 
+  it("F05: changed settings are applied to the running application before rebuild", async () => {
+    // maxFiles 40 -> 3: the next generated package must respect the new budget
+    state.configOverrides.maxFiles = 3;
+    state.infoChoice = "Rebuild";
+    for (const listener of state.configChangeListeners) {
+      listener({ affectsConfiguration: () => true });
+    }
+    await waitFor(
+      () => state.executed.includes("offlineCodeContext.rebuildIndex"),
+      10000,
+      "rebuild command",
+    );
+    state.inputBox = "util";
+    await state.commands.get("offlineCodeContext.generateTaskContext")!();
+    const generated = state.commands.get("offlineCodeContext.previewContext")!();
+    expect(generated).toBeDefined();
+    const manifestPath2 = path.join(storageDir, "manifest.json");
+    const manifest2 = JSON.parse(fs.readFileSync(manifestPath2, "utf8"));
+    // entries still exist (only the budget changed) — assert via the payload
+    const payload = (await import("./previewProvider")).PREVIEW_SCHEME;
+    void payload;
+    const preview2 = state.contentProviders.get(
+      ((await import("./previewProvider")) as { PREVIEW_SCHEME: string }).PREVIEW_SCHEME,
+    ) as ContextPreviewProvider;
+    const doc = preview2.provideTextDocumentContent(fileUri("occ-preview:task.md") as never);
+    const budgetLine = (doc as string).split("\n").find((l) => l.startsWith("Budgets:"))!;
+    expect(budgetLine).toContain("maxFiles=3");
+    state.configOverrides = {};
+  });
+
   it("M3-hardening: untrusted workspace shows the git-off note, trust grant re-enables", async () => {
     // This suite's beforeEach activated with the default (trusted) mock;
     // simulate the untrusted path with a dedicated activation.

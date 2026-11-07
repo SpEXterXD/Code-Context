@@ -36,15 +36,15 @@ export function activate(context: vscode.ExtensionContext): void {
   app.setGitRecencyAllowed(gitTrusted);
   if (gitTrusted) void app.refreshGitRecency();
   let trustNote: vscode.StatusBarItem | null = null;
-  const showTrustNote = (): void => {
-    if (trustNote || !config.enableGitRecency) return;
+  const showTrustNote = (current: typeof config): void => {
+    if (trustNote || !current.enableGitRecency) return;
     trustNote = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 99);
     trustNote.text = "$(shield) OCC: git metadata off (untrusted workspace)";
     trustNote.tooltip =
       "Git-based recency metadata is disabled because this workspace is not trusted. It enables automatically when you trust the workspace.";
     trustNote.show();
   };
-  if (config.enableGitRecency && !gitTrusted) showTrustNote();
+  if (config.enableGitRecency && !gitTrusted) showTrustNote(config);
   if (typeof vscode.workspace.onDidGrantWorkspaceTrust === "function") {
     context.subscriptions.push(
       vscode.workspace.onDidGrantWorkspaceTrust(() => {
@@ -94,18 +94,30 @@ export function activate(context: vscode.ExtensionContext): void {
   // is required when exclusion patterns change.
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration("offlineCodeContext")) {
-        void vscode.window
-          .showInformationMessage(
-            "OCC: settings changed. Rebuild the index to apply new exclusions?",
-            "Rebuild",
-          )
-          .then((choice) => {
-            if (choice === "Rebuild") {
-              void vscode.commands.executeCommand("offlineCodeContext.rebuildIndex");
-            }
-          });
+      if (!e.affectsConfiguration("offlineCodeContext")) return;
+      // F05: apply the new configuration to the live application BEFORE the
+      // rebuild prompt — budgets/security/recency take effect on the next
+      // package, and discovery options are updated before a rebuild runs.
+      const next = readConfig();
+      app?.updateConfig(next);
+      const stillTrusted = vscode.workspace.isTrusted !== false;
+      app?.setGitRecencyAllowed(stillTrusted);
+      if (next.enableGitRecency && stillTrusted) void app?.refreshGitRecency();
+      if (next.enableGitRecency && !stillTrusted) showTrustNote(next);
+      if (!next.enableGitRecency || stillTrusted) {
+        trustNote?.dispose();
+        trustNote = null;
       }
+      void vscode.window
+        .showInformationMessage(
+          "OCC: settings changed. Rebuild the index to apply new exclusions?",
+          "Rebuild",
+        )
+        .then((choice) => {
+          if (choice === "Rebuild") {
+            void vscode.commands.executeCommand("offlineCodeContext.rebuildIndex");
+          }
+        });
     }),
   );
 

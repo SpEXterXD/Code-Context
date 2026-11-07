@@ -61,7 +61,7 @@ export class OccApplication {
   constructor(
     readonly rootPath: string,
     storeRoot: string,
-    private readonly config: OccConfig = DEFAULT_CONFIG,
+    private config: OccConfig = DEFAULT_CONFIG,
   ) {
     const registry = createDefaultParserRegistry();
     this.indexing = new IndexingService(rootPath, storeRoot, (p) => registry.resolve(p), {
@@ -104,6 +104,23 @@ export class OccApplication {
   refreshGitRecency(): Promise<void> {
     if (!this.config.enableGitRecency || !this.gitRecencyAllowed) return Promise.resolve();
     return this.git.refreshRecencyOrder(this.rootPath);
+  }
+
+  /**
+   * F05: replaces the configuration snapshot and applies discovery options
+   * to the indexing service (serialized through its queue). Marks the cached
+   * builder dirty so the next package uses the new budgets/security/recency
+   * settings. Does NOT trigger a rebuild — the extension layer decides when
+   * discovery changes require one.
+   */
+  updateConfig(next: OccConfig): void {
+    this.config = next;
+    this.indexing.updateOptions({
+      excludePatterns: next.excludePatterns,
+      respectGitignore: next.respectGitignore,
+      maxFileSizeBytes: next.maxFileSizeBytes,
+    });
+    this.builderDirty = true;
   }
 
   /** Loads persisted index state; call once at startup. */
