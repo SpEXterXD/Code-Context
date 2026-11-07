@@ -69,3 +69,16 @@ export function checkCancelled(signal: CancellationSignal, every: number, iterat
     signal.throwIfCancelled();
   }
 }
+
+/**
+ * FU1: yields to the host event loop (macrotask boundary) so long synchronous
+ * batches do not starve the extension host — progress UI, watcher events and
+ * cancellation signals stay responsive. Uses the timer phase (not
+ * setImmediate): immediates resolve before already-queued timers within the
+ * same loop iteration, so a setImmediate yield lets an all-microtask resume
+ * chain finish without ever reaching queued work. Called periodically inside
+ * long parse/commit loops; one hop every N files is negligible overhead.
+ */
+export function yieldToHost(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}

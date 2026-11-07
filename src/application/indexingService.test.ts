@@ -635,6 +635,24 @@ describe("IndexingService (integration)", () => {
     });
   });
 
+  // FU1: the parse loop ran fully synchronously — no await anywhere — so on
+  // large workspaces the extension host was blocked for seconds and progress
+  // UI, watcher events and cancellation signals could not fire mid-index.
+  it("FU1: the parse loop yields to the host event loop during long batches", async () => {
+    root = makeTempDir();
+    const files: Record<string, string> = {};
+    for (let i = 0; i < 100; i++) files[`src/f${i}.ts`] = `export const v${i} = ${i};\n`;
+    writeRepo(root, files);
+    const service = makeService(root);
+    // A macrotask queued BEFORE indexing starts must run while indexing is in
+    // flight. On the original implementation the whole loop executed inside
+    // one synchronous macrotask, so this flag was still false afterwards.
+    let macrotaskRan = false;
+    setTimeout(() => (macrotaskRan = true), 0);
+    await service.indexWorkspace(CancellationSource.never());
+    expect(macrotaskRan).toBe(true);
+  });
+
   // F14: parser diagnostics were dropped before persistence — meta was built
   // with a hard-coded PARSED status and `parsed.parseError` (partial-analysis
   // diagnostics from the parsers) never reached the persisted FileMeta.

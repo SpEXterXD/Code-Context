@@ -20,7 +20,7 @@ import { SecretScanner, blankSpans } from "../security/secretScanner";
 import { toPosixPath, symbolId } from "../shared/ids";
 import { logger } from "../shared/logging";
 import type { CancellationSignal } from "../shared/cancellation";
-import { checkCancelled } from "../shared/cancellation";
+import { checkCancelled, yieldToHost } from "../shared/cancellation";
 import { CancelledError } from "../shared/errors";
 import { OccError } from "../shared/errors";
 import type { IndexingOptions } from "./indexingOptions";
@@ -452,6 +452,10 @@ export class IndexingService {
           this.parseCounter++;
         }
         processed++;
+        // FU1: yield the macrotask periodically so the extension host stays
+        // responsive (progress UI, watcher events, cancellation) on large
+        // workspaces — the loop is otherwise fully synchronous.
+        if (processed % 64 === 0) await yieldToHost();
       }
 
       // Analysis phase: stage all fresh entries so cross-file edges between
