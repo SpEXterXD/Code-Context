@@ -17,7 +17,7 @@ import { extractIdentifiers } from "../parser/typescriptParser";
 import { AnalysisEngine } from "../analysis/analysisEngine";
 import { JsonIndexStore, fingerprintForRoot, type IndexStore } from "../index/indexStore";
 import { SecretScanner, blankSpans } from "../security/secretScanner";
-import { toPosixPath } from "../shared/ids";
+import { toPosixPath, symbolId } from "../shared/ids";
 import { logger } from "../shared/logging";
 import type { CancellationSignal } from "../shared/cancellation";
 import { checkCancelled } from "../shared/cancellation";
@@ -518,7 +518,102 @@ export class IndexingService {
         }
       }
     }
+    this.sanitizeStructuralStrings(parsed);
     return parsed;
+  }
+
+  /**
+   * F01: scanner-flagged credential material must never survive in persisted
+   * metadata through structural strings — symbol names (thus ids), parent
+   * references, call sites, export names, imported names, module specifiers,
+   * or parse-error text. Flagged spans are blanked; a name that becomes
+   * empty drops its record. Ids are rebuilt deterministically after renaming
+   * and every parent/caller reference is rewritten through the id map, so
+   * references stay consistent without dangling entries.
+   */
+  private sanitizeStructuralStrings(parsed: ParsedFile): void {
+    if (parsed.parseError) {
+      const errSpans = this.scanner.scanSpans(parsed.parseError);
+      if (errSpans.length > 0) {
+        parsed.parseError = blankSpans(parsed.parseError, errSpans)
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 200);
+      }
+    }
+
+    const idMap = new Map<string, string>();
+    const dropped = new Set<string>();
+    const keptSymbols = [];
+    for (const s of parsed.symbols) {
+      const name = this.sanitizeText(s.name);
+      if (name !== null && name.length === 0) {
+        dropped.add(s.id);
+        continue;
+      }
+      if (name !== null && name !== s.name) {
+        const newId = symbolId(s.filePath, name, s.kind, s.startLine);
+        idMap.set(s.id, newId);
+        s.name = name;
+        s.id = newId;
+      }
+      keptSymbols.push(s);
+    }
+    for (const s of keptSymbols) {
+      if (s.parentId) {
+        if (dropped.has(s.parentId)) s.parentId = undefined;
+        else s.parentId = idMap.get(s.parentId) ?? s.parentId;
+      }
+    }
+    parsed.symbols = keptSymbols;
+
+    const remapCaller = (id: string): string | null => {
+      if (dropped.has(id)) return null;
+      return idMap.get(id) ?? id;
+    };
+    parsed.calls = parsed.calls
+      .map((c) => ({ ...c, callerId: remapCaller(c.callerId) }))
+      .filter((c): c is typeof c & { callerId: string } => c.callerId !== null)
+      .map((c) => {
+        const callee = this.sanitizeText(c.calleeName);
+        return callee !== null && callee.length === 0
+          ? null
+          : { ...c, calleeName: callee ?? c.calleeName };
+      })
+      .filter((c): c is NonNullable<typeof c> => c !== null);
+
+    // F01 note: sanitizeText returns null for "unchanged" — null must KEEP
+    // the original value; an empty result means fully flagged and drops the
+    // record. Treating null as a drop breaks import resolution.
+    parsed.exports = parsed.exports
+      .map((e) => {
+        const name = this.sanitizeText(e.name);
+        return name === null ? e : { ...e, name };
+      })
+      .filter((e) => e.name.length > 0);
+
+    parsed.imports = parsed.imports
+      .map((imp) => {
+        const source = this.sanitizeText(imp.sourceText);
+        if (source !== null && source.length === 0) return null; // specifier fully flagged
+        const names: string[] = [];
+        for (const n of imp.importedNames) {
+          const s = this.sanitizeText(n);
+          if (s === null)
+            names.push(n); // unchanged
+          else if (s.length > 0) names.push(s); // sanitized, still usable
+          // else: fully flagged name is dropped from the list
+        }
+        return { ...imp, sourceText: source ?? imp.sourceText, importedNames: names };
+      })
+      .filter((imp): imp is NonNullable<typeof imp> => imp !== null);
+  }
+
+  /** Blanks scanner-flagged spans in a string; null when nothing flagged. */
+  private sanitizeText(text: string): string | null {
+    const spans = this.scanner.scanSpans(text);
+    if (spans.length === 0) return null;
+    return blankSpans(text, spans).replace(/\s+/g, " ").trim();
   }
 
   private commitEntries(committed: FileEntry[]): void {

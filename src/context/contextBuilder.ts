@@ -39,6 +39,7 @@ import { OccError } from "../shared/errors";
 import { compareStrings } from "../shared/text";
 import type { SeedSet } from "../seeds/seedSet";
 import { sensitivePathCheck } from "../security/sensitivePathRules";
+import type { SecretFinding } from "../security/secretScanner";
 import { SecretScanner } from "../security/secretScanner";
 import { redactMatch } from "../security/redactor";
 
@@ -167,6 +168,26 @@ export class ContextBuilder {
 
     // Security screen BEFORE budgeting: blocked files never consume budget.
     const security = this.screenCandidates(candidates);
+    // F02: merge diff-content findings into the verdict so safe reports
+    // and the final leak-verification gate cover CURRENT CHANGES too.
+    if (seedState.diffFindings.length > 0) {
+      security.rawFindings.push(...seedState.diffFindings);
+      for (const f of seedState.diffFindings) {
+        security.safeFindings.push({
+          kind: f.kind,
+          filePath: f.filePath,
+          line: f.line,
+          description: f.description,
+          confidence: f.confidence,
+          action:
+            this.deps.security.secretPolicy === "block"
+              ? "blocked"
+              : this.deps.security.redactSecrets
+                ? "redacted"
+                : "warned",
+        });
+      }
+    }
     const seedContentExcluded = new Set<string>();
     if (signalOnly) {
       for (const h of seedState.hints) seedContentExcluded.add(h.path);
@@ -677,9 +698,11 @@ export class ContextBuilder {
     }>;
     currentChanges?: { sections: Array<{ path: string; diff: string }>; truncated: boolean };
     withheldDiffs: Array<{ path: string; reason: string }>;
+    /** F02: raw diff findings for the final leak-verification gate. */
+    diffFindings: SecretFinding[];
     notes: string[];
   } {
-    if (!seedSet) return { hints: [], withheldDiffs: [], notes: [] };
+    if (!seedSet) return { hints: [], withheldDiffs: [], diffFindings: [], notes: [] };
     const kindPriority = {
       DIFF_TOUCHED: 0,
       DIAGNOSTIC: 1,
@@ -703,6 +726,7 @@ export class ContextBuilder {
     );
 
     const withheldDiffs: Array<{ path: string; reason: string }> = [];
+    const diffFindings: SecretFinding[] = [];
     const accepted: Array<{ path: string; diff: string }> = [];
     const scanner = new SecretScanner();
     for (const section of [...seedSet.diffSections].sort((a, b) =>
@@ -718,8 +742,12 @@ export class ContextBuilder {
         continue;
       }
       let text = section.diff;
-      const findings = scanner.scan(section.path, text);
+      // F02: scan the LOGICAL diff lines (added/removed/context with the
+      // unified-diff prefix stripped) so line-anchored patterns see the real
+      // content; findings are merged into the security verdict below.
+      const findings = scanner.scanDiff(text);
       if (findings.length > 0) {
+        diffFindings.push(...findings);
         if (this.deps.security.secretPolicy === "block") {
           withheldDiffs.push({
             path: section.path,
@@ -759,7 +787,7 @@ export class ContextBuilder {
       }
     }
     const currentChanges = sections.length > 0 ? { sections, truncated } : undefined;
-    return { hints, currentChanges, withheldDiffs, notes: seedSet.notes };
+    return { hints, currentChanges, withheldDiffs, diffFindings, notes: seedSet.notes };
   }
 
   private screenCandidates(candidates: RankedCandidate[]): SecurityVerdict {

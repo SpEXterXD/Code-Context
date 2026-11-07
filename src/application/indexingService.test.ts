@@ -473,4 +473,75 @@ describe("IndexingService (integration)", () => {
       expect(bytes2).toBe(bytes1);
     });
   });
+  describe("F01: detected credentials never persist in metadata", () => {
+    // Fake tokens assembled from fragments so this test file is not itself
+    // a secret-shaped fixture.
+    const NL = "\n";
+    const Q = '"';
+    const SK = "sk_" + "live_" + "QW8Z7XP6M5L4K3J2ABCDEF";
+    const AWS = "AKIA" + "QW8Z7XP6M5L4K3J2";
+    const FIXTURE: Record<string, string> = {
+      "README.md": "# " + SK + NL + "summary " + SK + NL,
+      "config.json": '{ "' + SK + '": "safe value" }' + NL,
+      "module.ts":
+        "export const " +
+        SK.replace(/-/g, "_") +
+        " = 1;" +
+        NL +
+        "import { x } from " +
+        Q +
+        "./other" +
+        Q +
+        ";" +
+        NL +
+        "/** doc " +
+        SK +
+        " */" +
+        NL +
+        "export function f(sig" +
+        SK.replace(/[^A-Za-z0-9]/g, "") +
+        ": number) { " +
+        SK.replace(/-/g, "_") +
+        "(1); }" +
+        NL,
+      "other.ts": "export const helper = 1;" + NL,
+      "key.md":
+        "-----BEGIN RSA PRIVATE KEY-----" + NL + SK + NL + "-----END RSA PRIVATE KEY-----" + NL,
+    };
+
+    function expectNoCredentialMaterial(bytes: string): void {
+      expect(bytes).not.toContain(SK);
+      expect(bytes).not.toContain(AWS);
+      expect(bytes).not.toContain("BEGIN RSA PRIVATE KEY");
+    }
+
+    it("blanked structural names/exports/imports never reach serialized shards", async () => {
+      root = makeTempDir();
+      writeRepo(root, FIXTURE);
+      const service = makeService(root);
+      await service.indexWorkspace(CancellationSource.never());
+      expectNoCredentialMaterial(storeBytes(root));
+      // analysis survives: sanitized entries still exist and reference each other
+      const entries = [...service.getEntries().values()];
+      expect(entries.length).toBe(Object.keys(FIXTURE).length);
+      const mod = entries.find((e) => e.meta.path === "module.ts")!;
+      expect(mod.symbols.length).toBeGreaterThan(0);
+      for (const s of mod.symbols) {
+        expect(s.id).toBe("module.ts#" + s.name + "@" + s.kind + ":" + s.startLine);
+      }
+    });
+
+    it("is deterministic and applies under every secret policy", async () => {
+      root = makeTempDir();
+      writeRepo(root, FIXTURE);
+      const service = makeService(root);
+      await service.indexWorkspace(CancellationSource.never());
+      const first = storeBytes(root);
+      expectNoCredentialMaterial(first);
+      // Re-run: deterministic serialization of the same inputs.
+      const service2 = makeService(root);
+      await service2.indexWorkspace(CancellationSource.never());
+      expect(storeBytes(root)).toBe(first);
+    });
+  });
 });

@@ -5,7 +5,10 @@ import { sha256Hex, toPosixPath } from "../shared/ids";
 // lexical field; older stores rebuild so every entry carries body terms.
 // v3: secret token filtering in index entries (identifiers, bodyTokens, summary);
 // older stores rebuild once so no secret tokens survive in stored shards.
-export const STORE_SCHEMA_VERSION = 3;
+// v4 (F01): structural strings (symbol names/ids, exports, imports, calls,
+// parse errors) are sanitized at parse time; older stores rebuild once so
+// previously persisted credential-bearing names never survive on disk.
+export const STORE_SCHEMA_VERSION = 4;
 
 export interface IndexManifest {
   schemaVersion: number;

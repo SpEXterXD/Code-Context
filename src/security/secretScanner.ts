@@ -160,11 +160,24 @@ export class SecretScanner {
         const text = match[0];
         if (def.validate && !def.validate(text)) continue;
         const start = match.index ?? 0;
+        let end = start + text.length;
+        // F01: a private-key finding must cover the KEY BODY, not just the
+        // header line — under WARN/redaction a header-only match would blank
+        // the header while leaving the key material exposed.
+        if (def.kind === "private-key-block") {
+          const endMarker = content.indexOf("-----END", end);
+          if (endMarker >= 0) {
+            const lineEnd = content.indexOf("\n", endMarker);
+            end = lineEnd >= 0 ? lineEnd + 1 : content.length;
+          } else {
+            end = content.length;
+          }
+        }
         matches.push({
           kind: def.kind,
           start,
-          end: start + text.length,
-          match: text,
+          end,
+          match: content.slice(start, end),
           description: def.description,
           confidence: def.confidence,
         });
@@ -227,6 +240,44 @@ export class SecretScanner {
     return this.scanMatches(content)
       .map((m) => ({ start: m.start, end: m.end }))
       .sort((a, b) => a.start - b.start || a.end - b.end);
+  }
+
+  /**
+   * F02: scans a unified diff by its LOGICAL content lines. Line-anchored
+   * patterns (env-credential assignments) only match when each added,
+   * removed, or context line is scanned as a standalone line — scanning the
+   * raw diff text misses everything behind a `+`/`-` prefix. Hunk headers,
+   * file headers, and index lines are skipped; line numbers refer to the
+   * diff text itself. `match` values are the flagged text as it appears in
+   * the diff, so callers can redact or verify against the rendered payload.
+   */
+  scanDiff(diffText: string): SecretFinding[] {
+    const findings: SecretFinding[] = [];
+    const lines = diffText.split(/\r?\n/);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]!;
+      let logical: string;
+      if (/^diff --git /.test(line) || /^index /i.test(line) || /^@@ /.test(line)) continue;
+      if (/^--- (?:a\/|b\/|\/dev\/)/.test(line) || /^\+\+\+ (?:a\/|b\/|\/dev\/)/.test(line)) {
+        continue;
+      }
+      if (line.startsWith("+")) logical = line.slice(1);
+      else if (line.startsWith("-")) logical = line.slice(1);
+      else if (line.startsWith(" ")) logical = line.slice(1);
+      else logical = line;
+      if (logical.trim().length === 0) continue;
+      for (const m of this.scanMatches(logical)) {
+        findings.push({
+          kind: m.kind,
+          filePath: "",
+          line: i + 1,
+          match: m.match,
+          description: m.description,
+          confidence: m.confidence,
+        });
+      }
+    }
+    return findings.sort((a, b) => a.line - b.line || compareStrings(a.kind, b.kind));
   }
 }
 

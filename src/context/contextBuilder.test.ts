@@ -608,6 +608,54 @@ describe("ContextBuilder", () => {
       expect(r1.payload).not.toContain(AWS_ALT_KEY);
     });
 
+    it("F02: a secret only in REMOVED diff lines cannot escape under BLOCK", async () => {
+      const app = await makeSeedApp();
+      const result = app.buildContext("task", {
+        taskText: "anything",
+        seedSet: {
+          changedPaths: [{ path: "src/gizmo.ts", state: "unstaged" }],
+          diffSections: [
+            {
+              path: "src/gizmo.ts",
+              diff: "-const apiKey = 'AKIAQW8Z7XP6M5L4K3J2YZAB';" + NL + "+export const safe = 1;",
+            },
+          ],
+          openEditors: [],
+          diagnostics: [],
+          stackFrames: [],
+          notes: [],
+        },
+      });
+      const why = result.rankedForDisplay.find((w) => w.path === "src/gizmo.ts");
+      expect(why?.note).toContain("diff withheld by security policy");
+      expect(result.payload).not.toContain("AKIAQW8Z7XP6M5L4K3J2YZAB");
+      // findings surface in the safe report + final leak verification
+      expect(result.security.rawFindings.length).toBeGreaterThan(0);
+      expect(result.security.safeFindings.some((f) => f.action === "blocked")).toBe(true);
+    });
+
+    it("F02: WARN+redact preserves safe diff text and removes credential material", async () => {
+      const app = await makeSeedApp("warn");
+      const result = app.buildContext("task", {
+        taskText: "anything",
+        seedSet: {
+          changedPaths: [{ path: "src/gizmo.ts", state: "unstaged" }],
+          diffSections: [
+            {
+              path: "src/gizmo.ts",
+              diff: "-const apiKey = 'AKIAQW8Z7XP6M5L4K3J2YZAB';" + NL + "+export const safe = 1;",
+            },
+          ],
+          openEditors: [],
+          diagnostics: [],
+          stackFrames: [],
+          notes: [],
+        },
+      });
+      expect(result.payload).toContain("+export const safe = 1;");
+      expect(result.payload).not.toContain("AKIAQW8Z7XP6M5L4K3J2YZAB");
+    });
+
     it("unseeded requests stay byte-identical to the pre-M4 format", async () => {
       const app = await makeSeedApp();
       const result = app.buildContext("task", { taskText: "gizmo widget" });

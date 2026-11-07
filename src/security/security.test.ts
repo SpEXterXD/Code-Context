@@ -280,4 +280,46 @@ describe("scanSpans and blankSpans", () => {
     expect(blanked.length).toBe(text.length);
     expect(blanked.split("\n")).toHaveLength(3);
   });
+
+  describe("F02: scanDiff logical-line scanning", () => {
+    const scanner = new SecretScanner();
+    // Fake credential assembled from fragments.
+    const TOKEN = "d4f1" + "a09c" + "77bd" + "e2f3" + "a1b2" + "c3d4e5f6a7b8";
+
+    it("detects env credentials behind + and - prefixes", () => {
+      const diff = [
+        "@@ -1,2 +1,2 @@",
+        "-AUTH_TOKEN=" + TOKEN + ",",
+        "+AUTH_TOKEN=" + TOKEN + "_new",
+        " CONTEXT unchanged",
+      ].join("\n");
+      const f = scanner.scanDiff(diff);
+      expect(f.length).toBeGreaterThanOrEqual(2);
+      expect(f.every((x) => x.kind === "env-credential")).toBe(true);
+    });
+
+    it("detects quoted assignments and token families in removed lines", () => {
+      const diff = ["-const apiKey = '" + TOKEN + "';", "-ghp_" + "A".repeat(36)].join("\n");
+      const kinds = new Set(scanner.scanDiff(diff).map((x) => x.kind));
+      expect(kinds.has("generic-credential") || kinds.has("env-credential")).toBe(true);
+      expect(kinds.has("github-token")).toBe(true);
+    });
+
+    it("detects multiline private-key material added in a diff", () => {
+      const diff = [
+        "+-----BEGIN RSA PRIVATE KEY-----",
+        "+MIIBOgIBAAJBAKjEwPsxQ0cB1h9KagQ=",
+        "+-----END RSA PRIVATE KEY-----",
+      ].join("\n");
+      const f = scanner.scanDiff(diff);
+      expect(f.some((x) => x.kind === "private-key-block")).toBe(true);
+    });
+
+    it("maps findings to diff line numbers with CRLF and keeps safe diffs clean", () => {
+      const crlfDiff = "@@ -1 +1 @@" + "\r\n-AUTH_TOKEN=" + TOKEN;
+      expect(scanner.scanDiff(crlfDiff)[0]!.line).toBe(2);
+      const safe = ["+export const ok = 1;", "-export const stale = 2;", " ctx"].join("\n");
+      expect(scanner.scanDiff(safe)).toHaveLength(0);
+    });
+  });
 });
