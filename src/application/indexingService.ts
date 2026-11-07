@@ -10,7 +10,6 @@ import {
   type ScanResult,
 } from "../workspace/workspaceScanner";
 import { Sha256FileHasher, type FileHasher } from "../workspace/fileHasher";
-import type { IgnoreRules } from "../workspace/ignoreRules";
 import { detectLanguage, isTestFile, looksBinary } from "../workspace/languageDetection";
 import type { ParsedFile, SourceParser } from "../parser/parser";
 import { BODY_TOKEN_TOP_N, extractBodyTokens, type BodyTokens } from "../parser/bodyTokens";

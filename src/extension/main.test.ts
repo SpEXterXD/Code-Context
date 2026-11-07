@@ -795,7 +795,7 @@ describe("activation audit (real activate(), mocked vscode)", () => {
     const generated = state.commands.get("offlineCodeContext.previewContext")!();
     expect(generated).toBeDefined();
     const manifestPath2 = path.join(storageDir, "manifest.json");
-    const manifest2 = JSON.parse(fs.readFileSync(manifestPath2, "utf8"));
+    JSON.parse(fs.readFileSync(manifestPath2, "utf8")); // parsed to prove it still exists
     // entries still exist (only the budget changed) — assert via the payload
     const payload = (await import("./previewProvider")).PREVIEW_SCHEME;
     void payload;

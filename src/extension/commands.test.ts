@@ -20,6 +20,10 @@ const state = vi.hoisted(() => ({
   clipboardFails: false,
   activeEditorUri: null as string | null,
   workspaceRoot: null as string | null,
+  /** F13: response for the next showInputBox call (undefined = cancelled). */
+  inputBoxResponse: undefined as string | undefined,
+  /** F13: response for the next showQuickPick call (undefined = cancelled). */
+  quickPickResponse: undefined as unknown,
   registered: new Map<string, (...args: unknown[]) => unknown>(),
 }));
 
@@ -68,8 +72,8 @@ vi.mock("vscode", () => {
         state.errors.push(message);
         return Promise.resolve(undefined);
       },
-      showInputBox: async () => undefined,
-      showQuickPick: async () => undefined,
+      showInputBox: async () => state.inputBoxResponse,
+      showQuickPick: async () => state.quickPickResponse,
       showTextDocument: async () => ({}),
       get activeTextEditor() {
         return state.activeEditorUri
@@ -138,6 +142,8 @@ beforeEach(async () => {
   state.clipboard = null;
   state.clipboardFails = false;
   state.activeEditorUri = null;
+  state.inputBoxResponse = undefined;
+  state.quickPickResponse = undefined;
   state.registered.clear();
 
   root = fs.mkdtempSync(path.join(os.tmpdir(), "occ-cmds-"));
@@ -264,5 +270,42 @@ describe("context-menu commands (mocked vscode, real pipeline)", () => {
     );
     const direct = app.buildContext("project", { scope: { kind: "folder", relPath: "src/app" } });
     expect(state.clipboard).toBe(direct.payload);
+  });
+
+  // F13: task and selection generation must follow the same preview policy as
+  // project/file generation (docs/COMMANDS.md documents both as opening the
+  // preview). The original implementation discarded the build result.
+  it("F13: generateTaskContext opens the preview", async () => {
+    state.inputBoxResponse = "Add rate limiting to the login endpoint.";
+    await state.registered.get("offlineCodeContext.generateTaskContext")!();
+    expect(previewSetPayload).toHaveBeenCalledTimes(1);
+    // Wire format keeps the PROJECT CONTEXT header; task mode adds the task section.
+    expect(previewPayloads[0]).toContain("## DEVELOPER TASK");
+    expect(previewPayloads[0]).toContain("Add rate limiting to the login endpoint.");
+    expect(state.clipboard).toBeNull(); // generate never copies
+    const toast = state.messages.find((m) => m.includes("task context ready"));
+    expect(toast).toBeDefined();
+  });
+
+  it("F13: generateSelectionContext opens the preview", async () => {
+    state.activeEditorUri = path.join(root, "src", "app", "api.ts");
+    state.quickPickResponse = { label: "Expand with dependencies & tests", value: true };
+    await state.registered.get("offlineCodeContext.generateSelectionContext")!();
+    expect(previewSetPayload).toHaveBeenCalledTimes(1);
+    expect(previewPayloads[0]).toContain("### FILE: src/app/api.ts");
+    expect(state.clipboard).toBeNull();
+  });
+
+  it("F13: cancelling the task input does not open the preview", async () => {
+    state.inputBoxResponse = undefined;
+    await state.registered.get("offlineCodeContext.generateTaskContext")!();
+    expect(previewSetPayload).not.toHaveBeenCalled();
+  });
+
+  it("F13: cancelling the selection quick pick does not open the preview", async () => {
+    state.activeEditorUri = path.join(root, "src", "app", "api.ts");
+    state.quickPickResponse = undefined;
+    await state.registered.get("offlineCodeContext.generateSelectionContext")!();
+    expect(previewSetPayload).not.toHaveBeenCalled();
   });
 });

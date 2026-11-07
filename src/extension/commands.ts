@@ -327,7 +327,9 @@ export function registerCommands(
         placeHolder: "e.g. Add rate limiting to the login endpoint.",
       });
       if (task === undefined || task.trim().length === 0) return;
-      await buildAndStore("task", { taskText: task }, "task context");
+      const result = await buildAndStore("task", { taskText: task }, "task context");
+      // F13: all Generate commands follow one preview policy (docs/COMMANDS.md).
+      if (result) await openPreview("task", result);
     }),
 
     vscode.commands.registerCommand("offlineCodeContext.generateSelectionContext", async () => {
@@ -344,11 +346,13 @@ export function registerCommands(
         { placeHolder: "Selection context scope" },
       );
       if (!expand) return;
-      await buildAndStore(
+      const result = await buildAndStore(
         "selection",
         { selectedPaths: paths, expandSelection: expand.value },
         "selection context",
       );
+      // F13: all Generate commands follow one preview policy (docs/COMMANDS.md).
+      if (result) await openPreview("selection", result);
     }),
 
     vscode.commands.registerCommand("offlineCodeContext.previewContext", async () => {
