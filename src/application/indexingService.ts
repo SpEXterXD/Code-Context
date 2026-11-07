@@ -147,6 +147,13 @@ export class IndexingService {
     progress?: (p: IndexProgress) => void,
   ): Promise<IndexRunResult> {
     return this.enqueue(() => {
+      // F04: notify derived indexes of every removed path BEFORE clearing, so
+      // the retriever's inverted/symbol indexes drop stale postings and
+      // document frequencies reset; rebuild then emits only fresh upserts.
+      this.fireEntriesChanged({
+        upserted: [],
+        removed: [...this.entries.keys()].sort(),
+      });
       this.store.clear();
       this.entries.clear();
       this.graph.clear();
@@ -215,6 +222,13 @@ export class IndexingService {
 
   async clearIndex(): Promise<void> {
     return this.enqueue(async () => {
+      // F04: derived retrieval indexes must reset with the authoritative
+      // state — removals are emitted before clearing so the retriever drops
+      // stale postings/symbol entries and IDF agrees with a fresh app.
+      this.fireEntriesChanged({
+        upserted: [],
+        removed: [...this.entries.keys()].sort(),
+      });
       this.store.clear();
       this.entries.clear();
       this.graph.clear();

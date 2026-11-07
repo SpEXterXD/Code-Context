@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 
+import * as fs from "node:fs";
+
 import * as path from "node:path";
 
 import { OccApplication } from "./contextService";
@@ -135,5 +137,72 @@ describe("OccApplication context scopes (right-click entry points)", () => {
     const scoped = app.buildContext("project", { scope: { kind: "folder", relPath: "" } });
     const unscoped = app.buildContext("project", {});
     expect(scoped.payload).toBe(unscoped.payload);
+  });
+
+  describe("F04: clear/rebuild reset derived retrieval indexes", () => {
+    let root: string;
+    let app: OccApplication;
+
+    afterEach(() => {
+      if (root) removeRepo(root);
+    });
+
+    function rankedPaths(app2: OccApplication, query: string): string[] {
+      try {
+        return (app2.buildContext("task", { taskText: query }).retrieval?.ranked ?? []).map(
+          (r) => r.path,
+        );
+      } catch (e) {
+        // after clearIndex the empty index throws NOT_INDEXED: no old results.
+        if ((e as { code?: string }).code === "NOT_INDEXED") return [];
+        throw e;
+      }
+    }
+
+    it("rebuild after deleting a file drops it from search results", async () => {
+      root = makeTempDir();
+      writeRepo(root, {
+        "src/alpha.ts":
+          "/** Alpha module with distinctive vocabulary. */\nexport const alpha = 1;\n",
+      });
+      app = new OccApplication(root, path.join(root, ".occ-store"), undefined as never);
+      app.initialize();
+      await app.indexing.indexWorkspace(CancellationSource.never());
+      expect(rankedPaths(app, "alpha")).toContain("src/alpha.ts");
+      fs.rmSync(path.join(root, "src/alpha.ts"));
+      await app.indexing.rebuild(CancellationSource.never());
+      expect(rankedPaths(app, "alpha")).not.toContain("src/alpha.ts");
+    });
+
+    it("clearIndex drops stale search results; reindex agrees with a fresh app", async () => {
+      root = makeTempDir();
+      writeRepo(root, {
+        "src/alpha.ts":
+          "/** Alpha module with distinctive vocabulary. */\nexport const alpha = 1;\n",
+        "src/beta.ts":
+          "/** Beta module with different words entirely. */\nexport const beta = 2;\n",
+      });
+      app = new OccApplication(root, path.join(root, ".occ-store"), undefined as never);
+      app.initialize();
+      await app.indexing.indexWorkspace(CancellationSource.never());
+      expect(rankedPaths(app, "alpha")).toContain("src/alpha.ts");
+      await app.indexing.clearIndex();
+      expect(rankedPaths(app, "alpha")).toHaveLength(0);
+      // reindex after clear agrees with a fresh application (scores/IDF reset)
+      await app.indexing.rebuild(CancellationSource.never());
+      const fresh = new OccApplication(
+        root,
+        path.join(root, ".occ-store-fresh"),
+        undefined as never,
+      );
+      fresh.initialize();
+      await fresh.indexing.indexWorkspace(CancellationSource.never());
+      expect(rankedPaths(app, "alpha")).toEqual(rankedPaths(fresh, "alpha"));
+      const scored = app.buildContext("task", { taskText: "alpha" }).retrieval?.ranked ?? [];
+      const freshScored = fresh.buildContext("task", { taskText: "alpha" }).retrieval?.ranked ?? [];
+      expect(scored.map((r) => r.path + ":" + r.score.toFixed(4))).toEqual(
+        freshScored.map((r) => r.path + ":" + r.score.toFixed(4)),
+      );
+    });
   });
 });

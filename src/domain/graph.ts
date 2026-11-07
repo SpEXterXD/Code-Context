@@ -77,9 +77,63 @@ export class RelationshipGraph {
     return this.fileEntries.get(filePath)?.symbols.find((s) => s.id === symbolId);
   }
 
-  /** Replaces (or adds) the stored entry and re-derives its edges atomically. */
+  /**
+   * Replaces the stored entry. F03: only edges OWNED by the previous entry
+   * (outgoing from its file node and its symbol nodes) are removed —
+   * incoming edges owned by other files (imports, dependents, calls
+   * targeting this file's symbols) survive. Symbol-level targets that
+   * disappeared are reconciled: retargeted to a symbol at the same position
+   * (kind + start line) when one exists, dropped otherwise — no dangling
+   * resolved targets.
+   */
   upsertEntry(entry: FileEntry): void {
-    this.removeFile(entry.meta.path);
+    const existing = this.fileEntries.get(entry.meta.path);
+    const fileNode = `file:${entry.meta.path}`;
+    if (existing) {
+      // 1. Remove edges owned by the old entry (its outgoing edges).
+      for (const edge of [...(this.outgoing.get(fileNode) ?? [])]) {
+        this.removeFromList(this.incoming, edge.target, edge);
+      }
+      this.outgoing.delete(fileNode);
+      for (const sym of existing.symbols) {
+        const symNode = `symbol:${sym.id}`;
+        for (const edge of [...(this.outgoing.get(symNode) ?? [])]) {
+          this.removeFromList(this.incoming, edge.target, edge);
+        }
+        this.outgoing.delete(symNode);
+      }
+      // 2. Reconcile incoming symbol-level edges owned by OTHER files whose
+      // target ids disappeared. A file:file import edge owned by another
+      // file survives untouched.
+      const nextIds = new Set(entry.symbols.map((s) => s.id));
+      const byPosition = new Map(
+        entry.symbols.map((s) => [`${s.kind}:${s.startLine}`, s.id] as const),
+      );
+      for (const oldSym of existing.symbols) {
+        if (nextIds.has(oldSym.id)) continue;
+        const deadNode = `symbol:${oldSym.id}`;
+        for (const edge of [...(this.incoming.get(deadNode) ?? [])]) {
+          const replacement = byPosition.get(`${oldSym.kind}:${oldSym.startLine}`);
+          this.removeFromList(this.outgoing, edge.source, edge);
+          if (replacement) {
+            const retargeted = { ...edge, target: `symbol:${replacement}` };
+            const out = this.outgoing.get(edge.source) ?? [];
+            if (!out.some((e) => e.target === retargeted.target && e.kind === retargeted.kind)) {
+              out.push(retargeted);
+              this.outgoing.set(edge.source, out);
+            }
+            const inc = this.incoming.get(retargeted.target) ?? [];
+            if (!inc.some((e) => e.source === retargeted.source && e.kind === retargeted.kind)) {
+              inc.push(retargeted);
+              this.incoming.set(retargeted.target, inc);
+            }
+          }
+          // no replacement: the edge is dropped on both sides above
+        }
+        this.incoming.delete(deadNode);
+        this.outgoing.delete(deadNode);
+      }
+    }
     this.fileEntries.set(entry.meta.path, entry);
     this.indexEntry(entry);
   }
@@ -109,6 +163,28 @@ export class RelationshipGraph {
     this.outgoing.delete(fileNode);
     this.incoming.delete(fileNode);
     this.fileEntries.delete(filePath);
+  }
+
+  /**
+   * F03 restart reconciliation: drops edges targeting symbol nodes whose
+   * owning entry no longer contains that symbol id (a rename/move between
+   * indexing sessions). Called after loading persisted state so a rebuilt
+   * graph agrees with the live incremental state — no dangling resolved
+   * targets.
+   */
+  pruneDanglingSymbolTargets(): void {
+    for (const [node, edges] of [...this.incoming.entries()]) {
+      if (!node.startsWith("symbol:")) continue;
+      const filePath = node.slice("symbol:".length, node.indexOf("#"));
+      const owner = this.fileEntries.get(filePath);
+      const symbolId = node.slice("symbol:".length);
+      if (owner?.symbols.some((s) => s.id === symbolId)) continue;
+      for (const edge of [...edges]) {
+        this.removeFromList(this.outgoing, edge.source, edge);
+      }
+      this.incoming.delete(node);
+      this.outgoing.delete(node);
+    }
   }
 
   clear(): void {

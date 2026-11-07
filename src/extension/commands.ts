@@ -413,6 +413,7 @@ export function registerCommands(
       );
       if (confirm !== "Delete") return;
       await app.indexing.clearIndex();
+      last = null; // F04: a cleared index must not leave a stale generated payload
       void vscode.window.showInformationMessage("OCC: local index cleared.");
     }),
 
