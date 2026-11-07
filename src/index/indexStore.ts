@@ -9,6 +9,7 @@ import { logger } from "../shared/logging";
 import {
   emptyManifest,
   entryRelativePath,
+  isValidStoredFileEntry,
   serializeManifest,
   STORE_SCHEMA_VERSION,
   type IndexManifest,
@@ -80,8 +81,12 @@ export class JsonIndexStore implements IndexStore {
         for (const file of listSortedFiles(shardDir)) {
           const full = path.join(shardDir, file);
           try {
-            const entry = JSON.parse(fs.readFileSync(full, "utf8")) as FileEntry;
-            if (!entry?.meta?.path) throw new OccError("STORE_CORRUPT", "entry missing meta.path");
+            const entry = JSON.parse(fs.readFileSync(full, "utf8")) as unknown;
+            // FU5: fail-closed structural validation — invalid entries are
+            // dropped as corrupt and the file re-indexes on the next run.
+            if (!isValidStoredFileEntry(entry)) {
+              throw new OccError("STORE_CORRUPT", "entry failed structural validation");
+            }
             entries.set(entry.meta.path, entry);
           } catch (e) {
             // Corrupt entry: drop it and record. The index stays valid; the

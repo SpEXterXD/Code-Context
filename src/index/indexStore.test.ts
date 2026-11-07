@@ -84,6 +84,71 @@ describe("JsonIndexStore", () => {
     expect(entries.has("a.ts")).toBe(false);
   });
 
+  // FU5: the load path only checked meta.path presence — structurally invalid
+  // entries (bogus parseStatus, non-array collections, traversal/absolute
+  // paths) loaded unchecked into retrieval and context building.
+  describe("FU5: structural validation of loaded entries", () => {
+    /** Writes a syntactically valid JSON entry that violates the schema. */
+    function tamper(
+      rootDir: string,
+      rel: string,
+      mutate: (entry: Record<string, unknown>) => void,
+    ): void {
+      const file = path.join(rootDir, entryRelativePath(rel));
+      const entry = JSON.parse(fs.readFileSync(file, "utf8")) as Record<string, unknown>;
+      mutate(entry);
+      fs.writeFileSync(file, JSON.stringify(entry));
+    }
+
+    function loadPaths(rootDir: string): string[] {
+      return [...new JsonIndexStore(rootDir, "fp").load().entries.keys()].sort();
+    }
+
+    it("drops entries with an unknown parseStatus", () => {
+      root = makeTempDir();
+      const store = new JsonIndexStore(root, "fp");
+      store.upsertEntries([fakeEntry("a.ts"), fakeEntry("b.ts")]);
+      tamper(root, "a.ts", (e) => {
+        (e.meta as Record<string, unknown>).parseStatus = "bogus";
+      });
+      expect(loadPaths(root)).toEqual(["b.ts"]);
+    });
+
+    it("drops entries with non-array collections", () => {
+      root = makeTempDir();
+      const store = new JsonIndexStore(root, "fp");
+      store.upsertEntries([fakeEntry("a.ts"), fakeEntry("b.ts")]);
+      tamper(root, "b.ts", (e) => {
+        e.symbols = "not-an-array";
+      });
+      expect(loadPaths(root)).toEqual(["a.ts"]);
+    });
+
+    it("drops entries with traversal or absolute paths", () => {
+      root = makeTempDir();
+      const store = new JsonIndexStore(root, "fp");
+      store.upsertEntries([fakeEntry("a.ts"), fakeEntry("b.ts")]);
+      tamper(root, "a.ts", (e) => {
+        (e.meta as Record<string, unknown>).path = "../outside.ts";
+      });
+      tamper(root, "b.ts", (e) => {
+        (e.meta as Record<string, unknown>).path = "C:\\evil\\b.ts";
+      });
+      expect(loadPaths(root)).toEqual([]);
+    });
+
+    it("keeps valid entries with empty collections (FAILED-parse shape)", () => {
+      root = makeTempDir();
+      const store = new JsonIndexStore(root, "fp");
+      const failed = {
+        ...fakeEntry("x.ts"),
+        meta: { ...fakeEntry("x.ts").meta, parseStatus: "FAILED", parseError: "boom" },
+      };
+      store.upsertEntries([failed]);
+      expect(loadPaths(root)).toEqual(["x.ts"]);
+    });
+  });
+
   it("removes entries on removePaths", () => {
     root = makeTempDir();
     const store = new JsonIndexStore(root, "fp");
