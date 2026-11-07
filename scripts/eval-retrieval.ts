@@ -25,6 +25,7 @@
  * Usage: npm run eval:retrieval [-- [--repos id1,id2] [--split tuning]]
  */
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -328,6 +329,8 @@ async function run(): Promise<void> {
         : RESULTS_JSON;
   const outMd =
     split === "tuning" ? TUNING_RESULTS_MD : split === "holdout" ? HOLDOUT_RESULTS_MD : RESULTS_MD;
+  // Defined early: the holdout guard needs it before dataset loading.
+  const checkpointFile = path.join(ROOT, ".eval-cache", `results-${split}.records.jsonl`);
   const repos = loadReposFile();
   const filter = argReposFilter();
   let dataset: DatasetFile;
@@ -342,13 +345,21 @@ async function run(): Promise<void> {
       /* fresh */
     }
     if (runs >= 1) {
-      console.error("HOLDOUT ALREADY RUN — refusing a second run (see results-holdout.json).");
-      process.exit(1);
+      // F11: an interrupted holdout can RESUME through its checkpoint; only
+      // a COMPLETED holdout blocks a second experiment.
+      const cpManifest = checkpointFile.replace(".records.jsonl", ".manifest.json");
+      if (!fs.existsSync(cpManifest)) {
+        console.error(
+          "HOLDOUT ALREADY COMPLETED — refusing a second run (see results-holdout.json).",
+        );
+        process.exit(1);
+      }
+      console.log("HOLDOUT: resuming interrupted run (checkpoint identity will be verified).");
     }
     fs.mkdirSync(path.dirname(guard), { recursive: true });
     fs.writeFileSync(
       guard,
-      `${JSON.stringify({ count: runs + 1, at: new Date().toISOString() })}\n`,
+      `${JSON.stringify({ count: runs + 1, at: new Date().toISOString(), completed: false })}\n`,
     );
     console.log(
       "======================================================================\n" +
@@ -437,13 +448,65 @@ async function run(): Promise<void> {
     skipped?: { task: string; error: string };
     perTaskM3?: (typeof perTaskM3)[number];
   }
-  const checkpointFile = path.join(ROOT, ".eval-cache", `results-${split}.records.jsonl`);
+  // F11: run identity binds the checkpoint to this experiment — dataset,
+  // selected tasks, ablations, seed, and commit. A mismatch refuses resume.
+  const runIdentity = createHash("sha256")
+    .update(
+      JSON.stringify({
+        split,
+        datasetHash: dataset.datasetHash,
+        taskIds: tasks.map((t) => t.id),
+        ablations,
+        seed: SEED,
+        occCommit: occHeadCommit(),
+      }),
+    )
+    .digest("hex")
+    .slice(0, 16);
+  const manifestFile = checkpointFile.replace(".records.jsonl", ".manifest.json");
   const doneTasks = new Set<string>();
   const doneM3 = new Map<string, (typeof perTaskM3)[number]>();
+  if (fs.existsSync(manifestFile) || fs.existsSync(checkpointFile)) {
+    if (fs.existsSync(manifestFile)) {
+      const prev = JSON.parse(fs.readFileSync(manifestFile, "utf8")) as { identity?: string };
+      if (prev.identity !== runIdentity) {
+        console.error(
+          `F11: checkpoint identity mismatch (was ${prev.identity}, now ${runIdentity}). ` +
+            `Delete ${checkpointFile} to start a fresh run.`,
+        );
+        process.exit(1);
+      }
+    } else {
+      console.error(
+        `F11: legacy checkpoint without identity manifest at ${checkpointFile}. ` +
+          `Delete it to start a fresh identified run.`,
+      );
+      process.exit(1);
+    }
+  }
+  fs.mkdirSync(path.dirname(manifestFile), { recursive: true });
+  fs.writeFileSync(
+    manifestFile,
+    `${JSON.stringify({ identity: runIdentity, split, occCommit: occHeadCommit() })}\n`,
+  );
   if (fs.existsSync(checkpointFile)) {
-    for (const line of fs.readFileSync(checkpointFile, "utf8").split(/\r?\n/)) {
+    const rawLines = fs.readFileSync(checkpointFile, "utf8").split(/\r?\n/);
+    const lastContentIdx = rawLines.reduce((acc, l, i) => (l.trim() ? i : acc), -1);
+    for (let li = 0; li < rawLines.length; li++) {
+      const line = rawLines[li]!;
       if (line.trim().length === 0) continue;
-      const c = JSON.parse(line) as TaskCheckpoint;
+      let c: TaskCheckpoint;
+      try {
+        c = JSON.parse(line) as TaskCheckpoint;
+      } catch {
+        // Only a TRAILING torn line is recoverable; interior corruption
+        // means the file is untrustworthy.
+        if (li === lastContentIdx) {
+          console.warn("resuming: ignoring truncated final checkpoint line (task re-runs)");
+          break;
+        }
+        throw new Error(`corrupt checkpoint line ${li + 1} in ${checkpointFile}`);
+      }
       doneTasks.add(c.task);
       if (c.skipped) skippedTasks.push(c.skipped);
       if (c.ranks) for (const s of SYSTEMS) ranks.get(s)!.set(c.task, c.ranks[s] ?? []);
@@ -458,7 +521,7 @@ async function run(): Promise<void> {
         timingMs.baselinesMs += c.timing.baselinesMs;
       }
     }
-    console.log(`resuming: ${doneTasks.size} tasks already checkpointed`);
+    console.log(`resuming: ${doneTasks.size} tasks already checkpointed (identity ${runIdentity})`);
     for (const entry of doneM3.values()) perTaskM3.push(entry);
   }
   const checkpoint = (c: TaskCheckpoint): void => {
