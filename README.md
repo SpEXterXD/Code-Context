@@ -192,7 +192,7 @@ Complete reference for all 20 settings: [docs/CONFIGURATION.md](docs/CONFIGURATI
 - [Evaluation Methodology](docs/EVALUATION.md): Commit-mined benchmarks, metrics, and results.
 - [Developer Guide](docs/DEVELOPMENT.md): Setup, scripts, quality gates, and contribution checklists.
 - [Documentation Style Guide](docs/STYLE_GUIDE.md): Writing rules, vocabulary constraints, and style checks.
-- [Testing Guide](docs/TESTING.md): Suite matrix (27 suites, 292 tests) and property-based testing.
+- [Testing Guide](docs/TESTING.md): Suite matrix (27 suites, 300 tests) and property-based testing.
 - [Troubleshooting](docs/TROUBLESHOOTING.md): Error codes and diagnostic workflows.
 - [Limitations](docs/LIMITATIONS.md): Technical boundaries and platform constraints.
 - [Roadmap](docs/ROADMAP.md): Planned improvements and experimental features.

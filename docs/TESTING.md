@@ -4,7 +4,7 @@ Run everything with `npm test` (Vitest, no VS Code required). Run one suite
 with `npx vitest run src/path/to/suite.test.ts`. `npm run ci` adds
 typecheck, lint, format check, compile, and packaging.
 
-Current counts: **27 suites, 292 tests**, all passing. Counts in this file
+Current counts: **27 suites, 300 tests**, all passing. Counts in this file
 were captured from a full run; update them together with the suite table
 when adding tests. `scripts/check-docs-sync.ts` verifies these numbers
 against a real `vitest run` and fails CI on drift.
