@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 
+import { relativeToRoot } from "./workspacePaths";
+
 /**
  * Debounced file watcher bridging VS Code file events to incremental
  * indexing (Phase 6). Guarantees:
@@ -62,9 +64,8 @@ export class WatcherService {
   private relative(uri: vscode.Uri): string | null {
     const root = vscode.workspace.workspaceFolders?.[0];
     if (!root) return null;
-    const prefix = root.uri.fsPath;
-    if (!uri.fsPath.startsWith(prefix)) return null;
-    return uri.fsPath.slice(prefix.length).replace(/\\/g, "/").replace(/^\//, "");
+    // FU7: case-tolerant, traversal-safe relative resolution.
+    return relativeToRoot(root.uri.fsPath, uri.fsPath);
   }
 
   dispose(): void {

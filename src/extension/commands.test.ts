@@ -34,6 +34,11 @@ function fileUri(p: string): { scheme: string; path: string; fsPath: string } {
   return { scheme: "file", path: p.replace(/\\/g, "/"), fsPath: p };
 }
 
+/** Flips each letter's case — simulates Windows drive-letter/path casing mismatch. */
+function toDifferentCase(p: string): string {
+  return p.replace(/[a-zA-Z]/g, (c) => (c === c.toLowerCase() ? c.toUpperCase() : c.toLowerCase()));
+}
+
 vi.mock("vscode", () => {
   class EventEmitter {
     event = (_listener: unknown) => ({ dispose() {} });
@@ -326,6 +331,17 @@ describe("context-menu commands (mocked vscode, real pipeline)", () => {
   // from the REDACTED content only (the credential value is already replaced
   // by the placeholder there) — raw secret material never reaches the output
   // channel, and blocked files (no content to quote) get no excerpt.
+  // FU7: a drive-letter/path casing mismatch between the editor URI and the
+  // workspace folder broke the raw slice — the copy command reported
+  // "no active file" instead of compiling the file context.
+  it("FU7: copyFileContextToClipboard tolerates root casing mismatches", async () => {
+    state.workspaceRoot = toDifferentCase(root);
+    state.activeEditorUri = path.join(toDifferentCase(root), "src", "app", "api.ts");
+    await state.registered.get("offlineCodeContext.copyFileContextToClipboard")!();
+    expect(state.clipboard).toContain("### FILE: src/app/api.ts");
+    expect(state.warnings.some((m) => m.includes("no active file"))).toBe(false);
+  });
+
   it("FU3: securityScan groups findings per file with redacted excerpts", async () => {
     fs.writeFileSync(
       path.join(root, "src", "creds.ts"),

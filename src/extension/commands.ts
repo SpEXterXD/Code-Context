@@ -8,6 +8,7 @@ import { ContextPreviewProvider } from "./previewProvider";
 import { OccError } from "../shared/errors";
 import { logger } from "../shared/logging";
 import { compareStrings } from "../shared/text";
+import { relativeToRoot } from "./workspacePaths";
 
 /**
  * Registers all commands. Keep this layer thin: it adapts VS Code concepts
@@ -102,11 +103,9 @@ export function registerCommands(
     if (!editor) return undefined;
     const root = vscode.workspace.workspaceFolders?.[0];
     if (!root) return undefined;
-    const rel = editor.document.uri.fsPath
-      .slice(root.uri.fsPath.length)
-      .replace(/\\/g, "/")
-      .replace(/^\//, "");
-    return rel.length > 0 ? rel : undefined;
+    // FU7: case-tolerant, traversal-safe relative resolution (raw slice broke
+    // on Windows drive-letter/path casing mismatches).
+    return relativeToRoot(root.uri.fsPath, editor.document.uri.fsPath) ?? undefined;
   };
 
   /** Workspace-relative POSIX path for a right-clicked/selected resource, or null when outside the workspace. */
@@ -114,10 +113,8 @@ export function registerCommands(
     if (!uri) return null;
     const root = vscode.workspace.workspaceFolders?.[0];
     if (!root) return null;
-    const prefix = root.uri.fsPath;
-    if (!uri.fsPath.startsWith(prefix)) return null;
-    const rel = uri.fsPath.slice(prefix.length).replace(/\\/g, "/").replace(/^\//, "");
-    return rel.length > 0 ? rel : null;
+    // FU7: see activeRelPath.
+    return relativeToRoot(root.uri.fsPath, uri.fsPath);
   };
 
   /**
