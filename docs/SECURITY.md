@@ -42,7 +42,7 @@ For generic assignments (such as `password = "..."`, `secret = "..."`, or `.env`
 
 The `offlineCodeContext.secretPolicy` setting governs how detected secrets are handled:
 
-- `block` (default): The file's source code is entirely excluded from the `## SOURCE` section. The file remains visible in the `## WHY THESE FILES WERE SELECTED` section with the note `excluded by security policy (block)`, ensuring visibility without data leakage.
+- `block` (default): The file's source code is entirely excluded from the `## SOURCE` section. The file remains visible in the `## WHY THESE FILES WERE SELECTED` section with the tier label `excluded by security policy` and the note `source withheld by security policy` (diff seeds read `diff withheld by security policy`), ensuring visibility without data leakage.
 - `warn`: Source code is included in the package. If `offlineCodeContext.redactSecrets` is true (default), every matching credential string is replaced with a deterministic placeholder: `[REDACTED:<type>:<hash8>]`. The replacement is irreversible. If `redactSecrets` is false, source text is emitted verbatim and findings are reported.
 - `allow`: Findings are ignored and source code is included unredacted. This mode is strongly discouraged.
 
