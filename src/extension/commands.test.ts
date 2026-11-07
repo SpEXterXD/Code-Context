@@ -24,6 +24,9 @@ const state = vi.hoisted(() => ({
   inputBoxResponse: undefined as string | undefined,
   /** F13: response for the next showQuickPick call (undefined = cancelled). */
   quickPickResponse: undefined as unknown,
+  /** FU3: output-channel lines recorded by the securityScan mock. */
+  channelLines: [] as string[],
+  configOverrides: {} as Record<string, unknown>,
   registered: new Map<string, (...args: unknown[]) => unknown>(),
 }));
 
@@ -57,7 +60,10 @@ vi.mock("vscode", () => {
       executeCommand: async () => undefined,
     },
     window: {
-      createOutputChannel: () => ({ appendLine() {}, show() {} }),
+      createOutputChannel: () => ({
+        appendLine: (line: string) => state.channelLines.push(line),
+        show() {},
+      }),
       withProgress: (_options: unknown, callback: (p: unknown, t: unknown) => unknown) =>
         callback({}, { isCancellationRequested: false }),
       showInformationMessage: (message: string) => {
@@ -88,12 +94,14 @@ vi.mock("vscode", () => {
       },
       getConfiguration: () => ({
         get: (key: string) =>
-          (
-            ({ maxGraphDepth: 3, currentChangesMaxTokens: 1500, changeSeeds: false }) as Record<
-              string,
-              unknown
-            >
-          )[key],
+          key in state.configOverrides
+            ? state.configOverrides[key]
+            : (
+                { maxGraphDepth: 3, currentChangesMaxTokens: 1500, changeSeeds: false } as Record<
+                  string,
+                  unknown
+                >
+              )[key],
       }),
     },
     env: {
@@ -108,6 +116,7 @@ vi.mock("vscode", () => {
 });
 
 const { OccApplication } = await import("../application/contextService");
+const { DEFAULT_CONFIG } = await import("../application/contextService");
 const { registerCommands } = await import("./commands");
 const { ContextPreviewProvider } = await import("./previewProvider");
 const { CancellationSource } = await import("../shared/cancellation");
@@ -144,6 +153,8 @@ beforeEach(async () => {
   state.activeEditorUri = null;
   state.inputBoxResponse = undefined;
   state.quickPickResponse = undefined;
+  state.channelLines = [];
+  state.configOverrides = {};
   state.registered.clear();
 
   root = fs.mkdtempSync(path.join(os.tmpdir(), "occ-cmds-"));
@@ -307,5 +318,33 @@ describe("context-menu commands (mocked vscode, real pipeline)", () => {
     state.quickPickResponse = undefined;
     await state.registered.get("offlineCodeContext.generateSelectionContext")!();
     expect(previewSetPayload).not.toHaveBeenCalled();
+  });
+
+  // FU3: the Security Scan output previously listed one flat line per finding
+  // with no per-file grouping and no source excerpt, making flagged lines hard
+  // to locate. Findings are now grouped per file, each with an excerpt quoted
+  // from the REDACTED content only (the credential value is already replaced
+  // by the placeholder there) — raw secret material never reaches the output
+  // channel, and blocked files (no content to quote) get no excerpt.
+  it("FU3: securityScan groups findings per file with redacted excerpts", async () => {
+    fs.writeFileSync(
+      path.join(root, "src", "creds.ts"),
+      'export const cfg = { apiKey: "AKIAIOSFODNN7EXAMPLE" };\n',
+    );
+    state.configOverrides = { secretPolicy: "warn", redactSecrets: true };
+    await app.indexing.indexSingleFile("src/creds.ts", CancellationSource.never());
+    // WARN + redact so the finding lands in safeFindings with its source
+    // available in redactedContent (values already placeholder-replaced).
+    app.updateConfig({ ...DEFAULT_CONFIG, secretPolicy: "warn", redactSecrets: true });
+    state.inputBoxResponse = "update the apiKey used by creds";
+    await state.registered.get("offlineCodeContext.generateTaskContext")!();
+    await state.registered.get("offlineCodeContext.securityScan")!();
+    const perFile = state.channelLines.filter((l) => l.includes("src/creds.ts"));
+    expect(perFile.length).toBeGreaterThan(0);
+    expect(state.channelLines.some((l) => /\(\d+ finding\(s\)\)/.test(l))).toBe(true);
+    const excerpt = state.channelLines.find((l) => l.trim().startsWith(">"));
+    expect(excerpt).toBeDefined();
+    expect(excerpt).toContain("[REDACTED:");
+    expect(excerpt).not.toContain("AKIAIOSFODNN7EXAMPLE");
   });
 });

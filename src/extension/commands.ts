@@ -7,6 +7,7 @@ import { collectChangeSeeds, seedFromClipboard } from "./seedProvider";
 import { ContextPreviewProvider } from "./previewProvider";
 import { OccError } from "../shared/errors";
 import { logger } from "../shared/logging";
+import { compareStrings } from "../shared/text";
 
 /**
  * Registers all commands. Keep this layer thin: it adapts VS Code concepts
@@ -399,10 +400,32 @@ export function registerCommands(
         return;
       }
       channel.appendLine(`Security findings in current context package (${findings.length}):`);
+      // FU3: findings are grouped per file and each carries a source excerpt
+      // so the flagged line is locatable. Excerpts come ONLY from
+      // redactedContent — the credential value is already replaced by the
+      // `[REDACTED:…]` placeholder there — so the output channel never
+      // echoes raw secret material. Blocked files have no excerpt (their
+      // source is withheld by policy).
+      const byFile = new Map<string, typeof findings>();
       for (const f of findings) {
-        channel.appendLine(
-          `  [${f.action}] ${f.kind} at ${f.filePath}:${f.line} - ${f.description}`,
-        );
+        const list = byFile.get(f.filePath) ?? [];
+        list.push(f);
+        byFile.set(f.filePath, list);
+      }
+      for (const [filePath, list] of [...byFile.entries()].sort((a, b) =>
+        compareStrings(a[0], b[0]),
+      )) {
+        channel.appendLine(`  ${filePath} (${list.length} finding(s)):`);
+        for (const f of list) {
+          channel.appendLine(`    [${f.action}] ${f.kind} at line ${f.line} - ${f.description}`);
+          const redacted = last.result.security.redactedContent.get(filePath);
+          if (redacted) {
+            const excerpt = redacted.split(/\r?\n/)[f.line - 1];
+            if (excerpt !== undefined && excerpt.trim().length > 0) {
+              channel.appendLine(`      > ${excerpt.trim().slice(0, 120)}`);
+            }
+          }
+        }
       }
       channel.show();
       void vscode.window.showWarningMessage(

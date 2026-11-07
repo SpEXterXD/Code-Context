@@ -94,8 +94,8 @@ Each candidate file receives an explicit selection record:
 If a file was considered during retrieval but its source body was withheld due to security policy or budget exhaustion, `[source not included]` is appended to the heading:
 ```
 ### src/config/secrets.ts [source not included]
-- Tier: direct dependency (score 4.10)
-- Note: excluded by security policy (block)
+- Tier: excluded by security policy (score 4.10)
+- Note: source withheld by security policy
 ```
 
 ### 7. Repository source (`## SOURCE`)
