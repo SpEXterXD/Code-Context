@@ -73,4 +73,18 @@ describe("decoy pickers", () => {
     const again = randomDecoys(snapshot, ["src/a.ts"], ["src/a.ts", "src/b.ts"], 2, "t:1");
     expect(again).toEqual(decoys); // deterministic
   });
+
+  // Fix: the draw target was re-evaluated per iteration against the SHRINKING
+  // pool, so requesting k decoys from a pool of k+1 returned k-1 (and worse
+  // for tighter ratios).
+  it("F8: random decoys return the full requested count from a tight pool", () => {
+    const tight = ["src/a.ts", "src/b.ts", "src/c.ts", "src/d.ts", "src/e.ts"];
+    const decoys = randomDecoys(tight, [], [], 4, "t:2"); // 5 candidates, want 4
+    expect(decoys).toHaveLength(4); // was 3 before the fix (shrunken target)
+    expect(decoys.every((d) => tight.includes(d))).toBe(true);
+  });
+  it("F8: random decoys never exceed the available pool", () => {
+    const decoys = randomDecoys(snapshot, [], [], 10, "t:3");
+    expect(decoys).toHaveLength(snapshot.length);
+  });
 });

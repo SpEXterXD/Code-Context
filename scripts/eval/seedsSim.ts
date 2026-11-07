@@ -90,7 +90,11 @@ export function randomDecoys(
   const rng = mulberry32(hashString(taskId) ^ 0x7de1);
   const out: string[] = [];
   const pool = [...candidates];
-  while (out.length < Math.min(count, pool.length)) {
+  // Fix: target computed ONCE from the initial pool — re-evaluating
+  // min(count, pool.length) per iteration while splicing shrank the target
+  // faster than items were drawn (e.g. 3 of 4 from a 5-file pool).
+  const target = Math.min(count, pool.length);
+  while (out.length < target && pool.length > 0) {
     const idx = Math.floor(rng() * pool.length) % pool.length;
     out.push(pool.splice(idx, 1)[0]!);
   }

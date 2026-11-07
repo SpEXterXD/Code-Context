@@ -44,13 +44,22 @@ describe("recallAtK / allGoldAccAtK / top1Hit", () => {
 describe("taskMetrics / aggregateRuns", () => {
   it("computes the whole family for one task", () => {
     const m = taskMetrics(rank(["g.ts", "a.ts", "b.ts", "c.ts", "d.ts"]), ["g.ts", "b.ts"]);
-    expect(m).toEqual({ top1: 1, recall5: 1, recall10: 1, allGoldAcc10: 1, mrr: 1 });
+    expect(m).toEqual({
+      top1: 1,
+      recall5: 1,
+      recall8: 1,
+      recall10: 1,
+      allGoldAcc10: 1,
+      mrr: 1,
+    });
     const m2 = taskMetrics(rank(["a.ts", "b.ts", "c.ts", "d.ts", "e.ts", "f.ts"]), [
       "g.ts",
       "e.ts",
     ]);
     expect(m2.top1).toBe(0);
     expect(m2.recall5).toBe(0.5);
+    // Recall@8: e.ts at rank 5 is inside the top-8 window.
+    expect(m2.recall8).toBe(0.5);
     expect(m2.recall10).toBe(0.5);
     expect(m2.allGoldAcc10).toBe(0);
     expect(m2.mrr).toBe(0.2);
