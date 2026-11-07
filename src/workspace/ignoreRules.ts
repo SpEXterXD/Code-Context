@@ -38,7 +38,9 @@ export class IgnoreRules {
   private readonly patterns: IgnorePattern[] = [];
 
   constructor(excludeGlobs: string[] = []) {
-    for (const glob of excludeGlobs) this.addPattern(glob, undefined, true);
+    // User-configured exclude globs (settings) honor negation; only
+    // DEFAULT_EXCLUDES added by buildIgnoreRules carry the builtin flag.
+    for (const glob of excludeGlobs) this.addPattern(glob);
   }
 
   /** Adds one gitignore-style pattern scoped to `sourceDir` ("" = root). */

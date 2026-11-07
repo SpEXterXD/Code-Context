@@ -38,7 +38,10 @@ export interface ScanOptions {
 
 /** Builds the effective ignore rule set for a root (defaults + config + .gitignore). */
 export function buildIgnoreRules(rootPath: string, options: ScanOptions): IgnoreRules {
-  const rules = new IgnoreRules([...DEFAULT_EXCLUDES, ...(options.excludePatterns ?? [])]);
+  const rules = new IgnoreRules(options.excludePatterns ?? []);
+  // Built-in security/store excludes carry the builtin flag so repository
+  // negations cannot re-include them (F07 acceptance).
+  for (const glob of DEFAULT_EXCLUDES) rules.addPattern(glob, undefined, true);
   if (options.respectGitignore !== false) {
     try {
       rules.addGitignoreContent(fs.readFileSync(path.join(rootPath, ".gitignore"), "utf8"));
