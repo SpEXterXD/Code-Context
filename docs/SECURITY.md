@@ -88,7 +88,7 @@ Running `npm run eval:fsmonitor-repro` and `npm run eval:seed-hazard-repro` demo
 - `core.fsmonitor`: Raw `git status` executes repository-configured fsmonitor binaries (`MARKER WRITTEN`); `safeGit` neutralizes the hazard (`no marker`, exit code 0).
 - `diff.external`: Fires on raw plain `diff` (raw AND safeGit); the collector's form (`diff --no-ext-diff --no-textconv`) does NOT execute it.
 - `textconv`: Does not fire for a plain working-tree diff fixture; the collector's form additionally passes `--no-textconv`.
-- `clean` and `smudge` filters: EXECUTE during diff operations even through `safeGit` with `--no-ext-diff --no-textconv` — no git flag disables filters. This is the documented residual risk, mitigated by the workspace-trust gate only (git features are never invoked in untrusted workspaces; see ADR-006).
+- `clean` and `smudge` filters: EXECUTE during diff operations even through `safeGit` with `--no-ext-diff --no-textconv`: no git flag disables filters. This is the documented residual risk, mitigated by the workspace-trust gate only (git features are never invoked in untrusted workspaces; see ADR-006).
 
 ## Workspace trust behavior
 

@@ -76,7 +76,7 @@ When `offlineCodeContext.enableGitRecency` is enabled (default `false`), `safeGi
 ### Change-aware seed signals
 
 When `offlineCodeContext.changeSeeds` is enabled (default `false`, experimental), working-tree changes inject additional seed signals (`M4_SEED_WEIGHTS`):
-- `SELECTION`: `0.8` (explicit editor selection — strongest intent signal; consumed from `SeedSet.selection`)
+- `SELECTION`: `0.8` (explicit editor selection, the strongest intent signal; consumed from `SeedSet.selection`)
 - `DIFF_TOUCHED`: `0.6` (tuned by seed simulation in ADR-006)
 - `OPEN_EDITOR`: `0.3` (untuned default)
 - `DIAGNOSTIC`: `0.4` (untuned default)
