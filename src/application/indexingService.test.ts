@@ -544,4 +544,49 @@ describe("IndexingService (integration)", () => {
       expect(storeBytes(root)).toBe(first);
     });
   });
+  describe("F06: direct updates share scan eligibility", () => {
+    const NL = "\n";
+    function smallLimitService(root2: string): IndexingService {
+      return new IndexingService(
+        root2,
+        path.join(root2, ".occ-store"),
+        (p2) => registry.resolve(p2),
+        {
+          maxFileSizeBytes: 100,
+        },
+      );
+    }
+
+    it("skips oversized and binary files the direct path previously indexed", async () => {
+      root = makeTempDir();
+      const service = smallLimitService(root);
+      fs.writeFileSync(
+        path.join(root, "large.ts"),
+        "/** " + "x".repeat(200) + " */" + NL + "export const big = 1;" + NL,
+      );
+      fs.writeFileSync(
+        path.join(root, "binary.dat"),
+        Buffer.from([0x4f, 0x63, 0x74, 0x00, 0x01, 0x02]),
+      );
+      // The direct path previously indexed BOTH despite the shared limits.
+      expect(await service.indexSingleFile("large.ts", CancellationSource.never())).toBe("ignored");
+      expect(await service.indexSingleFile("binary.dat", CancellationSource.never())).toBe(
+        "ignored",
+      );
+      expect(service.getEntries().size).toBe(0);
+    });
+
+    it("outside-root paths are ignored without touching entries", async () => {
+      root = makeTempDir();
+      const service = makeService(root);
+      const outside = path.join(path.dirname(root), "outside.ts");
+      fs.writeFileSync(outside, "export const o = 1;\n");
+      try {
+        expect(await service.indexSingleFile(outside, CancellationSource.never())).toBe("ignored");
+        expect(service.getEntries().size).toBe(0);
+      } finally {
+        fs.rmSync(outside, { force: true });
+      }
+    });
+  });
 });

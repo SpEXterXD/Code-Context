@@ -10,7 +10,7 @@ import {
   type ScanResult,
 } from "../workspace/workspaceScanner";
 import { Sha256FileHasher, type FileHasher } from "../workspace/fileHasher";
-import { detectLanguage, isTestFile } from "../workspace/languageDetection";
+import { detectLanguage, isTestFile, looksBinary } from "../workspace/languageDetection";
 import type { ParsedFile, SourceParser } from "../parser/parser";
 import { BODY_TOKEN_TOP_N, extractBodyTokens, type BodyTokens } from "../parser/bodyTokens";
 import { extractIdentifiers } from "../parser/typescriptParser";
@@ -187,29 +187,73 @@ export class IndexingService {
     cancellation: CancellationSignal,
   ): Promise<"indexed" | "unchanged" | "removed" | "ignored"> {
     return this.enqueue(async () => {
-      const rel = toPosixPath(
-        path.relative(this.rootPath, path.resolve(this.rootPath, relativePath)),
-      );
+      const rel = this.normalizeRelative(relativePath);
+      if (rel === null) return "ignored"; // outside the workspace root
       if (this.isIgnored(rel)) {
         this.removeEntry(rel);
         return "ignored";
       }
-      const absolute = path.join(this.rootPath, rel);
-      let content: string;
-      try {
-        content = fs.readFileSync(absolute, "utf8");
-      } catch {
+      const evaluation = this.evaluateFileEligibility(rel);
+      if (evaluation.state === "removed") {
         this.removeEntry(rel);
         return "removed";
       }
-      const hash = this.hasher.hash(content);
+      if (evaluation.state === "skipped") {
+        this.removeEntry(rel); // previously eligible files become ineligible
+        return "ignored";
+      }
+      const raw = evaluation.content!;
+      const hash = this.hasher.hash(raw);
       const existing = this.entries.get(rel);
       if (existing && existing.meta.contentHash === hash) return "unchanged";
-      const entry = this.analyzeFile(rel, content, cancellation);
+      const entry = this.analyzeFile(rel, raw.toString("utf8"), cancellation);
       if (!entry) return "ignored";
       this.commitEntries([entry]);
+      this.setStatus({ state: "ready", fileCount: this.entries.size });
       return "indexed";
     });
+  }
+
+  /** POSIX-normalizes a watcher/CLI path; null when outside the root. */
+  private normalizeRelative(relativePath: string): string | null {
+    const resolved = path.resolve(this.rootPath, relativePath);
+    const nativeRel = path.relative(this.rootPath, resolved);
+    // F06/follow-up 7: check the RAW relative path BEFORE toPosixPath —
+    // toPosixPath collapses `..` segments, which would silently pull
+    // outside-root paths back inside the root.
+    if (nativeRel.startsWith("..") || path.isAbsolute(nativeRel)) return null;
+    const rel = toPosixPath(nativeRel);
+    if (rel.startsWith("../")) return null; // defensive double-check
+    return rel;
+  }
+
+  /**
+   * F06: shared eligibility/read evaluation for direct and rename paths —
+   * the same size, binary, and readability rules the full scan applies.
+   * Raw bytes are returned so hashing matches the batch path exactly.
+   */
+  private evaluateFileEligibility(rel: string): {
+    state: "ok" | "removed" | "skipped";
+    content?: Buffer;
+  } {
+    const absolute = path.join(this.rootPath, rel);
+    let stat: fs.Stats;
+    try {
+      stat = fs.statSync(absolute);
+    } catch {
+      return { state: "removed" };
+    }
+    if (!stat.isFile()) return { state: "removed" };
+    const maxSize = this.options.maxFileSizeBytes ?? 1024 * 1024;
+    if (stat.size > maxSize) return { state: "skipped" };
+    let raw: Buffer;
+    try {
+      raw = fs.readFileSync(absolute);
+    } catch {
+      return { state: "removed" };
+    }
+    if (looksBinary(raw.toString("latin1"))) return { state: "skipped" };
+    return { state: "ok", content: raw };
   }
 
   /** Removes a file's records (watcher delete / rename source). */
