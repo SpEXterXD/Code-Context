@@ -190,17 +190,23 @@ export class ContextBuilder {
     }
     const seedContentExcluded = new Set<string>();
     if (signalOnly) {
-      for (const h of seedState.hints) seedContentExcluded.add(h.path);
+      const pinSet = new Set(userPins);
+      for (const h of seedState.hints) {
+        if (!pinSet.has(h.path)) seedContentExcluded.add(h.path); // explicit pins override signal-only exclusion
+      }
     }
     const eligibleAll = candidates.filter(
       (c) => !security.blockedFiles.has(c.path) && !seedContentExcluded.has(c.path),
     );
-    // M3b/P1: the top-N retrieval-ranked eligible files take content slots in
-    // rank order first; everything else keeps the tier-then-score order.
-    let eligible = eligibleAll;
+    // F08: reserve explicit user selections BEFORE rank-priority extras —
+    // the top-N reorder must never displace a USER_SELECTED file.
+    const userPinSet = new Set(userPins);
+    const pinnedFirst = eligibleAll.filter((c) => userPinSet.has(c.path));
+    const unpinned = eligibleAll.filter((c) => !userPinSet.has(c.path));
+    let eligible = [...pinnedFirst];
     if (M3B_RANK_PRIORITY.enabled && retrieval.ranked.length > 0) {
       const rankOf = new Map(retrieval.ranked.map((r, i) => [r.path, i + 1] as const));
-      const byRank = eligibleAll
+      const byRank = unpinned
         .filter((c) => {
           const r = rankOf.get(c.path);
           return r !== undefined && r <= M3B_RANK_PRIORITY.topN;
@@ -208,8 +214,12 @@ export class ContextBuilder {
         .sort((a, b) => rankOf.get(a.path)! - rankOf.get(b.path)!);
       if (byRank.length > 0) {
         const prioritized = new Set(byRank.map((c) => c.path));
-        eligible = [...byRank, ...eligibleAll.filter((c) => !prioritized.has(c.path))];
+        eligible = [...eligible, ...byRank, ...unpinned.filter((c) => !prioritized.has(c.path))];
+      } else {
+        eligible = [...eligible, ...unpinned];
       }
+    } else {
+      eligible = [...eligible, ...unpinned];
     }
 
     // Reserve budget for static sections (tree/architecture/why overhead);

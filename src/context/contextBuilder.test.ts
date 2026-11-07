@@ -663,6 +663,42 @@ describe("ContextBuilder", () => {
       expect(result.payload).toContain("CONTEXT_VERSION: 1");
     });
 
+    describe("F08: rank-priority does not displace explicit selections", () => {
+      it("a low-ranked explicit pin gets the available slot over a rank-priority extra", async () => {
+        root = makeTempDir();
+        writeRepo(root, {
+          "package.json": JSON.stringify({ name: "f08", version: "1.0.0" }) + "\n",
+          "src/auth.ts":
+            "/** Auth module the user explicitly selected. */\nexport const auth = 1;\n",
+          "other/auth.ts":
+            "/** High-scoring auth match in another directory. */\nexport const otherAuth = 2;\n",
+        });
+        const app = new OccApplication(root, path.join(root, ".occ-store"), {
+          maxFiles: 1,
+          maxChars: 120000,
+          maxLines: 3000,
+          maxTokens: 30000,
+          maxGraphDepth: 3,
+          maxCodeLinesPerFile: 400,
+          structureDepth: 4,
+          currentChangesMaxTokens: 1500,
+          secretPolicy: "block",
+          redactSecrets: true,
+        });
+        await app.indexing.indexWorkspace(CancellationSource.never());
+        const result = app.buildContext("selection", {
+          activeFile: "src/auth.ts",
+          selectedPaths: ["src/auth.ts"],
+          expandSelection: true,
+        });
+        const source = extractSection(result.payload, "SOURCE");
+        expect(source).toContain("src/auth.ts");
+        expect(result.filesIncluded).toBe(1);
+        const omitted = result.rankedForDisplay.find((w) => w.path === "other/auth.ts");
+        expect(omitted?.included).toBe(false);
+      });
+    });
+
     describe("M4b slot policy (S1 signal-only, ablatable)", () => {
       const wasPolicy = M4_SEED_WEIGHTS.slotPolicy;
       afterEach(() => {
