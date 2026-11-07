@@ -635,6 +635,25 @@ describe("IndexingService (integration)", () => {
     });
   });
 
+  // FU4: aliased imports (`import { util as u }`) recorded only the original
+  // name, while call sites record the LOCAL alias — so findImportedDefinition
+  // never matched and CALL edges through aliases fell back to heuristic
+  // provenance instead of the import's STATIC_EXACT resolution.
+  it("FU4: calls through aliased imports keep STATIC_EXACT provenance", async () => {
+    root = makeTempDir();
+    writeRepo(root, {
+      "src/b.ts": "export function util() { return 2; }\n",
+      "src/a.ts": 'import { util as u } from "./b";\nexport const go = () => u();\n',
+    });
+    const service = makeService(root);
+    await service.indexWorkspace(CancellationSource.never());
+    const rels = service.getEntries().get("src/a.ts")!.internalRelations;
+    const call = rels.find((r) => r.kind === "calls");
+    expect(call).toBeDefined();
+    expect(call!.provenance).toBe("STATIC_EXACT");
+    expect(call!.target).toContain("src/b.ts");
+  });
+
   // FU1: the parse loop ran fully synchronously — no await anywhere — so on
   // large workspaces the extension host was blocked for seconds and progress
   // UI, watcher events and cancellation signals could not fire mid-index.

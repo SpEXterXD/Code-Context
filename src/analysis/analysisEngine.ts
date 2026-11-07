@@ -247,16 +247,21 @@ export class AnalysisEngine {
     name: string,
   ): SymbolDef | undefined {
     for (const imp of parsed.imports) {
-      if (!imp.importedNames.includes(name)) continue;
+      // FU4: the call site names the LOCAL alias; resolve it to the imported
+      // name ("default" for default imports) before the export lookup.
+      const imported = imp.importedNames.includes(name)
+        ? name
+        : (imp.aliasedNames?.find((a) => a.local === name)?.imported ?? undefined);
+      if (!imported) continue;
       const outcome = this.resolver.resolve(imp.sourceText, importerPath);
       if (outcome.status !== "RESOLVED") continue;
       const targetEntry = this.entries.get(outcome.path);
       if (!targetEntry) continue;
-      const target = findExportedSymbol(targetEntry.symbols, name, outcome.path);
+      const target = findExportedSymbol(targetEntry.symbols, imported, outcome.path);
       if (target) return target;
       // Default import name → target's default export.
       const def = targetEntry.symbols.find((s) => s.exportKind === "default");
-      if (imp.importedNames.includes("default") && def) return def;
+      if (imported === "default" && def) return def;
     }
     return undefined;
   }

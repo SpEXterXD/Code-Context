@@ -46,6 +46,9 @@ export class TypeScriptParser implements SourceParser {
         imports.push({
           sourceText: node.moduleSpecifier.text,
           importedNames: extractImportedNames(node.importClause),
+          // FU4: keep local alias → imported name pairings so call-site
+          // aliases resolve to the import's STATIC_EXACT provenance.
+          aliasedNames: extractAliasedNames(node.importClause),
           startLine: lineOf(node, sourceFile),
           isExternal: !node.moduleSpecifier.text.startsWith("."),
         });
@@ -390,6 +393,23 @@ function extractImportedNames(clause: ts.ImportClause | undefined): string[] {
         names.push(el.propertyName?.text ?? el.name.text);
   }
   return names.length ? names : ["*"];
+}
+
+/** FU4: local alias → imported name pairs (default imports included). */
+function extractAliasedNames(
+  clause: ts.ImportClause | undefined,
+): Array<{ local: string; imported: string }> {
+  if (!clause) return [];
+  const pairs: Array<{ local: string; imported: string }> = [];
+  if (clause.name) pairs.push({ local: clause.name.text, imported: "default" });
+  if (clause.namedBindings && !ts.isNamespaceImport(clause.namedBindings)) {
+    for (const el of clause.namedBindings.elements) {
+      if (el.propertyName) {
+        pairs.push({ local: el.name.text, imported: el.propertyName.text });
+      }
+    }
+  }
+  return pairs;
 }
 
 function extractExportClauseNames(clause: ts.ExportDeclaration["exportClause"]): string[] {

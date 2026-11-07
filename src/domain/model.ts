@@ -53,6 +53,13 @@ export interface ImportDecl {
   sourceText: string;
   /** Names imported: identifiers, or "default", or "*". */
   importedNames: string[];
+  /**
+   * FU4: aliased bindings as written — the LOCAL alias mapped to the name
+   * actually imported ("default" for default imports). Call sites reference
+   * the local alias, so resolution needs the pairing to keep STATIC_EXACT
+   * provenance instead of degrading to heuristics. Absent on older entries.
+   */
+  aliasedNames?: Array<{ local: string; imported: string }>;
   startLine: number;
   /** True for bare package specifiers (node_modules / builtins). */
   isExternal: boolean;
