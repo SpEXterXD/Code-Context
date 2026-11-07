@@ -544,6 +544,51 @@ describe("IndexingService (integration)", () => {
       expect(storeBytes(root)).toBe(first);
     });
   });
+  describe("F07: nested ignore rules are directory-scoped and shared", () => {
+    const NL = "\n";
+    function nestedFixture(): Record<string, string> {
+      return {
+        "a/.gitignore": "hidden.ts" + NL,
+        "a/hidden.ts": "export const hidden = 1;" + NL,
+        "a/visible.ts": "export const visible = 1;" + NL,
+        "b/hidden.ts": "export const sibling = 1;" + NL,
+      };
+    }
+
+    it("full scan and direct updates agree on sibling isolation", async () => {
+      root = makeTempDir();
+      writeRepo(root, nestedFixture());
+      const service = makeService(root);
+      await service.indexWorkspace(CancellationSource.never());
+      const paths = [...service.getEntries().keys()].sort();
+      expect(paths).toContain("a/.gitignore");
+      expect(paths).toContain("a/visible.ts");
+      expect(paths).toContain("b/hidden.ts"); // sibling NOT excluded by a/.gitignore
+      expect(paths).not.toContain("a/hidden.ts"); // scoped pattern applies
+
+      // direct update agrees with the full scan
+      fs.writeFileSync(path.join(root, "a/hidden.ts"), "export const hidden = 2;" + NL);
+      expect(await service.indexSingleFile("a/hidden.ts", CancellationSource.never())).toBe(
+        "ignored",
+      );
+      expect(service.getEntries().has("a/hidden.ts")).toBe(false);
+    });
+
+    it("ignore-file edits take effect on the next direct update", async () => {
+      root = makeTempDir();
+      writeRepo(root, { "a/visible.ts": "export const v = 1;" + NL });
+      const service = makeService(root);
+      await service.indexSingleFile("a/visible.ts", CancellationSource.never());
+      expect(service.getEntries().has("a/visible.ts")).toBe(true);
+      fs.writeFileSync(path.join(root, "a/.gitignore"), "visible.ts" + NL);
+      fs.writeFileSync(path.join(root, "a/visible.ts"), "export const v = 2;" + NL);
+      expect(await service.indexSingleFile("a/visible.ts", CancellationSource.never())).toBe(
+        "ignored",
+      );
+      expect(service.getEntries().has("a/visible.ts")).toBe(false);
+    });
+  });
+
   describe("F06: direct updates share scan eligibility", () => {
     const NL = "\n";
     function smallLimitService(root2: string): IndexingService {

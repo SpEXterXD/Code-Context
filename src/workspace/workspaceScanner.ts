@@ -86,7 +86,7 @@ export class WorkspaceScanner {
           if (this.options.respectGitignore !== false) {
             try {
               const nested = fs.readFileSync(path.join(absolutePath, ".gitignore"), "utf8");
-              rules.addGitignoreContent(nested);
+              rules.addGitignoreContent(nested, relPath);
             } catch {
               /* none */
             }

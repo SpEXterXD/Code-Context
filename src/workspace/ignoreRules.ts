@@ -15,6 +15,12 @@ import { compareStrings } from "../shared/text";
  * negations only re-include files that were not excluded by a parent
  * directory (we approximate: parent-dir exclusion wins over later negation
  * of a file inside it, documented in LIMITATIONS.md).
+ *
+ * F07: nested `.gitignore` files contribute patterns SCOPED to their
+ * directory (`sourceDir`) — `a/.gitignore` containing `hidden.ts` excludes
+ * `a/hidden.ts` but never `b/hidden.ts`. Built-in security/store excludes
+ * carry a `builtin` flag and win over repository negations: a repo
+ * `.gitignore` cannot re-include `.env`, `.occ-store`, etc.
  */
 export interface IgnorePattern {
   raw: string;
@@ -22,17 +28,21 @@ export interface IgnorePattern {
   dirOnly: boolean;
   anchored: boolean;
   regex: RegExp;
+  /** Directory (POSIX, root-relative, "" = root) this pattern is scoped to. */
+  sourceDir: string;
+  /** Built-in security/store excludes win over repository negations. */
+  builtin: boolean;
 }
 
 export class IgnoreRules {
   private readonly patterns: IgnorePattern[] = [];
 
   constructor(excludeGlobs: string[] = []) {
-    for (const glob of excludeGlobs) this.addPattern(glob, undefined);
+    for (const glob of excludeGlobs) this.addPattern(glob, undefined, true);
   }
 
-  /** Adds one gitignore-style pattern. `sourceDir` reserved for nested .gitignore support (future). */
-  addPattern(raw: string, _sourceDir?: string): void {
+  /** Adds one gitignore-style pattern scoped to `sourceDir` ("" = root). */
+  addPattern(raw: string, sourceDir?: string, builtin = false): void {
     const line = raw.trim();
     if (!line || line.startsWith("#")) return;
     let pattern = line;
@@ -49,25 +59,49 @@ export class IgnoreRules {
     const anchored = pattern.startsWith("/") || pattern.includes("/");
     if (pattern.startsWith("/")) pattern = pattern.slice(1);
     const regex = globToRegex(pattern, anchored);
-    this.patterns.push({ raw: line, negated, dirOnly, anchored, regex });
+    this.patterns.push({
+      raw: line,
+      negated,
+      dirOnly,
+      anchored,
+      regex,
+      sourceDir: (sourceDir ?? "").replace(/\\/g, "/").replace(/\/$/, ""),
+      builtin,
+    });
   }
 
-  /** Parses the content of a .gitignore file into these rules. */
-  addGitignoreContent(content: string): void {
-    for (const line of content.split(/\r?\n/)) this.addPattern(line);
+  /** Parses the content of a `.gitignore` file into these rules, scoped to its directory. */
+  addGitignoreContent(content: string, sourceDir = ""): void {
+    for (const line of content.split(/\r?\n/)) this.addPattern(line, sourceDir);
   }
 
-  /** True if the given POSIX-style relative path should be excluded. */
+  /**
+   * True if the given POSIX-style relative path should be excluded.
+   * Patterns with a sourceDir only apply to paths under that directory and
+   * match against the path relative to it; built-in patterns win over
+   * repository negations.
+   */
   isIgnored(path: string, isDirectory: boolean): boolean {
     let ignored = false;
+    let builtinMatched = false;
     for (const p of this.patterns) {
-      // dir-only patterns also exclude files inside the directory.
-      if (p.dirOnly && !isDirectory && !this.matchesDirPrefix(path, p)) continue;
-      if (p.regex.test(path)) {
+      let effectivePath = path;
+      if (p.sourceDir) {
+        const prefix = `${p.sourceDir}/`;
+        if (!path.startsWith(prefix)) continue;
+        effectivePath = path.slice(prefix.length);
+        if (effectivePath.length === 0) continue;
+      }
+      if (p.dirOnly && !isDirectory && !this.matchesDirPrefix(effectivePath, p)) continue;
+      if (p.regex.test(effectivePath)) {
+        if (p.builtin) {
+          builtinMatched = true;
+          continue;
+        }
         ignored = !p.negated;
       }
     }
-    return ignored;
+    return ignored || builtinMatched;
   }
 
   private matchesDirPrefix(path: string, p: IgnorePattern): boolean {

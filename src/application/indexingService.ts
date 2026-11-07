@@ -10,6 +10,7 @@ import {
   type ScanResult,
 } from "../workspace/workspaceScanner";
 import { Sha256FileHasher, type FileHasher } from "../workspace/fileHasher";
+import type { IgnoreRules } from "../workspace/ignoreRules";
 import { detectLanguage, isTestFile, looksBinary } from "../workspace/languageDetection";
 import type { ParsedFile, SourceParser } from "../parser/parser";
 import { BODY_TOKEN_TOP_N, extractBodyTokens, type BodyTokens } from "../parser/bodyTokens";
@@ -321,8 +322,28 @@ export class IndexingService {
     this.parseCounter = 0;
   }
 
+  /**
+   * F07: ignore evaluation for direct/rename paths uses the SAME effective
+   * rules as the full scan — root rules plus scoped nested `.gitignore`
+   * files from the path's ancestor directories.
+   */
   private isIgnored(rel: string): boolean {
-    return buildIgnoreRules(this.rootPath, this.options).isIgnored(rel, false);
+    const rules = buildIgnoreRules(this.rootPath, this.options);
+    if (this.options.respectGitignore !== false) {
+      const segments = rel.split("/");
+      segments.pop(); // the file itself
+      let current = "";
+      for (const seg of segments) {
+        current = current ? `${current}/${seg}` : seg;
+        try {
+          const nested = fs.readFileSync(path.join(this.rootPath, current, ".gitignore"), "utf8");
+          rules.addGitignoreContent(nested, current);
+        } catch {
+          /* no nested .gitignore in this directory */
+        }
+      }
+    }
+    return rules.isIgnored(rel, false);
   }
 
   private enqueue<T>(job: () => Promise<T> | T): Promise<T> {
