@@ -634,4 +634,67 @@ describe("IndexingService (integration)", () => {
       }
     });
   });
+
+  // F14: parser diagnostics were dropped before persistence — meta was built
+  // with a hard-coded PARSED status and `parsed.parseError` (partial-analysis
+  // diagnostics from the parsers) never reached the persisted FileMeta.
+  describe("F14: parser outcomes map into file metadata", () => {
+    it("lenient JSON fallback records PARTIAL status with the diagnostic and persists it", async () => {
+      root = makeTempDir();
+      writeRepo(root, {
+        "config/settings.json": '{\n  // deployment toggle\n  "a": 1,\n}\n',
+      });
+      const service = makeService(root);
+      await service.indexWorkspace(CancellationSource.never());
+      const entry = service.getEntries().get("config/settings.json");
+      expect(entry).toBeDefined();
+      expect(entry!.meta.parseStatus).toBe("PARTIAL");
+      expect(entry!.meta.parseError).toContain("leniently");
+      // partial analysis retained, not discarded
+      expect(entry!.symbols.length).toBeGreaterThan(0);
+      // the diagnostic survives persistence, not just memory
+      const raw = storeBytes(root);
+      expect(raw).toContain('"PARTIAL"');
+      expect(raw).toContain("leniently");
+    });
+
+    it("TypeScript syntax errors record PARTIAL with recovered symbols", async () => {
+      root = makeTempDir();
+      writeRepo(root, {
+        "src/broken.ts": "export const ok = 1;\nexport function broken( { return 2;\n",
+      });
+      const service = makeService(root);
+      await service.indexWorkspace(CancellationSource.never());
+      const entry = service.getEntries().get("src/broken.ts");
+      expect(entry).toBeDefined();
+      expect(entry!.meta.parseStatus).toBe("PARTIAL");
+      expect(entry!.meta.parseError).toBeDefined();
+      expect(entry!.meta.parseError!.length).toBeGreaterThan(0);
+      // useful partial analysis is retained alongside the diagnostic
+      expect(entry!.symbols.some((s) => s.name === "ok")).toBe(true);
+    });
+
+    it("clean files keep PARSED with no diagnostic", async () => {
+      root = makeTempDir();
+      writeRepo(root, { "src/clean.ts": "export const clean = 1;\n" });
+      const service = makeService(root);
+      await service.indexWorkspace(CancellationSource.never());
+      const entry = service.getEntries().get("src/clean.ts");
+      expect(entry!.meta.parseStatus).toBe("PARSED");
+      expect(entry!.meta.parseError).toBeUndefined();
+    });
+
+    it("the single-file path maps the outcome the same way", async () => {
+      root = makeTempDir();
+      writeRepo(root, { "config/late.json": '{ "a": 1,, }\n' });
+      const service = makeService(root);
+      expect(await service.indexSingleFile("config/late.json", CancellationSource.never())).toBe(
+        "indexed",
+      );
+      const entry = service.getEntries().get("config/late.json");
+      expect(entry).toBeDefined();
+      expect(entry!.meta.parseStatus).toBe("PARTIAL");
+      expect(entry!.meta.parseError).toBeDefined();
+    });
+  });
 });

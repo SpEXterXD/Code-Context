@@ -422,6 +422,12 @@ export class IndexingService {
             sanitizedContent,
             spans.length > 0,
           );
+          // F14: parser-reported diagnostics (partial analysis) map into the
+          // persisted metadata instead of being dropped.
+          if (parsed.parseError) {
+            meta.parseStatus = "PARTIAL";
+            meta.parseError = parsed.parseError;
+          }
           fresh.push({
             meta,
             parsed,
@@ -561,6 +567,12 @@ export class IndexingService {
         spans.length > 0,
       );
       this.parseCounter++;
+      // F14: parser-reported diagnostics (partial analysis) map into the
+      // persisted metadata instead of being dropped.
+      if (parsed.parseError) {
+        meta.parseStatus = "PARTIAL";
+        meta.parseError = parsed.parseError;
+      }
       const knownFiles = new Set([...this.entries.keys(), rel]);
       const staged = new Map(this.entries);
       const analysis = new AnalysisEngine(this.rootPath, knownFiles, staged);

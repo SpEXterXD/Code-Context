@@ -805,7 +805,10 @@ export class ContextBuilder {
       .map((c) => ({ path: c.path, entry: this.deps.entries.get(c.path) }))
       .filter((c): c is { path: string; entry: FileEntry } => c.entry !== undefined)
       .filter(
-        (c) => c.entry.meta.parseStatus === "PARSED" || c.entry.meta.parseStatus === "GENERIC",
+        (c) =>
+          c.entry.meta.parseStatus === "PARSED" ||
+          c.entry.meta.parseStatus === "PARTIAL" || // F14: partial analysis is still real content
+          c.entry.meta.parseStatus === "GENERIC",
       )
       .map((c) => ({
         path: c.path,

@@ -1,7 +1,13 @@
 /** Supported analysis levels. `generic` = metadata only, no deep parsing. */
 export type Language = "typescript" | "javascript" | "json" | "markdown" | "generic";
 
-export type ParseStatus = "PARSED" | "GENERIC" | "SKIPPED_BINARY" | "SKIPPED_TOO_LARGE" | "FAILED";
+/**
+ * F14: PARTIAL = the parser recovered a usable analysis but recorded
+ * diagnostics (e.g. TypeScript syntax errors with recovered symbols, or
+ * lenient JSON fallback). The diagnostic text persists in FileMeta.parseError.
+ */
+export type ParseStatus =
+  "PARSED" | "PARTIAL" | "GENERIC" | "SKIPPED_BINARY" | "SKIPPED_TOO_LARGE" | "FAILED";
 
 /** Metadata + parse result for one file. Content hash gates all re-analysis. */
 export interface FileMeta {
