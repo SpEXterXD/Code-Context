@@ -53,6 +53,11 @@ export const M4_SEED_WEIGHTS = {
   diagnostic: 0.4,
   stackFrame: 0.4,
   /**
+   * FU6: explicit user selection (seedEditors) — the strongest intent signal,
+   * above even DIFF_TOUCHED (a selection is where the user is looking now).
+   */
+  selection: 0.8,
+  /**
    * M4b/S1: how seeded files interact with package slots. Default
    * "signal-only" (v0.3 decision, ADR-006): seeds fire signals and originate
    * graph expansion, but are NOT pinned and are excluded from content slots
@@ -83,7 +88,7 @@ export interface RetrievalOptions {
    */
   seedHints?: Array<{
     path: string;
-    kind: "DIFF_TOUCHED" | "OPEN_EDITOR" | "DIAGNOSTIC" | "STACK_FRAME";
+    kind: "DIFF_TOUCHED" | "OPEN_EDITOR" | "DIAGNOSTIC" | "STACK_FRAME" | "SELECTION";
     detail?: string;
   }>;
 }
@@ -426,7 +431,9 @@ export class HybridRetriever {
               ? M4_SEED_WEIGHTS.openEditor
               : hint.kind === "DIAGNOSTIC"
                 ? M4_SEED_WEIGHTS.diagnostic
-                : M4_SEED_WEIGHTS.stackFrame;
+                : hint.kind === "SELECTION"
+                  ? M4_SEED_WEIGHTS.selection
+                  : M4_SEED_WEIGHTS.stackFrame;
         bump(hint.path, {
           kind: hint.kind,
           weight,

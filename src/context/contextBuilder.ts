@@ -7,6 +7,7 @@ import {
   type RetrievalResult,
 } from "../retrieval/hybridRetriever";
 import type { ScoredFile, RankingSignal } from "../retrieval/relevanceScorer";
+import { explainSignals } from "../retrieval/relevanceScorer";
 import {
   assignTiers,
   findEntryPoints,
@@ -332,17 +333,27 @@ export class ContextBuilder {
     }
     // M4b/S1 signal-only: seeded files never take content slots. Any seeded
     // candidate not otherwise in the WHY list gets a path-only entry (its
-    // diff, if any, already renders in ## CURRENT CHANGES).
+    // diff, if any, already renders in ## CURRENT CHANGES). FU6: the entry's
+    // reason derives from the hint's own kind — an editor selection seed must
+    // not be mislabeled as a working-tree change.
     if (signalOnly) {
       for (const h of [...seedState.hints].sort((a, b) => compareStrings(a.path, b.path))) {
         if (why.some((entry) => entry.path === h.path)) continue;
+        const reason = explainSignals({
+          path: h.path,
+          score: 0,
+          signals: [{ kind: h.kind, weight: 0, detail: h.detail ?? "" }],
+        })[0]!;
         why.push({
           path: h.path,
-          tierLabel: TIER_LABELS.CHANGE_SEED,
+          tierLabel: h.kind === "SELECTION" ? TIER_LABELS.USER_SELECTED : TIER_LABELS.CHANGE_SEED,
           score: 0,
-          reasons: ["Changed in your working tree"],
+          reasons: [reason],
           included: false,
-          note: "change seed: not packaged (signal-only mode; diff in CURRENT CHANGES)",
+          note:
+            h.kind === "SELECTION"
+              ? "selection seed: not packaged (signal-only mode)"
+              : "change seed: not packaged (signal-only mode; diff in CURRENT CHANGES)",
         });
       }
     }
@@ -703,7 +714,7 @@ export class ContextBuilder {
   private prepareSeedState(seedSet?: SeedSet): {
     hints: Array<{
       path: string;
-      kind: "DIFF_TOUCHED" | "OPEN_EDITOR" | "DIAGNOSTIC" | "STACK_FRAME";
+      kind: "DIFF_TOUCHED" | "OPEN_EDITOR" | "DIAGNOSTIC" | "STACK_FRAME" | "SELECTION";
       detail?: string;
     }>;
     currentChanges?: { sections: Array<{ path: string; diff: string }>; truncated: boolean };
@@ -714,10 +725,12 @@ export class ContextBuilder {
   } {
     if (!seedSet) return { hints: [], withheldDiffs: [], diffFindings: [], notes: [] };
     const kindPriority = {
-      DIFF_TOUCHED: 0,
-      DIAGNOSTIC: 1,
-      STACK_FRAME: 2,
-      OPEN_EDITOR: 3,
+      // FU6: an explicit editor selection is the strongest intent signal.
+      SELECTION: 0,
+      DIFF_TOUCHED: 1,
+      DIAGNOSTIC: 2,
+      STACK_FRAME: 3,
+      OPEN_EDITOR: 4,
     } as const;
     type HintKind = keyof typeof kindPriority;
     const hintByPath = new Map<string, { path: string; kind: HintKind; detail?: string }>();
@@ -726,6 +739,14 @@ export class ContextBuilder {
       if (!this.deps.entries.has(p) || hintByPath.has(p)) return;
       hintByPath.set(p, { path: p, kind, detail });
     };
+    // FU6: the explicit editor selection is consumed, not just collected.
+    if (seedSet.selection) {
+      addHint(
+        seedSet.selection.path,
+        "SELECTION",
+        `lines ${seedSet.selection.startLine}-${seedSet.selection.endLine}`,
+      );
+    }
     for (const c of seedSet.changedPaths) addHint(c.path, "DIFF_TOUCHED", c.state);
     for (const d of seedSet.diagnostics) addHint(d.path, "DIAGNOSTIC", d.message.slice(0, 60));
     for (const f of seedSet.stackFrames ?? []) addHint(f.path, "STACK_FRAME", `line ${f.line}`);

@@ -542,6 +542,37 @@ describe("ContextBuilder", () => {
       }
     });
 
+    // FU6: SeedSet.selection was collected by the extension seed provider
+    // (seedEditors gate) and normalized through SeedSet, but prepareSeedState
+    // never consumed it — the explicit user-selection seed was silently
+    // dropped before retrieval.
+    it("FU6: an editor selection seed fires a SELECTION signal in retrieval", async () => {
+      const app = await makeSeedApp();
+      const result = app.buildContext("task", {
+        taskText: "unrelated query with no lexical overlap whatsoever",
+        seedSet: {
+          changedPaths: [],
+          diffSections: [],
+          openEditors: [],
+          diagnostics: [],
+          stackFrames: [],
+          selection: { path: "src/gizmo.ts", startLine: 3, endLine: 9 },
+          notes: [],
+        },
+      });
+      const gizmo = result.retrieval?.ranked.find((r) => r.path === "src/gizmo.ts");
+      expect(gizmo).toBeDefined();
+      expect(gizmo!.signals.some((s) => s.kind === "SELECTION")).toBe(true);
+      const why = result.rankedForDisplay.find((w) => w.path === "src/gizmo.ts");
+      expect(why?.reasons.some((r) => r.startsWith("Explicitly selected in your editor"))).toBe(
+        true,
+      );
+      // Signal-only policy (ADR-006): seeds surface as path-only WHY entries,
+      // correctly labeled as a selection rather than a working-tree change.
+      expect(why?.tierLabel).toBe("explicitly selected by user");
+      expect(why?.included).toBe(false);
+    });
+
     it("renders CURRENT CHANGES after DEVELOPER TASK with content-aware fences", async () => {
       const app = await makeSeedApp();
       const diff =

@@ -60,6 +60,7 @@ export interface RankingSignal {
     | "OPEN_EDITOR"
     | "DIAGNOSTIC"
     | "STACK_FRAME"
+    | "SELECTION"
     | "SEED_NEIGHBOR";
   weight: number;
   detail: string;
@@ -110,6 +111,8 @@ export function explainSignals(scored: ScoredFile): string[] {
           return `Has a diagnostic: ${s.detail}`;
         case "STACK_FRAME":
           return `Appears in the parsed stack trace (${s.detail})`;
+        case "SELECTION":
+          return `Explicitly selected in your editor${s.detail ? ` (${s.detail})` : ""}`;
         case "SEED_NEIGHBOR":
           return `Graph neighbor of a changed file (${s.detail})`;
       }
