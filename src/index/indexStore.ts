@@ -9,6 +9,7 @@ import { logger } from "../shared/logging";
 import {
   emptyManifest,
   entryRelativePath,
+  isValidStoredFileEntry,
   serializeManifest,
   STORE_SCHEMA_VERSION,
   type IndexManifest,
@@ -31,7 +32,7 @@ import {
  * surfaces as a broken index.
  */
 export interface IndexStore {
-  load(): { manifest: IndexManifest; entries: Map<string, FileEntry> };
+  load(repair?: boolean): { manifest: IndexManifest; entries: Map<string, FileEntry> };
   upsertEntries(entries: FileEntry[]): void;
   removePaths(paths: string[]): void;
   writeManifest(): void;
@@ -53,7 +54,7 @@ export class JsonIndexStore implements IndexStore {
     return fs.existsSync(path.join(this.storeRoot, "manifest.json"));
   }
 
-  load(): { manifest: IndexManifest; entries: Map<string, FileEntry> } {
+  load(repair = true): { manifest: IndexManifest; entries: Map<string, FileEntry> } {
     const manifestPath = path.join(this.storeRoot, "manifest.json");
     if (fs.existsSync(manifestPath)) {
       try {
@@ -63,7 +64,8 @@ export class JsonIndexStore implements IndexStore {
           logger.warn(
             `index schema ${parsed.schemaVersion} ≠ ${STORE_SCHEMA_VERSION}; rebuilding store`,
           );
-          this.clear();
+          if (repair) this.clear();
+          else this.manifest = emptyManifest(this.projectFingerprint);
           return { manifest: { ...this.manifest }, entries: new Map() };
         }
       } catch {
@@ -75,29 +77,37 @@ export class JsonIndexStore implements IndexStore {
     const entriesDir = path.join(this.storeRoot, "entries");
 
     if (fs.existsSync(entriesDir)) {
-      for (const shard of listSortedDirs(entriesDir)) {
+      for (const shard of listSortedDirs(entriesDir).filter((d) => CANONICAL_SHARD_DIR.test(d))) {
         const shardDir = path.join(entriesDir, shard);
         for (const file of listSortedFiles(shardDir)) {
           const full = path.join(shardDir, file);
           try {
-            const entry = JSON.parse(fs.readFileSync(full, "utf8")) as FileEntry;
-            if (!entry?.meta?.path) throw new OccError("STORE_CORRUPT", "entry missing meta.path");
+            const entry = JSON.parse(fs.readFileSync(full, "utf8")) as unknown;
+            // FU5: fail-closed structural validation — invalid entries are
+            // dropped as corrupt and the file re-indexes on the next run.
+            if (!isValidStoredFileEntry(entry)) {
+              throw new OccError("STORE_CORRUPT", "entry failed structural validation");
+            }
             entries.set(entry.meta.path, entry);
           } catch (e) {
             // Corrupt entry: drop it and record. The index stays valid; the
             // file will be re-indexed on next run.
             logger.warn(`dropping corrupt index entry ${full}: ${(e as Error).message}`);
-            try {
-              fs.unlinkSync(full);
-            } catch {
-              /* ignore */
+            if (repair) {
+              try {
+                fs.unlinkSync(full);
+              } catch {
+                /* ignore */
+              }
             }
           }
         }
       }
     }
 
-    this.manifest = this.loadOrRebuildManifest(entries);
+    this.manifest = repair
+      ? this.loadOrRebuildManifest(entries)
+      : this.rebuildManifest(entries, false);
     return { manifest: { ...this.manifest }, entries };
   }
 
@@ -117,18 +127,20 @@ export class JsonIndexStore implements IndexStore {
       // Reconcile: the entries directory is the source of truth. Any drift
       // (crash between entry and manifest writes, dropped corrupt entries,
       // schema bump, manifest copied from a different workspace root) is
-      // repaired by rebuilding the manifest from entries.
+      // repaired by rebuilding the manifest from entries. Review fix: the
+      // mapping must match EXACTLY — equal counts with wrong keys or stale
+      // content hashes still rebuild.
       if (parsed.projectFingerprint !== this.projectFingerprint) {
         logger.warn(
           `manifest fingerprint ${parsed.projectFingerprint} ≠ ${this.projectFingerprint}; rebuilding manifest`,
         );
         return this.rebuildManifest(entries);
       }
-      const manifestCount = Object.keys(parsed.files ?? {}).length;
-      if (manifestCount !== entries.size) {
-        return this.rebuildManifest(entries);
+      const manifestFiles = parsed.files ?? {};
+      if (manifestMatchesEntries(manifestFiles, entries)) {
+        return parsed;
       }
-      return parsed;
+      return this.rebuildManifest(entries);
     } catch (e) {
       if (fs.existsSync(manifestPath)) {
         logger.warn(`manifest unreadable (${(e as Error).message}); rebuilding from entries`);
@@ -137,13 +149,13 @@ export class JsonIndexStore implements IndexStore {
     }
   }
 
-  private rebuildManifest(entries: Map<string, FileEntry>): IndexManifest {
+  private rebuildManifest(entries: Map<string, FileEntry>, persist = true): IndexManifest {
     const manifest = emptyManifest(this.projectFingerprint);
     for (const [p, entry] of entries) {
       manifest.files[p] = entry.meta.contentHash;
     }
     this.manifest = manifest;
-    this.writeManifest();
+    if (persist) this.writeManifest();
     return manifest;
   }
 
@@ -152,7 +164,7 @@ export class JsonIndexStore implements IndexStore {
     for (const entry of newEntries) {
       const rel = entryRelativePath(entry.meta.path);
       const full = path.join(this.storeRoot, rel);
-      atomicWriteFileSync(full, JSON.stringify(entry));
+      atomicWriteFileSync(full, JSON.stringify({ ...entry, heritages: entry.heritages ?? [] }));
       this.manifest.files[entry.meta.path] = entry.meta.contentHash;
     }
     this.writeManifest();
@@ -163,8 +175,8 @@ export class JsonIndexStore implements IndexStore {
       const full = path.join(this.storeRoot, entryRelativePath(p));
       try {
         fs.unlinkSync(full);
-      } catch {
-        /* already gone */
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
       }
       delete this.manifest.files[p];
     }
@@ -221,13 +233,35 @@ export function atomicWriteFileSync(target: string, content: string): void {
     }
   }
   // Last resort: in-place write (still consistent content, slightly less
-  // atomic). Verified content via size check.
+  // atomic). Review fix: the PREVIOUS destination is backed up first and
+  // restored if the write fails — a mid-write failure can no longer destroy
+  // previously valid state. Content verified via size check; no .bak/.tmp
+  // remnants survive either outcome.
+  let backup: string | null = null;
   try {
+    if (fs.existsSync(target)) {
+      backup = `${target}.bak-${process.pid}-${Math.floor(Math.random() * 1e9).toString(36)}`;
+      fs.copyFileSync(target, backup);
+    }
     fs.writeFileSync(target, data);
     const stat = fs.statSync(target);
     if (stat.size !== data.length) {
       throw new StoreCorruptError(`size mismatch writing ${target}`);
     }
+    if (backup) {
+      fs.unlinkSync(backup);
+      backup = null;
+    }
+  } catch (e) {
+    if (backup) {
+      try {
+        fs.copyFileSync(backup, target);
+        fs.unlinkSync(backup);
+      } catch {
+        /* best-effort restore */
+      }
+    }
+    throw e;
   } finally {
     try {
       fs.unlinkSync(tmp);
@@ -249,16 +283,38 @@ function listSortedDirs(dir: string): string[] {
   }
 }
 
+/**
+ * Canonical shard filenames only: entries are stored as
+ * `entries/<2 hex>/<64 hex sha256>.json` (see entryRelativePath). Temp
+ * remnants, orphan files, or hand-placed JSON must never be read as records.
+ */
+const CANONICAL_ENTRY_FILE = /^[0-9a-f]{64}\.json$/;
+const CANONICAL_SHARD_DIR = /^[0-9a-f]{2}$/;
+
 function listSortedFiles(dir: string): string[] {
   try {
     return fs
       .readdirSync(dir, { withFileTypes: true })
-      .filter((d) => d.isFile())
+      .filter((d) => d.isFile() && CANONICAL_ENTRY_FILE.test(d.name))
       .map((d) => d.name)
       .sort();
   } catch {
     return [];
   }
+}
+
+/** Exact manifest reconciliation: identical key sets AND identical hashes. */
+function manifestMatchesEntries(
+  files: Record<string, string>,
+  entries: Map<string, FileEntry>,
+): boolean {
+  const keys = Object.keys(files);
+  if (keys.length !== entries.size) return false;
+  for (const [p, hash] of Object.entries(files)) {
+    const entry = entries.get(p);
+    if (!entry || entry.meta.contentHash !== hash) return false;
+  }
+  return true;
 }
 
 export function fingerprintForRoot(rootPath: string): string {

@@ -30,14 +30,15 @@ flags, async, timeout):
   Both `--no-ext-diff` and `--no-textconv` are mandatory on every diff invocation.
   An external diff driver (`diff.external`, git-config(1)) or textconv filter introduces repository-configurable command execution risks.
 
-`npm run eval:seed-hazard-repro` reproduces this behavior for `diff.external`, textconv drivers, and clean/smudge filters.
-Measurements with git 2.53 on 2026-10-25 show that raw `status` invokes the clean filter during index refreshes, whereas safeGit flags (`GIT_OPTIONAL_LOCKS=0`) prevent it.
-A plain `diff` runs the external driver, textconv filter, and clean filter.
-SafeGit global flags do not cover diff drivers, while the collector form (`diff --no-ext-diff --no-textconv`) neutralizes external diff and textconv drivers.
+`npm run eval:seed-hazard-repro` reproduces this behavior for `diff.external`, textconv drivers, and clean/smudge filters, with each hazard configured in its OWN isolated victim repo (hazard configuration baseline-committed BEFORE measurement), raw git vs safeGit vs the collector form, and asserted positive controls (nonempty relevant diff; the raw form fires the hazard marker).
+Measurements with git 2.53 on Windows (2026-11) show that raw `status` invokes the clean filter during index refreshes, whereas safeGit flags (`GIT_OPTIONAL_LOCKS=0`) prevent it during status refreshes.
+A plain `diff` runs the external driver, textconv filter, and clean filter, and it does so through safeGit too (its global flags do not cover diff drivers).
+The collector form (`diff --no-ext-diff --no-textconv`) neutralizes external diff and textconv drivers while still returning the nonempty diff.
+Clean/smudge filters are NOT neutralizable by flags: they execute during diff operations even through the collector form; the trust gate is the only mitigation.
 
 Diff collection is protected through two mechanisms:
 1. The collector always passes `--no-ext-diff --no-textconv` to neutralize driver execution.
-2. The workspace-trust gate prevents collector invocation in untrusted workspaces (`seedProvider.test.ts`). A plumbing-based self-computed diff (`cat-file` vs disk, no filters) remains the future hardening path.
+2. The workspace-trust gate prevents collector invocation in untrusted workspaces (`seedProvider.test.ts`), the ONLY mitigation for clean/smudge filters. A plumbing-based self-computed diff (`cat-file` vs disk, no filters) remains the future hardening path.
 
 Handling rules for changes:
 - Untracked files act as path-only seeds by default. When small enough, their added content is rendered from disk under the size cap. Blocked paths never reach that step.

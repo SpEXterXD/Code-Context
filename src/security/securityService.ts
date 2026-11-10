@@ -1,7 +1,7 @@
 import type { FileEntry } from "../domain/model";
 import { SecretScanner, type SecretFinding } from "./secretScanner";
 import { sensitivePathCheck } from "./sensitivePathRules";
-import { redactMatch, assertSecretsAbsent } from "./redactor";
+import { assertSecretsAbsent, redactSpans } from "./redactor";
 import { compareStrings } from "../shared/text";
 import { logger } from "../shared/logging";
 import { OccError } from "../shared/errors";
@@ -93,12 +93,18 @@ export function applySecurityPolicy(
 
     if (config.secretPolicy === "warn") {
       if (config.redactSecrets) {
-        let redacted = content;
-        let redactions = 0;
+        // Stage 2 correction A: redact the UNION of flagged spans against the
+        // original snapshot in one pass. Sequential whole-match replacement
+        // removed newlines (shifting later lines) and could consume a
+        // substring a later finding needed, silently skipping that redaction
+        // and leaking the remaining body. Every detected finding is reported
+        // as redacted — all of them are covered by merged regions.
+        const detailed = scanner.scanDetailed(path, content);
+        const result = redactSpans(
+          content,
+          detailed.map((f) => ({ start: f.start, end: f.end, kind: f.kind, match: f.match })),
+        );
         for (const finding of findings) {
-          const result = redactMatch(finding, redacted);
-          redacted = result.text;
-          redactions += result.replaced;
           safeFindings.push({
             kind: finding.kind,
             filePath: path,
@@ -108,7 +114,7 @@ export function applySecurityPolicy(
             action: "redacted",
           });
         }
-        if (redactions > 0) redactedContent.set(path, redacted);
+        if (result.merged > 0) redactedContent.set(path, result.text);
         push(warnedFiles, path, `${findings.length} potential secret(s) redacted`);
       } else {
         for (const finding of findings) {

@@ -7,6 +7,8 @@ import { collectChangeSeeds, seedFromClipboard } from "./seedProvider";
 import { ContextPreviewProvider } from "./previewProvider";
 import { OccError } from "../shared/errors";
 import { logger } from "../shared/logging";
+import { compareStrings } from "../shared/text";
+import { relativeToRoot } from "./workspacePaths";
 
 /**
  * Registers all commands. Keep this layer thin: it adapts VS Code concepts
@@ -99,24 +101,28 @@ export function registerCommands(
   const activeRelPath = (): string | undefined => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return undefined;
+    if (editor.document.uri.scheme !== "file") return undefined;
     const root = vscode.workspace.workspaceFolders?.[0];
-    if (!root) return undefined;
-    const rel = editor.document.uri.fsPath
-      .slice(root.uri.fsPath.length)
-      .replace(/\\/g, "/")
-      .replace(/^\//, "");
-    return rel.length > 0 ? rel : undefined;
+    if (!root || root.uri.scheme !== "file") return undefined;
+    // FU7/review: case-tolerant, traversal-safe relative resolution (raw
+    // slice broke on Windows drive-letter/path casing mismatches). ""
+    // (the root itself) is not a file: treated as no active file.
+    const rel = relativeToRoot(root.uri.fsPath, editor.document.uri.fsPath);
+    return rel ? rel : undefined;
   };
 
   /** Workspace-relative POSIX path for a right-clicked/selected resource, or null when outside the workspace. */
   const relFromUri = (uri: vscode.Uri | undefined): string | null => {
     if (!uri) return null;
+    // Stage 3: only file-scheme URIs map to workspace paths — remote/virtual
+    // documents (https, vscode-remote, untitled, output channels) have no
+    // filesystem location inside the workspace and must never be indexed or
+    // exported.
+    if (uri.scheme !== "file") return null;
     const root = vscode.workspace.workspaceFolders?.[0];
-    if (!root) return null;
-    const prefix = root.uri.fsPath;
-    if (!uri.fsPath.startsWith(prefix)) return null;
-    const rel = uri.fsPath.slice(prefix.length).replace(/\\/g, "/").replace(/^\//, "");
-    return rel.length > 0 ? rel : null;
+    if (!root || root.uri.scheme !== "file") return null;
+    // FU7: see activeRelPath.
+    return relativeToRoot(root.uri.fsPath, uri.fsPath);
   };
 
   /**
@@ -190,7 +196,7 @@ export function registerCommands(
   const selectionRelPath = (): string[] | undefined => {
     const editor = vscode.window.activeTextEditor;
     const root = vscode.workspace.workspaceFolders?.[0];
-    if (!editor || !root) return undefined;
+    if (!editor || !root || root.uri.scheme !== "file") return undefined;
     // Selection mode uses the active file as the (single) explicit selection;
     // multi-file selection would require a UI multi-pick, offered in Task mode.
     const rel = activeRelPath();
@@ -257,7 +263,7 @@ export function registerCommands(
       });
       if (chosen) {
         const root = vscode.workspace.workspaceFolders?.[0];
-        if (root) {
+        if (root && root.uri.scheme === "file") {
           const doc = vscode.Uri.file(`${root.uri.fsPath}/${chosen.target}`);
           void vscode.window.showTextDocument(doc, { preview: true });
         }
@@ -327,7 +333,9 @@ export function registerCommands(
         placeHolder: "e.g. Add rate limiting to the login endpoint.",
       });
       if (task === undefined || task.trim().length === 0) return;
-      await buildAndStore("task", { taskText: task }, "task context");
+      const result = await buildAndStore("task", { taskText: task }, "task context");
+      // F13: all Generate commands follow one preview policy (docs/COMMANDS.md).
+      if (result) await openPreview("task", result);
     }),
 
     vscode.commands.registerCommand("offlineCodeContext.generateSelectionContext", async () => {
@@ -344,11 +352,13 @@ export function registerCommands(
         { placeHolder: "Selection context scope" },
       );
       if (!expand) return;
-      await buildAndStore(
+      const result = await buildAndStore(
         "selection",
         { selectedPaths: paths, expandSelection: expand.value },
         "selection context",
       );
+      // F13: all Generate commands follow one preview policy (docs/COMMANDS.md).
+      if (result) await openPreview("selection", result);
     }),
 
     vscode.commands.registerCommand("offlineCodeContext.previewContext", async () => {
@@ -395,10 +405,32 @@ export function registerCommands(
         return;
       }
       channel.appendLine(`Security findings in current context package (${findings.length}):`);
+      // FU3: findings are grouped per file and each carries a source excerpt
+      // so the flagged line is locatable. Excerpts come ONLY from
+      // redactedContent — the credential value is already replaced by the
+      // `[REDACTED:…]` placeholder there — so the output channel never
+      // echoes raw secret material. Blocked files have no excerpt (their
+      // source is withheld by policy).
+      const byFile = new Map<string, typeof findings>();
       for (const f of findings) {
-        channel.appendLine(
-          `  [${f.action}] ${f.kind} at ${f.filePath}:${f.line} - ${f.description}`,
-        );
+        const list = byFile.get(f.filePath) ?? [];
+        list.push(f);
+        byFile.set(f.filePath, list);
+      }
+      for (const [filePath, list] of [...byFile.entries()].sort((a, b) =>
+        compareStrings(a[0], b[0]),
+      )) {
+        channel.appendLine(`  ${filePath} (${list.length} finding(s)):`);
+        for (const f of list) {
+          channel.appendLine(`    [${f.action}] ${f.kind} at line ${f.line} - ${f.description}`);
+          const redacted = last.result.security.redactedContent.get(filePath);
+          if (redacted) {
+            const excerpt = redacted.split(/\r?\n/)[f.line - 1];
+            if (excerpt !== undefined && excerpt.trim().length > 0) {
+              channel.appendLine(`      > ${excerpt.trim().slice(0, 120)}`);
+            }
+          }
+        }
       }
       channel.show();
       void vscode.window.showWarningMessage(
@@ -413,6 +445,7 @@ export function registerCommands(
       );
       if (confirm !== "Delete") return;
       await app.indexing.clearIndex();
+      last = null; // F04: a cleared index must not leave a stale generated payload
       void vscode.window.showInformationMessage("OCC: local index cleared.");
     }),
 

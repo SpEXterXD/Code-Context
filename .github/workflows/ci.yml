@@ -35,3 +35,19 @@ jobs:
         with:
           name: vsix-${{ matrix.os }}
           path: "*.vsix"
+
+  smoke-min-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run package
+      - name: Smoke test packaged VSIX at minimum VS Code version
+        run: xvfb-run -a npm run smoke:vsix
+        env:
+          SMOKE_VSCODE_VERSION: "1.85.0"
+

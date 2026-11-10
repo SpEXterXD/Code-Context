@@ -96,13 +96,13 @@ Complete reference for all 20 settings in Offline Code Context Compiler (OCC). S
 - Default: `"block"`
 - Options: `"block"`, `"warn"`, `"allow"`
 - Reindex Required: No
-- Description: Policy for potential secrets detected in candidate files. Under `block`, candidate files containing detected secrets are excluded from the source section while remaining listed in WHY entries. Under `warn`, file source is included with secrets redacted (when `redactSecrets` is true). Under `allow`, secrets are included verbatim (not recommended). Regardless of this setting, the final export passes through the leak gate.
+- Description: Policy for potential secrets detected in candidate files. Under `block`, candidate files containing detected secrets are excluded from the source section while remaining listed in WHY entries. Under `warn`, file source is included with secrets redacted (when `redactSecrets` is true). Under `allow`, secrets are included verbatim (not recommended). PRECEDENCE: the final leak gate is unconditional and runs LAST. Under `warn` with `redactSecrets` off, and under `allow`, a finding whose value survives verbatim into the payload aborts the entire generation with `SECURITY_BLOCKED`; the setting widens what is scanned and included, it never overrides the gate.
 
 ### `offlineCodeContext.redactSecrets`
 - Type: `boolean`
 - Default: `true`
 - Reindex Required: No
-- Description: When true, secret-like matches in `warn` policy files are deterministically replaced with `[REDACTED:<type>:<hash8>]`. Files under `block` policy are excluded entirely regardless of this setting.
+- Description: When true, secret-like matches in `warn` policy files are deterministically replaced with `[REDACTED:<type>:<hash8>]`. Files under `block` policy are excluded entirely regardless of this setting. With redaction off, included findings remain subject to the unconditional leak gate: generation aborts if a known value survives verbatim into the payload.
 
 ### `offlineCodeContext.enableGitRecency`
 - Type: `boolean`
@@ -126,7 +126,7 @@ Complete reference for all 20 settings in Offline Code Context Compiler (OCC). S
 - Type: `boolean`
 - Default: `false`
 - Reindex Required: No
-- Description: Experimental feature. When true, seeds retrieval with current working-tree changes from local git status. Defaults to false because evaluation benchmarks showed no recall gain on the tuning split (see ADR-006).
+- Description: Experimental feature. When true, seeds retrieval with current working-tree changes from local git status (status-only: changed paths and kinds; raw diff text is not collected while diff export is paused, see the security documentation). Defaults to false because evaluation benchmarks showed no recall gain on the tuning split (see ADR-006).
 
 ### `offlineCodeContext.changeSeedsMaxPaths`
 - Type: `integer`
@@ -158,4 +158,4 @@ Complete reference for all 20 settings in Offline Code Context Compiler (OCC). S
 - Default: `1500`
 - Range: `0` to `20000`
 - Reindex Required: No
-- Description: Maximum token budget allocated to the optional `## CURRENT CHANGES` diff section when `changeSeeds` is active. Counts directly against the overall package token budget.
+- Description: Maximum token budget allocated to the optional `## CURRENT CHANGES` diff section when `changeSeeds` is active. Counts directly against the overall package token budget. INACTIVE for production output while raw diff export is paused (Stage 1): generated payloads contain no diff text regardless of this setting; the setting is retained for the planned diff-restoration stage.

@@ -160,11 +160,24 @@ export class SecretScanner {
         const text = match[0];
         if (def.validate && !def.validate(text)) continue;
         const start = match.index ?? 0;
+        let end = start + text.length;
+        // F01: a private-key finding must cover the KEY BODY, not just the
+        // header line — under WARN/redaction a header-only match would blank
+        // the header while leaving the key material exposed.
+        if (def.kind === "private-key-block") {
+          const endMarker = content.indexOf("-----END", end);
+          if (endMarker >= 0) {
+            const lineEnd = content.indexOf("\n", endMarker);
+            end = lineEnd >= 0 ? lineEnd + 1 : content.length;
+          } else {
+            end = content.length;
+          }
+        }
         matches.push({
           kind: def.kind,
           start,
-          end: start + text.length,
-          match: text,
+          end,
+          match: content.slice(start, end),
           description: def.description,
           confidence: def.confidence,
         });
@@ -220,6 +233,32 @@ export class SecretScanner {
   }
 
   /**
+   * Stage 2 correction A: scan with EXACT character offsets, so redaction can
+   * apply the union of overlapping flagged ranges against the original
+   * immutable snapshot in one pass (sequential whole-match replacement breaks
+   * when one redaction removes a substring another finding's match needs, and
+   * it shifts line numbering).
+   */
+  scanDetailed(
+    filePath: string,
+    content: string,
+  ): Array<SecretFinding & { start: number; end: number }> {
+    const findings: Array<SecretFinding & { start: number; end: number }> = this.scanMatches(
+      content,
+    ).map((m) => ({
+      kind: m.kind,
+      filePath,
+      line: lineOfIndex(content, m.start),
+      match: m.match,
+      description: m.description,
+      confidence: m.confidence,
+      start: m.start,
+      end: m.end,
+    }));
+    return findings.sort((a, b) => a.line - b.line || compareStrings(a.kind, b.kind));
+  }
+
+  /**
    * Scans content and returns character offset spans [start, end) of flagged matches.
    * Minimal span-returning function reusing the exact same scanner rules and patterns.
    */
@@ -227,6 +266,128 @@ export class SecretScanner {
     return this.scanMatches(content)
       .map((m) => ({ start: m.start, end: m.end }))
       .sort((a, b) => a.start - b.start || a.end - b.end);
+  }
+
+  /**
+   * F02: scans a unified diff by its LOGICAL content. Line-anchored patterns
+   * (env-credential assignments) only match when lines are scanned without
+   * their `+`/`-` prefix — scanning the raw diff text misses everything
+   * behind a prefix. Hunk headers, file headers, and index lines are
+   * skipped; line numbers refer to the diff text itself. `match` values are
+   * the flagged text as it appears in the diff, so callers can redact or
+   * verify against the rendered payload.
+   *
+   * Each hunk is reconstructed as its TWO real versions and scanned
+   * separately: the OLD version from removed + unchanged context lines, the
+   * NEW version from added + unchanged context lines. A multiline block that
+   * straddles changed and unchanged lines (e.g. a key body added inside an
+   * existing key block, or a removed body between context markers) is
+   * therefore ONE finding covering the whole block in that version — per-run
+   * scanning reduced such blocks to header-only matches whose redaction left
+   * the key body exposed. Versions never merge across hunk or file
+   * boundaries, so unrelated content is never joined into fabricated blocks.
+   *
+   * Findings map back to the EXACT original offsets in `diffText` (LF and
+   * CRLF: line starts and separator lengths are tokenized from the real
+   * string, not assumed), prefixes included, and carry the caller-provided
+   * section filePath so redaction and the final leak gate operate on the
+   * real exported bytes. A block appearing in both versions (context-only)
+   * is deduplicated to one finding.
+   */
+  scanDiff(diffText: string, filePath = ""): SecretFinding[] {
+    interface DiffLine {
+      text: string; // content without its separator
+      start: number; // exact offset of the first character in diffText
+    }
+    // Tokenize with REAL separator widths (LF and CRLF), so reconstructed
+    // match offsets are exact in the original string.
+    const lines: DiffLine[] = [];
+    {
+      let pos = 0;
+      while (pos < diffText.length) {
+        const nl = diffText.indexOf("\n", pos);
+        if (nl === -1) {
+          lines.push({ text: diffText.slice(pos), start: pos });
+          break;
+        }
+        const contentEnd = nl > pos && diffText[nl - 1] === "\r" ? nl - 1 : nl;
+        lines.push({ text: diffText.slice(pos, contentEnd), start: pos });
+        pos = nl + 1;
+      }
+    }
+
+    const isHeader = (line: string): boolean =>
+      /^diff --git /.test(line) ||
+      /^index /i.test(line) ||
+      /^@@ /.test(line) ||
+      /^--- (?:a\/|b\/|\/dev\/)/.test(line) ||
+      /^\+\+\+ (?:a\/|b\/|\/dev\/)/.test(line);
+    const kindOf = (line: string): "added" | "removed" | "context" | "other" =>
+      line.startsWith("+")
+        ? "added"
+        : line.startsWith("-")
+          ? "removed"
+          : line.startsWith(" ")
+            ? "context"
+            : "other";
+
+    const findings: SecretFinding[] = [];
+    const seen = new Set<string>();
+
+    // Scan one hunk's version: lines of the given kinds joined logically.
+    const scanVersion = (hunk: number[], kinds: Set<string>): void => {
+      let text = "";
+      const map: Array<{ diffIdx: number; start: number; end: number }> = [];
+      for (const idx of hunk) {
+        const line = lines[idx]!;
+        const kind = kindOf(line.text);
+        if (!kinds.has(kind)) continue;
+        const stripped = kind === "other" ? line.text : line.text.slice(1);
+        const start = text.length;
+        text += stripped + "\n";
+        map.push({ diffIdx: idx, start, end: text.length });
+      }
+      if (text.trim().length === 0) return;
+      for (const m of this.scanMatches(text)) {
+        const first = map.find((s) => m.start >= s.start && m.start < s.end) ?? map[0]!;
+        const last = map.find((s) => m.end > s.start && m.end <= s.end) ?? map[map.length - 1]!;
+        // Exact raw substring: whole first line through whole last line in
+        // the ORIGINAL text (prefixes included, separators untouched).
+        const rawStart = lines[first.diffIdx]!.start;
+        const rawEnd = lines[last.diffIdx]!.start + lines[last.diffIdx]!.text.length;
+        const key = `${m.kind}:${rawStart}:${rawEnd}`;
+        if (seen.has(key)) continue; // context blocks appear in BOTH versions
+        seen.add(key);
+        findings.push({
+          kind: m.kind,
+          filePath,
+          line: first.diffIdx + 1,
+          match: diffText.slice(rawStart, rawEnd),
+          description: m.description,
+          confidence: m.confidence,
+        });
+      }
+    };
+
+    // Group content lines into hunks (@@-to-@@ / file-header boundaries).
+    let hunk: number[] = [];
+    const flushHunk = (): void => {
+      if (hunk.length === 0) return;
+      scanVersion(hunk, new Set(["removed", "context"])); // OLD version
+      scanVersion(hunk, new Set(["added", "context"])); // NEW version
+      hunk = [];
+    };
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]!;
+      if (isHeader(line.text)) {
+        flushHunk();
+        continue;
+      }
+      hunk.push(i);
+    }
+    flushHunk();
+
+    return findings.sort((a, b) => a.line - b.line || compareStrings(a.kind, b.kind));
   }
 }
 

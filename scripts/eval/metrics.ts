@@ -181,6 +181,8 @@ export function taskMetrics(
 ): {
   top1: number;
   recall5: number;
+  /** Recall@8 — OCC's mean package size; the seeds-sim harness reports it. */
+  recall8: number;
   recall10: number;
   allGoldAcc10: number;
   mrr: number;
@@ -188,6 +190,7 @@ export function taskMetrics(
   return {
     top1: top1Hit(ranked, gold),
     recall5: recallAtK(ranked, gold, 5),
+    recall8: recallAtK(ranked, gold, 8),
     recall10: recallAtK(ranked, gold, 10),
     allGoldAcc10: allGoldAccAtK(ranked, gold, 10),
     mrr: reciprocalRank(ranked, gold),

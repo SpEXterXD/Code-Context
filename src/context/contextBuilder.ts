@@ -7,6 +7,7 @@ import {
   type RetrievalResult,
 } from "../retrieval/hybridRetriever";
 import type { ScoredFile, RankingSignal } from "../retrieval/relevanceScorer";
+import { explainSignals } from "../retrieval/relevanceScorer";
 import {
   assignTiers,
   findEntryPoints,
@@ -36,9 +37,11 @@ import {
 } from "./contextFormatter";
 import { sha256Hex } from "../shared/ids";
 import { OccError } from "../shared/errors";
+import { logger } from "../shared/logging";
 import { compareStrings } from "../shared/text";
 import type { SeedSet } from "../seeds/seedSet";
 import { sensitivePathCheck } from "../security/sensitivePathRules";
+import type { SecretFinding } from "../security/secretScanner";
 import { SecretScanner } from "../security/secretScanner";
 import { redactMatch } from "../security/redactor";
 
@@ -109,7 +112,14 @@ export interface ContextBuilderDeps {
   budget: ContextBudgetConfig;
   security: SecurityConfig;
   enableGitRecency: boolean;
-  readFile: (repoRelativePath: string) => string;
+  /**
+   * Reads one workspace-relative source file. May return null to signal
+   * "source unavailable for this build" (e.g. the live file grew past the
+   * configured byte cap between indexing and generation) — the builder then
+   * degrades that file to metadata-only instead of exporting unchecked
+   * content. Thrown errors are equally treated as an unavailable read.
+   */
+  readFile: (repoRelativePath: string) => string | null;
 }
 
 const TIER_ORDER_SIGNAL_WEIGHT: Record<string, number> = {
@@ -140,6 +150,25 @@ export const M3B_RANK_PRIORITY = {
 };
 
 /**
+ * Stage 1 (raw diff export paused): production always omits raw diff text
+ * from generated payloads. Until the replacement diff-screening design lands
+ * (Stage 7), `prepareSeedState` drops SeedSet.diffSections at this shared
+ * boundary for every caller, mode, and policy; changed paths keep their
+ * DIFF_TOUCHED hints. Production code must never un-pause; the setter exists
+ * only for the developer-only eval harness and diff fixtures so the
+ * scanner/redaction pipeline stays exercised until restoration. Default: paused.
+ */
+let rawDiffExportPaused = true;
+
+export function setRawDiffExportPaused(paused: boolean): void {
+  rawDiffExportPaused = paused;
+}
+
+export function isRawDiffExportPaused(): boolean {
+  return rawDiffExportPaused;
+}
+
+/**
  * Builds a complete context package for a mode:
  * retrieve → tier → security screen → budgeted truncation ladder → format.
  *
@@ -166,20 +195,49 @@ export class ContextBuilder {
     const candidates = assignTiers(retrieval.ranked, userPins);
 
     // Security screen BEFORE budgeting: blocked files never consume budget.
-    const security = this.screenCandidates(candidates);
+    // Stage 2: snapshots holds the ONE bounded source read per candidate for
+    // this build; assembly uses only these (never re-reads).
+    const sourceSnapshots = new Map<string, string | null>();
+    const security = this.screenCandidates(candidates, sourceSnapshots);
+    // F02: merge diff-content findings into the verdict so safe reports
+    // and the final leak-verification gate cover CURRENT CHANGES too.
+    if (seedState.diffFindings.length > 0) {
+      security.rawFindings.push(...seedState.diffFindings);
+      for (const f of seedState.diffFindings) {
+        security.safeFindings.push({
+          kind: f.kind,
+          filePath: f.filePath,
+          line: f.line,
+          description: f.description,
+          confidence: f.confidence,
+          action:
+            this.deps.security.secretPolicy === "block"
+              ? "blocked"
+              : this.deps.security.redactSecrets
+                ? "redacted"
+                : "warned",
+        });
+      }
+    }
     const seedContentExcluded = new Set<string>();
     if (signalOnly) {
-      for (const h of seedState.hints) seedContentExcluded.add(h.path);
+      const pinSet = new Set(userPins);
+      for (const h of seedState.hints) {
+        if (!pinSet.has(h.path)) seedContentExcluded.add(h.path); // explicit pins override signal-only exclusion
+      }
     }
     const eligibleAll = candidates.filter(
       (c) => !security.blockedFiles.has(c.path) && !seedContentExcluded.has(c.path),
     );
-    // M3b/P1: the top-N retrieval-ranked eligible files take content slots in
-    // rank order first; everything else keeps the tier-then-score order.
-    let eligible = eligibleAll;
+    // F08: reserve explicit user selections BEFORE rank-priority extras —
+    // the top-N reorder must never displace a USER_SELECTED file.
+    const userPinSet = new Set(userPins);
+    const pinnedFirst = eligibleAll.filter((c) => userPinSet.has(c.path));
+    const unpinned = eligibleAll.filter((c) => !userPinSet.has(c.path));
+    let eligible = [...pinnedFirst];
     if (M3B_RANK_PRIORITY.enabled && retrieval.ranked.length > 0) {
       const rankOf = new Map(retrieval.ranked.map((r, i) => [r.path, i + 1] as const));
-      const byRank = eligibleAll
+      const byRank = unpinned
         .filter((c) => {
           const r = rankOf.get(c.path);
           return r !== undefined && r <= M3B_RANK_PRIORITY.topN;
@@ -187,8 +245,12 @@ export class ContextBuilder {
         .sort((a, b) => rankOf.get(a.path)! - rankOf.get(b.path)!);
       if (byRank.length > 0) {
         const prioritized = new Set(byRank.map((c) => c.path));
-        eligible = [...byRank, ...eligibleAll.filter((c) => !prioritized.has(c.path))];
+        eligible = [...eligible, ...byRank, ...unpinned.filter((c) => !prioritized.has(c.path))];
+      } else {
+        eligible = [...eligible, ...unpinned];
       }
+    } else {
+      eligible = [...eligible, ...unpinned];
     }
 
     // Reserve budget for static sections (tree/architecture/why overhead);
@@ -221,6 +283,9 @@ export class ContextBuilder {
     );
 
     // Per-file source assembly with truncation ladder (greedy by tier order).
+    // Stage 2: each candidate's source is read ONCE per build (bounded
+    // snapshot), screened, and assembled only from that snapshot or its
+    // redacted derivative — a second, differing read can never be exported.
     const sourceFiles: SourceFileSection[] = [];
     const truncation: Array<{ path: string; level: TruncationLevel }> = [];
     const why: WhySelection[] = [];
@@ -236,7 +301,8 @@ export class ContextBuilder {
           candidate.path,
           entry,
           ledger,
-          security.redactedContent,
+          security,
+          sourceSnapshots,
         );
         if (attempt) {
           ledger.addFile(); // file is committed to the package: count it against maxFiles
@@ -301,17 +367,27 @@ export class ContextBuilder {
     }
     // M4b/S1 signal-only: seeded files never take content slots. Any seeded
     // candidate not otherwise in the WHY list gets a path-only entry (its
-    // diff, if any, already renders in ## CURRENT CHANGES).
+    // diff, if any, already renders in ## CURRENT CHANGES). FU6: the entry's
+    // reason derives from the hint's own kind — an editor selection seed must
+    // not be mislabeled as a working-tree change.
     if (signalOnly) {
       for (const h of [...seedState.hints].sort((a, b) => compareStrings(a.path, b.path))) {
         if (why.some((entry) => entry.path === h.path)) continue;
+        const reason = explainSignals({
+          path: h.path,
+          score: 0,
+          signals: [{ kind: h.kind, weight: 0, detail: h.detail ?? "" }],
+        })[0]!;
         why.push({
           path: h.path,
-          tierLabel: TIER_LABELS.CHANGE_SEED,
+          tierLabel: h.kind === "SELECTION" ? TIER_LABELS.USER_SELECTED : TIER_LABELS.CHANGE_SEED,
           score: 0,
-          reasons: ["Changed in your working tree"],
+          reasons: [reason],
           included: false,
-          note: "change seed: not packaged (signal-only mode; diff in CURRENT CHANGES)",
+          note:
+            h.kind === "SELECTION"
+              ? "selection seed: not packaged (signal-only mode)"
+              : "change seed: not packaged (signal-only mode)",
         });
       }
     }
@@ -428,7 +504,7 @@ export class ContextBuilder {
       tree: tree.text,
       treeNote: tree.truncated ? `tree truncated at depth ${budget.structureDepth}` : undefined,
       architecture,
-      symbols: this.buildSymbolLines(includedPaths),
+      symbols: this.buildSymbolLines(includedPaths, security.rawFindings),
       why,
       sourceFiles,
       metadata: {
@@ -672,19 +748,23 @@ export class ContextBuilder {
   private prepareSeedState(seedSet?: SeedSet): {
     hints: Array<{
       path: string;
-      kind: "DIFF_TOUCHED" | "OPEN_EDITOR" | "DIAGNOSTIC" | "STACK_FRAME";
+      kind: "DIFF_TOUCHED" | "OPEN_EDITOR" | "DIAGNOSTIC" | "STACK_FRAME" | "SELECTION";
       detail?: string;
     }>;
     currentChanges?: { sections: Array<{ path: string; diff: string }>; truncated: boolean };
     withheldDiffs: Array<{ path: string; reason: string }>;
+    /** F02: raw diff findings for the final leak-verification gate. */
+    diffFindings: SecretFinding[];
     notes: string[];
   } {
-    if (!seedSet) return { hints: [], withheldDiffs: [], notes: [] };
+    if (!seedSet) return { hints: [], withheldDiffs: [], diffFindings: [], notes: [] };
     const kindPriority = {
-      DIFF_TOUCHED: 0,
-      DIAGNOSTIC: 1,
-      STACK_FRAME: 2,
-      OPEN_EDITOR: 3,
+      // FU6: an explicit editor selection is the strongest intent signal.
+      SELECTION: 0,
+      DIFF_TOUCHED: 1,
+      DIAGNOSTIC: 2,
+      STACK_FRAME: 3,
+      OPEN_EDITOR: 4,
     } as const;
     type HintKind = keyof typeof kindPriority;
     const hintByPath = new Map<string, { path: string; kind: HintKind; detail?: string }>();
@@ -693,6 +773,14 @@ export class ContextBuilder {
       if (!this.deps.entries.has(p) || hintByPath.has(p)) return;
       hintByPath.set(p, { path: p, kind, detail });
     };
+    // FU6: the explicit editor selection is consumed, not just collected.
+    if (seedSet.selection) {
+      addHint(
+        seedSet.selection.path,
+        "SELECTION",
+        `lines ${seedSet.selection.startLine}-${seedSet.selection.endLine}`,
+      );
+    }
     for (const c of seedSet.changedPaths) addHint(c.path, "DIFF_TOUCHED", c.state);
     for (const d of seedSet.diagnostics) addHint(d.path, "DIAGNOSTIC", d.message.slice(0, 60));
     for (const f of seedSet.stackFrames ?? []) addHint(f.path, "STACK_FRAME", `line ${f.line}`);
@@ -702,7 +790,23 @@ export class ContextBuilder {
       (a, b) => kindPriority[a.kind] - kindPriority[b.kind] || compareStrings(a.path, b.path),
     );
 
+    // Stage 1 (raw diff export paused): at this shared production boundary
+    // raw diff text is OMITTED from every generated payload regardless of
+    // caller, policy, or mode — including injected SeedSet.diffSections.
+    // Changed paths keep their DIFF_TOUCHED hints; the whole diff-screening
+    // pipeline below stays in place behind the pause flag for its verified
+    // restoration (Stage 7). A developer-only caller (eval harness, diff
+    // fixtures) may re-enable explicitly via setRawDiffExportPaused(false).
+    if (isRawDiffExportPaused()) {
+      const notes =
+        seedSet.diffSections.length > 0
+          ? [...seedSet.notes, "raw diff export paused: diff text omitted (changed paths retained)"]
+          : [...seedSet.notes];
+      return { hints, currentChanges: undefined, withheldDiffs: [], diffFindings: [], notes };
+    }
+
     const withheldDiffs: Array<{ path: string; reason: string }> = [];
+    const diffFindings: SecretFinding[] = [];
     const accepted: Array<{ path: string; diff: string }> = [];
     const scanner = new SecretScanner();
     for (const section of [...seedSet.diffSections].sort((a, b) =>
@@ -718,8 +822,14 @@ export class ContextBuilder {
         continue;
       }
       let text = section.diff;
-      const findings = scanner.scan(section.path, text);
+      // F02: scan the LOGICAL diff content (added/removed/context with the
+      // unified-diff prefix stripped) so line-anchored patterns see the real
+      // content; findings are merged into the security verdict below. The
+      // section path is attributed to every finding, and multiline blocks
+      // (private keys) are reported whole so redaction withholds all of it.
+      const findings = scanner.scanDiff(text, section.path);
       if (findings.length > 0) {
+        diffFindings.push(...findings);
         if (this.deps.security.secretPolicy === "block") {
           withheldDiffs.push({
             path: section.path,
@@ -759,21 +869,33 @@ export class ContextBuilder {
       }
     }
     const currentChanges = sections.length > 0 ? { sections, truncated } : undefined;
-    return { hints, currentChanges, withheldDiffs, notes: seedSet.notes };
+    return { hints, currentChanges, withheldDiffs, diffFindings, notes: seedSet.notes };
   }
 
-  private screenCandidates(candidates: RankedCandidate[]): SecurityVerdict {
+  private screenCandidates(
+    candidates: RankedCandidate[],
+    snapshots: Map<string, string | null>,
+  ): SecurityVerdict {
+    // Security screen EVERY readable candidate, regardless of parse status.
+    // The previous PARSED/PARTIAL/GENERIC filter excluded FAILED entries
+    // while assembleSource still read their source — a parser failure could
+    // then export credential-bearing content that no policy (and not even
+    // the final leak gate, which only sees scanned rawFindings) ever
+    // checked. Parse status must never become a security exemption.
+    // Stage 2: the read is the ONE bounded snapshot for this build — stored
+    // in `snapshots` so assembly never re-reads (a second read could differ
+    // and export unscreened content).
     const toScan = candidates
       .map((c) => ({ path: c.path, entry: this.deps.entries.get(c.path) }))
       .filter((c): c is { path: string; entry: FileEntry } => c.entry !== undefined)
-      .filter(
-        (c) => c.entry.meta.parseStatus === "PARSED" || c.entry.meta.parseStatus === "GENERIC",
-      )
-      .map((c) => ({
-        path: c.path,
-        entry: c.entry,
-        content: safeRead(this.deps.readFile, c.path),
-      }))
+      .map((c) => {
+        let content = snapshots.get(c.path);
+        if (content === undefined) {
+          content = safeRead(this.deps.readFile, c.path);
+          snapshots.set(c.path, content);
+        }
+        return { path: c.path, entry: c.entry, content };
+      })
       .filter((c) => c.content !== null)
       .map((c) => ({ path: c.path, entry: c.entry, content: c.content as string }));
     return applySecurityPolicy(toScan, this.deps.security);
@@ -783,15 +905,25 @@ export class ContextBuilder {
    * Truncation ladder: FULL → SYMBOLS → SIGNATURES → METADATA.
    * Returns the largest representation that fits the remaining budget,
    * measured exactly (byte-identical to what will be rendered).
+   *
+   * Stage 2: content comes ONLY from this build's screened snapshot (or its
+   * redacted derivative). A failed screened read (null) is never retried —
+   * the file degrades to metadata-only. Before any source section is
+   * returned, {@link guardKnownFindings} enforces known-finding absence on
+   * the actual selected lines (pre-decoration), so clipped or decorated
+   * excerpts cannot export credential material that the final payload gate
+   * (a whole-match substring check) cannot see.
    */
   private assembleSource(
     path: string,
     entry: FileEntry,
     ledger: BudgetLedger,
-    redactedContent: Map<string, string>,
+    security: SecurityVerdict,
+    snapshots: Map<string, string | null>,
   ): { section: SourceFileSection; level: TruncationLevel } | null {
-    const content = redactedContent.get(path) ?? safeRead(this.deps.readFile, path);
-    if (content === null) return null;
+    const snapshot = snapshots.get(path);
+    if (snapshot === undefined || snapshot === null) return null; // failed read: no retry
+    const content = security.redactedContent.get(path) ?? snapshot;
     const lines = content.split(/\r?\n/);
     if (lines.length > 0 && lines[lines.length - 1] === "") lines.pop();
     const language = entry.meta.language;
@@ -812,6 +944,10 @@ export class ContextBuilder {
       if (ledger.canAdd(size.chars, size.lines)) return { section, size };
       return null;
     };
+    // Stage 2: known-finding absence is enforced on the ACTUAL selected lines
+    // (pre-decoration) at each emission point.
+    const guard = (blocks: SourceBlock[]): void =>
+      this.guardKnownFindings(path, blocks, lines, security.rawFindings);
 
     // FULL (capped at maxCodeLinesPerFile; longer files degrade to SYMBOLS).
     if (lines.length <= this.deps.budget.maxCodeLinesPerFile) {
@@ -820,15 +956,19 @@ export class ContextBuilder {
       ]);
       const ok = fits(section);
       if (ok) {
+        guard(section.blocks);
         ledger.add(ok.size.chars, ok.size.lines);
         return { section, level: "FULL" };
       }
     }
 
-    // SYMBOLS: ranges of defined symbols (sorted by line), greedily included.
-    // Exact accounting: re-measure the whole candidate section each iteration
-    // and only commit the final measurement to the ledger.
-    const symbolRanges = [...entry.symbols]
+    // SYMBOLS: merged DISJOINT ranges of defined symbols, capped by
+    // maxCodeLinesPerFile like FULL content. Overlapping/adjacent ranges
+    // (e.g. a class plus its members) merge into one span, so a member line
+    // is never rendered twice; a range longer than the whole allowance is
+    // truncated deterministically to the allowance.
+    const perFileCap = this.deps.budget.maxCodeLinesPerFile;
+    const rawRanges = [...entry.symbols]
       .filter((s) => s.kind !== "json-key")
       .sort((a, b) => a.startLine - b.startLine || compareStrings(a.id, b.id))
       .slice(0, 20)
@@ -836,37 +976,61 @@ export class ContextBuilder {
         start: Math.max(1, s.startLine),
         end: Math.min(lines.length, s.endLine),
       }))
-      .filter((r) => r.end >= r.start);
+      .filter((r) => r.end >= r.start)
+      .sort((a, b) => a.start - b.start || a.end - b.end);
+    const mergedRanges: Array<{ start: number; end: number }> = [];
+    for (const r of rawRanges) {
+      const last = mergedRanges[mergedRanges.length - 1];
+      if (last && r.start <= last.end + 1) {
+        last.end = Math.max(last.end, r.end); // overlapping or adjacent: merge
+      } else {
+        mergedRanges.push({ ...r });
+      }
+    }
     const symbolBlocks: SourceBlock[] = [];
-    for (const range of symbolRanges) {
-      const candidate = sectionFor([
-        ...symbolBlocks,
-        {
-          startLine: range.start,
-          endLine: range.end,
-          text: renderCodeBlock(lines.slice(range.start - 1, range.end), range.start),
-        },
-      ]);
+    let perFileLines = 0;
+    for (const range of mergedRanges) {
+      const remaining = perFileCap - perFileLines;
+      if (remaining <= 0) break;
+      let end = range.end;
+      if (range.end - range.start + 1 > remaining) {
+        // One symbol exceeds the allowance (or the remaining share):
+        // truncate deterministically at the allowance boundary.
+        end = range.start + remaining - 1;
+      }
+      const block = {
+        startLine: range.start,
+        endLine: end,
+        text: renderCodeBlock(lines.slice(range.start - 1, end), range.start),
+      };
+      const candidate = sectionFor([...symbolBlocks, block]);
       const size = renderedSize(candidate);
       if (!ledger.canAdd(size.chars, size.lines)) break;
-      symbolBlocks.push(candidate.blocks[candidate.blocks.length - 1]);
+      symbolBlocks.push(block);
+      perFileLines += end - range.start + 1;
     }
     if (symbolBlocks.length > 0) {
       const section = sectionFor(symbolBlocks);
       const size = renderedSize(section);
       if (ledger.canAdd(size.chars, size.lines)) {
+        guard(symbolBlocks);
         ledger.add(size.chars, size.lines);
         return { section, level: "SYMBOLS" };
       }
     }
 
-    // SIGNATURES: signatures + locations only.
+    // SIGNATURES: signatures + locations only, under the same per-file cap.
+    // Stage 2 correction A: this fallback emits derived text, not snapshot
+    // lines — guarded against known-finding fragments like every other
+    // emitted representation.
     const signatureLines = entry.symbols
       .filter((s) => s.signature)
       .sort((a, b) => a.startLine - b.startLine)
       .slice(0, 40)
+      .slice(0, perFileCap)
       .map((s) => `${s.startLine}: ${s.signature}`);
     if (signatureLines.length > 0) {
+      this.guardKnownFragments(path, signatureLines, security.rawFindings);
       const section = sectionFor([
         { startLine: 1, endLine: lines.length, text: signatureLines.join("\n") },
       ]);
@@ -879,22 +1043,118 @@ export class ContextBuilder {
     return null;
   }
 
-  private buildSymbolLines(includedPaths: string[]): ContextModel["symbols"] {
+  /**
+   * Stage 2: enforces known-finding absence on the ACTUAL lines selected for
+   * emission, BEFORE line decoration. The final payload gate matches whole
+   * raw findings against the rendered text — invisible once renderCodeBlock
+   * inserts "N: " prefixes, or when a clipped excerpt emits only part of a
+   * multiline match. Here each gated finding is mapped to the file line
+   * indices it covers, and if any COVERED line is about to be emitted with
+   * its flagged material intact, the build fails with SECURITY_BLOCKED (the
+   * documented ALLOW / WARN-without-redaction precedence). Under WARN with
+   * redaction the emitted lines come from the redacted derivative, where the
+   * flagged material is replaced — the guard passes unless redaction failed,
+   * in which case the build also fails closed. Credential bytes never appear
+   * in the error message.
+   */
+  private guardKnownFindings(
+    path: string,
+    blocks: SourceBlock[],
+    lines: string[],
+    rawFindings: SecurityVerdict["rawFindings"],
+  ): void {
+    const fileFindings = rawFindings.filter((f) => f.filePath === path);
+    if (fileFindings.length === 0) return;
+    const gated = fileFindings.filter(
+      (f) => f.confidence === "high" || f.match.length >= 8, // same floor as the final gate
+    );
+    if (gated.length === 0) return;
+    const emitted = new Set<number>();
+    for (const b of blocks) {
+      for (let i = b.startLine - 1; i < b.endLine && i < lines.length; i++) {
+        emitted.add(i);
+      }
+    }
+    for (const finding of gated) {
+      const matchLines = finding.match.split(/\r?\n/);
+      for (let li = 0; li < matchLines.length; li++) {
+        const idx = finding.line - 1 + li;
+        if (!emitted.has(idx)) continue;
+        const flaggedLine = matchLines[li] ?? "";
+        const emittedLine = lines[idx] ?? "";
+        if (flaggedLine.length > 0 && emittedLine.includes(flaggedLine)) {
+          logger.error(
+            `security: known finding material selected for emission in ${path} at line ${finding.line}`,
+          );
+          throw new OccError(
+            "SECURITY_BLOCKED",
+            `SECURITY: generated context would include known secret material from ${path} ` +
+              `(finding ${finding.kind} at line ${finding.line}). Export aborted.`,
+          );
+        }
+      }
+    }
+  }
+
+  /**
+   * Stage 2 correction A: fragment-level guard for emitted text that is NOT
+   * snapshot lines (signature fallback, symbol labels). A finding counts as
+   * leaked only when a SUBSTANTIVE fragment of its match (a trimmed line of
+   * at least 8 characters: blanks and short common fragments never match
+   * unrelated text) appears verbatim in the emitted text.
+   */
+  private guardKnownFragments(
+    path: string,
+    texts: string[],
+    rawFindings: SecurityVerdict["rawFindings"],
+  ): void {
+    const gated = rawFindings.filter(
+      (f) => f.filePath === path && (f.confidence === "high" || f.match.length >= 8),
+    );
+    if (gated.length === 0) return;
+    for (const finding of gated) {
+      for (const line of finding.match.split(/\r?\n/)) {
+        const fragment = line.trim();
+        if (fragment.length < 8) continue; // blank/common fragment: never a signal
+        for (const text of texts) {
+          if (text.includes(fragment)) {
+            logger.error(
+              `security: known finding fragment selected for emission in ${path} at line ${finding.line}`,
+            );
+            throw new OccError(
+              "SECURITY_BLOCKED",
+              `SECURITY: generated context would include known secret material from ${path} ` +
+                `(finding ${finding.kind} at line ${finding.line}). Export aborted.`,
+            );
+          }
+        }
+      }
+    }
+  }
+  private buildSymbolLines(
+    includedPaths: string[],
+    rawFindings: SecurityVerdict["rawFindings"],
+  ): ContextModel["symbols"] {
     const symbols: ContextModel["symbols"] = [];
     for (const path of includedPaths) {
       const entry = this.deps.entries.get(path);
       if (!entry) continue;
+      const labels: string[] = [];
       for (const sym of entry.symbols) {
         if (sym.kind === "json-key") continue;
+        const label = `${sym.kind} ${sym.name}${sym.signature ? `: ${sym.signature}` : ""}`.slice(
+          0,
+          160,
+        );
+        labels.push(label);
         symbols.push({
           path,
           line: sym.startLine,
-          label: `${sym.kind} ${sym.name}${sym.signature ? `: ${sym.signature}` : ""}`.slice(
-            0,
-            160,
-          ),
+          label,
         });
       }
+      // Stage 2 correction A: symbol labels are emitted representations too.
+      this.guardKnownFragments(path, labels, rawFindings);
     }
     return symbols
       .sort(
@@ -963,7 +1223,7 @@ function renderWithTokenConvergence(model: ContextModel): {
   };
 }
 
-function safeRead(readFile: (p: string) => string, path: string): string | null {
+function safeRead(readFile: (p: string) => string | null, path: string): string | null {
   try {
     return readFile(path);
   } catch {

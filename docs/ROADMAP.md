@@ -7,7 +7,7 @@ This document outlines planned improvements and experimental features for Offlin
 Change-aware seeds are implemented, experimental, and off by default. Seed simulation benchmarks showed no gain in package recall on the tuning split (see [ADR-006](adr/006-change-aware-seeds.md) and [docs/eval/README.md](eval/README.md)).
 
 When enabled by the developer (`offlineCodeContext.changeSeeds: true`), retrieval is seeded from the active working state:
-- Working-tree modifications: Staged and unstaged files gathered via `safeGit`, formatted into the optional `## CURRENT CHANGES` section.
+- Working-tree modifications: Staged and unstaged files gathered via `safeGit` as path-only seeds. RAW DIFF EXPORT IS PAUSED: generated payloads contain no `## CURRENT CHANGES` section or diff text (see the security documentation); the section returns with the planned diff-restoration stage.
 - Editor state: Files open in active editor tabs and current editor selections (`offlineCodeContext.seedEditors`).
 - Diagnostics: Files displaying compiler diagnostics in the problems panel (`offlineCodeContext.seedDiagnostics`).
 - Stack traces: File locations captured from clipboard stack traces (`offlineCodeContext.seedStackTraces`).

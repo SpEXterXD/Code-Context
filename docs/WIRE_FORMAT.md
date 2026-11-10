@@ -8,7 +8,10 @@ Every generated context package follows a fixed section order:
 
 1. Header Metadata: Project identifier, index version, file counts, token estimate.
 2. `## DEVELOPER TASK`: Task query entered by the developer, or active file context.
-3. `## CURRENT CHANGES` (Optional): Working-tree git diffs when change seeds are enabled.
+3. `## CURRENT CHANGES` (Currently not emitted): RAW DIFF EXPORT IS PAUSED. Since the
+   Stage 1 security pause, production payloads contain no diff text; changed files
+   still surface as path-only seeds through retrieval hints and WHY entries. The
+   section format below is retained for the planned diff-restoration stage.
 4. `## PROJECT STRUCTURE`: ASCII directory tree with file counts.
 5. `## RELEVANT ARCHITECTURE`: Largest directories, hub files, and external package references.
 6. `## RELEVANT SYMBOLS`: Exported symbols, class declarations, function signatures, and line numbers.
@@ -43,8 +46,12 @@ ESTIMATED_TOKENS: ~<tokens>
 ### 1. Developer task (`## DEVELOPER TASK`)
 Contains the literal text entered into the task prompt. If no task was specified (such as in project or file overview modes), emits `(no task specified)`.
 
-### 2. Current changes (`## CURRENT CHANGES`)
-Emitted only when `offlineCodeContext.changeSeeds` is true and uncommitted changes exist in the local working tree:
+### 2. Current changes (`## CURRENT CHANGES`, paused; historical format)
+HISTORICAL FORMAT, retained for the planned diff-restoration stage. While raw diff
+export is paused, this section is NOT emitted: production payloads contain no diff
+text even when `offlineCodeContext.changeSeeds` is true and uncommitted changes
+exist; changed files surface as path-only seeds through retrieval hints and WHY
+entries. The example below shows the format the restoration stage will re-enable:
 ````
 ## CURRENT CHANGES
 ### DIFF: src/middleware/rateLimit.ts
@@ -94,8 +101,8 @@ Each candidate file receives an explicit selection record:
 If a file was considered during retrieval but its source body was withheld due to security policy or budget exhaustion, `[source not included]` is appended to the heading:
 ```
 ### src/config/secrets.ts [source not included]
-- Tier: direct dependency (score 4.10)
-- Note: excluded by security policy (block)
+- Tier: excluded by security policy (score 4.10)
+- Note: source withheld by security policy
 ```
 
 ### 7. Repository source (`## SOURCE`)

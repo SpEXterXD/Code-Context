@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 
+import { isInsideRoot, relativeToRoot } from "./workspacePaths";
+import { compareStrings } from "../shared/text";
 import { collectGitSeeds } from "../seeds/seedCollector";
 import { parseStackTrace, type StackFrame } from "../seeds/stackTrace";
 import { emptySeedSet, normalizeSeedSet, type SeedSet } from "../seeds/seedSet";
@@ -65,7 +67,6 @@ export function resetCapturedStackFrames(): void {
 }
 
 function editorSeedSet(config: SeedProviderConfig, rootPath: string): Partial<SeedSet> {
-  const rootPosix = rootPath.replace(/\\/g, "/").replace(/\/$/, "");
   const partial: Partial<SeedSet> = {};
   if (config.seedEditors) {
     try {
@@ -73,19 +74,38 @@ function editorSeedSet(config: SeedProviderConfig, rootPath: string): Partial<Se
       const tabs = groups
         .flatMap((g) => g.tabs)
         .filter((t) => t.input instanceof vscode.TabInputText);
-      const paths = tabs
-        .map((t) => (t.input as vscode.TabInputText).uri.fsPath.replace(/\\/g, "/"))
-        .filter((p) => p.startsWith(`${rootPosix}/`));
-      const rel = paths.map((p) => relativeToRoot(p, rootPath));
-      partial.openEditors = rel.map((p, i) => ({ path: p, active: i === 0 }));
+      const fileTabs = tabs.filter((t) => (t.input as vscode.TabInputText).uri.scheme === "file");
+      const paths = fileTabs
+        .map((t) => (t.input as vscode.TabInputText).uri.fsPath)
+        .filter((p) => isInsideRoot(rootPath, p));
+      const rel = paths
+        .map((p) => relativeToRoot(rootPath, p))
+        .filter((p): p is string => p !== null);
+      // Review fix (follow-up 6): the active flag reflects the ACTUAL active
+      // editor (by fsPath), never "first tab" — a reordered tab strip or an
+      // active editor that holds no tab must not fabricate state.
+      const activeDoc = vscode.window.activeTextEditor?.document;
+      const activeFsPath =
+        activeDoc && activeDoc.uri.scheme === "file" ? activeDoc.uri.fsPath : undefined;
+      partial.openEditors = rel.map((p, i) => ({
+        path: p,
+        active: activeFsPath !== undefined && paths[i] === activeFsPath,
+      }));
       const active = vscode.window.activeTextEditor;
-      if (active && active.selection && !active.selection.isEmpty) {
-        const relPath = relativeToRoot(active.document.uri.fsPath.replace(/\\/g, "/"), rootPath);
-        partial.selection = {
-          path: relPath,
-          startLine: active.selection.start.line + 1,
-          endLine: active.selection.end.line + 1,
-        };
+      if (
+        active &&
+        active.document.uri.scheme === "file" &&
+        active.selection &&
+        !active.selection.isEmpty
+      ) {
+        const relPath = relativeToRoot(rootPath, active.document.uri.fsPath);
+        if (relPath) {
+          partial.selection = {
+            path: relPath,
+            startLine: active.selection.start.line + 1,
+            endLine: active.selection.end.line + 1,
+          };
+        }
       }
     } catch {
       /* editor APIs unavailable: degrade to absent */
@@ -96,19 +116,20 @@ function editorSeedSet(config: SeedProviderConfig, rootPath: string): Partial<Se
       const all = vscode.languages.getDiagnostics();
       const items: { path: string; message: string }[] = [];
       for (const [uri, diagnostics] of all) {
+        if (uri.scheme !== "file") continue;
         for (const d of diagnostics) {
           if (
             d.severity !== vscode.DiagnosticSeverity.Error &&
             d.severity !== vscode.DiagnosticSeverity.Warning
           )
             continue;
-          items.push({
-            path: relativeToRoot(uri.fsPath.replace(/\\/g, "/"), rootPath),
-            message: d.message,
-          });
+          const rel = relativeToRoot(rootPath, uri.fsPath);
+          if (rel) items.push({ path: rel, message: d.message });
         }
       }
-      items.sort((a, b) => a.path.localeCompare(b.path) || a.message.localeCompare(b.message));
+      // Review fix: compareStrings (locale-agnostic) — localeCompare ordering
+      // is environment-dependent and broke payload determinism.
+      items.sort((a, b) => compareStrings(a.path, b.path) || compareStrings(a.message, b.message));
       partial.diagnostics = items;
     } catch {
       /* diagnostics unavailable: degrade to absent */
@@ -118,11 +139,6 @@ function editorSeedSet(config: SeedProviderConfig, rootPath: string): Partial<Se
     partial.stackFrames = capturedStackFrames;
   }
   return partial;
-}
-
-function relativeToRoot(absPosix: string, rootPath: string): string {
-  const root = rootPath.replace(/\\/g, "/").replace(/\/$/, "");
-  return absPosix.startsWith(`${root}/`) ? absPosix.slice(root.length + 1) : absPosix;
 }
 
 export async function collectChangeSeeds(deps: SeedProviderDeps): Promise<SeedSet> {

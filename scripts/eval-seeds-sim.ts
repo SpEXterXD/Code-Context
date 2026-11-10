@@ -20,8 +20,14 @@ import process from "node:process";
 import { OccApplication } from "../src/application/contextService";
 import { CancellationSource } from "../src/shared/cancellation";
 import { M4_SEED_WEIGHTS } from "../src/retrieval/hybridRetriever";
+import { setRawDiffExportPaused } from "../src/context/contextBuilder";
 
 import type { Snapshot } from "./eval/baselines";
+
+// DEVELOPER-ONLY: the seed-simulation arms exercise the diff-screening pipeline
+// (realdiff arm). Production stays paused (Stage 1); this explicitly re-enables
+// diff export for this harness run only.
+setRawDiffExportPaused(false);
 import { bm25Baseline } from "./eval/baselines";
 import { cloneDirFor, materializeSnapshot, verifyPinnedCommit } from "./eval/gitminer";
 import { pairedDiffCi, taskMetrics, type PairedDiff, type RankedFile } from "./eval/metrics";
@@ -167,7 +173,6 @@ async function main(): Promise<void> {
     console.log(`resuming: ${done.size} tasks checkpointed`);
   }
 
-  let byPathOf: Map<string, Set<string>> | null = null;
   for (const repoId of repoIds) {
     const clonePath = cloneDirFor(repoId);
     for (const t of tasks.filter((x) => x.repoId === repoId) as DatasetTask[]) {
@@ -338,7 +343,8 @@ async function main(): Promise<void> {
       const vals = score(arm, slice);
       const mean = {
         top1: avg(vals.map((v) => v.top1)),
-        recall8: avg(vals.map((v) => v.recall5)),
+        // Fix: report true Recall@8 (was aliased to recall5 values).
+        recall8: avg(vals.map((v) => v.recall8)),
         recall10: avg(vals.map((v) => v.recall10)),
         mrr: avg(vals.map((v) => v.mrr)),
         packageRecall: avg(vals.map((v) => v.packageRecall)),
@@ -366,6 +372,15 @@ async function main(): Promise<void> {
     }
     summary[`${slice}Slice`] = perArm;
   }
+  // Fix: token means are computed BEFORE the summary file is written — the
+  // original assigned meanTokensPerArm to the in-memory object after
+  // writeFileSync, so the persisted JSON never contained the token stats.
+  const tokenMeans: Record<string, number> = {};
+  for (const arm of ARMS) {
+    const toks = [...done.values()].map((t) => t.arms[arm].tokens);
+    tokenMeans[arm] = avg(toks);
+  }
+  (summary as { meanTokensPerArm: Record<string, number> }).meanTokensPerArm = tokenMeans;
   const outDir = path.join(ROOT, "docs", "eval");
   fs.mkdirSync(outDir, { recursive: true });
   const summaryFile = path.join(outDir, `results-seeds-sim-${split}-w${weight}.json`);
@@ -379,12 +394,6 @@ async function main(): Promise<void> {
       >;
     }
   ).fullSlice;
-  const tokenMeans: Record<string, number> = {};
-  for (const arm of ARMS) {
-    const toks = [...done.values()].map((t) => t.arms[arm].tokens);
-    tokenMeans[arm] = avg(toks);
-  }
-  (summary as { meanTokensPerArm: Record<string, number> }).meanTokensPerArm = tokenMeans;
   for (const arm of ARMS) {
     const m = full[arm]!.mean;
     const p = full[arm]!.pairedVsUnseeded;

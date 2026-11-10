@@ -64,7 +64,7 @@ OCC is evaluated against three reference systems:
 
 ## Statistical analysis
 
-All metrics are reported as mean values accompanied by 95% bootstrap confidence intervals computed using 2,000 paired bootstrap draws (`pairedBootstrap` in JSON). Differences between systems are calculated per task pair (OCC minus baseline). An advantage is statistically significant at alpha = 0.05 when the 95% confidence interval of the difference excludes zero.
+All metrics are reported as mean values accompanied by 95% bootstrap confidence intervals computed using 1,000 paired bootstrap draws (`BINDING_COUNT` in `scripts/eval/metrics.ts`). Differences between systems are calculated per task pair (OCC minus baseline). An advantage is statistically significant at alpha = 0.05 when the 95% confidence interval of the difference excludes zero.
 
 ## Evaluation results
 

@@ -78,7 +78,7 @@ Complete reference for all 16 commands provided by Offline Code Context Compiler
 ### `offlineCodeContext.generateSelectionContext`
 - Title: `OCC: Generate Selection Context`
 - Availability: Command Palette
-- Description: Compiles a package focused on the active editor selection. Prompts whether to include graph neighbors (imports, callers, tests) or restrict the package to the selected file content only.
+- Description: Compiles a package focused on the active editor selection. Prompts whether to include graph neighbors (imports, callers, tests) or restrict the package to the selected file content only. Opens the result in the read-only preview editor.
 
 ### `offlineCodeContext.previewContext`
 - Title: `OCC: Preview Context`
@@ -93,7 +93,7 @@ Complete reference for all 16 commands provided by Offline Code Context Compiler
 ### `offlineCodeContext.securityScan`
 - Title: `OCC: Security Scan`
 - Availability: Command Palette
-- Description: Performs an explicit scan for secret-like tokens across workspace files selected for context. Reports findings, detected pattern types, and redaction actions in the Offline Code Context output channel.
+- Description: Performs an explicit scan for secret-like tokens across workspace files selected for context. Reports findings grouped per file with detected pattern types, redaction actions, and a redacted source excerpt for each flagged line (quoted only from redacted content, so raw secret values never appear in the output channel) in the Offline Code Context output channel.
 
 ### `offlineCodeContext.clearIndex`
 - Title: `OCC: Clear Local Index`

@@ -60,6 +60,7 @@ export interface RankingSignal {
     | "OPEN_EDITOR"
     | "DIAGNOSTIC"
     | "STACK_FRAME"
+    | "SELECTION"
     | "SEED_NEIGHBOR";
   weight: number;
   detail: string;
@@ -110,6 +111,8 @@ export function explainSignals(scored: ScoredFile): string[] {
           return `Has a diagnostic: ${s.detail}`;
         case "STACK_FRAME":
           return `Appears in the parsed stack trace (${s.detail})`;
+        case "SELECTION":
+          return `Explicitly selected in your editor${s.detail ? ` (${s.detail})` : ""}`;
         case "SEED_NEIGHBOR":
           return `Graph neighbor of a changed file (${s.detail})`;
       }
@@ -188,7 +191,14 @@ export class SymbolNameIndex {
       line: number;
     }> = [];
     for (const candidate of [...new Set(candidates)].sort(compareStrings)) {
-      for (const hit of this.byCanonical.get(candidate) ?? []) hits.push(hit);
+      const matches = [...(this.byCanonical.get(candidate) ?? [])];
+      matches.sort(
+        (a, b) =>
+          compareStrings(a.path, b.path) ||
+          a.line - b.line ||
+          compareStrings(a.symbolId, b.symbolId),
+      );
+      for (const hit of matches) hits.push(hit);
     }
     return hits;
   }

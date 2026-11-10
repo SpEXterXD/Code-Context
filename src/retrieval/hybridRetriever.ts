@@ -53,6 +53,11 @@ export const M4_SEED_WEIGHTS = {
   diagnostic: 0.4,
   stackFrame: 0.4,
   /**
+   * FU6: explicit user selection (seedEditors) — the strongest intent signal,
+   * above even DIFF_TOUCHED (a selection is where the user is looking now).
+   */
+  selection: 0.8,
+  /**
    * M4b/S1: how seeded files interact with package slots. Default
    * "signal-only" (v0.3 decision, ADR-006): seeds fire signals and originate
    * graph expansion, but are NOT pinned and are excluded from content slots
@@ -83,7 +88,7 @@ export interface RetrievalOptions {
    */
   seedHints?: Array<{
     path: string;
-    kind: "DIFF_TOUCHED" | "OPEN_EDITOR" | "DIAGNOSTIC" | "STACK_FRAME";
+    kind: "DIFF_TOUCHED" | "OPEN_EDITOR" | "DIAGNOSTIC" | "STACK_FRAME" | "SELECTION";
     detail?: string;
   }>;
 }
@@ -156,14 +161,30 @@ export class HybridRetriever {
 
     // 1) Lexical (tf-idf over weighted fields), normalized to [0, 1].
     //    Includes prefix matching (>=4 chars) so "authentication" hits "auth".
+    //    F09: expand matching posting keys BEFORE the normalization
+    //    denominator so a prefix-only term (no exact corpus occurrence)
+    //    still contributes — its effective IDF is the best prefix key's.
     if (analysis.terms.length > 0) {
       const maxWeight = this.inverted.maxTermWeight;
-      const idfSum = analysis.terms.reduce((acc, t) => acc + this.inverted.idf(t), 0);
+      const termIdf = new Map<string, number>();
+      for (const term of analysis.terms) {
+        const exact = this.inverted.idf(term);
+        if (exact > 0) {
+          termIdf.set(term, exact);
+          continue;
+        }
+        let best = 0;
+        for (const { key } of this.inverted.docsForPrefix(term)) {
+          best = Math.max(best, this.inverted.idf(key));
+        }
+        if (best > 0) termIdf.set(term, best);
+      }
+      const idfSum = [...termIdf.values()].reduce((acc, v) => acc + v, 0);
       if (idfSum > 0) {
         const docScores = new Map<string, { raw: number; terms: Set<string> }>();
         const PREFIX_DISCOUNT = 0.7;
         for (const term of analysis.terms) {
-          const idf = this.inverted.idf(term);
+          const idf = termIdf.get(term) ?? 0;
           if (idf === 0) continue;
           for (const path of this.inverted.docsFor(term)) {
             const contribution = (this.inverted.tf(term, path) * idf) / (idfSum * maxWeight);
@@ -347,6 +368,21 @@ export class HybridRetriever {
           break;
       }
     }
+    // 5) Same-directory bonus relative to the top seed. F10: collected BEFORE
+    // the structural capping/application step (previously appended after the
+    // map was consumed, so the signal never reached any candidate). Root-level
+    // seeds (empty directory) consistently get no same-directory bonus.
+    if (seeds.length > 0) {
+      const seedDir = dirOf(seeds[0]);
+      if (seedDir) {
+        for (const path of this.graph.allFiles()) {
+          if (dirOf(path) === seedDir && path !== seeds[0]) {
+            addStructural(path, "SAME_DIRECTORY", seedDir, STRUCTURAL_BONUS.sameDirectory);
+          }
+        }
+      }
+    }
+
     // Apply structural signals per path with a total cap (hub damping).
     const structuralPerPath = new Map<
       string,
@@ -363,18 +399,6 @@ export class HybridRetriever {
       const scale = total > STRUCTURAL_CAP ? STRUCTURAL_CAP / total : 1;
       for (const s of list) {
         bump(path, { kind: s.kind, weight: s.weight * scale, detail: s.other });
-      }
-    }
-
-    // 5) Same-directory bonus relative to the top seed (capped with the rest).
-    if (seeds.length > 0) {
-      const seedDir = dirOf(seeds[0]);
-      if (seedDir) {
-        for (const path of this.graph.allFiles()) {
-          if (dirOf(path) === seedDir && path !== seeds[0]) {
-            addStructural(path, "SAME_DIRECTORY", seedDir, STRUCTURAL_BONUS.sameDirectory);
-          }
-        }
       }
     }
 
@@ -407,7 +431,9 @@ export class HybridRetriever {
               ? M4_SEED_WEIGHTS.openEditor
               : hint.kind === "DIAGNOSTIC"
                 ? M4_SEED_WEIGHTS.diagnostic
-                : M4_SEED_WEIGHTS.stackFrame;
+                : hint.kind === "SELECTION"
+                  ? M4_SEED_WEIGHTS.selection
+                  : M4_SEED_WEIGHTS.stackFrame;
         bump(hint.path, {
           kind: hint.kind,
           weight,

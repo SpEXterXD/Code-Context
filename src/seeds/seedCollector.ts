@@ -121,7 +121,27 @@ function truncateAtLineBoundary(
   };
 }
 
+/**
+ * Stage 1 (raw diff export paused): PRODUCTION seed collection is
+ * status-only. One hardened `git status --porcelain=v1 -z` yields changed
+ * paths, change kinds, deterministic ordering and caps, and the merge/rebase
+ * note — no `git diff` is ever spawned and no untracked file body is read.
+ * Sensitive paths and BOTH rename endpoints are retained as path-only
+ * metadata hints (the context builder omits all raw diffs anyway); the
+ * sensitive-path veto guards CONTENT reads only. Diff collection survives in
+ * {@link collectGitSeedsWithDiffs} for developer-only fixtures and the
+ * eventual Stage 7 restoration; production callers (seedProvider) never use
+ * it.
+ */
 export async function collectGitSeeds(
+  rootPath: string,
+  options: SeedCollectorOptions,
+): Promise<SeedCollectorResult> {
+  return collectGitSeedsInternal(rootPath, options);
+}
+
+/** Shared status pass: identical for both collectors, including flood control. */
+async function collectGitSeedsInternal(
   rootPath: string,
   options: SeedCollectorOptions,
 ): Promise<SeedCollectorResult> {
@@ -160,8 +180,24 @@ export async function collectGitSeeds(
   if (droppedCount > 0) {
     seedSet.notes.push(`${droppedCount} changed path(s) excluded (cap/filters)`);
   }
+  return { seedSet: normalizeSeedSet({ ...seedSet, changedPaths: kept }) };
+}
 
-  // Diff content — AFTER the sensitive-path veto; blocked paths never read.
+/**
+ * DEVELOPER-ONLY: the pre-Stage-1 collector that additionally reads per-file
+ * diffs (`git diff --no-ext-diff --no-textconv`, untracked bodies from disk).
+ * Not used by any production path; kept explicitly isolated for fixtures and
+ * the Stage 7 restoration work. Sensitive-path veto still runs BEFORE any
+ * diff content is read.
+ */
+export async function collectGitSeedsWithDiffs(
+  rootPath: string,
+  options: SeedCollectorOptions,
+): Promise<SeedCollectorResult> {
+  const base = await collectGitSeedsInternal(rootPath, options);
+  if (base.unavailableReason) return base;
+  const seedSet = base.seedSet;
+  const kept = seedSet.changedPaths;
   let truncatedAny = false;
   for (const cp of kept) {
     if (cp.state === "deleted" || options.isBlockedPath(cp.path)) continue;

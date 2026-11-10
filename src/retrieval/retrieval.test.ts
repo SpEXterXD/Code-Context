@@ -229,10 +229,10 @@ describe("HybridRetriever ranking + explanations", () => {
     function fusionFixture(): { retriever: HybridRetriever; paths: [string, string, string] } {
       const seed = entryWith("src/seed.ts", { symbols: ["gizmo"] });
       // Graph-proximate but content-free: only the imports edge fires (0.5).
-      const neighbor = entryWith("src/neighbor.ts", {});
+      const neighbor = entryWith("lib/neighbor.ts", {});
       neighbor.internalRelations = [
         {
-          source: "file:src/neighbor.ts",
+          source: "file:lib/neighbor.ts",
           target: "file:src/seed.ts",
           kind: "imports",
           provenance: "STATIC_EXACT",
@@ -246,7 +246,7 @@ describe("HybridRetriever ranking + explanations", () => {
       ];
       return {
         retriever: makeRetriever([seed, neighbor, lexical]),
-        paths: ["src/seed.ts", "src/neighbor.ts", "other/panel.ts"],
+        paths: ["src/seed.ts", "lib/neighbor.ts", "other/panel.ts"],
       };
     }
     const rankOf = (r: ReturnType<HybridRetriever["retrieve"]>, path: string): number =>
@@ -368,6 +368,66 @@ describe("HybridRetriever ranking + explanations", () => {
         M4_SEED_WEIGHTS.enabled = wasEnabled;
         M4_SEED_WEIGHTS.slotPolicy = wasPolicy;
       }
+    });
+  });
+  describe("F09/F10: prefix-only queries and same-directory signals", () => {
+    it("F09: prefix-only term matches when the exact term is absent from the corpus", () => {
+      const graph = new RelationshipGraph();
+      const map = new Map<string, FileEntry>();
+      const auth = entryWith("src/auth.ts", { identifiers: ["auth", "login"] });
+      const unrelated = entryWith("src/util.ts", { identifiers: ["unrelated"] });
+      for (const e of [auth, unrelated]) {
+        map.set(e.meta.path, e);
+        graph.upsertEntry(e);
+      }
+      const retriever = new HybridRetriever("/tmp", graph, new GitMetadata(), map);
+      retriever.rebuild();
+      const result = retriever.retrieve("authentication", { maxGraphDepth: 1 });
+      expect(result.ranked.some((r) => r.path === "src/auth.ts")).toBe(true);
+    });
+
+    it("F09: mixed exact and prefix-only terms both contribute", () => {
+      const graph = new RelationshipGraph();
+      const map = new Map<string, FileEntry>();
+      const auth = entryWith("src/auth.ts", { identifiers: ["auth", "login"] });
+      const widget = entryWith("src/widget.ts", { identifiers: ["widget"] });
+      for (const e of [auth, widget]) {
+        map.set(e.meta.path, e);
+        graph.upsertEntry(e);
+      }
+      const retriever = new HybridRetriever("/tmp", graph, new GitMetadata(), map);
+      retriever.rebuild();
+      // "authentication" is prefix-only; "widget" is exact
+      const result = retriever.retrieve("authentication widget", { maxGraphDepth: 1 });
+      expect(result.ranked.some((r) => r.path === "src/auth.ts")).toBe(true);
+      expect(result.ranked.some((r) => r.path === "src/widget.ts")).toBe(true);
+    });
+
+    it("F10: disconnected sibling receives a real SAME_DIRECTORY signal", () => {
+      const graph = new RelationshipGraph();
+      const map = new Map<string, FileEntry>();
+      const seed = entryWith("src/auth/handler.ts", { symbols: ["handleLogin"] });
+      const sibling = entryWith("src/auth/config.ts", {});
+      const distant = entryWith("src/other/util.ts", {});
+      for (const e of [seed, sibling, distant]) {
+        map.set(e.meta.path, e);
+        graph.upsertEntry(e);
+      }
+      const retriever = new HybridRetriever("/tmp", graph, new GitMetadata(), map);
+      retriever.rebuild();
+      const result = retriever.retrieve("handleLogin", { maxGraphDepth: 1 });
+      const siblingScored = result.ranked.find((r) => r.path === "src/auth/config.ts");
+      expect(siblingScored).toBeDefined();
+      expect(siblingScored!.signals.some((s) => s.kind === "SAME_DIRECTORY")).toBe(true);
+      expect(
+        retriever.explain(siblingScored!).some((r) => r.startsWith("Same directory as top match")),
+      ).toBe(true);
+      expect(result.ranked.find((r) => r.path === "src/other/util.ts")).toBeUndefined();
+      // determinism: identical query twice
+      const again = retriever.retrieve("handleLogin", { maxGraphDepth: 1 });
+      expect(again.ranked.map((r) => r.path + ":" + r.score.toFixed(4))).toEqual(
+        result.ranked.map((r) => r.path + ":" + r.score.toFixed(4)),
+      );
     });
   });
 });

@@ -1,10 +1,37 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 
+// Behavioral accounting for the Stage 1 collector: every safeGit call is
+// recorded while the real hardened helper and filesystem still do the work.
+const accounting = vi.hoisted(() => ({
+  gitCalls: [] as string[][],
+  readPaths: [] as string[],
+}));
+vi.mock("../git/safeGit", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../git/safeGit")>();
+  return {
+    safeGit: (options: Parameters<typeof actual.safeGit>[0]) => {
+      accounting.gitCalls.push(options.args);
+      return actual.safeGit(options);
+    },
+  };
+});
+vi.mock("node:fs", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs")>();
+  return {
+    ...actual,
+    readFileSync: (file: Parameters<typeof actual.readFileSync>[0], ...rest: unknown[]) => {
+      accounting.readPaths.push(String(file));
+      return (actual.readFileSync as (...a: unknown[]) => string)(file, ...rest);
+    },
+  };
+});
+
 import { safeGit } from "../git/safeGit";
-import { collectGitSeeds, parseStatusZ } from "./seedCollector";
+import { sensitivePathCheck } from "../security/sensitivePathRules";
+import { collectGitSeeds, collectGitSeedsWithDiffs, parseStatusZ } from "./seedCollector";
 import { applyFloodControl, isGeneratedOrLockfilePath, normalizeSeedSet } from "./seedSet";
 import { parseStackTrace, STACK_TRACE_MAX_INPUT_CHARS } from "./stackTrace";
 
@@ -121,6 +148,7 @@ describe("git seed collector (temp repo, through safeGit)", () => {
     await run(["config", "user.name", "s"]);
     fs.writeFileSync(path.join(repo, "base.ts"), "export const base = 1;\n");
     fs.writeFileSync(path.join(repo, "old-name.ts"), "export const moved = 1;\n");
+    fs.writeFileSync(path.join(repo, "public-origin.ts"), "export const other = 1;\n");
     fs.writeFileSync(path.join(repo, "unstaged.ts"), "export const u = 1;\n");
     await run(["add", "-A"]);
     await run(["commit", "-q", "-m", "init"]);
@@ -132,12 +160,22 @@ describe("git seed collector (temp repo, through safeGit)", () => {
     fs.writeFileSync(path.join(repo, "untracked.ts"), "export const n = 3;\n");
     fs.rmSync(path.join(repo, "base.ts"));
     await run(["mv", "old-name.ts", "new-name.ts"]);
+    // Sensitive modified path + sensitive rename endpoint (Stage 1 C1):
+    fs.writeFileSync(path.join(repo, ".env"), "OCC_TEST_VALUE=1\n");
+    await run(["add", ".env"]);
+    await run(["commit", "-q", "-m", "env baseline", "--", ".env"]);
+    fs.writeFileSync(path.join(repo, ".env"), "OCC_TEST_VALUE=2\n");
+    fs.writeFileSync(path.join(repo, "secret.pem"), "not-a-real-key\n");
+    await run(["add", "secret.pem"]);
+    await run(["commit", "-q", "-m", "pem baseline", "--", "secret.pem"]);
+    await run(["mv", "secret.pem", "renamed-safe.ts"]);
+    await run(["mv", "public-origin.ts", "renamed-private.pem"]);
   });
   afterAll(() => {
     fs.rmSync(repo, { recursive: true, force: true });
   });
 
-  it("collects staged/unstaged/untracked/deleted/renamed seeds with diffs", async () => {
+  it("collects staged/unstaged/untracked/deleted/renamed paths (status-only, no diffs)", async () => {
     const { seedSet, unavailableReason } = await collectGitSeeds(repo, {
       maxPaths: 20,
       maxDiffBytesPerFile: 32 * 1024,
@@ -152,6 +190,20 @@ describe("git seed collector (temp repo, through safeGit)", () => {
     expect(byPath.get("base.ts")).toBe("deleted");
     expect(byPath.get("new-name.ts")).toBe("staged");
     expect(byPath.get("old-name.ts")).toBeDefined(); // renames seed both paths
+    // Stage 1: status-only production collection emits no diff text.
+    expect(seedSet.diffSections).toEqual([]);
+  });
+
+  // Developer-only fixture: collectGitSeedsWithDiffs keeps the pre-Stage-1
+  // diff behavior (small untracked add-diffs, per-file diffs) for the
+  // Stage 7 restoration. Production never calls it.
+  it("collectGitSeedsWithDiffs (developer-only) still returns diff content", async () => {
+    const { seedSet } = await collectGitSeedsWithDiffs(repo, {
+      maxPaths: 20,
+      maxDiffBytesPerFile: 32 * 1024,
+      maxUntrackedContentBytes: 64 * 1024,
+      isBlockedPath: () => false,
+    });
     const diffPaths = seedSet.diffSections.map((d) => d.path);
     expect(diffPaths).toContain("unstaged.ts");
     expect(diffPaths).toContain("untracked.ts"); // small untracked renders as add-diff
@@ -161,18 +213,54 @@ describe("git seed collector (temp repo, through safeGit)", () => {
     );
   });
 
-  it("applies the sensitive-path veto BEFORE reading diff content", async () => {
-    const blockedSeen: string[] = [];
-    const { seedSet } = await collectGitSeeds(repo, {
+  // Stage 1 corrections 1+2: the production collector keeps sensitive
+  // paths and BOTH rename endpoints as path-only metadata (same status
+  // pass and flood control as the developer-only collector), and its
+  // behavior is covered DIRECTLY: exactly one status invocation, zero
+  // diff invocations, zero reads of the specific untracked fixture body,
+  // and no emitted diff sections.
+  it("status-only collector: 1 status call, 0 diff calls, 0 untracked body reads", async () => {
+    const secret = "synthetic-" + "MIIuntrackedbodytoken1234567890=";
+    const untrackedSecretPath = path.join(repo, "untracked-secret.txt");
+    fs.writeFileSync(untrackedSecretPath, "body line\n" + secret + "\n");
+
+    accounting.gitCalls.length = 0;
+    accounting.readPaths.length = 0;
+    const result = await collectGitSeeds(repo, {
       maxPaths: 20,
       maxDiffBytesPerFile: 32 * 1024,
       maxUntrackedContentBytes: 64 * 1024,
-      isBlockedPath: (p) => {
-        blockedSeen.push(p);
-        return p === "staged.ts" || p === "new-name.ts";
-      },
+      isBlockedPath: (file) => sensitivePathCheck(file) !== null,
     });
-    expect(blockedSeen).toContain("staged.ts"); // veto consulted pre-read
+    const seedSet = result.seedSet;
+    expect(result.unavailableReason).toBeUndefined();
+
+    // Git-call accounting: exactly one status invocation, zero diffs.
+    expect(accounting.gitCalls).toEqual([["status", "--porcelain=v1", "-z"]]);
+
+    // The specific untracked fixture body was never read.
+    expect(accounting.readPaths).not.toContain(untrackedSecretPath);
+    expect(seedSet.diffSections).toEqual([]);
+    expect(JSON.stringify(seedSet)).not.toContain(secret);
+
+    // Sensitive paths and both rename directions stay as path-only hints.
+    const byPath = new Map(seedSet.changedPaths.map((c) => [c.path, c.state] as const));
+    expect(byPath.get(".env")).toBe("unstaged"); // modified sensitive path retained
+    expect(byPath.get("renamed-safe.ts")).toBe("staged"); // rename destination
+    expect(byPath.get("secret.pem")).toBe("staged"); // rename source retained
+    expect(byPath.get("renamed-private.pem")).toBe("staged");
+    expect(byPath.get("public-origin.ts")).toBe("staged");
+    expect(byPath.get("untracked-secret.txt")).toBe("untracked");
+    fs.rmSync(untrackedSecretPath, { force: true });
+  });
+
+  it("collectGitSeedsWithDiffs (developer-only) vetoes blocked paths before reading", async () => {
+    const { seedSet } = await collectGitSeedsWithDiffs(repo, {
+      maxPaths: 20,
+      maxDiffBytesPerFile: 32 * 1024,
+      maxUntrackedContentBytes: 64 * 1024,
+      isBlockedPath: (p) => p === "staged.ts" || p === "new-name.ts",
+    });
     const diffPaths = seedSet.diffSections.map((d) => d.path);
     expect(diffPaths).not.toContain("staged.ts");
     expect(diffPaths).not.toContain("new-name.ts");
@@ -236,7 +324,32 @@ describe("normalizeSeedSet", () => {
       diagnostics: [{ path: "a.ts", message: "line1\nline2" }],
     });
     expect(s.openEditors).toHaveLength(10);
-    expect(s.openEditors[0]!.active).toBe(true); // first becomes active-capable
     expect(s.diagnostics[0]!.message).toBe("line1");
+  });
+
+  // Review fix (follow-up 6): normalization fabricated an active editor when
+  // none was marked — the harness must reflect ACTUAL editor state.
+  it("does not fabricate an active editor when none is marked", () => {
+    const s = normalizeSeedSet({
+      changedPaths: [],
+      openEditors: [
+        { path: "a.ts", active: false },
+        { path: "b.ts", active: false },
+      ],
+    });
+    expect(s.openEditors.every((e) => !e.active)).toBe(true);
+  });
+
+  it("orders diagnostics deterministically (compareStrings, hostile-locale safe)", () => {
+    const s = normalizeSeedSet({
+      changedPaths: [],
+      openEditors: [],
+      diagnostics: [
+        { path: "z.ts", message: "b" },
+        { path: "İstanbul.ts", message: "a" }, // dotted capital I: localeCompare-hostile
+        { path: "a.ts", message: "c" },
+      ],
+    });
+    expect(s.diagnostics.map((d) => d.path)).toEqual(["a.ts", "z.ts", "İstanbul.ts"]);
   });
 });

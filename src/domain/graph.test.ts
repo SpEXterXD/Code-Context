@@ -190,4 +190,112 @@ describe("traverse (hard depth limit)", () => {
     // exercised again; the oracle invariant is the assertion.)
     expect(fresh.allExternalPackages()).toEqual(oracle(fresh));
   });
+  describe("F03: owned-edge upsert semantics", () => {
+    function chainGraph(): RelationshipGraph {
+      const graph = new RelationshipGraph();
+      const a = entry("src/a.ts", [importsEdge("src/a.ts", "src/b.ts")]);
+      const b = entry("src/b.ts", []);
+      graph.upsertEntry(a);
+      graph.upsertEntry(b);
+      return graph;
+    }
+
+    it("re-upserting a dependency keeps the importer's file edge", () => {
+      const graph = chainGraph();
+      expect(graph.fileDependencies("src/a.ts")).toEqual(["src/b.ts"]);
+      graph.upsertEntry(entry("src/b.ts", [])); // dependency-only edit
+      expect(graph.fileDependencies("src/a.ts")).toEqual(["src/b.ts"]);
+    });
+
+    it("cycle: re-upserting either side keeps both directions", () => {
+      const graph = new RelationshipGraph();
+      graph.upsertEntry(entry("src/a.ts", [importsEdge("src/a.ts", "src/b.ts")]));
+      graph.upsertEntry(entry("src/b.ts", [importsEdge("src/b.ts", "src/a.ts")]));
+      graph.upsertEntry(entry("src/b.ts", [importsEdge("src/b.ts", "src/a.ts")]));
+      expect(graph.fileDependencies("src/a.ts")).toEqual(["src/b.ts"]);
+      expect(graph.fileDependencies("src/b.ts")).toEqual(["src/a.ts"]);
+    });
+
+    it("renamed/removed symbols DROP incoming call edges — no line-position retargeting", () => {
+      const graph = new RelationshipGraph();
+      const callee = entry(
+        "src/b.ts",
+        [],
+        [
+          {
+            id: "src/b.ts#old@function:1",
+            name: "old",
+            kind: "function",
+            filePath: "src/b.ts",
+            startLine: 1,
+            endLine: 2,
+          },
+        ],
+      );
+      const caller = entry(
+        "src/a.ts",
+        [],
+        [
+          {
+            id: "src/a.ts#caller@function:1",
+            name: "caller",
+            kind: "function",
+            filePath: "src/a.ts",
+            startLine: 1,
+            endLine: 2,
+          },
+        ],
+      );
+      caller.internalRelations = [
+        {
+          source: "symbol:src/a.ts#caller@function:1",
+          target: "symbol:src/b.ts#old@function:1",
+          kind: "calls",
+          provenance: "STATIC_EXACT",
+        },
+      ];
+      graph.upsertEntry(callee);
+      graph.upsertEntry(caller);
+      // rename old -> renamed at the same position
+      graph.upsertEntry(
+        entry(
+          "src/b.ts",
+          [],
+          [
+            {
+              id: "src/b.ts#renamed@function:1",
+              name: "renamed",
+              kind: "function",
+              filePath: "src/b.ts",
+              startLine: 1,
+              endLine: 2,
+            },
+          ],
+        ),
+      );
+      // Review fix: the graph NEVER retargets by kind+startLine — that
+      // fabricated STATIC_EXACT calls to whatever symbol now occupies the
+      // old line. The stale edge is dropped; the indexing service restores
+      // correct edges by recomputing importer relations.
+      expect(
+        graph
+          .edgesTo("symbol:src/b.ts#renamed@function:1")
+          .some((e) => e.source === "symbol:src/a.ts#caller@function:1" && e.kind === "calls"),
+      ).toBe(false);
+      expect(graph.edgesTo("symbol:src/b.ts#old@function:1")).toHaveLength(0);
+      const graph2 = new RelationshipGraph();
+      graph2.upsertEntry(callee);
+      graph2.upsertEntry(caller);
+      graph2.upsertEntry(entry("src/b.ts", [])); // definition disappeared
+      expect(graph2.edgesFrom("symbol:src/a.ts#caller@function:1")).toHaveLength(0); // dropped, no dangling
+      // restart simulation: rebuilding from the STORED records would resurrect
+      // the dangling target — pruneDanglingSymbolTargets removes it, agreeing
+      // with the live incremental state.
+      const restarted = new RelationshipGraph();
+      for (const e of [graph2.getEntry("src/a.ts")!, graph2.getEntry("src/b.ts")!])
+        restarted.upsertEntry(e);
+      restarted.pruneDanglingSymbolTargets();
+      expect(restarted.edgesFrom("symbol:src/a.ts#caller@function:1")).toHaveLength(0);
+    });
+  });
 });

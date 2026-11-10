@@ -14,11 +14,16 @@ import { NEVER_CANCELLED, type CancellationSignal } from "../shared/cancellation
 let app: OccApplication | null = null;
 
 export function activate(context: vscode.ExtensionContext): void {
-  const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-  if (!root) {
+  const folder = vscode.workspace.workspaceFolders?.[0];
+  if (!folder) {
     void vscode.window.showWarningMessage("OCC: open a folder to use Offline Code Context.");
     return;
   }
+  if (folder.uri.scheme !== "file") {
+    void vscode.window.showWarningMessage("OCC: open a local folder to use Offline Code Context.");
+    return;
+  }
+  const root = folder.uri.fsPath;
 
   const config = readConfig();
   const storeRoot =
@@ -36,15 +41,15 @@ export function activate(context: vscode.ExtensionContext): void {
   app.setGitRecencyAllowed(gitTrusted);
   if (gitTrusted) void app.refreshGitRecency();
   let trustNote: vscode.StatusBarItem | null = null;
-  const showTrustNote = (): void => {
-    if (trustNote || !config.enableGitRecency) return;
+  const showTrustNote = (current: typeof config): void => {
+    if (trustNote || !current.enableGitRecency) return;
     trustNote = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 99);
     trustNote.text = "$(shield) OCC: git metadata off (untrusted workspace)";
     trustNote.tooltip =
       "Git-based recency metadata is disabled because this workspace is not trusted. It enables automatically when you trust the workspace.";
     trustNote.show();
   };
-  if (config.enableGitRecency && !gitTrusted) showTrustNote();
+  if (config.enableGitRecency && !gitTrusted) showTrustNote(config);
   if (typeof vscode.workspace.onDidGrantWorkspaceTrust === "function") {
     context.subscriptions.push(
       vscode.workspace.onDidGrantWorkspaceTrust(() => {
@@ -79,14 +84,15 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(...commands, tree, statusBar, statusView);
 
   // ---- watcher (Phase 6) ----
-  // VS Code emits no rename events: a rename arrives as delete + create,
-  // which the indexing queue sequences. IndexingService.renameFile remains
-  // available (tested) for future callers that observe renames directly.
+  // Re-read the current path on every event. A delayed delete can arrive
+  // after recreation, and a rename arrives as separate delete/create events.
   const watcher = vscode.workspace.createFileSystemWatcher("**/*");
+  const refreshPath = (rel: string) =>
+    app!.indexing.indexSingleFile(rel, neverCancelled()).then(() => undefined);
   const watcherService = new WatcherService(watcher, {
-    change: (rel) => app!.indexing.indexSingleFile(rel, neverCancelled()).then(() => undefined),
-    create: (rel) => app!.indexing.indexSingleFile(rel, neverCancelled()).then(() => undefined),
-    remove: (rel) => app!.indexing.removeFile(rel),
+    change: refreshPath,
+    create: refreshPath,
+    remove: refreshPath,
   });
   context.subscriptions.push(...watcherService.start(), watcherService);
 
@@ -94,18 +100,30 @@ export function activate(context: vscode.ExtensionContext): void {
   // is required when exclusion patterns change.
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration("offlineCodeContext")) {
-        void vscode.window
-          .showInformationMessage(
-            "OCC: settings changed. Rebuild the index to apply new exclusions?",
-            "Rebuild",
-          )
-          .then((choice) => {
-            if (choice === "Rebuild") {
-              void vscode.commands.executeCommand("offlineCodeContext.rebuildIndex");
-            }
-          });
+      if (!e.affectsConfiguration("offlineCodeContext")) return;
+      // F05: apply the new configuration to the live application BEFORE the
+      // rebuild prompt — budgets/security/recency take effect on the next
+      // package, and discovery options are updated before a rebuild runs.
+      const next = readConfig();
+      app?.updateConfig(next);
+      const stillTrusted = vscode.workspace.isTrusted !== false;
+      app?.setGitRecencyAllowed(stillTrusted);
+      if (next.enableGitRecency && stillTrusted) void app?.refreshGitRecency();
+      if (next.enableGitRecency && !stillTrusted) showTrustNote(next);
+      if (!next.enableGitRecency || stillTrusted) {
+        trustNote?.dispose();
+        trustNote = null;
       }
+      void vscode.window
+        .showInformationMessage(
+          "OCC: settings changed. Rebuild the index to apply new exclusions?",
+          "Rebuild",
+        )
+        .then((choice) => {
+          if (choice === "Rebuild") {
+            void vscode.commands.executeCommand("offlineCodeContext.rebuildIndex");
+          }
+        });
     }),
   );
 

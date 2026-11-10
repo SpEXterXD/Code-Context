@@ -175,7 +175,7 @@ export class InvertedIndex {
       if (!longer.startsWith(shorter)) continue;
       results.push({ key, docs: [...bag.keys()].sort(compareStrings) });
     }
-    return results;
+    return results.sort((a, b) => compareStrings(a.key, b.key));
   }
 
   /** Inverse document frequency: log(1 + N/df). Deterministic per corpus state. */

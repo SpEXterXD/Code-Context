@@ -24,6 +24,8 @@ A **sharded JSON KV store** (`JsonIndexStore`):
  inconsistency (crash between entry and manifest writes, corrupt entry,
  schema bump) is repaired at load time by rebuilding or dropping the single
  affected entry. This is a tested code path, not prose.
+- Schema v7 stores sanitized inheritance clauses so relationship resolution
+  can use persisted entries. Stores from earlier schemas rebuild from source.
 
 ## Alternatives
 
@@ -48,6 +50,11 @@ A **sharded JSON KV store** (`JsonIndexStore`):
 
 ## Consequences
 
-- A crash mid-index leaves the previously committed state valid (tested).
-- A kill mid-transaction never yields partial relationship data: an entry is
- either fully replaced or not (tested).
+- A mutation stages entries and relationships before writing shards. The
+  live index is published as a single batch after the writes complete.
+- Cancellation before the first write preserves the previous index. Once
+  writing starts, the writer finishes the batch unless a write fails.
+- A failed or interrupted write batch can leave some shards updated. On
+  reopen or write failure, the service resolves relationships against the
+  shards that landed and saves any relationship repairs on the next
+  successful indexing mutation.

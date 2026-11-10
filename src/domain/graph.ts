@@ -77,9 +77,48 @@ export class RelationshipGraph {
     return this.fileEntries.get(filePath)?.symbols.find((s) => s.id === symbolId);
   }
 
-  /** Replaces (or adds) the stored entry and re-derives its edges atomically. */
+  /**
+   * Replaces the stored entry. F03: only edges OWNED by the previous entry
+   * (outgoing from its file node and its symbol nodes) are removed —
+   * incoming edges owned by other files (imports, dependents, calls
+   * targeting this file's symbols) survive. Symbol-level incoming edges
+   * whose target id disappeared are DROPPED, never retargeted: matching by
+   * kind+startLine invented STATIC_EXACT edges to whatever symbol now
+   * occupies the old line (a rename on the same line fabricated a call to
+   * the new symbol). Correct cross-file edges are restored by the indexing
+   * service, which recomputes importer relations through the analysis model
+   * when a dependency changes.
+   */
   upsertEntry(entry: FileEntry): void {
-    this.removeFile(entry.meta.path);
+    const existing = this.fileEntries.get(entry.meta.path);
+    const fileNode = `file:${entry.meta.path}`;
+    if (existing) {
+      // 1. Remove edges owned by the old entry (its outgoing edges).
+      for (const edge of [...(this.outgoing.get(fileNode) ?? [])]) {
+        this.removeFromList(this.incoming, edge.target, edge);
+      }
+      this.outgoing.delete(fileNode);
+      for (const sym of existing.symbols) {
+        const symNode = `symbol:${sym.id}`;
+        for (const edge of [...(this.outgoing.get(symNode) ?? [])]) {
+          this.removeFromList(this.incoming, edge.target, edge);
+        }
+        this.outgoing.delete(symNode);
+      }
+      // 2. Incoming symbol-level edges owned by OTHER files whose target id
+      // disappeared are dropped on both sides (a file:file import edge owned
+      // by another file survives untouched). No position-based retargeting.
+      const nextIds = new Set(entry.symbols.map((s) => s.id));
+      for (const oldSym of existing.symbols) {
+        if (nextIds.has(oldSym.id)) continue;
+        const deadNode = `symbol:${oldSym.id}`;
+        for (const edge of [...(this.incoming.get(deadNode) ?? [])]) {
+          this.removeFromList(this.outgoing, edge.source, edge);
+        }
+        this.incoming.delete(deadNode);
+        this.outgoing.delete(deadNode);
+      }
+    }
     this.fileEntries.set(entry.meta.path, entry);
     this.indexEntry(entry);
   }
@@ -109,6 +148,28 @@ export class RelationshipGraph {
     this.outgoing.delete(fileNode);
     this.incoming.delete(fileNode);
     this.fileEntries.delete(filePath);
+  }
+
+  /**
+   * F03 restart reconciliation: drops edges targeting symbol nodes whose
+   * owning entry no longer contains that symbol id (a rename/move between
+   * indexing sessions). Called after loading persisted state so a rebuilt
+   * graph agrees with the live incremental state — no dangling resolved
+   * targets.
+   */
+  pruneDanglingSymbolTargets(): void {
+    for (const [node, edges] of [...this.incoming.entries()]) {
+      if (!node.startsWith("symbol:")) continue;
+      const filePath = node.slice("symbol:".length, node.indexOf("#"));
+      const owner = this.fileEntries.get(filePath);
+      const symbolId = node.slice("symbol:".length);
+      if (owner?.symbols.some((s) => s.id === symbolId)) continue;
+      for (const edge of [...edges]) {
+        this.removeFromList(this.outgoing, edge.source, edge);
+      }
+      this.incoming.delete(node);
+      this.outgoing.delete(node);
+    }
   }
 
   clear(): void {

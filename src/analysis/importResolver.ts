@@ -1,11 +1,11 @@
-import * as fs from "node:fs";
-import * as path from "node:path";
-
-import { toPosixPath } from "../shared/ids";
+import { sha256Hex, toPosixPath } from "../shared/ids";
+import { readBoundedFile, type BoundWorkspaceRoot } from "../workspace/containment";
 
 export interface AliasMapping {
   /** e.g. "@/" -> ["src/"] (POSIX, repo-relative). */
-  prefixes: Map<string, string[]>;
+  prefixes: ReadonlyMap<string, string[]>;
+  /** Hashes effective mappings in resolution order. */
+  fingerprint: string;
 }
 
 export type ResolutionOutcome =
@@ -25,14 +25,12 @@ const CODE_EXTENSIONS = [".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", "
  * specifiers yield `EXTERNAL` (out of repo scope by design).
  */
 export class ImportResolver {
-  private readonly knownFiles: Set<string>;
-  private readonly aliases: AliasMapping;
   private readonly resolutionCache = new Map<string, ResolutionOutcome>();
 
-  constructor(rootPath: string, knownFiles: Set<string>) {
-    this.knownFiles = knownFiles;
-    this.aliases = loadTsConfigAliases(rootPath);
-  }
+  constructor(
+    private readonly knownFiles: ReadonlySet<string>,
+    private readonly aliases: AliasMapping,
+  ) {}
 
   resolve(specifier: string, importerPath: string): ResolutionOutcome {
     const cacheKey = `${importerPath}::${specifier}`;
@@ -87,7 +85,7 @@ function joinPosix(a: string, b: string): string {
   return `${a}/${b}`;
 }
 
-function resolveFromKnown(known: Set<string>, candidate: string): string | null {
+function resolveFromKnown(known: ReadonlySet<string>, candidate: string): string | null {
   const normalized = toPosixPath(candidate);
   if (known.has(normalized)) return normalized;
   for (const ext of CODE_EXTENSIONS) {
@@ -108,17 +106,21 @@ function resolveFromKnown(known: Set<string>, candidate: string): string | null 
   return null;
 }
 
-/** Reads root tsconfig.json (+ referenced configs minimally) for `paths` aliases. */
-function loadTsConfigAliases(rootPath: string): AliasMapping {
-  const prefixes = new Map<string, string[]>();
+/** Reads bounded root configuration for `paths` aliases, independent of indexing exclusions. */
+export function loadAliasMapping(
+  root: string | BoundWorkspaceRoot,
+  maxBytes = 1024 * 1024,
+): AliasMapping {
   const candidates = ["tsconfig.json", "jsconfig.json"];
   for (const candidate of candidates) {
     try {
-      const raw = fs.readFileSync(path.join(rootPath, candidate), "utf8");
+      const raw = readBoundedFile(root, candidate, maxBytes);
+      if (raw === null) continue;
       const json = parseJsoncLoose(raw) as
         { compilerOptions?: { paths?: Record<string, string[]>; baseUrl?: string } } | undefined;
       const opts = json?.compilerOptions;
       if (!opts?.paths) continue;
+      const prefixes = new Map<string, string[]>();
       const baseUrl = opts.baseUrl ? toPosixPath(opts.baseUrl) : "";
       for (const [pattern, targets] of Object.entries(opts.paths)) {
         const prefix = pattern.replace(/\*$/, "");
@@ -128,12 +130,12 @@ function loadTsConfigAliases(rootPath: string): AliasMapping {
         });
         prefixes.set(prefix, resolvedTargets);
       }
-      break; // first config wins
+      return { prefixes, fingerprint: sha256Hex(JSON.stringify([...prefixes])) };
     } catch {
       /* no tsconfig: fine */
     }
   }
-  return { prefixes };
+  return { prefixes: new Map(), fingerprint: sha256Hex("[]") };
 }
 
 /** Minimal JSONC relaxer for tsconfig files (comments + trailing commas). */

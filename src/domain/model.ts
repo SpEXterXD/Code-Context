@@ -1,7 +1,13 @@
 /** Supported analysis levels. `generic` = metadata only, no deep parsing. */
 export type Language = "typescript" | "javascript" | "json" | "markdown" | "generic";
 
-export type ParseStatus = "PARSED" | "GENERIC" | "SKIPPED_BINARY" | "SKIPPED_TOO_LARGE" | "FAILED";
+/**
+ * F14: PARTIAL = the parser recovered a usable analysis but recorded
+ * diagnostics (e.g. TypeScript syntax errors with recovered symbols, or
+ * lenient JSON fallback). The diagnostic text persists in FileMeta.parseError.
+ */
+export type ParseStatus =
+  "PARSED" | "PARTIAL" | "GENERIC" | "SKIPPED_BINARY" | "SKIPPED_TOO_LARGE" | "FAILED";
 
 /** Metadata + parse result for one file. Content hash gates all re-analysis. */
 export interface FileMeta {
@@ -47,6 +53,13 @@ export interface ImportDecl {
   sourceText: string;
   /** Names imported: identifiers, or "default", or "*". */
   importedNames: string[];
+  /**
+   * FU4: aliased bindings as written — the LOCAL alias mapped to the name
+   * actually imported ("default" for default imports). Call sites reference
+   * the local alias, so resolution needs the pairing to keep STATIC_EXACT
+   * provenance instead of degrading to heuristics. Absent on older entries.
+   */
+  aliasedNames?: Array<{ local: string; imported: string }>;
   startLine: number;
   /** True for bare package specifiers (node_modules / builtins). */
   isExternal: boolean;
@@ -62,6 +75,15 @@ export interface CallSite {
   callerId: string;
   /** Callee as written: identifier or final property segment. */
   calleeName: string;
+  startLine: number;
+}
+
+export interface HeritageInfo {
+  /** Name of the class/interface declaring the heritage clause. */
+  symbolName: string;
+  kind: "extends" | "implements";
+  /** Parent names as written in source. */
+  parents: string[];
   startLine: number;
 }
 
@@ -97,6 +119,8 @@ export interface FileEntry {
   imports: ImportDecl[];
   exports: ExportDecl[];
   calls: CallSite[];
+  /** Structural input for re-resolving inheritance when another file changes. */
+  heritages?: HeritageInfo[];
   /** File-level summary for retrieval (file docblock, MD title, JSON top-level keys). */
   fileSummary?: string;
   /** Unique source identifiers (capped) harvested by the parser, for lexical search. */
