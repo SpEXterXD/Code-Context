@@ -78,6 +78,15 @@ export interface CallSite {
   startLine: number;
 }
 
+export interface HeritageInfo {
+  /** Name of the class/interface declaring the heritage clause. */
+  symbolName: string;
+  kind: "extends" | "implements";
+  /** Parent names as written in source. */
+  parents: string[];
+  startLine: number;
+}
+
 export type EdgeKind =
   | "imports"
   | "exports"
@@ -110,6 +119,8 @@ export interface FileEntry {
   imports: ImportDecl[];
   exports: ExportDecl[];
   calls: CallSite[];
+  /** Structural input for re-resolving inheritance when another file changes. */
+  heritages?: HeritageInfo[];
   /** File-level summary for retrieval (file docblock, MD title, JSON top-level keys). */
   fileSummary?: string;
   /** Unique source identifiers (capped) harvested by the parser, for lexical search. */

@@ -14,11 +14,16 @@ import { NEVER_CANCELLED, type CancellationSignal } from "../shared/cancellation
 let app: OccApplication | null = null;
 
 export function activate(context: vscode.ExtensionContext): void {
-  const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-  if (!root) {
+  const folder = vscode.workspace.workspaceFolders?.[0];
+  if (!folder) {
     void vscode.window.showWarningMessage("OCC: open a folder to use Offline Code Context.");
     return;
   }
+  if (folder.uri.scheme !== "file") {
+    void vscode.window.showWarningMessage("OCC: open a local folder to use Offline Code Context.");
+    return;
+  }
+  const root = folder.uri.fsPath;
 
   const config = readConfig();
   const storeRoot =
@@ -79,14 +84,15 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(...commands, tree, statusBar, statusView);
 
   // ---- watcher (Phase 6) ----
-  // VS Code emits no rename events: a rename arrives as delete + create,
-  // which the indexing queue sequences. IndexingService.renameFile remains
-  // available (tested) for future callers that observe renames directly.
+  // Re-read the current path on every event. A delayed delete can arrive
+  // after recreation, and a rename arrives as separate delete/create events.
   const watcher = vscode.workspace.createFileSystemWatcher("**/*");
+  const refreshPath = (rel: string) =>
+    app!.indexing.indexSingleFile(rel, neverCancelled()).then(() => undefined);
   const watcherService = new WatcherService(watcher, {
-    change: (rel) => app!.indexing.indexSingleFile(rel, neverCancelled()).then(() => undefined),
-    create: (rel) => app!.indexing.indexSingleFile(rel, neverCancelled()).then(() => undefined),
-    remove: (rel) => app!.indexing.removeFile(rel),
+    change: refreshPath,
+    create: refreshPath,
+    remove: refreshPath,
   });
   context.subscriptions.push(...watcherService.start(), watcherService);
 

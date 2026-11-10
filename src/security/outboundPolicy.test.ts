@@ -3,14 +3,15 @@ import { describe, expect, it } from "vitest";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
+import { importedSpecifiersSyntax } from "./forbiddenModules";
 import { FORBIDDEN_NODE_MODULES, OUTBOUND_POLICY_STATEMENT } from "./outboundPolicy";
 
 /**
- * FU9: the outbound policy was previously dead documentation —
- * FORBIDDEN_NODE_MODULES was declared "used by tests" but no test enforced
- * it, so a network-capable import could slip into src/ unnoticed. These
- * tests ARE the enforcement: any new import of a forbidden module in src/,
- * or any runtime dependency that ships one, fails the suite.
+ * FU9/review: the outbound policy was previously dead documentation, and the
+ * first enforcement pass used a REGEX extractor that missed `export * from
+ * "node:https"` and flagged commented-out imports. Enforcement is now
+ * syntax-aware (the installed TypeScript parser): any import of a forbidden
+ * module in src/, or any runtime dependency that ships one, fails the suite.
  */
 
 const SRC_ROOT = path.resolve(import.meta.dirname ?? process.cwd(), "..", "..", "src");
@@ -25,29 +26,66 @@ function listSourceFiles(dir: string): string[] {
   return out;
 }
 
-/** Import / require / dynamic-import specifiers in one source file. */
-function importedSpecifiers(source: string): string[] {
-  const specifiers: string[] = [];
-  const patterns = [
-    /(?:^|\n)\s*import\s+(?:type\s+)?[^'"]*?from\s*["']([^"']+)["']/g,
-    /(?:^|\n)\s*import\s*["']([^"']+)["']/g,
-    /\brequire\(\s*["']([^"']+)["']\s*\)/g,
-    /\bimport\(\s*["']([^"']+)["']\s*\)/g,
-  ];
-  for (const re of patterns) {
-    for (const m of source.matchAll(re)) specifiers.push(m[1]!);
-  }
-  return specifiers;
+function isForbidden(spec: string): boolean {
+  const bare = spec.replace(/^node:/, "").split("/")[0]!;
+  return (FORBIDDEN_NODE_MODULES as readonly string[]).includes(bare);
 }
+
+describe("FU9: forbidden-module extraction (syntax-aware)", () => {
+  it("finds every supported import form", () => {
+    const source = [
+      'import { createServer } from "http";',
+      'import "https";',
+      'import * as net2 from "node:net";',
+      'import dgram from "node:dgram";',
+      'export * from "node:tls";', // the form the regex extractor missed
+      'export { x } from "node:dns";',
+      'const u = require("undici");',
+      'import eq = require("node:http2");',
+      'const m = await import("axios");',
+      'const n = await import("node-fetch");',
+    ].join("\n");
+    const specs = importedSpecifiersSyntax(source);
+    for (const expected of [
+      "http",
+      "https",
+      "node:net",
+      "node:dgram",
+      "node:tls",
+      "node:dns",
+      "undici",
+      "node:http2",
+      "axios",
+      "node-fetch",
+    ]) {
+      expect(specs).toContain(expected);
+    }
+  });
+
+  it("never flags comments, prose, or string content", () => {
+    const source = [
+      "// import * as net from 'node:net';",
+      '/* const http = require("http"); */',
+      'const message = "please import \\"https\\" somewhere";',
+      'const url = "https://example.invalid/api";',
+      "export const ok = 1;",
+    ].join("\n");
+    expect(importedSpecifiersSyntax(source).filter(isForbidden)).toEqual([]);
+  });
+
+  it("leaves non-literal dynamic imports unreported rather than guessed", () => {
+    const source = "const mod = await import(variableName);";
+    expect(importedSpecifiersSyntax(source)).toEqual([]);
+  });
+});
 
 describe("FU9: outbound network policy is enforced", () => {
   it("forbids network-capable module imports anywhere in src/", () => {
     const offenders: string[] = [];
     for (const file of listSourceFiles(SRC_ROOT)) {
       const source = fs.readFileSync(file, "utf8");
-      for (const spec of importedSpecifiers(source)) {
-        const bare = spec.replace(/^node:/, "").split("/")[0]!;
-        if ((FORBIDDEN_NODE_MODULES as readonly string[]).includes(bare)) {
+      for (const spec of importedSpecifiersSyntax(source, file)) {
+        if (isForbidden(spec)) {
           offenders.push(`${path.relative(SRC_ROOT, file)} imports "${spec}"`);
         }
       }

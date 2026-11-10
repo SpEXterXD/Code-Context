@@ -191,7 +191,14 @@ export class SymbolNameIndex {
       line: number;
     }> = [];
     for (const candidate of [...new Set(candidates)].sort(compareStrings)) {
-      for (const hit of this.byCanonical.get(candidate) ?? []) hits.push(hit);
+      const matches = [...(this.byCanonical.get(candidate) ?? [])];
+      matches.sort(
+        (a, b) =>
+          compareStrings(a.path, b.path) ||
+          a.line - b.line ||
+          compareStrings(a.symbolId, b.symbolId),
+      );
+      for (const hit of matches) hits.push(hit);
     }
     return hits;
   }

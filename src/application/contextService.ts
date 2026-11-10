@@ -1,7 +1,12 @@
-import * as fs from "node:fs";
 import * as path from "node:path";
 
 import { IndexingService } from "./indexingService";
+import {
+  readBoundedFile,
+  bindWorkspaceRoot,
+  isBoundWorkspaceRoot,
+  type BoundWorkspaceRoot,
+} from "../workspace/containment";
 import { createDefaultParserRegistry } from "../parser/parserRegistry";
 import { HybridRetriever } from "../retrieval/hybridRetriever";
 import { GitMetadata } from "../git/gitMetadata";
@@ -57,14 +62,16 @@ export class OccApplication {
    * (and pre-trust-availability tests) behave as before.
    */
   private gitRecencyAllowed = true;
+  readonly rootBinding: BoundWorkspaceRoot;
 
   constructor(
     readonly rootPath: string,
     storeRoot: string,
     private config: OccConfig = DEFAULT_CONFIG,
   ) {
+    this.rootBinding = bindWorkspaceRoot(rootPath);
     const registry = createDefaultParserRegistry();
-    this.indexing = new IndexingService(rootPath, storeRoot, (p) => registry.resolve(p), {
+    this.indexing = new IndexingService(this.rootBinding, storeRoot, (p) => registry.resolve(p), {
       excludePatterns: config.excludePatterns,
       respectGitignore: config.respectGitignore,
       maxFileSizeBytes: config.maxFileSizeBytes,
@@ -135,7 +142,7 @@ export class OccApplication {
         entries: this.indexing.getEntries(),
         graph: this.indexing.getGraph(),
         retriever: this.retriever,
-        projectName: resolveProjectName(this.rootPath),
+        projectName: resolveProjectName(this.rootBinding),
         indexVersion: computeIndexVersion(this.indexing.getEntries()),
         budget: this.config,
         security: {
@@ -143,7 +150,10 @@ export class OccApplication {
           redactSecrets: this.config.redactSecrets,
         },
         enableGitRecency: this.config.enableGitRecency && this.gitRecencyAllowed,
-        readFile: (p: string) => fs.readFileSync(path.join(this.rootPath, p), "utf8"),
+        readFile: (p: string): string | null => {
+          const cap = this.config.maxFileSizeBytes ?? DEFAULT_CONFIG.maxFileSizeBytes;
+          return readBoundedFile(this.rootBinding, p, cap);
+        },
       });
       this.builderDirty = false;
     }
@@ -170,12 +180,16 @@ export class OccApplication {
     }
     // Normalize scopes onto existing modes: a file scope IS the file mode
     // (pinned seed + tier expansion); a folder scope narrows the project
-    // mode's candidate set. No new modes, no new pipelines.
+    // mode's candidate set. No new modes, no new pipelines. Review fix
+    // (follow-up 6): the seedSet is forwarded through normalization — the
+    // file-scope path previously dropped it, silently losing CURRENT CHANGES
+    // and seed hints for right-click file context.
     if (request.scope?.kind === "file") {
       return this.ensureBuilder().build({
         mode: "file",
         activeFile: request.scope.relPath,
         expandSelection: request.expandSelection,
+        seedSet: request.seedSet,
       });
     }
     // Keep retrieval structures in sync (cheap no-ops when nothing changed).
@@ -199,12 +213,16 @@ export class OccApplication {
   }
 }
 
-export function resolveProjectName(rootPath: string): string {
+export function resolveProjectName(root: string | BoundWorkspaceRoot): string {
+  const rootPath = isBoundWorkspaceRoot(root) ? root.rootPath : root;
   try {
-    const pkg = JSON.parse(fs.readFileSync(path.join(rootPath, "package.json"), "utf8")) as {
-      name?: string;
-    };
-    if (pkg.name) return pkg.name;
+    const content = readBoundedFile(root, "package.json", 64 * 1024);
+    if (content !== null) {
+      const pkg = JSON.parse(content) as { name?: string };
+      if (pkg && typeof pkg.name === "string" && pkg.name.trim().length > 0) {
+        return pkg.name;
+      }
+    }
   } catch {
     /* fall through to directory name */
   }

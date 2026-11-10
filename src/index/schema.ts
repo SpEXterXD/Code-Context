@@ -10,7 +10,15 @@ import type { FileEntry } from "../domain/model";
 // v4 (F01): structural strings (symbol names/ids, exports, imports, calls,
 // parse errors) are sanitized at parse time; older stores rebuild once so
 // previously persisted credential-bearing names never survive on disk.
-export const STORE_SCHEMA_VERSION = 4;
+// v5 (review fix): import alias bindings are sanitized on both sides.
+// v6 (Stage 3): thrown parser diagnostics are replaced with safe categories
+// (the exception message is untrusted and may echo source material).
+// Schema-v5 stores may already hold tainted FAILED parseError text, so they
+// rebuild once. Per-entry writes stay atomic single-file transactions; a
+// failed write preserves the previous valid destination (see indexStore).
+// v7 (Stage 4): sanitized heritage clauses are needed to re-resolve relations.
+// Older shards rebuild from source because the missing clauses cannot be recovered.
+export const STORE_SCHEMA_VERSION = 7;
 
 export interface IndexManifest {
   schemaVersion: number;
@@ -59,12 +67,12 @@ const isObjArr = (v: unknown): v is Array<Record<string, unknown>> =>
   Array.isArray(v) && v.every((x) => typeof x === "object" && x !== null);
 
 /**
- * FU5: fail-closed structural validation for entries read from disk. The
- * original load only checked `meta.path` presence, so a hand-edited,
- * partially-corrupt, or foreign entry (bogus parseStatus, non-array
- * collections, absolute or traversal paths) loaded into memory unchecked and
- * flowed into retrieval and context building. Invalid entries are dropped as
- * corrupt — the file re-indexes on the next run.
+ * FU5/review: fail-closed structural validation for entries read from disk.
+ * The original load only checked `meta.path` presence, and the first hardening
+ * pass only validated the top-level collection shapes — `imports:[{}]` still
+ * passed and later crashed initialization on `importedNames.join`. The
+ * complete nested shape of every persisted record is validated here; invalid
+ * entries are dropped as corrupt and the file re-indexes on the next run.
  */
 export function isValidStoredFileEntry(entry: unknown): entry is FileEntry {
   if (typeof entry !== "object" || entry === null) return false;
@@ -85,15 +93,86 @@ export function isValidStoredFileEntry(entry: unknown): entry is FileEntry {
   if (typeof meta.isTest !== "boolean") return false;
   if (meta.parseError !== undefined && !isStr(meta.parseError)) return false;
   // Collections must be present and shaped (empty is valid for FAILED entries).
-  if (!isObjArr(e.symbols) || !e.symbols.every((s) => isStr(s.id) && isStr(s.name))) return false;
-  if (!isObjArr(e.imports)) return false;
-  if (!isObjArr(e.exports)) return false;
-  if (!isObjArr(e.calls)) return false;
-  if (!isObjArr(e.internalRelations)) return false;
-  if (e.fileSummary !== undefined && !isStr(e.fileSummary)) return false;
-  if (e.identifiers !== undefined && !Array.isArray(e.identifiers)) return false;
-  if (e.identifiers !== undefined && !(e.identifiers as unknown[]).every((t) => isStr(t))) {
+  if (
+    !isObjArr(e.symbols) ||
+    !e.symbols.every(
+      (s) =>
+        isStr(s.id) &&
+        s.id.length > 0 &&
+        isStr(s.name) &&
+        isStr(s.kind) &&
+        isStr(s.filePath) &&
+        typeof s.startLine === "number" &&
+        s.startLine >= 0 &&
+        typeof s.endLine === "number" &&
+        s.endLine >= s.startLine &&
+        (s.exportKind === undefined || s.exportKind === "named" || s.exportKind === "default") &&
+        (s.signature === undefined || isStr(s.signature)) &&
+        (s.docComment === undefined || isStr(s.docComment)) &&
+        (s.parentId === undefined || isStr(s.parentId)),
+    )
+  ) {
     return false;
+  }
+  if (
+    !isObjArr(e.imports) ||
+    !e.imports.every(
+      (i) =>
+        isStr(i.sourceText) &&
+        Array.isArray(i.importedNames) &&
+        i.importedNames.every((n) => isStr(n)) &&
+        typeof i.startLine === "number" &&
+        i.startLine >= 0 &&
+        typeof i.isExternal === "boolean" &&
+        (i.aliasedNames === undefined ||
+          (Array.isArray(i.aliasedNames) &&
+            i.aliasedNames.every(
+              (a) => typeof a === "object" && a !== null && isStr(a.local) && isStr(a.imported),
+            ))),
+    )
+  ) {
+    return false;
+  }
+  if (
+    !isObjArr(e.exports) ||
+    !e.exports.every((x) => isStr(x.name) && typeof x.startLine === "number" && x.startLine >= 0)
+  ) {
+    return false;
+  }
+  if (
+    !isObjArr(e.calls) ||
+    !e.calls.every(
+      (c) => isStr(c.callerId) && isStr(c.calleeName) && typeof c.startLine === "number",
+    )
+  ) {
+    return false;
+  }
+  if (
+    !isObjArr(e.heritages) ||
+    !e.heritages.every(
+      (h) =>
+        isStr(h.symbolName) &&
+        (h.kind === "extends" || h.kind === "implements") &&
+        Array.isArray(h.parents) &&
+        h.parents.every(isStr) &&
+        typeof h.startLine === "number" &&
+        h.startLine >= 0,
+    )
+  ) {
+    return false;
+  }
+  if (
+    !isObjArr(e.internalRelations) ||
+    !e.internalRelations.every(
+      (r) => isStr(r.source) && isStr(r.target) && isStr(r.kind) && isStr(r.provenance),
+    )
+  ) {
+    return false;
+  }
+  if (e.fileSummary !== undefined && !isStr(e.fileSummary)) return false;
+  if (e.identifiers !== undefined) {
+    if (!Array.isArray(e.identifiers)) return false;
+    if (!(e.identifiers as unknown[]).every((t) => isStr(t))) return false;
   }
   if (e.bodyTokens !== undefined) {
     if (!isObjArr(e.bodyTokens)) return false;

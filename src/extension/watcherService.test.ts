@@ -7,7 +7,7 @@ import { WatcherService } from "./watcherService";
 // keeps this suite headless. Fake timers make the debounce deterministic.
 vi.mock("vscode", () => ({
   workspace: {
-    workspaceFolders: [{ uri: { fsPath: "/ws" } }],
+    workspaceFolders: [{ uri: { scheme: "file", fsPath: "/ws" } }],
   },
 }));
 
@@ -53,7 +53,13 @@ function makeService() {
     const uri = { scheme: "file", fsPath: `/ws/${rel}` };
     for (const listener of listeners[kind]) listener(uri);
   };
-  return { service, calls, fire };
+  const fireUri = (
+    uri: { scheme: string; fsPath: string },
+    kind: "create" | "change" | "delete" = "change",
+  ): void => {
+    for (const listener of listeners[kind]) listener(uri);
+  };
+  return { service, calls, fire, fireUri };
 }
 
 describe("WatcherService debounce", () => {
@@ -118,5 +124,18 @@ describe("WatcherService debounce", () => {
     expect(calls.creates).toEqual(["src/new.ts"]);
     expect(calls.removes).toEqual(["src/old.ts"]);
     expect(calls.changes).toHaveLength(0);
+  });
+
+  it("Stage 3: rejects non-file URI schemes matching workspace files and accepts file URIs", async () => {
+    const { calls, fireUri } = makeService();
+    // Non-file URI matching workspace path is ignored
+    fireUri({ scheme: "vscode-vfs", fsPath: "/ws/src/a.ts" }, "change");
+    await vi.advanceTimersByTimeAsync(600);
+    expect(calls.changes).toHaveLength(0);
+
+    // Positive control: equivalent file URI is scheduled and processed
+    fireUri({ scheme: "file", fsPath: "/ws/src/a.ts" }, "change");
+    await vi.advanceTimersByTimeAsync(600);
+    expect(calls.changes).toEqual(["src/a.ts"]);
   });
 });

@@ -216,7 +216,7 @@ describe("traverse (hard depth limit)", () => {
       expect(graph.fileDependencies("src/b.ts")).toEqual(["src/a.ts"]);
     });
 
-    it("renamed symbol retargets incoming call edges; removed symbol drops them", () => {
+    it("renamed/removed symbols DROP incoming call edges — no line-position retargeting", () => {
       const graph = new RelationshipGraph();
       const callee = entry(
         "src/b.ts",
@@ -273,12 +273,15 @@ describe("traverse (hard depth limit)", () => {
           ],
         ),
       );
-      // graph-level observable: the call edge was retargeted to the renamed symbol
+      // Review fix: the graph NEVER retargets by kind+startLine — that
+      // fabricated STATIC_EXACT calls to whatever symbol now occupies the
+      // old line. The stale edge is dropped; the indexing service restores
+      // correct edges by recomputing importer relations.
       expect(
         graph
           .edgesTo("symbol:src/b.ts#renamed@function:1")
           .some((e) => e.source === "symbol:src/a.ts#caller@function:1" && e.kind === "calls"),
-      ).toBe(true);
+      ).toBe(false);
       expect(graph.edgesTo("symbol:src/b.ts#old@function:1")).toHaveLength(0);
       const graph2 = new RelationshipGraph();
       graph2.upsertEntry(callee);

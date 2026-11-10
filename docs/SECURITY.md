@@ -7,7 +7,7 @@ Offline Code Context Compiler (OCC) runs entirely on the local machine without o
 | Asset | Threat | Mitigation | Residual Risk |
 |---|---|---|---|
 | Repository Credentials (API keys, tokens, private keys) | Exfiltration via generated context pasted into external LLM interfaces | Automated pattern scanning, Shannon entropy detection, BLOCK/WARN/ALLOW policies, deterministic redaction, and fail-closed leak gate | Novel credential formats, short or low-entropy secrets, and multi-token fragmented secrets may pass undetected |
-| Developer Environment | Remote code execution via malicious repository configuration when spawning git | `safeGit` execution hardening with disabled fsmonitor, hooks, diff drivers, textconv filters, and external transports; trust gating | Git features must be enabled by user; untrusted workspaces disable git entirely |
+| Developer Environment | Remote code execution via malicious repository configuration when spawning git | `safeGit` execution hardening with disabled fsmonitor, hooks, diff drivers, textconv filters, and external transports; trust gating; raw diff export paused since Stage 1 (production seed collection is status-only: no `git diff`, no untracked body reads) | Git features must be enabled by user; untrusted workspaces disable git entirely |
 | LLM Reasoning Integrity | Prompt injection via malicious repository comments or files (for example, "Ignore previous instructions") | Repository source code is strictly segregated inside the `## SOURCE` section under an inert data banner with dynamic fence lengths | The external model reading the exported package is responsible for distinguishing data from system instructions |
 | Local Disk Index Storage | Persistence of sensitive credentials in on-disk index shards | Before token harvesting, secret spans matching scanner patterns are blanked with whitespace | Values not flagged by the scanner (such as low-entropy passwords) remain tokenized; key-type prefixes remain |
 | Supply Chain Dependencies | Malicious dependencies executing during extension activation | The only runtime dependency is `typescript`; zero network dependencies; ESLint boundary rules prohibit network modules | Vulnerabilities in VS Code core extension host or upstream TypeScript compiler |
@@ -42,9 +42,11 @@ For generic assignments (such as `password = "..."`, `secret = "..."`, or `.env`
 
 The `offlineCodeContext.secretPolicy` setting governs how detected secrets are handled:
 
-- `block` (default): The file's source code is entirely excluded from the `## SOURCE` section. The file remains visible in the `## WHY THESE FILES WERE SELECTED` section with the tier label `excluded by security policy` and the note `source withheld by security policy` (diff seeds read `diff withheld by security policy`), ensuring visibility without data leakage.
+- `block` (default): The file's source code is entirely excluded from the `## SOURCE` section. The file remains visible in the `## WHY THESE FILES WERE SELECTED` section with the tier label `excluded by security policy` and the note `source withheld by security policy`, ensuring visibility without data leakage. Note: since the Stage 1 pause, production payloads contain no raw diff text at all (see below).
 - `warn`: Source code is included in the package. If `offlineCodeContext.redactSecrets` is true (default), every matching credential string is replaced with a deterministic placeholder: `[REDACTED:<type>:<hash8>]`. The replacement is irreversible. If `redactSecrets` is false, source text is emitted verbatim and findings are reported.
 - `allow`: Findings are ignored and source code is included unredacted. This mode is strongly discouraged.
+
+PRECEDENCE: the fail-closed leak gate below runs LAST and unconditionally. Under `warn` without redaction, and under `allow`, a detected value that survives verbatim into the payload aborts the whole generation with `SECURITY_BLOCKED`; the policy setting only decides what is scanned and included, never whether the gate runs. This precedence is enforced by tests (WARN-without-redaction and ALLOW with a known finding both throw).
 
 ### Fail-Closed Leak Gate
 Before any context package is displayed in the preview editor or written to the clipboard, `verifyNoSecretLeaks()` (`src/security/securityService.ts`) performs a final pass over the serialized string. If any raw credential value identified during scanning appears in the output, context generation throws `SECURITY_BLOCKED` and aborts the export.
@@ -59,6 +61,16 @@ Files matching sensitive path conventions are excluded from indexing and context
 
 If a file matching these patterns is requested directly, sensitive path rules intercept the request and block the content from being read.
 
+## Workspace file boundary
+
+OCC binds file reads to the identity of the opened local workspace root.
+Discovery, incremental indexing, alias configuration, and source export use
+bounded reads. They reject paths outside the workspace, non-file URI schemes
+at the editor boundary, and symlinks or junctions below the bound root.
+If the root is replaced during discovery, the scan aborts without applying
+discovery-based deletions. A source file that fails validation at export
+time has its source withheld.
+
 ## Local index storage and secret token blanking
 
 The local index store persists parsed syntax structures and lexical tokens to local disk inside the VS Code workspace storage directory.
@@ -69,7 +81,11 @@ In versions 0.3.2 and later, file text is screened using `SecretScanner.scanSpan
 ### Stated limit of token filtering
 Token filtering blanks only patterns identified by the scanner. Values that the scanner does not flag, such as low-entropy passwords, custom tokens, or split credentials, are still tokenized. Furthermore, word-like fragments such as key-type prefixes (for example, `AKIA`, `ghp`, or `sk_live`) remain in the index.
 
-Versions up to 0.3.1 persisted secret-bearing tokens in the local index store. To address this, schema version 3 clears and rebuilds any existing store from earlier versions on first run. Schema version 4 additionally sanitizes structural strings (symbol names, ids, exports, imports, calls, parse-error text) at parse time, so credential material flagged by the scanner cannot survive in persisted metadata through any field.
+Versions up to 0.3.1 could persist secret-bearing tokens in index shards.
+The current store uses schema v7. It sanitizes structural strings and
+inheritance clauses and uses fixed categories for thrown parser errors.
+Opening an older schema discards its local shards and schedules indexing
+from workspace files.
 
 ## Git hardening and execution hazards
 
@@ -84,11 +100,22 @@ To prevent malicious repositories from executing arbitrary code via git hooks or
 4. Process Timeouts: Commands enforce strict timeouts and run with `GIT_OPTIONAL_LOCKS=0` and `GIT_TERMINAL_PROMPT=0`.
 
 ### Empirical hazard verification
-Running `npm run eval:fsmonitor-repro` and `npm run eval:seed-hazard-repro` demonstrates the efficacy of these mitigations. The seed-hazard repro configures each hazard in its OWN isolated victim repo and measures raw git vs safeGit vs the collector's exact diff form:
+Running `npm run eval:fsmonitor-repro` and `npm run eval:seed-hazard-repro` demonstrates the efficacy of these mitigations. The seed-hazard repro configures each hazard in its OWN isolated victim repo, commits the hazard configuration as the BASELINE, then creates a confirmed working-tree change, and reports positive controls (nonempty relevant diff; the raw form fires the hazard marker), measured with git 2.53 on Windows (2026-11):
 - `core.fsmonitor`: Raw `git status` executes repository-configured fsmonitor binaries (`MARKER WRITTEN`); `safeGit` neutralizes the hazard (`no marker`, exit code 0).
-- `diff.external`: Fires on raw plain `diff` (raw AND safeGit); the collector's form (`diff --no-ext-diff --no-textconv`) does NOT execute it.
-- `textconv`: Does not fire for a plain working-tree diff fixture; the collector's form additionally passes `--no-textconv`.
-- `clean` and `smudge` filters: EXECUTE during diff operations even through `safeGit` with `--no-ext-diff --no-textconv`: no git flag disables filters. This is the documented residual risk, mitigated by the workspace-trust gate only (git features are never invoked in untrusted workspaces; see ADR-006).
+- `diff.external`: Fires on plain `diff` (raw AND safeGit; hardening flags do not disable drivers); the collector's form (`diff --no-ext-diff --no-textconv`) does NOT execute it and still returns the nonempty diff.
+- `textconv`: Also FIRES on plain `diff` (raw AND safeGit); the collector's form does NOT execute it (the collector passes `--no-textconv`).
+- `clean` and `smudge` filters: EXECUTE in EVERY measured form, including through the collector's `--no-ext-diff --no-textconv`: no git flag disables filters. This is the documented residual risk, mitigated by the workspace-trust gate only (git features are never invoked in untrusted workspaces; see ADR-006).
+
+### Raw diff export paused (Stage 1)
+Until a replacement diff-screening design is verified, the shared context-building
+boundary omits raw diff text from EVERY generated payload: injected diff sections,
+collector diffs, and untracked-body renders are all dropped, under every secret
+policy and in all modes (project, file, task, selection, scoped variants, preview,
+and copy). Production seed collection is status-only (`git status --porcelain=v1
+-z` through safeGit; no `git diff`, no untracked body reads). Changed files keep
+their path-only seeds and DIFF_TOUCHED retrieval hints. The diff scanner and
+redaction pipeline are retained behind an explicit developer-only switch for the
+planned restoration; historical evaluation reports are unaffected.
 
 ## Workspace trust behavior
 

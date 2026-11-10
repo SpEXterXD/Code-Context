@@ -1,11 +1,34 @@
 # Changelog
 
-## [0.3.2] - 2026-10-26
+## [Unreleased]
+
+## [0.3.2]
 
 ### Security
 
-- **Index secret token filtering (`STORE_SCHEMA_VERSION` 3)**: On-disk index shards (`entries/xx/<hash>.json`) no longer persist tokens flagged by `SecretScanner`. Matched secret spans are blanked before extracting `identifiers` (lexical search terms) and `bodyTokens` (BM25 term frequencies), and any secret matches in `fileSummary`, symbol `docComment`, or symbol `signature` are blanked. The filter applies for all `secretPolicy` values, including `allow`. Older stores automatically clear stale entries and rebuild once on next load. Versions up to 0.3.1 persisted such tokens in the local index. Stated limit: values the scanner does not flag in the source file, such as short passwords or low-entropy strings, are still tokenized, and word-like fragments such as key-type prefixes remain.
+- Paused raw Git diff export. Change seeds use Git status paths and can still
+  influence retrieval. Preview and clipboard share the screened payload.
+- Screened a single bounded source snapshot per candidate and extended
+  detection and redaction for multiline private key blocks.
+- Applied the same workspace containment rules to discovery, watcher
+  updates, metadata reads, and source export. Sanitized stored parser
+  diagnostics and inheritance clauses.
+
+- **Index secret token filtering**: On-disk index shards (`entries/xx/<hash>.json`) no longer persist tokens flagged by `SecretScanner`. Matched secret spans are blanked before extracting `identifiers` (lexical search terms) and `bodyTokens` (BM25 term frequencies), and any secret matches in `fileSummary`, symbol `docComment`, or symbol `signature` are blanked. The filter applies for all `secretPolicy` values, including `allow`. Older stores automatically clear stale entries and rebuild once on next load. Versions up to 0.3.1 persisted such tokens in the local index. Stated limit: values the scanner does not flag in the source file, such as short passwords or low-entropy strings, are still tokenized, and word-like fragments such as key-type prefixes remain.
 - **Runtime-assembled test fixtures**: Test secret fixtures are assembled at runtime from string fragments across test suites (`security.test.ts`, `contextBuilder.test.ts`, `contextService.test.ts`, `main.test.ts`) so raw secret tokens are not stored as literals in test source files.
+
+### Fixed
+
+- Kept relationships and file counts consistent after edits, deletes,
+  creates, and renames. Reopening the index reconciles a partial write from
+  the shards that landed.
+- Reconciled root and nested ignore-file changes and changes to excluded
+  TypeScript or JavaScript alias configuration.
+
+### Changed
+
+- Bumped the local store to schema v7. OCC discards earlier stores and
+  rebuilds them from source on upgrade.
 
 ### Added
 

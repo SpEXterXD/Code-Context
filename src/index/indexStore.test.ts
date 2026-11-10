@@ -1,9 +1,32 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-import { JsonIndexStore } from "./indexStore";
+// Fault-injection seam: the fs module namespace cannot be patched at runtime,
+// so writeFileSync is routed through an override slot that individual tests
+// set (delegating to the real implementation when unset).
+const fsState = vi.hoisted(() => ({
+  writeOverride: null as null | ((file: string, data: Buffer) => void),
+}));
+vi.mock("node:fs", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs")>();
+  return {
+    ...actual,
+    writeFileSync: (
+      file: Parameters<typeof actual.writeFileSync>[0],
+      data: Parameters<typeof actual.writeFileSync>[1],
+      options?: Parameters<typeof actual.writeFileSync>[2],
+    ) => {
+      if (fsState.writeOverride) {
+        return fsState.writeOverride(String(file), Buffer.from(data as never));
+      }
+      return actual.writeFileSync(file, data, options);
+    },
+  };
+});
+
+import { JsonIndexStore, atomicWriteFileSync } from "./indexStore";
 import { entryRelativePath, serializeManifest, STORE_SCHEMA_VERSION } from "./schema";
 import type { FileEntry } from "../domain/model";
 import { sha256Hex } from "../shared/ids";
@@ -137,6 +160,90 @@ describe("JsonIndexStore", () => {
       expect(loadPaths(root)).toEqual([]);
     });
 
+    // Review finding (follow-up 5): shallow validation accepted entries that
+    // crashed initialization later — imports:[{}] passed the array-of-objects
+    // check and initialize() died on importedNames.join.
+    it("drops entries with malformed nested records (imports/symbols/calls/relations)", () => {
+      root = makeTempDir();
+      const store = new JsonIndexStore(root, "fp");
+      store.upsertEntries([fakeEntry("a.ts"), fakeEntry("b.ts"), fakeEntry("c.ts")]);
+      tamper(root, "a.ts", (e) => {
+        e.imports = [{}]; // missing sourceText/importedNames
+      });
+      tamper(root, "b.ts", (e) => {
+        (e.symbols as unknown[]).push({ name: 42 }); // malformed symbol
+      });
+      tamper(root, "c.ts", (e) => {
+        (e.calls as unknown[]).push({ calleeName: null });
+      });
+      expect(loadPaths(root)).toEqual([]);
+    });
+
+    it("drops missing or malformed heritage input even when the manifest is missing", () => {
+      root = makeTempDir();
+      const store = new JsonIndexStore(root, "fp");
+      store.upsertEntries([fakeEntry("a.ts"), fakeEntry("b.ts"), fakeEntry("c.ts")]);
+      tamper(root, "a.ts", (e) => {
+        delete e.heritages;
+      });
+      tamper(root, "b.ts", (e) => {
+        e.heritages = [{ kind: "extends", symbolName: "B", parents: [null], startLine: 1 }];
+      });
+      fs.unlinkSync(path.join(root, "manifest.json"));
+      expect(loadPaths(root)).toEqual(["c.ts"]);
+    });
+
+    it("reconciles the manifest EXACTLY (equal count with wrong keys/hashes rebuilds)", () => {
+      root = makeTempDir();
+      const store = new JsonIndexStore(root, "fp");
+      store.upsertEntries([fakeEntry("a.ts"), fakeEntry("b.ts")]);
+      const manifestPath = path.join(root, "manifest.json");
+      const parsed = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as {
+        files: Record<string, string>;
+      };
+      // Same count, wrong keys and wrong hash values.
+      parsed.files = { "wrong/key.ts": "deadbeef", "another.ts": "0000" };
+      fs.writeFileSync(manifestPath, JSON.stringify(parsed));
+      const { manifest } = new JsonIndexStore(root, "fp").load();
+      expect(Object.keys(manifest.files).sort()).toEqual(["a.ts", "b.ts"]);
+      expect(Object.values(manifest.files).every((h) => h.length === 64)).toBe(true);
+    });
+
+    it("ignores non-canonical shard files (temp/orphan remnants)", () => {
+      root = makeTempDir();
+      const store = new JsonIndexStore(root, "fp");
+      store.upsertEntries([fakeEntry("a.ts")]);
+      const shardDir = path.join(root, "entries", entryRelativePath("a.ts").split("/")[1]);
+      // A temp remnant and an entry-shaped file with a non-hash name.
+      fs.writeFileSync(path.join(shardDir, "orphan.tmp"), "{}\n");
+      fs.writeFileSync(path.join(shardDir, "not-a-hash.json"), "{}\n");
+      expect(loadPaths(root)).toEqual(["a.ts"]);
+    });
+
+    it("atomic-write in-place fallback preserves the old destination on failure", () => {
+      root = makeTempDir();
+      const target = path.join(root, "entry.json");
+      const OLD = '{"old":true}';
+      fs.writeFileSync(target, OLD);
+      // Fail the in-place write (the final fallback) once; the old content
+      // must survive and no .bak/.tmp remnant may be left behind. The fs
+      // module namespace cannot be patched at runtime in Node, so the fault
+      // is injected through the hoisted vi.mock partial at the file top.
+      fsState.writeOverride = (file) => {
+        if (String(file) === target) throw new Error("simulated mid-write failure");
+      };
+      try {
+        expect(() => atomicWriteFileSync(target, '{"new":true}')).toThrow();
+      } finally {
+        fsState.writeOverride = null;
+      }
+      expect(fs.readFileSync(target, "utf8")).toBe(OLD);
+      const leftovers = fs
+        .readdirSync(root)
+        .filter((f) => f.includes(".bak-") || f.includes(".tmp-"));
+      expect(leftovers).toEqual([]);
+    });
+
     it("keeps valid entries with empty collections (FAILED-parse shape)", () => {
       root = makeTempDir();
       const store = new JsonIndexStore(root, "fp");
@@ -196,6 +303,43 @@ describe("JsonIndexStore", () => {
     expect(entries.size).toBe(0);
   });
 
+  // Stage 3 B migration: schema-v5 stores may already hold tainted FAILED
+  // parseError text (raw exception messages were persisted before the safe-
+  // category fix). The v6 bump must invalidate such stores wholesale.
+  it("invalidates v5 stores that may contain tainted parser diagnostics", () => {
+    root = makeTempDir();
+    const store = new JsonIndexStore(root, "fp");
+    store.upsertEntries([fakeEntry("a.ts")]);
+    // Hand-taint the shard the way a pre-fix write would have.
+    const shard = path.join(root, entryRelativePath("a.ts"));
+    const entry = JSON.parse(fs.readFileSync(shard, "utf8")) as Record<string, unknown>;
+    (entry.meta as Record<string, unknown>).parseStatus = "FAILED";
+    (entry.meta as Record<string, unknown>).parseError = "parser blew up: SYNTHETIC-TOKEN123456";
+    fs.writeFileSync(shard, JSON.stringify(entry));
+    const manifestPath = path.join(root, "manifest.json");
+    const parsed = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as { schemaVersion: number };
+    parsed.schemaVersion = 5; // pre-fix store
+    fs.writeFileSync(manifestPath, JSON.stringify(parsed));
+
+    const store2 = new JsonIndexStore(root, "fp");
+    const { entries } = store2.load();
+    // Wholesale rebuild: the tainted shard is gone from memory AND disk.
+    expect(entries.size).toBe(0);
+    expect(fs.existsSync(shard)).toBe(false);
+    // Manifest + surviving shards are token-free.
+    const leftovers: string[] = [];
+    const walkShards = (dir: string): void => {
+      for (const d of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, d.name);
+        if (d.isDirectory()) walkShards(full);
+        else leftovers.push(fs.readFileSync(full, "utf8"));
+      }
+    };
+    walkShards(root);
+    for (const bytes of leftovers) {
+      expect(bytes).not.toContain("SYNTHETIC-TOKEN123456");
+    }
+  });
   it("rejects a foreign project fingerprint by rebuilding the manifest (F5)", () => {
     // A manifest copied from a different workspace root must not be accepted:
     // the loaded manifest carries the constructing store's fingerprint.

@@ -38,6 +38,13 @@ import { M3_BODY_FIELD } from "../src/retrieval/invertedIndex";
 import { M3B_RANK_PRIORITY } from "../src/context/contextBuilder";
 
 import { bm25Baseline, filenameBaseline, randomBaseline } from "./eval/baselines";
+import {
+  readCheckpointState,
+  sourceFingerprint,
+  truncateTornTail,
+  validateCheckpointRecords,
+  writeCheckpointManifest,
+} from "./eval/checkpointState";
 import type { DatasetTask } from "./eval/dataset";
 import { cloneDirFor, materializeSnapshot, verifyPinnedCommit } from "./eval/gitminer";
 import {
@@ -68,7 +75,6 @@ import {
   readSnapshot,
   type DatasetFile,
   type RepoEntry,
-  type ReposFile,
 } from "./eval/splitLoader";
 
 const ROOT = path.resolve(import.meta.dirname ?? path.join(process.cwd(), "scripts"), "..");
@@ -345,10 +351,15 @@ async function run(): Promise<void> {
       /* fresh */
     }
     if (runs >= 1) {
-      // F11: an interrupted holdout can RESUME through its checkpoint; only
-      // a COMPLETED holdout blocks a second experiment.
+      // F11/review: an interrupted holdout can RESUME through its checkpoint;
+      // only a COMPLETED holdout blocks a second experiment. Manifest
+      // existence alone is NOT permission to resume — the explicit
+      // pending/completed status decides.
       const cpManifest = checkpointFile.replace(".records.jsonl", ".manifest.json");
-      if (!fs.existsSync(cpManifest)) {
+      const state = fs.existsSync(cpManifest)
+        ? readCheckpointState(cpManifest, "") // identity verified later; status only here
+        : { status: "none" as const };
+      if (state.status !== "pending") {
         console.error(
           "HOLDOUT ALREADY COMPLETED — refusing a second run (see results-holdout.json).",
         );
@@ -448,8 +459,14 @@ async function run(): Promise<void> {
     skipped?: { task: string; error: string };
     perTaskM3?: (typeof perTaskM3)[number];
   }
-  // F11: run identity binds the checkpoint to this experiment — dataset,
-  // selected tasks, ablations, seed, and commit. A mismatch refuses resume.
+  // F11/review: run identity binds the checkpoint to this experiment —
+  // dataset, selected tasks, ablations, seed, commit, AND the dirty source
+  // fingerprint (implementation/config/weight changes at one HEAD previously
+  // shared checkpoints). A mismatch refuses resume; a COMPLETED checkpoint
+  // refuses any further run.
+  const runGit = (args: string[], cwd: string): string =>
+    execFileSync("git", args, { cwd, encoding: "utf8" });
+  const srcFingerprint = sourceFingerprint(runGit, ROOT);
   const runIdentity = createHash("sha256")
     .update(
       JSON.stringify({
@@ -459,6 +476,7 @@ async function run(): Promise<void> {
         ablations,
         seed: SEED,
         occCommit: occHeadCommit(),
+        sourceFingerprint: srcFingerprint,
       }),
     )
     .digest("hex")
@@ -466,47 +484,48 @@ async function run(): Promise<void> {
   const manifestFile = checkpointFile.replace(".records.jsonl", ".manifest.json");
   const doneTasks = new Set<string>();
   const doneM3 = new Map<string, (typeof perTaskM3)[number]>();
-  if (fs.existsSync(manifestFile) || fs.existsSync(checkpointFile)) {
-    if (fs.existsSync(manifestFile)) {
-      const prev = JSON.parse(fs.readFileSync(manifestFile, "utf8")) as { identity?: string };
-      if (prev.identity !== runIdentity) {
-        console.error(
-          `F11: checkpoint identity mismatch (was ${prev.identity}, now ${runIdentity}). ` +
-            `Delete ${checkpointFile} to start a fresh run.`,
-        );
-        process.exit(1);
-      }
-    } else {
-      console.error(
-        `F11: legacy checkpoint without identity manifest at ${checkpointFile}. ` +
-          `Delete it to start a fresh identified run.`,
-      );
+  const cpState = readCheckpointState(manifestFile, runIdentity);
+  if (cpState.status === "completed") {
+    console.error(
+      `F11: checkpoint ${manifestFile} is COMPLETED — refusing to rerun the experiment. ` +
+        `Results are final; delete the checkpoint files only to start a genuinely new run.`,
+    );
+    process.exit(1);
+  }
+  if (cpState.status === "pending" && cpState.identityMismatch) {
+    console.error(
+      `F11: checkpoint identity mismatch (was ${cpState.manifest?.identity}, now ${runIdentity}). ` +
+        `Delete ${checkpointFile} to start a fresh run.`,
+    );
+    process.exit(1);
+  }
+  if (cpState.status === "none" && fs.existsSync(checkpointFile)) {
+    console.error(
+      `F11: legacy checkpoint without identity manifest at ${checkpointFile}. ` +
+        `Delete it to start a fresh identified run.`,
+    );
+    process.exit(1);
+  }
+  // Records validation: shapes, duplicates, and task membership are checked
+  // BEFORE resume; a recoverable trailing torn line is repaired (rewritten)
+  // so a later append cannot join onto it.
+  const taskIds = new Set(tasks.map((t) => t.id));
+  let records: Array<{ task: string }> = [];
+  if (fs.existsSync(checkpointFile)) {
+    try {
+      records = validateCheckpointRecords(checkpointFile, taskIds);
+    } catch (e) {
+      console.error(`F11: ${(e as Error).message}`);
       process.exit(1);
     }
-  }
-  fs.mkdirSync(path.dirname(manifestFile), { recursive: true });
-  fs.writeFileSync(
-    manifestFile,
-    `${JSON.stringify({ identity: runIdentity, split, occCommit: occHeadCommit() })}\n`,
-  );
-  if (fs.existsSync(checkpointFile)) {
+    const validCount = truncateTornTail(checkpointFile);
+    if (validCount !== records.length) {
+      console.warn("resuming: repaired truncated final checkpoint line (task re-runs)");
+    }
     const rawLines = fs.readFileSync(checkpointFile, "utf8").split(/\r?\n/);
-    const lastContentIdx = rawLines.reduce((acc, l, i) => (l.trim() ? i : acc), -1);
-    for (let li = 0; li < rawLines.length; li++) {
-      const line = rawLines[li]!;
+    for (const line of rawLines) {
       if (line.trim().length === 0) continue;
-      let c: TaskCheckpoint;
-      try {
-        c = JSON.parse(line) as TaskCheckpoint;
-      } catch {
-        // Only a TRAILING torn line is recoverable; interior corruption
-        // means the file is untrustworthy.
-        if (li === lastContentIdx) {
-          console.warn("resuming: ignoring truncated final checkpoint line (task re-runs)");
-          break;
-        }
-        throw new Error(`corrupt checkpoint line ${li + 1} in ${checkpointFile}`);
-      }
+      const c = JSON.parse(line) as TaskCheckpoint;
       doneTasks.add(c.task);
       if (c.skipped) skippedTasks.push(c.skipped);
       if (c.ranks) for (const s of SYSTEMS) ranks.get(s)!.set(c.task, c.ranks[s] ?? []);
@@ -524,6 +543,13 @@ async function run(): Promise<void> {
     console.log(`resuming: ${doneTasks.size} tasks already checkpointed (identity ${runIdentity})`);
     for (const entry of doneM3.values()) perTaskM3.push(entry);
   }
+  writeCheckpointManifest(manifestFile, {
+    identity: runIdentity,
+    split,
+    occCommit: occHeadCommit(),
+    sourceFingerprint: srcFingerprint,
+    status: "pending",
+  });
   const checkpoint = (c: TaskCheckpoint): void => {
     fs.mkdirSync(path.dirname(checkpointFile), { recursive: true });
     fs.appendFileSync(checkpointFile, `${JSON.stringify(c)}\n`);
@@ -532,7 +558,7 @@ async function run(): Promise<void> {
   for (const repoId of repoIds) {
     for (const t of tasks.filter((x) => x.repoId === repoId)) {
       if (doneTasks.has(t.id)) continue;
-      let dTiming = { snapshotMs: 0, indexMs: 0, occMs: 0, baselinesMs: 0 };
+      const dTiming = { snapshotMs: 0, indexMs: 0, occMs: 0, baselinesMs: 0 };
       const clonePath = cloneDirFor(repoId);
       const snapshotStart = performance.now();
       // Task ids contain ':' (e.g. "axios:d17d9a66"); Windows paths reject it.
@@ -934,7 +960,18 @@ async function run(): Promise<void> {
 
   fs.mkdirSync(path.dirname(outJson), { recursive: true });
   fs.writeFileSync(outJson, `${JSON.stringify(results, null, 2)}\n`);
-  fs.rmSync(checkpointFile, { force: true }); // complete: a fresh run starts clean
+  // Complete: the manifest flips to "completed" (blocking any rerun) and the
+  // records file is removed. Review fix: the previous code deleted the
+  // records but left a manifest without completed state, so the holdout
+  // guard treated the finished experiment as resumable and reran it.
+  writeCheckpointManifest(manifestFile, {
+    identity: runIdentity,
+    split,
+    occCommit: occHeadCommit(),
+    sourceFingerprint: srcFingerprint,
+    status: "completed",
+  });
+  fs.rmSync(checkpointFile, { force: true });
   writeResultsMd(results, dataset, outMd);
   console.log(`results written: ${path.relative(ROOT, outJson)} + ${path.relative(ROOT, outMd)}`);
 }

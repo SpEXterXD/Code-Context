@@ -133,9 +133,10 @@ Candidate files are scored using a deterministic hybrid ranking pipeline. Lexica
 - Local Execution: All indexing, parsing, and formatting run locally on the CPU. The extension imports no network modules and transmits zero telemetry.
 - Secret Scanning: Candidate files are scanned against pattern families (AWS keys, GitHub tokens, Slack tokens, Stripe keys, private keys, JWTs) and Shannon entropy heuristics.
 - Policy Enforcement: Under the default `block` policy, files containing detected credentials have source code excluded from output while remaining listed in WHY entries. Under `warn`, secrets are deterministically redacted (`[REDACTED:<type>:<hash8>]`).
-- Fail-Closed Leak Gate: The finalized context package is scanned immediately before clipboard writing. If any raw credential value survived redaction, export aborts with a `SECURITY_BLOCKED` error.
+- Fail-Closed Leak Gate: Preview and clipboard use the same finalized, screened payload. If a detected credential survives in that payload, generation aborts with a `SECURITY_BLOCKED` error.
 - Workspace Trust: In untrusted workspaces, git subprocesses are completely disabled. Indexing and packaging continue safely without git metadata.
-- Index Storage: Index metadata is stored locally under VS Code workspace storage (`context.storageUri`). File content is not persisted in the store. Before token extraction, secret spans are blanked with whitespace. Versions up to 0.3.1 persisted secret-like tokens in local index shards; schema version 3 clears older stores on first run, and schema version 4 additionally sanitizes structural strings at parse time. Details: [docs/SECURITY.md](docs/SECURITY.md).
+- Workspace Boundary: Discovery, indexing, and source export use bounded reads within the opened local workspace. Symlinks and junctions below that root are skipped.
+- Index Storage: OCC stores sanitized metadata and tokens in VS Code workspace storage. Schema v7 stores inheritance clauses for relationship resolution. On upgrade, OCC discards older index shards and rebuilds from workspace files. See [the security policy](docs/SECURITY.md).
 
 ## Measured context quality
 
@@ -192,7 +193,7 @@ Complete reference for all 20 settings: [docs/CONFIGURATION.md](docs/CONFIGURATI
 - [Evaluation Methodology](docs/EVALUATION.md): Commit-mined benchmarks, metrics, and results.
 - [Developer Guide](docs/DEVELOPMENT.md): Setup, scripts, quality gates, and contribution checklists.
 - [Documentation Style Guide](docs/STYLE_GUIDE.md): Writing rules, vocabulary constraints, and style checks.
-- [Testing Guide](docs/TESTING.md): Suite matrix (29 suites, 340 tests) and property-based testing.
+- [Testing Guide](docs/TESTING.md): Suite matrix (31 suites, 453 tests) and property-based testing.
 - [Troubleshooting](docs/TROUBLESHOOTING.md): Error codes and diagnostic workflows.
 - [Limitations](docs/LIMITATIONS.md): Technical boundaries and platform constraints.
 - [Roadmap](docs/ROADMAP.md): Planned improvements and experimental features.

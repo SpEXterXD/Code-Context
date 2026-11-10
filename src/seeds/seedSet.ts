@@ -126,12 +126,22 @@ export function applyFloodControl(
 export function normalizeSeedSet(
   partial: Partial<SeedSet> & { changedPaths: ChangedPath[] },
 ): SeedSet {
+  // Review fixes (follow-up 6): the active flag is the CALLER'S real editor
+  // state — normalization never fabricates an active editor — and
+  // diagnostics order deterministically via compareStrings (locale-agnostic,
+  // hostile-locale safe) with duplicate (path, message) pairs removed.
   const openEditors = (partial.openEditors ?? [])
     .slice(0, MAX_OPEN_EDITORS)
-    .map((e, i) => ({ path: e.path, active: e.active || i === 0 }));
-  const diagnostics = (partial.diagnostics ?? [])
-    .slice(0, MAX_DIAGNOSTICS)
-    .map((d) => ({ path: d.path, message: d.message.split(/\r?\n/)[0] ?? "" }));
+    .map((e) => ({ path: e.path, active: e.active === true }));
+  const dedupedDiagnostics = new Map<string, { path: string; message: string }>();
+  for (const d of partial.diagnostics ?? []) {
+    const message = d.message.split(/\r?\n/)[0] ?? "";
+    const key = `${d.path}\u0000${message}`;
+    if (!dedupedDiagnostics.has(key)) dedupedDiagnostics.set(key, { path: d.path, message });
+  }
+  const diagnostics = [...dedupedDiagnostics.values()]
+    .sort((a, b) => compareStrings(a.path, b.path) || compareStrings(a.message, b.message))
+    .slice(0, MAX_DIAGNOSTICS);
   return {
     changedPaths: partial.changedPaths,
     diffSections: partial.diffSections ?? [],

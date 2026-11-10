@@ -1,13 +1,11 @@
-import type { Language, SymbolDef, ImportDecl, ExportDecl, CallSite } from "../domain/model";
-
-export interface HeritageInfo {
-  /** Name of the class/interface declaring the heritage clause. */
-  symbolName: string;
-  kind: "extends" | "implements";
-  /** Parent names as written in source. */
-  parents: string[];
-  startLine: number;
-}
+import type {
+  Language,
+  SymbolDef,
+  ImportDecl,
+  ExportDecl,
+  CallSite,
+  HeritageInfo,
+} from "../domain/model";
 
 /** Normalized output of one parser run. */
 export interface ParsedFile {

@@ -6,6 +6,7 @@ import * as path from "node:path";
 
 const state = vi.hoisted(() => ({
   root: null as string | null,
+  workspaceFoldersOverride: undefined as Array<{ uri: unknown }> | undefined,
   commands: new Map<string, (...args: unknown[]) => unknown>(),
   messages: [] as string[],
   warnings: [] as string[],
@@ -165,6 +166,7 @@ vi.mock("vscode", () => {
     },
     workspace: {
       get workspaceFolders() {
+        if (state.workspaceFoldersOverride !== undefined) return state.workspaceFoldersOverride;
         return state.root ? [{ uri: fileUri(state.root) }] : undefined;
       },
       openTextDocument: async (uriOrStr: { fsPath?: string; path?: string } | string) => {
@@ -222,7 +224,7 @@ const { activate } = await import("./main");
 const { OccApplication } = await import("../application/contextService");
 const { CancellationSource } = await import("../shared/cancellation");
 const { PREVIEW_SCHEME, ContextPreviewProvider } = await import("./previewProvider");
-const { entryRelativePath } = await import("../index/schema");
+const { entryRelativePath, STORE_SCHEMA_VERSION } = await import("../index/schema");
 
 const SECRET_VALUE = "J8s2kLq9" + "zX1pQw7v" + "R3mNtYu5";
 
@@ -304,6 +306,7 @@ beforeEach(async () => {
   state.workspaceTrusted = true;
   state.configOverrides = {};
   state.cancelled = false;
+  state.workspaceFoldersOverride = undefined;
 
   root = fs.mkdtempSync(path.join(os.tmpdir(), "occ-activate-"));
   state.root = root;
@@ -352,7 +355,7 @@ describe("activation audit (real activate(), mocked vscode)", () => {
     const manifestPath = path.join(storageDir, "manifest.json");
     expect(fs.existsSync(manifestPath)).toBe(true);
     const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-    expect(manifest.schemaVersion).toBe(4); // v4 (F01): structural-string sanitization // v3: secret token filtering
+    expect(manifest.schemaVersion).toBe(STORE_SCHEMA_VERSION);
     expect(manifest.entryCount).toBe(6);
     expect(Object.keys(manifest.files).sort()).toEqual([
       "README.md",
@@ -560,6 +563,137 @@ describe("activation audit (real activate(), mocked vscode)", () => {
     expect(state.clipboard).not.toContain("src/app/leak.ts");
   });
 
+  it("watcher: delete, create, and delayed delete refresh persisted targets", async () => {
+    const target = path.join(root, "src/app/api.ts");
+    const importer = path.join(storageDir, entryRelativePath("src/app/index.ts"));
+    fs.unlinkSync(target);
+    for (const listener of state.watcherListeners.delete) listener(fileUri(target));
+    await waitFor(() => fs.readFileSync(importer, "utf8").includes("unresolved:./api"));
+    const reopened = new OccApplication(root, storageDir);
+    reopened.initialize();
+    expect(reopened.indexing.getGraph().fileDependencies("src/app/index.ts")).toEqual([]);
+
+    fs.writeFileSync(target, "\nexport const api = () => 1;\n");
+    for (const listener of state.watcherListeners.create) listener(fileUri(target));
+    await waitFor(() =>
+      fs.readFileSync(importer, "utf8").includes("symbol:src/app/api.ts#api@function:2"),
+    );
+    reopened.initialize();
+    expect(reopened.indexing.getGraph().fileDependencies("src/app/index.ts")).toEqual([
+      "src/app/api.ts",
+    ]);
+    expect(reopened.indexing.getEntry("src/app/index.ts")?.internalRelations).toContainEqual(
+      expect.objectContaining({
+        kind: "calls",
+        target: "symbol:src/app/api.ts#api@function:2",
+        provenance: "STATIC_EXACT",
+      }),
+    );
+
+    fs.writeFileSync(target, "\n\nexport const api = () => 2;\n");
+    for (const listener of state.watcherListeners.delete) listener(fileUri(target));
+    await waitFor(() =>
+      fs.readFileSync(importer, "utf8").includes("symbol:src/app/api.ts#api@function:3"),
+    );
+  });
+
+  it.each([
+    [".gitignore", "/src/app/"],
+    ["src/app/.gitignore", ""],
+  ])("watcher: %s reconciles eligibility on create, edit, and delete", async (ignore, prefix) => {
+    const ignorePath = path.join(root, ignore);
+    const hidden = "src/app/newApi.ts";
+    const api = "src/app/api.ts";
+    const shard = (file: string) => path.join(storageDir, entryRelativePath(file));
+    const emit = (kind: "create" | "change" | "delete") => {
+      for (const listener of state.watcherListeners[kind]) listener(fileUri(ignorePath));
+    };
+
+    fs.writeFileSync(path.join(root, hidden), "export const newApi = () => 2;\n");
+    fs.writeFileSync(ignorePath, prefix + "newApi.ts\n");
+    emit("create");
+    await waitFor(() => fs.existsSync(shard(ignore)));
+    expect(fs.existsSync(shard(hidden))).toBe(false);
+
+    fs.writeFileSync(ignorePath, prefix + "api.ts\n");
+    emit("change");
+    await waitFor(() => fs.existsSync(shard(hidden)) && !fs.existsSync(shard(api)));
+    const reopened = new OccApplication(root, storageDir);
+    reopened.initialize();
+    expect(reopened.indexing.getGraph().fileDependencies("src/app/index.ts")).toEqual([]);
+    expect(reopened.indexing.getEntries().has("src/shared/util.ts")).toBe(true);
+
+    fs.unlinkSync(ignorePath);
+    emit("delete");
+    await waitFor(() => fs.existsSync(shard(api)) && !fs.existsSync(shard(ignore)));
+    reopened.initialize();
+    const fresh = new OccApplication(root, path.join(storageDir, "fresh"));
+    await fresh.indexing.indexWorkspace(CancellationSource.never());
+    expect(reopened.indexing.getEntries()).toEqual(fresh.indexing.getEntries());
+    expect(reopened.indexing.status.fileCount).toBe(fresh.indexing.status.fileCount);
+  });
+
+  it("watcher: excluded alias config creation, edit, and deletion update importer shards", async () => {
+    const tsconfig = path.join(root, "tsconfig.json");
+    const jsconfig = path.join(root, "jsconfig.json");
+    const ignore = path.join(root, ".gitignore");
+    const importer = path.join(storageDir, entryRelativePath("src/app/alias-user.ts"));
+    const aliases = (dir: string) =>
+      JSON.stringify({
+        compilerOptions: { paths: { "@lib/*": [`src/${dir}/*`] } },
+      });
+    const emit = (file: string, kind: "create" | "change" | "delete") => {
+      for (const listener of state.watcherListeners[kind]) listener(fileUri(file));
+    };
+    const expectCall = async (dir: string) => {
+      await waitFor(
+        () => {
+          if (!fs.existsSync(importer)) return false;
+          const relations = JSON.parse(fs.readFileSync(importer, "utf8")).internalRelations;
+          return relations.some(
+            (r: { kind: string; target: string; provenance: string }) =>
+              r.kind === "calls" &&
+              r.target === `symbol:src/${dir}/foo.ts#foo@function:1` &&
+              r.provenance === "STATIC_EXACT",
+          );
+        },
+        10000,
+        `watcher alias resolution to src/${dir}/foo.ts`,
+      );
+      for (const config of ["tsconfig.json", "jsconfig.json"]) {
+        expect(fs.existsSync(path.join(storageDir, entryRelativePath(config)))).toBe(false);
+      }
+    };
+
+    fs.writeFileSync(path.join(root, "src/app/foo.ts"), "export function foo() { return 1; }");
+    fs.writeFileSync(path.join(root, "src/shared/foo.ts"), "export function foo() { return 2; }");
+    fs.writeFileSync(
+      path.join(root, "src/app/alias-user.ts"),
+      'import { foo } from "@lib/foo";\nexport const use = () => foo();',
+    );
+    fs.writeFileSync(jsconfig, aliases("shared"));
+    fs.writeFileSync(ignore, "/tsconfig.json\n/jsconfig.json\n");
+    emit(ignore, "create");
+    await expectCall("shared");
+
+    fs.writeFileSync(tsconfig, aliases("app"));
+    emit(tsconfig, "create");
+    await expectCall("app");
+
+    fs.writeFileSync(tsconfig, aliases("shared"));
+    emit(tsconfig, "change");
+    await expectCall("shared");
+
+    fs.writeFileSync(jsconfig, aliases("app"));
+    fs.unlinkSync(tsconfig);
+    emit(tsconfig, "delete");
+    await expectCall("app");
+
+    fs.writeFileSync(jsconfig, aliases("shared"));
+    emit(jsconfig, "change");
+    await expectCall("shared");
+  });
+
   it("index is reused across a restart with zero reparses", async () => {
     const second = new OccApplication(root, storageDir);
     second.initialize();
@@ -743,6 +877,39 @@ describe("activation audit (real activate(), mocked vscode)", () => {
     expect(state.warnings).toContain("OCC: open a folder to use Offline Code Context.");
     expect(state.commands.size).toBe(0);
     expect(state.treeViews.length).toBe(0);
+  });
+
+  it("unsupported workspace URI scheme: activate warns and aborts early even when fsPath matches fixture", () => {
+    state.commands.clear();
+    state.treeViews = [];
+    state.warnings = [];
+    state.workspaceFoldersOverride = [
+      {
+        uri: {
+          scheme: "vscode-vfs",
+          path: "/fixture-root",
+          fsPath: root,
+        },
+      },
+    ];
+    const dummyContext = {
+      subscriptions: [] as Array<{ dispose(): void }>,
+      storageUri: fileUri(path.join(os.tmpdir(), "dummy-storage")),
+      globalStorageUri: fileUri(path.join(os.tmpdir(), "dummy-global")),
+      asAbsolutePath: (p: string) => p,
+    };
+    activate(dummyContext as never);
+
+    expect(state.warnings).toContain("OCC: open a local folder to use Offline Code Context.");
+    expect(state.commands.size).toBe(0);
+    expect(state.treeViews.length).toBe(0);
+
+    // Positive control: supported file-scheme workspace URI activates normally
+    state.warnings = [];
+    state.workspaceFoldersOverride = [{ uri: fileUri(root) }];
+    activate(dummyContext as never);
+    expect(state.warnings).not.toContain("OCC: open a local folder to use Offline Code Context.");
+    expect(state.commands.size).toBeGreaterThan(0);
   });
 
   it("watcher ignores file events outside workspace root", async () => {

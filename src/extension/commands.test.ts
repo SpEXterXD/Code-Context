@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { execFileSync } from "node:child_process";
+
 import * as path from "node:path";
 import * as fs from "node:fs";
 import * as os from "node:os";
@@ -26,6 +28,8 @@ const state = vi.hoisted(() => ({
   quickPickResponse: undefined as unknown,
   /** FU3: output-channel lines recorded by the securityScan mock. */
   channelLines: [] as string[],
+  activeEditorDoc: null as { document: { uri: unknown } } | null,
+  workspaceFolderUri: null as { scheme: string; path?: string; fsPath: string } | null,
   configOverrides: {} as Record<string, unknown>,
   registered: new Map<string, (...args: unknown[]) => unknown>(),
 }));
@@ -87,6 +91,7 @@ vi.mock("vscode", () => {
       showQuickPick: async () => state.quickPickResponse,
       showTextDocument: async () => ({}),
       get activeTextEditor() {
+        if (state.activeEditorDoc) return state.activeEditorDoc;
         return state.activeEditorUri
           ? { document: { uri: fileUri(state.activeEditorUri) } }
           : undefined;
@@ -95,6 +100,7 @@ vi.mock("vscode", () => {
     workspace: {
       openTextDocument: async () => ({}),
       get workspaceFolders() {
+        if (state.workspaceFolderUri) return [{ uri: state.workspaceFolderUri as never }];
         return state.workspaceRoot ? [{ uri: fileUri(state.workspaceRoot) }] : undefined;
       },
       getConfiguration: () => ({
@@ -156,6 +162,8 @@ beforeEach(async () => {
   state.clipboard = null;
   state.clipboardFails = false;
   state.activeEditorUri = null;
+  state.activeEditorDoc = null;
+  state.workspaceFolderUri = null;
   state.inputBoxResponse = undefined;
   state.quickPickResponse = undefined;
   state.channelLines = [];
@@ -362,5 +370,138 @@ describe("context-menu commands (mocked vscode, real pipeline)", () => {
     expect(excerpt).toBeDefined();
     expect(excerpt).toContain("[REDACTED:");
     expect(excerpt).not.toContain("AKIAIOSFODNN7EXAMPLE");
+  });
+
+  // Stage 1 (diff-export pause) at the COMMAND boundary: with change seeds
+  // enabled and a real git fixture, generated preview, Copy Context, and the
+  // direct copy path must all omit raw diff text (## CURRENT CHANGES), stay
+  // byte-identical between preview and copy, and keep the changed-file hint
+  // observable in WHY.
+  it("Stage 1: preview, Copy Context, and direct copy omit raw diffs with parity", async () => {
+    // Real git fixture: baseline commit, then a working-tree modification.
+    const git = (args: string[]): string =>
+      execFileSync("git", args, { cwd: root, encoding: "utf8" });
+    git(["init", "-q"]);
+    git(["config", "user.email", "t@t.dev"]);
+    git(["config", "user.name", "t"]);
+    git(["add", "-A"]);
+    git(["commit", "-q", "-m", "baseline"]);
+    fs.writeFileSync(
+      path.join(root, "src", "app", "api.ts"),
+      "/** API helpers. */\nexport const api = () => util() + 1;\nexport const touched = true;\n",
+    );
+    state.configOverrides = { changeSeeds: true };
+
+    // 1. Generated preview.
+    await state.registered.get("offlineCodeContext.generateProjectContext")!();
+    const previewPayload = previewPayloads[0]!;
+    // 2. Copy Project Context (direct copy path, fresh build).
+    await state.registered.get("offlineCodeContext.copyProjectContextToClipboard")!();
+    const copyPayload = state.clipboard!;
+    expect(copyPayload).toBe(previewPayload); // preview/copy parity
+    // 3. Copy Context (copies the stored last result).
+    state.clipboard = null;
+    await state.registered.get("offlineCodeContext.copyContext")!();
+    expect(state.clipboard).toBe(previewPayload);
+    for (const payload of [previewPayload, copyPayload, state.clipboard!]) {
+      expect(payload).not.toContain("## CURRENT CHANGES");
+      expect(payload).not.toContain("### DIFF:");
+    }
+    // The changed-file hint stays observable through WHY.
+    expect(previewPayload).toContain("Changed in your working tree");
+  });
+  // Stage 2 (review): a stable indexed file containing a multiline PEM block
+  // must be omitted from BOTH the generated preview and the clipboard copy
+  // under the default BLOCK policy, with the security explanation visible and
+  // preview/copy parity preserved.
+  it("Stage 2: preview and copy omit an indexed multiline key block under BLOCK", async () => {
+    fs.writeFileSync(
+      path.join(root, "src", "keys.ts"),
+      [
+        "export const wrapper = 1;",
+        "-----BEGIN RSA PRIVATE KEY-----",
+        "MIIB" + "OgIBAAJBAKjEwPsxQ0cB1h9KagQ=",
+        "-----END RSA PRIVATE KEY-----",
+        "export const tail = 2;",
+        "",
+      ].join("\n"),
+    );
+    await app.indexing.indexSingleFile("src/keys.ts", CancellationSource.never());
+    // File-scoped generate pins keys.ts as an explicit USER_SELECTED candidate
+    // (project-mode retrieval may not rank it at all).
+    await state.registered.get("offlineCodeContext.generateFileContext")!(
+      fileUri(path.join(root, "src", "keys.ts")),
+    );
+    const previewPayload = previewPayloads[previewPayloads.length - 1]!;
+    await state.registered.get("offlineCodeContext.copyFileContextToClipboard")!(
+      fileUri(path.join(root, "src", "keys.ts")),
+    );
+    const copyPayload = state.clipboard!;
+    expect(copyPayload).toBe(previewPayload); // parity
+    for (const payload of [previewPayload, copyPayload]) {
+      expect(payload).not.toContain("BEGIN RSA PRIVATE KEY");
+      expect(payload).not.toContain("MIIBOgIBAAJBAKjEwPsxQ0cB1h9KagQ=");
+      expect(payload).toContain("excluded by security policy");
+    }
+  });
+
+  // Stage 3: only file-scheme URIs map to workspace paths. Remote/virtual
+  // schemes (https, vscode-remote, untitled, ...) have no workspace
+  // filesystem location and must never be indexed or exported.
+  it("Stage 3: non-file URI schemes are rejected at the command boundary", async () => {
+    // Non-file URI whose fsPath exactly matches a valid indexed file in the workspace
+    const validFsPath = path.join(root, "src", "app", "api.ts");
+    const nonFileUri = {
+      scheme: "vscode-vfs",
+      path: "/src/app/api.ts",
+      fsPath: validFsPath,
+    };
+    await state.registered.get("offlineCodeContext.copyFileContextToClipboard")!(nonFileUri);
+    expect(state.clipboard).toBeNull();
+    expect(state.warnings.some((m) => m.includes("no active file"))).toBe(true);
+
+    // Active-editor boundary fallback also rejects non-file URI matching an indexed file
+    state.activeEditorDoc = {
+      document: { uri: nonFileUri },
+    };
+    state.warnings = [];
+    await state.registered.get("offlineCodeContext.copyFileContextToClipboard")!();
+    expect(state.clipboard).toBeNull();
+    expect(state.warnings.some((m) => m.includes("no active file"))).toBe(true);
+
+    // Active-editor positive control: file URI active editor is accepted
+    const validFileUri = fileUri(validFsPath);
+    state.activeEditorDoc = {
+      document: { uri: validFileUri },
+    };
+    state.warnings = [];
+    await state.registered.get("offlineCodeContext.copyFileContextToClipboard")!();
+    expect(state.clipboard).not.toBeNull();
+    expect(state.clipboard).toContain("### FILE: src/app/api.ts");
+
+    // Argument positive control: equivalent file URI argument is accepted
+    state.clipboard = null;
+    state.activeEditorDoc = null;
+    await state.registered.get("offlineCodeContext.copyFileContextToClipboard")!(validFileUri);
+    expect(state.clipboard).not.toBeNull();
+    expect(state.clipboard).toContain("### FILE: src/app/api.ts");
+  });
+
+  it("Stage 3: unsupported workspace URI scheme is rejected even when fsPath matches fixture root", async () => {
+    // Set workspace folder to unsupported scheme whose fsPath matches root
+    state.workspaceFolderUri = { scheme: "vscode-vfs", fsPath: root, path: "/root" };
+    const validFsPath = path.join(root, "src", "app", "api.ts");
+    const validFileUri = fileUri(validFsPath);
+
+    await state.registered.get("offlineCodeContext.copyFileContextToClipboard")!(validFileUri);
+    expect(state.clipboard).toBeNull();
+    expect(state.warnings.some((m) => m.includes("no active file"))).toBe(true);
+
+    // Positive control: workspace folder with file scheme succeeds
+    state.workspaceFolderUri = null;
+    state.warnings = [];
+    await state.registered.get("offlineCodeContext.copyFileContextToClipboard")!(validFileUri);
+    expect(state.clipboard).not.toBeNull();
+    expect(state.clipboard).toContain("### FILE: src/app/api.ts");
   });
 });

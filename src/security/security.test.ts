@@ -321,5 +321,111 @@ describe("scanSpans and blankSpans", () => {
       const safe = ["+export const ok = 1;", "-export const stale = 2;", " ctx"].join("\n");
       expect(scanner.scanDiff(safe)).toHaveLength(0);
     });
+
+    // Review finding 3: per-logical-line scanning reduced a private-key block
+    // to a header-only finding; WARN+redact then removed just the header and
+    // exported the key BODY in CURRENT CHANGES while the report claimed
+    // redaction succeeded. Findings must cover the whole block and carry the
+    // section filePath so redaction and the final gate see the material.
+    it("multiline key-block findings cover the whole block and carry the filePath", () => {
+      const diff = [
+        "@@ -1,2 +1,5 @@",
+        " context line",
+        "+-----BEGIN RSA PRIVATE KEY-----",
+        "+" + TOKEN,
+        "+" + TOKEN,
+        "+-----END RSA PRIVATE KEY-----",
+        "+export const after = 1;",
+      ].join("\n");
+      const f = scanner.scanDiff(diff, "src/leak.ts");
+      const key = f.find((x) => x.kind === "private-key-block")!;
+      expect(key).toBeDefined();
+      expect(key.filePath).toBe("src/leak.ts");
+      expect(key.match).toContain("-----BEGIN RSA PRIVATE KEY-----");
+      expect(key.match).toContain("-----END RSA PRIVATE KEY-----");
+      // The body (and nothing beyond the block) is inside the finding.
+      expect(key.match).toContain(TOKEN);
+      expect(key.line).toBe(3); // first diff line of the block
+    });
+
+    // Review fix: each hunk is scanned as its TWO versions (old = removed +
+    // context, new = added + context). An END marker that exists only in the
+    // old version must not close a block detected in the new one — blocks
+    // never span versions.
+    it("versions are scanned separately: an old-only END marker cannot close a new block", () => {
+      const diff = [
+        "@@ -1,3 +1,3 @@",
+        "+-----BEGIN RSA PRIVATE KEY-----", // added; NEW version has no END
+        "-unrelated removed line",
+        "------END RSA PRIVATE KEY-----", // removed; END exists only in OLD
+      ].join("\n");
+      const f = scanner.scanDiff(diff, "src/x.ts");
+      const keys = f.filter((x) => x.kind === "private-key-block");
+      // NEW version: unterminated header truncates at the version end (the
+      // added line only). OLD version: an END marker alone is not a finding.
+      expect(keys).toHaveLength(1);
+      expect(keys[0]!.match).toBe("+-----BEGIN RSA PRIVATE KEY-----");
+    });
+
+    it("context lines are part of BOTH versions (straddled blocks detected)", () => {
+      // Body added INSIDE an existing key block: header and END are context.
+      const diff = [
+        "@@ -1,4 +1,5 @@",
+        " -----BEGIN RSA PRIVATE KEY-----",
+        "+" + TOKEN,
+        "+" + TOKEN,
+        " -----END RSA PRIVATE KEY-----",
+      ].join("\n");
+      const f = scanner.scanDiff(diff, "src/straddle.ts");
+      const key = f.find((x) => x.kind === "private-key-block")!;
+      expect(key).toBeDefined();
+      expect(key.match).toContain(TOKEN); // body covered via the NEW version
+      expect(key.match).toContain("-----BEGIN RSA PRIVATE KEY-----");
+      expect(key.match).toContain("-----END RSA PRIVATE KEY-----");
+    });
+
+    it("maps findings to exact original offsets with CRLF separators", () => {
+      const diff = [
+        "@@ -1,2 +1,4 @@",
+        " context",
+        "+-----BEGIN RSA PRIVATE KEY-----",
+        "+" + TOKEN,
+        "+-----END RSA PRIVATE KEY-----",
+        "+tail",
+      ].join("\r\n");
+      const f = scanner.scanDiff(diff, "src/crlf.ts");
+      const key = f.find((x) => x.kind === "private-key-block")!;
+      expect(key).toBeDefined();
+      // The match is an EXACT substring of the original CRLF text: byte
+      // offsets were tokenized from the real separators, so redaction works.
+      expect(diff.includes(key.match)).toBe(true);
+      expect(key.match).toContain("-----BEGIN RSA PRIVATE KEY-----\r\n");
+      expect(key.match).toContain(TOKEN);
+      expect(key.line).toBe(3); // the +BEGIN line
+      // Round-trip: the deterministic redaction removes it from the source.
+      const { text } = redactMatch(key, diff);
+      expect(text).not.toContain(TOKEN);
+      expect(text).toContain("tail");
+    });
+
+    it("does not join unrelated versions across +/-/context boundaries", () => {
+      const diff = [
+        "@@ -1,3 +1,3 @@",
+        "+-----BEGIN RSA PRIVATE KEY-----", // added run ends here (no END marker)
+        "-unrelated removed line " + TOKEN,
+        " ctx " + TOKEN,
+      ].join("\n");
+      const f = scanner.scanDiff(diff, "src/x.ts");
+      // The unterminated NEW-version header truncates at the version end and
+      // may cover its own version's context — but the OLD version's lines
+      // are scanned separately: no finding may CLAIM the removed line as a
+      // secret match start, and no fabricated block spans the whole hunk.
+      const key = f.find((x) => x.kind === "private-key-block")!;
+      expect(key).toBeDefined();
+      expect(key.match.startsWith("+-----BEGIN RSA PRIVATE KEY-----")).toBe(true);
+      // The removed line's credential is still caught — in the OLD version,
+      // by its own findings — not silently absorbed into a fabricated block.
+      expect(f.some((x) => x.match.includes("unrelated removed line"))).toBe(true);
+    });
   });
 });

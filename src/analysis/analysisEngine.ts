@@ -2,12 +2,11 @@ import type { FileEntry, FileMeta, Relationship, SymbolDef } from "../domain/mod
 import type { ParsedFile } from "../parser/parser";
 import { fileNodeId, externalNodeId } from "../shared/ids";
 import { compareStrings } from "../shared/text";
-import { ImportResolver, type ResolutionOutcome } from "./importResolver";
+import { ImportResolver, type AliasMapping, type ResolutionOutcome } from "./importResolver";
 import { sourceFileOfTestFile } from "../workspace/languageDetection";
 
 /**
- * Turns a ParsedFile plus repo-wide context (known files, export index,
- * existing entries) into the file's complete outgoing relationship set.
+ * Resolves a file's structural data against the workspace's staged entries.
  *
  * Every relationship carries an explicit provenance:
  * - STATIC_EXACT: resolved against the real file/exports/symbol tables
@@ -21,67 +20,49 @@ import { sourceFileOfTestFile } from "../workspace/languageDetection";
 export class AnalysisEngine {
   private readonly resolver: ImportResolver;
   private readonly knownFiles: Set<string>;
-  private /** name -> sorted file paths exporting that name */ exportIndex: Map<string, string[]>;
-  private entries: Map<string, FileEntry>;
+  private readonly exportIndex: Map<string, string[]>;
 
-  constructor(rootPath: string, knownFiles: Set<string>, entries: Map<string, FileEntry>) {
-    this.resolver = new ImportResolver(rootPath, knownFiles);
-    this.knownFiles = knownFiles;
-    this.entries = entries;
+  constructor(
+    private readonly entries: ReadonlyMap<string, FileEntry>,
+    aliases: AliasMapping,
+  ) {
+    this.knownFiles = new Set(entries.keys());
+    this.resolver = new ImportResolver(this.knownFiles, aliases);
     this.exportIndex = buildExportIndex(entries);
   }
 
-  /**
-   * Replaces the entry view used for cross-file resolution. Callers staging a
-   * batch pass this map so edges between simultaneously-changed files resolve
-   * against the fresh state instead of the stale index.
-   */
-  setEntriesView(entries: Map<string, FileEntry>): void {
-    this.entries = entries;
-    this.exportIndex = buildExportIndex(entries);
+  /** Checks prior targets and newly resolvable candidates against the staged files. */
+  isAffected(entry: FileEntry, paths: ReadonlySet<string>, names: ReadonlySet<string>): boolean {
+    return (
+      entry.internalRelations.some(
+        (r) => r.target.startsWith("file:") && paths.has(r.target.slice("file:".length)),
+      ) ||
+      entry.imports.some((imp) => {
+        const outcome = this.resolver.resolve(imp.sourceText, entry.meta.path);
+        return outcome.status === "RESOLVED" && paths.has(outcome.path);
+      }) ||
+      entry.calls.some((call) => names.has(call.calleeName)) ||
+      (entry.heritages?.some((clause) => clause.parents.some((name) => names.has(name))) ??
+        false) ||
+      (entry.meta.isTest && paths.has(sourceFileOfTestFile(entry.meta.path) ?? ""))
+    );
   }
 
-  /** Rebuilds the export index (used after batch upserts). */
-  refreshExportIndex(entries: Map<string, FileEntry>): void {
-    this.setEntriesView(entries);
-  }
-
-  /** Computes the full FileEntry for one parsed file. */
-  buildFileEntry(meta: FileMeta, parsed: ParsedFile): FileEntry {
-    const internalRelations = this.computeRelationships(meta, parsed);
-    const mdStats = (parsed as { markdownStats?: { codeFenceLanguages: string[] } }).markdownStats;
-    const fileSummary = mdStats
-      ? [
-          parsed.fileSummary,
-          mdStats.codeFenceLanguages.length > 0
-            ? `code: ${mdStats.codeFenceLanguages.join(", ")}`
-            : "",
-        ]
-          .filter(Boolean)
-          .join(" | ")
-      : parsed.fileSummary;
-    return {
-      meta,
-      symbols: parsed.symbols,
-      imports: parsed.imports,
-      exports: parsed.exports,
-      calls: parsed.calls,
-      fileSummary: fileSummary || undefined,
-      identifiers: parsed.identifiers,
-      internalRelations,
-    };
+  /** Resolves a stored entry against the staged workspace without reading its source. */
+  recomputeRelations(entry: FileEntry): FileEntry {
+    const internalRelations = this.computeRelationships(entry);
+    return { ...entry, internalRelations };
   }
 
   /**
    * All outgoing edges for one file:
    * imports / references / calls / extends / implements / tests / depends_on.
    */
-  computeRelationships(meta: FileMeta, parsed: ParsedFile): Relationship[] {
+  private computeRelationships(entry: FileEntry): Relationship[] {
+    const { meta, imports, symbols, calls, heritages } = entry;
     const relations: Relationship[] = [];
     const fileNode = fileNodeId(meta.path);
-    const importedNames = new Map<string, string[]>(); // repo path -> names imported
-
-    for (const imp of parsed.imports) {
+    for (const imp of imports) {
       const outcome: ResolutionOutcome = this.resolver.resolve(imp.sourceText, meta.path);
       if (outcome.status === "RESOLVED") {
         relations.push({
@@ -91,14 +72,12 @@ export class AnalysisEngine {
           provenance: "STATIC_EXACT",
           detail: `import "${imp.sourceText}" (${imp.importedNames.join(", ")})`,
         });
-        const prev = importedNames.get(outcome.path) ?? [];
-        importedNames.set(outcome.path, [...prev, ...imp.importedNames]);
         // Symbol-level references for names the target actually exports.
         const targetEntry = this.entries.get(outcome.path);
         if (targetEntry) {
           for (const name of imp.importedNames) {
             if (name === "*") continue;
-            const target = findExportedSymbol(targetEntry.symbols, name, outcome.path);
+            const target = findExportedSymbol(targetEntry, name);
             if (target) {
               relations.push({
                 source: fileNode,
@@ -138,8 +117,8 @@ export class AnalysisEngine {
     }
 
     // Call graph: caller symbol -> callee definition.
-    const localSymbolsByName = groupByName(parsed.symbols);
-    for (const call of parsed.calls) {
+    const localSymbolsByName = groupByName(symbols);
+    for (const call of calls) {
       if (call.callerId.startsWith("file:")) continue; // top-level calls have no meaningful caller
       const local = localSymbolsByName.get(call.calleeName);
       if (local) {
@@ -152,7 +131,7 @@ export class AnalysisEngine {
         });
         continue;
       }
-      const imported = this.findImportedDefinition(meta.path, parsed, call.calleeName);
+      const imported = this.findImportedDefinition(entry, call.calleeName);
       if (imported) {
         relations.push({
           source: `symbol:${call.callerId}`,
@@ -177,7 +156,7 @@ export class AnalysisEngine {
     }
 
     // Inheritance: extends / implements.
-    for (const heritage of parsed.heritages) {
+    for (const heritage of heritages ?? []) {
       const owner = localSymbolsByName.get(heritage.symbolName);
       if (!owner) continue;
       for (const parentName of heritage.parents) {
@@ -191,7 +170,7 @@ export class AnalysisEngine {
           });
           continue;
         }
-        const importedParent = this.findImportedDefinition(meta.path, parsed, parentName);
+        const importedParent = this.findImportedDefinition(entry, parentName);
         if (importedParent) {
           relations.push({
             source: `symbol:${owner.id}`,
@@ -241,27 +220,23 @@ export class AnalysisEngine {
     return relations.sort(compareRelations);
   }
 
-  private findImportedDefinition(
-    importerPath: string,
-    parsed: ParsedFile,
-    name: string,
-  ): SymbolDef | undefined {
-    for (const imp of parsed.imports) {
-      // FU4: the call site names the LOCAL alias; resolve it to the imported
-      // name ("default" for default imports) before the export lookup.
-      const imported = imp.importedNames.includes(name)
-        ? name
-        : (imp.aliasedNames?.find((a) => a.local === name)?.imported ?? undefined);
-      if (!imported) continue;
-      const outcome = this.resolver.resolve(imp.sourceText, importerPath);
+  private findImportedDefinition(entry: FileEntry, name: string): SymbolDef | undefined {
+    for (const imp of entry.imports) {
+      // Resolve the local binding first. A name used only on the exported
+      // side of an alias is unavailable locally under that name.
+      const bindings = imp.aliasedNames ?? [];
+      const alias = bindings.find((a) => a.local === name);
+      if (!alias) {
+        const importsWithName = imp.importedNames.filter((n) => n === name).length;
+        const renamedImports = bindings.filter((a) => a.imported === name).length;
+        if (importsWithName <= renamedImports) continue;
+      }
+      const outcome = this.resolver.resolve(imp.sourceText, entry.meta.path);
       if (outcome.status !== "RESOLVED") continue;
       const targetEntry = this.entries.get(outcome.path);
       if (!targetEntry) continue;
-      const target = findExportedSymbol(targetEntry.symbols, imported, outcome.path);
+      const target = findExportedSymbol(targetEntry, alias?.imported ?? name);
       if (target) return target;
-      // Default import name → target's default export.
-      const def = targetEntry.symbols.find((s) => s.exportKind === "default");
-      if (imported === "default" && def) return def;
     }
     return undefined;
   }
@@ -273,11 +248,11 @@ export class AnalysisEngine {
     if (filePath === excludeFile) return undefined;
     const entry = this.entries.get(filePath);
     if (!entry) return undefined;
-    return findExportedSymbol(entry.symbols, name, filePath);
+    return entry.symbols.find((s) => s.name === name && s.exportKind !== undefined);
   }
 }
 
-export function buildExportIndex(entries: Map<string, FileEntry>): Map<string, string[]> {
+export function buildExportIndex(entries: Iterable<[string, FileEntry]>): Map<string, string[]> {
   const index = new Map<string, string[]>();
   for (const [filePath, entry] of entries) {
     const exportedNames = new Set(entry.exports.map((e) => e.name));
@@ -302,16 +277,41 @@ function groupByName(symbols: SymbolDef[]): Map<string, SymbolDef> {
   return map;
 }
 
-function findExportedSymbol(
-  symbols: SymbolDef[],
-  name: string,
-  _filePath: string,
-): SymbolDef | undefined {
-  return (
-    symbols.find((s) => s.name === name && s.exportKind !== undefined) ??
-    symbols.find((s) => s.name === name && !s.name.includes(".")) ??
-    symbols.find((s) => s.name === name)
+function findExportedSymbol(entry: FileEntry, name: string): SymbolDef | undefined {
+  // Review fix (follow-up 4): cross-file EXACT resolution must target an
+  // actually EXPORTED declaration. The previous fallback to any same-name
+  // symbol gave STATIC_EXACT provenance to non-exported definitions, which
+  // are invisible across module boundaries.
+  if (name === "default") return entry.symbols.find((s) => s.exportKind === "default");
+  return entry.symbols.find(
+    (s) =>
+      s.name === name &&
+      (s.exportKind === "named" ||
+        (s.exportKind === "default" && entry.exports.some((e) => e.name === name))),
   );
+}
+
+/** Creates an entry before cross-file analysis, so a whole batch can resolve together. */
+export function buildFileEntry(meta: FileMeta, parsed: ParsedFile): FileEntry {
+  const mdStats = (parsed as { markdownStats?: { codeFenceLanguages: string[] } }).markdownStats;
+  const codeLanguages = mdStats?.codeFenceLanguages ?? [];
+  const fileSummary = [
+    parsed.fileSummary,
+    codeLanguages.length > 0 ? `code: ${codeLanguages.join(", ")}` : "",
+  ]
+    .filter(Boolean)
+    .join(" | ");
+  return {
+    meta,
+    symbols: parsed.symbols,
+    imports: parsed.imports,
+    exports: parsed.exports,
+    calls: parsed.calls,
+    heritages: parsed.heritages,
+    fileSummary: fileSummary || undefined,
+    identifiers: parsed.identifiers,
+    internalRelations: [],
+  };
 }
 
 function compareRelations(a: Relationship, b: Relationship): number {

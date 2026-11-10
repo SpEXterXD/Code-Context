@@ -81,10 +81,13 @@ export class RelationshipGraph {
    * Replaces the stored entry. F03: only edges OWNED by the previous entry
    * (outgoing from its file node and its symbol nodes) are removed —
    * incoming edges owned by other files (imports, dependents, calls
-   * targeting this file's symbols) survive. Symbol-level targets that
-   * disappeared are reconciled: retargeted to a symbol at the same position
-   * (kind + start line) when one exists, dropped otherwise — no dangling
-   * resolved targets.
+   * targeting this file's symbols) survive. Symbol-level incoming edges
+   * whose target id disappeared are DROPPED, never retargeted: matching by
+   * kind+startLine invented STATIC_EXACT edges to whatever symbol now
+   * occupies the old line (a rename on the same line fabricated a call to
+   * the new symbol). Correct cross-file edges are restored by the indexing
+   * service, which recomputes importer relations through the analysis model
+   * when a dependency changes.
    */
   upsertEntry(entry: FileEntry): void {
     const existing = this.fileEntries.get(entry.meta.path);
@@ -102,33 +105,15 @@ export class RelationshipGraph {
         }
         this.outgoing.delete(symNode);
       }
-      // 2. Reconcile incoming symbol-level edges owned by OTHER files whose
-      // target ids disappeared. A file:file import edge owned by another
-      // file survives untouched.
+      // 2. Incoming symbol-level edges owned by OTHER files whose target id
+      // disappeared are dropped on both sides (a file:file import edge owned
+      // by another file survives untouched). No position-based retargeting.
       const nextIds = new Set(entry.symbols.map((s) => s.id));
-      const byPosition = new Map(
-        entry.symbols.map((s) => [`${s.kind}:${s.startLine}`, s.id] as const),
-      );
       for (const oldSym of existing.symbols) {
         if (nextIds.has(oldSym.id)) continue;
         const deadNode = `symbol:${oldSym.id}`;
         for (const edge of [...(this.incoming.get(deadNode) ?? [])]) {
-          const replacement = byPosition.get(`${oldSym.kind}:${oldSym.startLine}`);
           this.removeFromList(this.outgoing, edge.source, edge);
-          if (replacement) {
-            const retargeted = { ...edge, target: `symbol:${replacement}` };
-            const out = this.outgoing.get(edge.source) ?? [];
-            if (!out.some((e) => e.target === retargeted.target && e.kind === retargeted.kind)) {
-              out.push(retargeted);
-              this.outgoing.set(edge.source, out);
-            }
-            const inc = this.incoming.get(retargeted.target) ?? [];
-            if (!inc.some((e) => e.source === retargeted.source && e.kind === retargeted.kind)) {
-              inc.push(retargeted);
-              this.incoming.set(retargeted.target, inc);
-            }
-          }
-          // no replacement: the edge is dropped on both sides above
         }
         this.incoming.delete(deadNode);
         this.outgoing.delete(deadNode);

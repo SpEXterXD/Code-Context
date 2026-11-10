@@ -265,12 +265,12 @@
             "allow"
           ],
           "default": "block",
-          "description": "Policy for potential secrets found in files selected for a context package. block: exclude the file's source. warn: include source but list the finding. allow: ignore findings (not recommended)."
+          "description": "Policy for potential secrets found in files selected for a context package. block: exclude the file's source. warn: include source (redacted when redactSecrets is on) and list the finding. allow: include source unredacted. PRECEDENCE: under warn (with redaction off) and allow, a finding whose value survives verbatim into the payload still aborts generation through the unconditional fail-closed leak gate — the setting widens what is included, it never overrides the gate."
         },
         "offlineCodeContext.redactSecrets": {
           "type": "boolean",
           "default": true,
-          "description": "When true, secret-like matches in WARN policy files are deterministically redacted before inclusion. BLOCK policy files are excluded entirely regardless of this setting."
+          "description": "When true, secret-like matches in WARN policy files are deterministically redacted before inclusion. BLOCK policy files are excluded entirely regardless of this setting. With redaction off, included findings are still enforced by the unconditional leak gate: generation aborts if a known value survives verbatim into the payload."
         },
         "offlineCodeContext.enableGitRecency": {
           "type": "boolean",
@@ -319,7 +319,7 @@
           "default": 1500,
           "minimum": 0,
           "maximum": 20000,
-          "description": "Token budget for the optional CURRENT CHANGES diff section (counts against the package budget)."
+          "description": "Token budget for the optional CURRENT CHANGES diff section. INACTIVE for production output while raw diff export is paused (Stage 1): generated payloads contain no diff text regardless of this setting. Retained for the planned diff-restoration stage."
         }
       }
     }

@@ -12,7 +12,11 @@ export type ErrorCode =
   | "SECURITY_BLOCKED"
   | "NOT_INDEXED"
   | "INVALID_STATE"
-  | "CLIPBOARD_FAILED";
+  | "CLIPBOARD_FAILED"
+  | "CONTAINMENT_VIOLATION"
+  | "FILE_UNAVAILABLE"
+  | "BINARY_FILE"
+  | "SCAN_INCOMPLETE";
 
 export class OccError extends Error {
   readonly code: ErrorCode;

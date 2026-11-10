@@ -62,7 +62,7 @@ The codebase is organized into fifteen modules under `src/`:
 | `src/domain/` | Abstract data types, graph structure, and index records | No external runtime dependencies; immutable data contracts |
 | `src/extension/` | VS Code API adapter, commands, status bar, and views | Isolates `vscode` API; translates VS Code events into domain commands |
 | `src/git/` | Hardened, read-only git command execution | Execution isolation flags; strictly read-only; trust-gated in untrusted workspaces |
-| `src/index/` | Sharded file storage on local disk | Schema version 3; atomic writes via temp file and rename; manifest-entry consistency |
+| `src/index/` | Sharded file storage on local disk | Schema v7, per-entry writes, and manifest reconciliation |
 | `src/parser/` | AST parsing and symbol extraction | Fault-tolerant parsing; errors produce FAILED status records instead of crashing |
 | `src/property/` | Property-based tests and invariant assertions | Seeded PRNG fuzzing; deterministic reproducibility |
 | `src/retrieval/` | Lexical inverted index and structural graph ranking | Pure deterministic scoring; stable tie-breaking by file path |
@@ -152,6 +152,7 @@ Each entry shard JSON file contains:
 - `imports`: Imported module specifiers, imported symbol names, and external package flags.
 - `exports`: Exported identifiers and line numbers.
 - `calls`: Enclosing symbol ID and called identifier name.
+- `heritages` holds sanitized inheritance clauses for relationship recomputation.
 - `fileSummary`: File-level summary comment or Markdown heading overview.
 - `identifiers`: Unique source code identifiers harvested for lexical search.
 - `bodyTokens`: Token frequency list of non-stopword code terms for BM25F lexical matching.
@@ -162,13 +163,18 @@ Each entry shard JSON file contains:
 
 Before extracting `identifiers`, `bodyTokens`, and `fileSummary`, file content is scanned using `SecretScanner.scanSpans()`. All spans matching known secret patterns (API keys, private tokens, high-entropy credential assignments) are blanked with whitespace characters. This guarantees that credentials matching the secret scanner are never persisted in on-disk index shards.
 
-Stated Limit: Filtering blanks only values flagged by the secret scanner. Values that the scanner does not flag, such as short passwords or low-entropy credentials, are still tokenized. Furthermore, word-like fragments such as key-type prefixes (for example, `AKIA` or `sk_live`) remain in token lists. Versions up to 0.3.1 persisted raw secret tokens in the local index; schema version 3 clears older stores to eliminate legacy shards, and schema version 4 additionally sanitizes structural strings (symbol names, ids, exports, imports, calls, parse-error text) at parse time.
+Filtering blanks values flagged by the secret scanner. Short passwords,
+low-entropy credentials, and key-type prefixes can still appear in token
+lists. The current schema v7 also stores sanitized structural strings and
+heritage clauses. On load, OCC discards older schema stores and rebuilds
+them from workspace files.
 
 ## Git integration and hardening
 
 OCC interacts with git exclusively through `safeGit` (`src/git/safeGit.ts`). Git interactions are strictly read-only and designed to avoid command execution hazards:
 
-1. Global Flags: Every `execFile` call passes `-c core.fsmonitor= -c diff.external= -c core.textconv= -c filter.clean= -c filter.smudge=`. This prevents repository configuration from invoking arbitrary binaries during git operations.
+1. Production change seeds use Git status metadata only. Raw diff export is
+   paused. See the [Git execution limits](SECURITY.md#git-hardening-and-execution-hazards).
 2. Argument Arrays: Commands use `child_process.execFile` with explicit argument arrays, bypassing shell interpreters entirely.
 3. Workspace Trust: In untrusted workspaces (`vscode.workspace.isTrusted === false`), git features are completely disabled. No git processes are spawned, and `enableGitRecency` is bypassed.
 4. Asynchronous Cache: Git metadata is prefetched asynchronously into a local cache. Retrieval operations read exclusively from the in-memory cache, ensuring git execution never blocks query response times.

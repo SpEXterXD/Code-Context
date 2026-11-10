@@ -20,8 +20,14 @@ import process from "node:process";
 import { OccApplication } from "../src/application/contextService";
 import { CancellationSource } from "../src/shared/cancellation";
 import { M4_SEED_WEIGHTS } from "../src/retrieval/hybridRetriever";
+import { setRawDiffExportPaused } from "../src/context/contextBuilder";
 
 import type { Snapshot } from "./eval/baselines";
+
+// DEVELOPER-ONLY: the seed-simulation arms exercise the diff-screening pipeline
+// (realdiff arm). Production stays paused (Stage 1); this explicitly re-enables
+// diff export for this harness run only.
+setRawDiffExportPaused(false);
 import { bm25Baseline } from "./eval/baselines";
 import { cloneDirFor, materializeSnapshot, verifyPinnedCommit } from "./eval/gitminer";
 import { pairedDiffCi, taskMetrics, type PairedDiff, type RankedFile } from "./eval/metrics";

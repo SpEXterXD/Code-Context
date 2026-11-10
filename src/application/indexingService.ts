@@ -1,7 +1,6 @@
-import * as fs from "node:fs";
 import * as path from "node:path";
 
-import type { FileEntry, FileMeta } from "../domain/model";
+import type { FileEntry, FileMeta, Relationship } from "../domain/model";
 import { RelationshipGraph } from "../domain/graph";
 import {
   WorkspaceScanner,
@@ -11,18 +10,29 @@ import {
 } from "../workspace/workspaceScanner";
 import { Sha256FileHasher, type FileHasher } from "../workspace/fileHasher";
 import { detectLanguage, isTestFile, looksBinary } from "../workspace/languageDetection";
+import {
+  checkComponentLinks,
+  hasTraversalSegment,
+  readBoundedBuffer,
+  readBoundedFile,
+  readBoundedFileResult,
+  bindWorkspaceRoot,
+  isBoundWorkspaceRoot,
+  verifyRootIdentity,
+  type BoundWorkspaceRoot,
+} from "../workspace/containment";
 import type { ParsedFile, SourceParser } from "../parser/parser";
-import { BODY_TOKEN_TOP_N, extractBodyTokens, type BodyTokens } from "../parser/bodyTokens";
+import { BODY_TOKEN_TOP_N, extractBodyTokens } from "../parser/bodyTokens";
 import { extractIdentifiers } from "../parser/typescriptParser";
-import { AnalysisEngine } from "../analysis/analysisEngine";
+import { AnalysisEngine, buildExportIndex, buildFileEntry } from "../analysis/analysisEngine";
+import { loadAliasMapping } from "../analysis/importResolver";
 import { JsonIndexStore, fingerprintForRoot, type IndexStore } from "../index/indexStore";
 import { SecretScanner, blankSpans } from "../security/secretScanner";
 import { toPosixPath, symbolId } from "../shared/ids";
 import { logger } from "../shared/logging";
 import type { CancellationSignal } from "../shared/cancellation";
-import { checkCancelled, yieldToHost } from "../shared/cancellation";
-import { CancelledError } from "../shared/errors";
-import { OccError } from "../shared/errors";
+import { checkCancelled, NEVER_CANCELLED, yieldToHost } from "../shared/cancellation";
+import { CancelledError, OccError } from "../shared/errors";
 import type { IndexingOptions } from "./indexingOptions";
 
 export interface IndexProgress {
@@ -54,12 +64,12 @@ export interface IndexStatus {
 /**
  * Application service orchestrating the indexing pipeline:
  * scan → diff by content hash → parse only changed files → resolve
- * relationships → persist atomically → update the in-memory graph.
+ * relationships → persist per entry → publish one coherent live update.
  *
  * Guarantees (all covered by tests):
  * - unchanged content hash ⇒ reuse previous analysis, zero re-parses
- * - each file entry is one atomic persistence transaction; a crash or
- *   cancellation mid-run leaves the previously committed state valid
+ * - persistence is per entry; a crash or
+ *   write failure can leave a partial batch, recovered from the landed shards
  * - all mutations serialize through an internal queue; concurrent triggers
  *   (watcher events + commands) never interleave half-updates
  */
@@ -71,6 +81,7 @@ export class IndexingService {
   private readonly hasher: FileHasher = new Sha256FileHasher();
   private options: IndexingOptions;
   private storeExclusion?: string;
+  private readonly rootBinding: BoundWorkspaceRoot;
   private readonly rootPath: string;
   private readonly scanner = new SecretScanner();
 
@@ -81,21 +92,25 @@ export class IndexingService {
     (changes: { upserted: FileEntry[]; removed: string[] }) => void
   > = [];
   private parseCounter = 0;
+  private readonly pendingRelationWrites = new Set<string>();
+  private manifestNeedsWrite = false;
+  private aliasFingerprint?: string;
 
   constructor(
-    rootPath: string,
+    root: string | BoundWorkspaceRoot,
     storeRoot: string,
     parserFor: (path: string) => SourceParser,
     options: IndexingOptions = {},
     storeOverride?: IndexStore,
   ) {
-    this.rootPath = rootPath;
-    this.store = storeOverride ?? new JsonIndexStore(storeRoot, fingerprintForRoot(rootPath));
+    this.rootBinding = isBoundWorkspaceRoot(root) ? root : bindWorkspaceRoot(root);
+    this.rootPath = this.rootBinding.rootPath;
+    this.store = storeOverride ?? new JsonIndexStore(storeRoot, fingerprintForRoot(this.rootPath));
     this.parserFor = parserFor;
     this.options = { ...options };
     // Never index our own store: if it lives inside the workspace root,
     // exclude it explicitly (inspection list shows the exclusion).
-    const relStore = toPosixPath(path.relative(rootPath, storeRoot));
+    const relStore = toPosixPath(path.relative(this.rootPath, storeRoot));
     if (relStore && !relStore.startsWith("..")) {
       this.options.excludePatterns = [...(this.options.excludePatterns ?? []), relStore];
       this.storeExclusion = relStore;
@@ -119,16 +134,8 @@ export class IndexingService {
 
   /** Loads persisted state into memory; safe to call repeatedly. */
   initialize(): void {
-    const { entries } = this.store.load();
-    this.entries.clear();
-    this.graph.clear();
-    for (const p of [...entries.keys()].sort()) {
-      const entry = entries.get(p);
-      if (entry) {
-        this.entries.set(p, entry);
-        this.graph.upsertEntry(entry);
-      }
-    }
+    this.reconcileLoadedEntries(this.store.load().entries);
+    this.manifestNeedsWrite = false;
     this.setStatus({
       state: this.entries.size > 0 ? "ready" : "empty",
       fileCount: this.entries.size,
@@ -143,24 +150,12 @@ export class IndexingService {
     return this.enqueue(() => this.runIncremental(cancellation, progress, false));
   }
 
-  /** Drops all local state and re-indexes from scratch. */
+  /** Re-parses every eligible file before replacing the committed state. */
   async rebuild(
     cancellation: CancellationSignal,
     progress?: (p: IndexProgress) => void,
   ): Promise<IndexRunResult> {
-    return this.enqueue(() => {
-      // F04: notify derived indexes of every removed path BEFORE clearing, so
-      // the retriever's inverted/symbol indexes drop stale postings and
-      // document frequencies reset; rebuild then emits only fresh upserts.
-      this.fireEntriesChanged({
-        upserted: [],
-        removed: [...this.entries.keys()].sort(),
-      });
-      this.store.clear();
-      this.entries.clear();
-      this.graph.clear();
-      return this.runIncremental(cancellation, progress, true);
-    });
+    return this.enqueue(() => this.runIncremental(cancellation, progress, true));
   }
 
   /**
@@ -188,28 +183,34 @@ export class IndexingService {
   ): Promise<"indexed" | "unchanged" | "removed" | "ignored"> {
     return this.enqueue(async () => {
       const rel = this.normalizeRelative(relativePath);
-      if (rel === null) return "ignored"; // outside the workspace root
-      if (this.isIgnored(rel)) {
-        this.removeEntry(rel);
-        return "ignored";
+      if (rel === null || !verifyRootIdentity(this.rootBinding)) return "ignored";
+      cancellation.throwIfCancelled();
+      if (this.isIgnoreFile(rel)) {
+        const before = this.entries.get(rel);
+        const { cancelled } = await this.runIncremental(cancellation, undefined, false);
+        if (cancelled) cancellation.throwIfCancelled();
+        const after = this.entries.get(rel);
+        if (!after) return before ? "removed" : "ignored";
+        return before === after ? "unchanged" : "indexed";
       }
-      const evaluation = this.evaluateFileEligibility(rel);
-      if (evaluation.state === "removed") {
-        this.removeEntry(rel);
-        return "removed";
-      }
-      if (evaluation.state === "skipped") {
-        this.removeEntry(rel); // previously eligible files become ineligible
-        return "ignored";
+      const evaluation = this.isIgnored(rel)
+        ? { state: "skipped" as const }
+        : this.evaluateFileEligibility(rel);
+      if (evaluation.state !== "ok") {
+        await this.commitEntries([], [rel], cancellation);
+        return evaluation.state === "removed" ? "removed" : "ignored";
       }
       const raw = evaluation.content!;
-      const hash = this.hasher.hash(raw);
       const existing = this.entries.get(rel);
-      if (existing && existing.meta.contentHash === hash) return "unchanged";
-      const entry = this.analyzeFile(rel, raw.toString("utf8"), cancellation);
-      if (!entry) return "ignored";
-      this.commitEntries([entry]);
-      this.setStatus({ state: "ready", fileCount: this.entries.size });
+      if (
+        existing &&
+        !isTransientFailure(existing) &&
+        existing.meta.contentHash === this.hasher.hash(raw)
+      ) {
+        await this.commitEntries([], [], cancellation);
+        return "unchanged";
+      }
+      await this.commitEntries([this.analyzeFile(rel, raw)], [], cancellation);
       return "indexed";
     });
   }
@@ -218,12 +219,14 @@ export class IndexingService {
   private normalizeRelative(relativePath: string): string | null {
     const resolved = path.resolve(this.rootPath, relativePath);
     const nativeRel = path.relative(this.rootPath, resolved);
-    // F06/follow-up 7: check the RAW relative path BEFORE toPosixPath —
-    // toPosixPath collapses `..` segments, which would silently pull
-    // outside-root paths back inside the root.
-    if (nativeRel.startsWith("..") || path.isAbsolute(nativeRel)) return null;
+    // F06/follow-up 7 + Stage 3: lexical containment via the shared policy —
+    // only an actual ".." SEGMENT is traversal. The previous startsWith("..")
+    // check rejected legal root-level names like `..notes.ts` on the direct
+    // path while full scan accepted them. Sibling roots sharing a prefix
+    // (..\root2\x) and absolute outsiders still fail via the ".." segment.
+    if (hasTraversalSegment(nativeRel) || path.isAbsolute(nativeRel)) return null;
     const rel = toPosixPath(nativeRel);
-    if (rel.startsWith("../")) return null; // defensive double-check
+    if (hasTraversalSegment(rel)) return null; // defensive double-check
     return rel;
   }
 
@@ -236,22 +239,13 @@ export class IndexingService {
     state: "ok" | "removed" | "skipped";
     content?: Buffer;
   } {
-    const absolute = path.join(this.rootPath, rel);
-    let stat: fs.Stats;
-    try {
-      stat = fs.statSync(absolute);
-    } catch {
-      return { state: "removed" };
-    }
-    if (!stat.isFile()) return { state: "removed" };
     const maxSize = this.options.maxFileSizeBytes ?? 1024 * 1024;
-    if (stat.size > maxSize) return { state: "skipped" };
-    let raw: Buffer;
-    try {
-      raw = fs.readFileSync(absolute);
-    } catch {
+    const readResult = readBoundedFileResult(this.rootBinding, rel, maxSize);
+    if (!readResult.ok) {
+      if (readResult.reason === "too-large") return { state: "skipped" };
       return { state: "removed" };
     }
+    const raw = readResult.buffer;
     if (looksBinary(raw.toString("latin1"))) return { state: "skipped" };
     return { state: "ok", content: raw };
   }
@@ -259,44 +253,62 @@ export class IndexingService {
   /** Removes a file's records (watcher delete / rename source). */
   async removeFile(relativePath: string): Promise<void> {
     return this.enqueue(async () => {
-      this.removeEntry(toPosixPath(relativePath));
+      const rel = this.normalizeRelative(relativePath);
+      if (rel === null) return;
+      if (this.isIgnoreFile(rel)) {
+        await this.runIncremental(NEVER_CANCELLED, undefined, false);
+      } else {
+        await this.commitEntries([], [rel]);
+      }
     });
   }
 
-  /** Rename = remove old path + index new path, atomically sequenced. */
+  /** Stages the source removal and eligible destination in the same writer job. */
   async renameFile(
     oldRelativePath: string,
     newRelativePath: string,
     cancellation: CancellationSignal,
   ): Promise<void> {
     return this.enqueue(async () => {
-      const oldRel = toPosixPath(oldRelativePath);
-      const newRel = toPosixPath(newRelativePath);
-      this.removeEntry(oldRel);
-      if (this.isIgnored(newRel)) return;
-      try {
-        const content = fs.readFileSync(path.join(this.rootPath, newRel), "utf8");
-        const entry = this.analyzeFile(newRel, content, cancellation);
-        if (entry) this.commitEntries([entry]);
-      } catch {
-        /* new path unreadable: nothing to add */
+      cancellation.throwIfCancelled();
+      const oldRel = this.normalizeRelative(oldRelativePath);
+      const newRel = this.normalizeRelative(newRelativePath);
+      if (
+        (oldRel !== null && this.isIgnoreFile(oldRel)) ||
+        (newRel !== null && this.isIgnoreFile(newRel))
+      ) {
+        const result = await this.runIncremental(cancellation, undefined, false);
+        if (result.cancelled) cancellation.throwIfCancelled();
+        return;
       }
+      const removed = oldRel === null ? [] : [oldRel];
+      const changed: FileEntry[] = [];
+      if (newRel !== null) {
+        const evaluation = this.isIgnored(newRel)
+          ? { state: "skipped" as const }
+          : this.evaluateFileEligibility(newRel);
+        if (evaluation.state === "ok") {
+          changed.push(this.analyzeFile(newRel, evaluation.content!));
+        } else {
+          removed.push(newRel);
+        }
+      }
+      await this.commitEntries(changed, removed, cancellation);
     });
   }
 
   async clearIndex(): Promise<void> {
-    return this.enqueue(async () => {
-      // F04: derived retrieval indexes must reset with the authoritative
-      // state — removals are emitted before clearing so the retriever drops
-      // stale postings/symbol entries and IDF agrees with a fresh app.
-      this.fireEntriesChanged({
-        upserted: [],
-        removed: [...this.entries.keys()].sort(),
-      });
-      this.store.clear();
-      this.entries.clear();
-      this.graph.clear();
-      this.setStatus({ state: "empty", fileCount: 0 });
+    return this.enqueue(() => {
+      try {
+        this.store.clear();
+      } catch (error) {
+        this.recoverWriteFailure(error);
+        throw error;
+      }
+      this.pendingRelationWrites.clear();
+      this.manifestNeedsWrite = false;
+      this.publishEntries([], [...this.entries.keys()]);
+      this.setStatus({ state: "empty", fileCount: 0, lastError: undefined });
     });
   }
 
@@ -326,20 +338,39 @@ export class IndexingService {
    * rules as the full scan — root rules plus scoped nested `.gitignore`
    * files from the path's ancestor directories.
    */
+  private isIgnoreFile(rel: string): boolean {
+    return this.options.respectGitignore !== false && path.posix.basename(rel) === ".gitignore";
+  }
+
   private isIgnored(rel: string): boolean {
-    const rules = buildIgnoreRules(this.rootPath, this.options);
+    // Stage 3: containment FIRST — a path with a link component (or missing
+    // component) is treated as ignored so nested .gitignore reads can never
+    // reach outside the root through a linked ancestor. Full scan never
+    // enters linked directories, so this only guards direct/rename inputs.
+    if (!checkComponentLinks(this.rootBinding, rel).ok) return true;
+    const rules = buildIgnoreRules(this.rootBinding, this.options);
     if (this.options.respectGitignore !== false) {
       const segments = rel.split("/");
       segments.pop(); // the file itself
       let current = "";
       for (const seg of segments) {
         current = current ? `${current}/${seg}` : seg;
-        try {
-          const nested = fs.readFileSync(path.join(this.rootPath, current, ".gitignore"), "utf8");
+        const nestedRel = `${current}/.gitignore`;
+        const maxSize = this.options.maxFileSizeBytes ?? 1024 * 1024;
+        const nested = readBoundedFile(this.rootBinding, nestedRel, maxSize);
+        if (nested !== null) {
           rules.addGitignoreContent(nested, current);
-        } catch {
-          /* no nested .gitignore in this directory */
         }
+      }
+      // Review fix (F07 parity): Git cannot re-include a file below an
+      // EXCLUDED parent directory — traversal prunes the directory and never
+      // reaches nested negations, so direct decisions must check each
+      // ancestor directory the same way (`ignored/` + `!ignored/keep.ts`
+      // keeps keep.ts excluded).
+      let dir = "";
+      for (const seg of rel.split("/").slice(0, -1)) {
+        dir = dir ? `${dir}/${seg}` : seg;
+        if (rules.isIgnored(dir, true)) return true;
       }
     }
     return rules.isIgnored(rel, false);
@@ -362,38 +393,31 @@ export class IndexingService {
     const started = Date.now();
     this.setStatus({ state: "indexing", fileCount: this.entries.size });
     try {
-      const scanner = new WorkspaceScanner(this.options);
-      const scan = scanner.scan(this.rootPath, cancellation);
+      const scan = new WorkspaceScanner(this.options).scan(this.rootBinding, cancellation);
+      if (!scan.complete || !verifyRootIdentity(this.rootBinding)) {
+        throw new OccError("SCAN_INCOMPLETE", "workspace discovery incomplete");
+      }
       progress?.({ phase: "scan", processed: 0, total: scan.files.length, reparsed: 0, reused: 0 });
 
       let reused = 0;
-      const toParse: typeof scan.files = [];
-      for (const file of scan.files) {
+      const eligible = scan.files.filter((file) => file.status === "OK");
+      const toParse = eligible.filter((file) => {
         const existing = this.entries.get(file.path);
         if (
           !force &&
-          file.status === "OK" &&
           existing &&
+          !isTransientFailure(existing) &&
           existing.meta.contentHash === file.contentHash
         ) {
           reused++;
-          continue;
+          return false;
         }
-        if (file.status !== "OK") {
-          if (existing) this.removeEntry(file.path); // binary/oversized: no stale records
-          continue;
-        }
-        toParse.push(file);
-      }
-
-      // Parse phase (pure): read + parse every changed file.
-      const fresh: Array<{ meta: FileMeta; parsed: ParsedFile; body?: BodyTokens }> = [];
+        return true;
+      });
+      const scanned = new Set(eligible.map((f) => f.path));
+      const removed = [...this.entries.keys()].filter((p) => !scanned.has(p));
+      const fresh: FileEntry[] = [];
       let processed = 0;
-      const analysis = new AnalysisEngine(
-        this.rootPath,
-        new Set(scan.files.map((f) => f.path)),
-        this.entries,
-      );
       for (const file of toParse) {
         checkCancelled(cancellation, 8, processed);
         progress?.({
@@ -405,50 +429,47 @@ export class IndexingService {
           reused,
         });
         try {
-          const content = fs.readFileSync(file.absolutePath, "utf8");
-          const meta: FileMeta = {
-            path: file.path,
-            language: detectLanguage(file.path),
-            sizeBytes: file.sizeBytes,
-            lineCount: countLines(content),
-            contentHash: file.contentHash,
-            isTest: file.isTest,
-            parseStatus: "PARSED",
-          };
-          const spans = this.scanner.scanSpans(content);
-          const sanitizedContent = spans.length > 0 ? blankSpans(content, spans) : content;
-          const parsed = this.sanitizeParsed(
-            this.parserFor(file.path).parse(file.path, content),
-            sanitizedContent,
-            spans.length > 0,
-          );
-          // F14: parser-reported diagnostics (partial analysis) map into the
-          // persisted metadata instead of being dropped.
-          if (parsed.parseError) {
-            meta.parseStatus = "PARTIAL";
-            meta.parseError = parsed.parseError;
+          const cap = this.options.maxFileSizeBytes ?? 1024 * 1024;
+          const containment = checkComponentLinks(this.rootBinding, file.path, {
+            requireLeafFile: true,
+          });
+          if (!containment.ok) {
+            throw new OccError(
+              "CONTAINMENT_VIOLATION",
+              `file failed containment check: ${containment.reason}`,
+            );
           }
-          fresh.push({
-            meta,
-            parsed,
-            body: extractBodyTokens(sanitizedContent, BODY_TOKEN_TOP_N),
-          });
-          this.parseCounter++;
+          const raw = readBoundedBuffer(this.rootBinding, file.path, cap);
+          if (raw === null) {
+            throw new OccError(
+              "FILE_UNAVAILABLE",
+              "source snapshot unavailable or changed at parse",
+            );
+          }
+          if (looksBinary(raw.toString("latin1"))) {
+            throw new OccError("BINARY_FILE", "file content is binary");
+          }
+          fresh.push(this.analyzeFile(file.path, raw));
         } catch (e) {
-          logger.warn(`parse failed for ${file.path}: ${(e as Error).message}`);
-          fresh.push({
-            meta: {
-              path: file.path,
-              language: detectLanguage(file.path),
-              sizeBytes: file.sizeBytes,
-              lineCount: 0,
-              contentHash: file.contentHash,
-              isTest: file.isTest,
-              parseStatus: "FAILED",
-              parseError: (e as Error).message.slice(0, 200),
-            },
-            parsed: emptyParsed(file.path),
-          });
+          // Stage 3: the exception message is untrusted (may echo source
+          // material) - persist and log a safe category only.
+          const category = safeParseFailureCategory(e);
+          logger.warn(`parse failed for ${file.path}: ${category}`);
+          fresh.push(
+            buildFileEntry(
+              {
+                path: file.path,
+                language: detectLanguage(file.path),
+                sizeBytes: file.sizeBytes,
+                lineCount: 0,
+                contentHash: file.contentHash,
+                isTest: file.isTest,
+                parseStatus: "FAILED",
+                parseError: category,
+              },
+              emptyParsed(file.path),
+            ),
+          );
           this.parseCounter++;
         }
         processed++;
@@ -458,61 +479,36 @@ export class IndexingService {
         if (processed % 64 === 0) await yieldToHost();
       }
 
-      // Analysis phase: stage all fresh entries so cross-file edges between
-      // simultaneously-changed files resolve against the fresh state.
-      const staged = new Map(this.entries);
-      const provisional: FileEntry[] = fresh.map(({ meta, parsed }) => ({
-        meta,
-        symbols: parsed.symbols,
-        imports: parsed.imports,
-        exports: parsed.exports,
-        calls: parsed.calls,
-        fileSummary: parsed.fileSummary,
-        identifiers: parsed.identifiers,
-        internalRelations: [],
-      }));
-      provisional.forEach((e) => staged.set(e.meta.path, e));
-      analysis.setEntriesView(staged);
-
-      const committed = provisional.map((provisionalEntry, index) => {
-        const source = fresh[index];
-        if (!source) throw new OccError("INVALID_STATE", "provisional/fresh length mismatch");
-        const entry = analysis.buildFileEntry(provisionalEntry.meta, source.parsed);
-        return source.body
-          ? { ...entry, bodyTokens: source.body.terms, bodyLength: source.body.total }
-          : entry;
+      await this.commitEntries(fresh, removed, cancellation, () => {
+        progress?.({
+          phase: "commit",
+          processed,
+          total: toParse.length,
+          reparsed: fresh.length,
+          reused,
+        });
       });
-
-      // Commit phase: persist atomically per entry, then update memory.
-      if (committed.length > 0) {
-        this.store.upsertEntries(committed); // persist first (atomic per entry)
-        for (const entry of committed) {
-          this.entries.set(entry.meta.path, entry);
-          this.graph.upsertEntry(entry);
-        }
-        this.fireEntriesChanged({ upserted: committed, removed: [] });
-      }
-
-      // Removals: indexed files that disappeared from the scan.
-      const scanned = new Set(scan.files.map((f) => f.path));
-      const removed = [...this.entries.keys()].filter((p) => !scanned.has(p));
-      for (const p of removed) this.removeEntry(p);
 
       const result: IndexRunResult = {
         totalFiles: scan.files.length,
-        reparsed: committed.length,
+        reparsed: fresh.length,
         reused,
         removed: removed.length,
         scan,
         durationMs: Date.now() - started,
         cancelled: false,
       };
-      this.setStatus({ state: "ready", fileCount: this.entries.size, lastResult: result });
+      this.setStatus({
+        state: "ready",
+        fileCount: this.entries.size,
+        lastResult: result,
+        lastError: undefined,
+      });
       progress?.({
         phase: "done",
         processed,
         total: toParse.length,
-        reparsed: committed.length,
+        reparsed: fresh.length,
         reused,
       });
       return result;
@@ -532,6 +528,7 @@ export class IndexingService {
             excludedPaths: [],
             truncatedExclusionList: false,
             durationMs: 0,
+            complete: false,
           },
           durationMs: Date.now() - started,
           cancelled: true,
@@ -546,61 +543,44 @@ export class IndexingService {
     }
   }
 
-  /** Single-file analysis used by watcher-driven incremental updates. */
-  private analyzeFile(
-    rel: string,
-    content: string,
-    cancellation: CancellationSignal,
-  ): FileEntry | null {
-    cancellation.throwIfCancelled();
+  /** Parses bounded bytes through the same sanitization for scans and watcher events. */
+  private analyzeFile(rel: string, raw: Buffer): FileEntry {
+    const content = raw.toString("utf8");
     const meta: FileMeta = {
       path: rel,
       language: detectLanguage(rel),
-      sizeBytes: Buffer.byteLength(content, "utf8"),
+      sizeBytes: raw.length,
       lineCount: countLines(content),
-      contentHash: this.hasher.hash(content),
+      contentHash: this.hasher.hash(raw),
       isTest: isTestFile(rel),
       parseStatus: "PARSED",
     };
+    this.parseCounter++;
     try {
       const spans = this.scanner.scanSpans(content);
       const sanitizedContent = spans.length > 0 ? blankSpans(content, spans) : content;
+      const parser = this.parserFor(rel);
       const parsed = this.sanitizeParsed(
-        this.parserFor(rel).parse(rel, content),
+        parser.parse(rel, content),
         sanitizedContent,
         spans.length > 0,
       );
-      this.parseCounter++;
-      // F14: parser-reported diagnostics (partial analysis) map into the
-      // persisted metadata instead of being dropped.
       if (parsed.parseError) {
         meta.parseStatus = "PARTIAL";
         meta.parseError = parsed.parseError;
+      } else if (parser.language === "generic") {
+        meta.parseStatus = "GENERIC";
       }
-      const knownFiles = new Set([...this.entries.keys(), rel]);
-      const staged = new Map(this.entries);
-      const analysis = new AnalysisEngine(this.rootPath, knownFiles, staged);
-      // Intentional two-pass build (same pattern as the batch staging in
-      // runIncremental, ADR-008): pass 1 builds a provisional entry so the
-      // staged view can include this file, pass 2 recomputes relationships
-      // with the file visible for its own cross-file resolution (e.g. a
-      // re-export chain through itself). Do not "simplify" to one call.
-      const entry = analysis.buildFileEntry(meta, parsed);
-      staged.set(rel, { ...entry, internalRelations: [] });
-      analysis.setEntriesView(staged);
-      const final = analysis.buildFileEntry(meta, parsed);
+      const entry = buildFileEntry(meta, parsed);
       const body = extractBodyTokens(sanitizedContent, BODY_TOKEN_TOP_N);
-      return { ...final, bodyTokens: body.terms, bodyLength: body.total };
+      return { ...entry, bodyTokens: body.terms, bodyLength: body.total };
     } catch (e) {
-      logger.warn(`single-file analysis failed for ${rel}: ${(e as Error).message}`);
-      return {
-        meta: { ...meta, parseStatus: "FAILED", parseError: (e as Error).message.slice(0, 200) },
-        symbols: [],
-        imports: [],
-        exports: [],
-        calls: [],
-        internalRelations: [],
-      };
+      const category = safeParseFailureCategory(e);
+      logger.warn(`parse failed for ${rel}: ${category}`);
+      return buildFileEntry(
+        { ...meta, parseStatus: "FAILED", parseError: category },
+        emptyParsed(rel),
+      );
     }
   }
 
@@ -696,6 +676,14 @@ export class IndexingService {
       })
       .filter((c): c is NonNullable<typeof c> => c !== null);
 
+    parsed.heritages = parsed.heritages.flatMap((clause) => {
+      const symbolName = this.sanitizeText(clause.symbolName) ?? clause.symbolName;
+      const parents = clause.parents
+        .map((parent) => this.sanitizeText(parent) ?? parent)
+        .filter(Boolean);
+      return symbolName && parents.length > 0 ? [{ ...clause, symbolName, parents }] : [];
+    });
+
     // F01 note: sanitizeText returns null for "unchanged" — null must KEEP
     // the original value; an empty result means fully flagged and drops the
     // record. Treating null as a drop breaks import resolution.
@@ -718,7 +706,26 @@ export class IndexingService {
           else if (s.length > 0) names.push(s); // sanitized, still usable
           // else: fully flagged name is dropped from the list
         }
-        return { ...imp, sourceText: source ?? imp.sourceText, importedNames: names };
+        // Review fix: aliasedNames (local alias → imported name, FU4 field)
+        // are structural strings too — both sides sanitized; a pair whose
+        // either side becomes fully flagged is dropped, and an emptied list
+        // omits the field entirely (never falls back to the raw original).
+        const aliases: Array<{ local: string; imported: string }> = [];
+        for (const pair of imp.aliasedNames ?? []) {
+          const local = this.sanitizeText(pair.local);
+          if (local !== null && local.length === 0) continue;
+          const imported = this.sanitizeText(pair.imported);
+          if (imported !== null && imported.length === 0) continue;
+          aliases.push({ local: local ?? pair.local, imported: imported ?? pair.imported });
+        }
+        const cleaned = {
+          ...imp,
+          sourceText: source ?? imp.sourceText,
+          importedNames: names,
+        };
+        if (aliases.length > 0) cleaned.aliasedNames = aliases;
+        else delete cleaned.aliasedNames;
+        return cleaned;
       })
       .filter((imp): imp is NonNullable<typeof imp> => imp !== null);
   }
@@ -730,23 +737,141 @@ export class IndexingService {
     return blankSpans(text, spans).replace(/\s+/g, " ").trim();
   }
 
-  private commitEntries(committed: FileEntry[]): void {
-    if (committed.length === 0) return;
-    this.store.upsertEntries(committed); // persist first (atomic per entry)
-    for (const entry of committed) {
+  /**
+   * Computes the entire mutation against a staged view. Once shard writes start,
+   * finish the batch despite cancellation. Readers keep the old index during
+   * yields, and receive one synchronous publication after the last write.
+   */
+  private async commitEntries(
+    changed: FileEntry[],
+    removedPaths: string[],
+    cancellation: CancellationSignal = NEVER_CANCELLED,
+    beforeWrite?: () => void,
+  ): Promise<void> {
+    const freshPaths = new Set(changed.map((entry) => entry.meta.path));
+    const removed = [...new Set(removedPaths)].filter(
+      (p) => this.entries.has(p) && !freshPaths.has(p),
+    );
+    const changedPaths = new Set([...freshPaths, ...removed]);
+    // Alias configs can affect relationships even when excluded from discovery
+    // or when every source entry is reused.
+    const aliases = loadAliasMapping(this.rootBinding, this.options.maxFileSizeBytes);
+    const aliasesChanged = aliases.fingerprint !== this.aliasFingerprint;
+    const upserts = new Map<string, FileEntry>();
+    if (changedPaths.size > 0 || aliasesChanged) {
+      const staged = new Map(this.entries);
+      for (const p of removed) staged.delete(p);
+      for (const entry of changed) staged.set(entry.meta.path, entry);
+
+      // Select importers from prior outgoing edges before publishing removals.
+      // New resolution also catches missing imports and higher-priority candidates.
+      const oldEntries = [...this.entries].filter(([p]) => changedPaths.has(p));
+      const changedNames = new Set([
+        ...buildExportIndex(oldEntries).keys(),
+        ...buildExportIndex(changed.map((entry) => [entry.meta.path, entry])).keys(),
+      ]);
+      const analysis = new AnalysisEngine(staged, aliases);
+      let processed = 0;
+      for (const [p, entry] of staged) {
+        checkCancelled(cancellation, 64, processed);
+        const isFresh = freshPaths.has(p);
+        const refreshImports = aliasesChanged && entry.imports.length > 0;
+        if (isFresh || refreshImports || analysis.isAffected(entry, changedPaths, changedNames)) {
+          const recomputed = analysis.recomputeRelations(entry);
+          if (
+            isFresh ||
+            !compareRelationsShallow(entry.internalRelations, recomputed.internalRelations)
+          ) {
+            upserts.set(p, recomputed);
+          }
+        }
+        if (++processed % 64 === 0) await yieldToHost();
+      }
+    }
+
+    // A previous write failure may have landed some shards. Flush repairs
+    // even on an otherwise unchanged run once the store is writable again.
+    const writes = new Map(upserts);
+    const removedSet = new Set(removed);
+    for (const p of this.pendingRelationWrites) {
+      const entry = this.entries.get(p);
+      if (entry && !removedSet.has(p) && !writes.has(p)) writes.set(p, entry);
+    }
+    beforeWrite?.();
+    cancellation.throwIfCancelled();
+    const hasWrites = writes.size > 0 || removed.length > 0 || this.manifestNeedsWrite;
+    if (!hasWrites && !aliasesChanged && !beforeWrite) return;
+    if (!verifyRootIdentity(this.rootBinding)) {
+      throw new OccError("SCAN_INCOMPLETE", "workspace root identity invalidated before commit");
+    }
+
+    let persisted = 0;
+    try {
+      for (const entry of writes.values()) {
+        if (persisted > 0 && persisted % 64 === 0) await yieldToHost();
+        this.store.upsertEntries([entry]);
+        persisted++;
+      }
+      for (const p of removed) {
+        if (persisted > 0 && persisted % 64 === 0) await yieldToHost();
+        this.store.removePaths([p]);
+        persisted++;
+      }
+      if (this.manifestNeedsWrite && persisted === 0) this.store.writeManifest();
+    } catch (error) {
+      this.recoverWriteFailure(error);
+      throw error;
+    }
+    this.pendingRelationWrites.clear();
+    this.manifestNeedsWrite = false;
+    this.aliasFingerprint = aliases.fingerprint;
+    if (upserts.size > 0 || removed.length > 0) {
+      this.publishEntries([...upserts.values()], removed);
+    }
+    if (hasWrites && this._status.state !== "indexing") {
+      this.setStatus({ state: "ready", fileCount: this.entries.size, lastError: undefined });
+    }
+  }
+
+  private recoverWriteFailure(error: unknown): void {
+    // Read the authoritative shards without attempting another write against
+    // the failing store. Reopening applies the same relationship repair.
+    this.reconcileLoadedEntries(this.store.load(false).entries);
+    this.manifestNeedsWrite = true;
+    this.setStatus({
+      state: "error",
+      fileCount: this.entries.size,
+      lastError: (error as Error).message,
+    });
+  }
+
+  private reconcileLoadedEntries(loaded: Map<string, FileEntry>): void {
+    this.pendingRelationWrites.clear();
+    const aliases = loadAliasMapping(this.rootBinding, this.options.maxFileSizeBytes);
+    const analysis = new AnalysisEngine(loaded, aliases);
+    const upserted: FileEntry[] = [];
+    for (const [p, entry] of loaded) {
+      const resolved = analysis.recomputeRelations(entry);
+      const differs = !compareRelationsShallow(entry.internalRelations, resolved.internalRelations);
+      if (differs) this.pendingRelationWrites.add(p);
+      upserted.push(differs ? resolved : entry);
+    }
+    const removed = [...this.entries.keys()].filter((p) => !loaded.has(p));
+    this.aliasFingerprint = aliases.fingerprint;
+    this.publishEntries(upserted, removed);
+  }
+
+  private publishEntries(upserted: FileEntry[], removed: string[]): void {
+    for (const p of removed) {
+      this.entries.delete(p);
+      this.graph.removeFile(p);
+    }
+    for (const entry of upserted) {
       this.entries.set(entry.meta.path, entry);
       this.graph.upsertEntry(entry);
     }
-    this.fireEntriesChanged({ upserted: committed, removed: [] });
-  }
-
-  private removeEntry(rel: string): void {
-    if (!this.entries.has(rel)) return;
-    this.store.removePaths([rel]);
-    this.entries.delete(rel);
-    this.graph.removeFile(rel);
-    this.fireEntriesChanged({ upserted: [], removed: [rel] });
-    this.setStatus({ state: "ready", fileCount: this.entries.size });
+    this._status = { ...this._status, fileCount: this.entries.size };
+    this.fireEntriesChanged({ upserted, removed });
   }
 
   private fireEntriesChanged(changes: { upserted: FileEntry[]; removed: string[] }): void {
@@ -769,4 +894,61 @@ function emptyParsed(path: string): ParsedFile {
     calls: [],
     heritages: [],
   };
+}
+
+/**
+ * Stage 3: safe parse-failure category. A thrown parser error's message is
+ * UNTRUSTED (a hostile parser, or a parser that echoes source material, can
+ * put scanner-flagged content into it), so it is never persisted, logged,
+ * or rendered. Only trusted internal error codes survive; everything else
+ * degrades to a fixed category with the message withheld.
+ * Distinguishes files that could not be read or validated (transient failures)
+ * from files whose bytes were actually parsed.
+ */
+export function safeParseFailureCategory(error: unknown): string {
+  if (error instanceof OccError) {
+    if (error.code === "CONTAINMENT_VIOLATION") {
+      return `containment check failed: ${error.code}`;
+    }
+    if (error.code === "FILE_UNAVAILABLE") {
+      return `read failed: ${error.code}`;
+    }
+    return `parser failed: ${error.code}`;
+  }
+  return "parser failed: unexpected error (message withheld)";
+}
+
+/**
+ * Distinguishes a transient failure (a file that could not be read or validated
+ * at parse time) from one whose bytes were actually parsed. Transient failures
+ * must not satisfy the unchanged-file shortcut so recovery is automatic on retry.
+ */
+export function isTransientFailure(entry: FileEntry | FileMeta | undefined): boolean {
+  if (!entry) return false;
+  const meta = "meta" in entry ? entry.meta : entry;
+  if (meta.parseStatus !== "FAILED") return false;
+  const err = meta.parseError ?? "";
+  return (
+    err.startsWith("containment check failed") ||
+    err.startsWith("read failed") ||
+    err.includes("CONTAINMENT_VIOLATION") ||
+    err.includes("FILE_UNAVAILABLE")
+  );
+}
+
+/** Analysis emits relationships in a deterministic order. */
+function compareRelationsShallow(a: Relationship[], b: Relationship[]): boolean {
+  return (
+    a.length === b.length &&
+    a.every((r, i) => {
+      const other = b[i]!;
+      return (
+        r.source === other.source &&
+        r.target === other.target &&
+        r.kind === other.kind &&
+        r.provenance === other.provenance &&
+        r.detail === other.detail
+      );
+    })
+  );
 }

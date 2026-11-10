@@ -62,8 +62,9 @@ export class WatcherService {
   }
 
   private relative(uri: vscode.Uri): string | null {
+    if (uri.scheme !== "file") return null;
     const root = vscode.workspace.workspaceFolders?.[0];
-    if (!root) return null;
+    if (!root || root.uri.scheme !== "file") return null;
     // FU7: case-tolerant, traversal-safe relative resolution.
     return relativeToRoot(root.uri.fsPath, uri.fsPath);
   }

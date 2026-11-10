@@ -1,8 +1,15 @@
 import * as ts from "typescript";
 
-import type { SymbolDef, ImportDecl, ExportDecl, CallSite, SymbolKind } from "../domain/model";
+import type {
+  SymbolDef,
+  ImportDecl,
+  ExportDecl,
+  CallSite,
+  SymbolKind,
+  HeritageInfo,
+} from "../domain/model";
 import { symbolId } from "../shared/ids";
-import type { HeritageInfo, SourceParser } from "./parser";
+import type { SourceParser } from "./parser";
 import { extName } from "../shared/ids";
 
 /**
@@ -436,18 +443,12 @@ function collectExportNames(sf: ts.SourceFile, out: ExportDecl[]): void {
       }
     }
     if (
-      ts.isFunctionDeclaration(node) &&
+      (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node)) &&
       node.name &&
       node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)
     ) {
-      out.push({ name: node.name.text, startLine: lineOf(node, sf) });
-    }
-    if (
-      ts.isClassDeclaration(node) &&
-      node.name &&
-      node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)
-    ) {
-      out.push({ name: node.name.text, startLine: lineOf(node, sf) });
+      const name = exportKindOf(node) === "default" ? "default" : node.name.text;
+      out.push({ name, startLine: lineOf(node, sf) });
     }
     ts.forEachChild(node, visit);
   };

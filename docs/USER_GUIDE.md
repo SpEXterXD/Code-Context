@@ -129,6 +129,11 @@ decides what happens:
  replacement is not reversible.
 - `allow`: findings are ignored. Not recommended.
 
+Precedence: regardless of the policy, the exact payload is re-checked before preview
+and copy. Under `warn` (redaction off) and `allow`, a finding whose value survives
+verbatim into the package aborts the whole generation with a `SECURITY:` error; the
+setting never overrides that gate.
+
 Independent of the policy, the exact payload is re-checked before preview
 and copy; if a known secret value survived anyway, the copy aborts with a
 `SECURITY:` error instead of continuing. The **OCC: Security Scan** command

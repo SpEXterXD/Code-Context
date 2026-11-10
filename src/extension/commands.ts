@@ -101,18 +101,26 @@ export function registerCommands(
   const activeRelPath = (): string | undefined => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return undefined;
+    if (editor.document.uri.scheme !== "file") return undefined;
     const root = vscode.workspace.workspaceFolders?.[0];
-    if (!root) return undefined;
-    // FU7: case-tolerant, traversal-safe relative resolution (raw slice broke
-    // on Windows drive-letter/path casing mismatches).
-    return relativeToRoot(root.uri.fsPath, editor.document.uri.fsPath) ?? undefined;
+    if (!root || root.uri.scheme !== "file") return undefined;
+    // FU7/review: case-tolerant, traversal-safe relative resolution (raw
+    // slice broke on Windows drive-letter/path casing mismatches). ""
+    // (the root itself) is not a file: treated as no active file.
+    const rel = relativeToRoot(root.uri.fsPath, editor.document.uri.fsPath);
+    return rel ? rel : undefined;
   };
 
   /** Workspace-relative POSIX path for a right-clicked/selected resource, or null when outside the workspace. */
   const relFromUri = (uri: vscode.Uri | undefined): string | null => {
     if (!uri) return null;
+    // Stage 3: only file-scheme URIs map to workspace paths — remote/virtual
+    // documents (https, vscode-remote, untitled, output channels) have no
+    // filesystem location inside the workspace and must never be indexed or
+    // exported.
+    if (uri.scheme !== "file") return null;
     const root = vscode.workspace.workspaceFolders?.[0];
-    if (!root) return null;
+    if (!root || root.uri.scheme !== "file") return null;
     // FU7: see activeRelPath.
     return relativeToRoot(root.uri.fsPath, uri.fsPath);
   };
@@ -188,7 +196,7 @@ export function registerCommands(
   const selectionRelPath = (): string[] | undefined => {
     const editor = vscode.window.activeTextEditor;
     const root = vscode.workspace.workspaceFolders?.[0];
-    if (!editor || !root) return undefined;
+    if (!editor || !root || root.uri.scheme !== "file") return undefined;
     // Selection mode uses the active file as the (single) explicit selection;
     // multi-file selection would require a UI multi-pick, offered in Task mode.
     const rel = activeRelPath();
@@ -255,7 +263,7 @@ export function registerCommands(
       });
       if (chosen) {
         const root = vscode.workspace.workspaceFolders?.[0];
-        if (root) {
+        if (root && root.uri.scheme === "file") {
           const doc = vscode.Uri.file(`${root.uri.fsPath}/${chosen.target}`);
           void vscode.window.showTextDocument(doc, { preview: true });
         }
