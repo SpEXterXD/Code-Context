@@ -163,46 +163,34 @@ describe("Stage 3: shared containment policy", () => {
     });
   });
 
-  describe("path representation: Windows separators and POSIX literal backslashes", () => {
-    it("Windows separators: checkComponentLinks and readBoundedFile validate and open the same path", () => {
+  describe("native path representation", () => {
+    it("validates and reads the same nested file", () => {
       root = makeTempDir();
-      writeRepo(root, { "src/nested/file.txt": "win-sep-content\n" });
+      writeRepo(root, { "src/nested/file.txt": "nested-content\n" });
 
-      const linkCheck = checkComponentLinks(root, "src\\nested\\file.txt", {
-        requireLeafFile: true,
-        pathImpl: path.win32,
+      const relativePath = path.join("src", "nested", "file.txt");
+      expect(checkComponentLinks(root, relativePath, { requireLeafFile: true })).toEqual({
+        ok: true,
+        validatedPath: path.join(root, "src", "nested", "file.txt"),
       });
-      expect(linkCheck.ok).toBe(true);
-      if (linkCheck.ok) {
-        expect(linkCheck.validatedPath).toBe(path.win32.join(root, "src", "nested", "file.txt"));
-      }
-
-      const content = readBoundedFile(root, "src\\nested\\file.txt", 1024, {
-        pathImpl: path.win32,
-      });
-      expect(content).toBe("win-sep-content\n");
+      expect(readBoundedFile(root, relativePath)).toBe("nested-content\n");
     });
 
-    it("POSIX literal backslashes: treated as filename character rather than directory separator", () => {
+    it("uses native backslash semantics when validating and reading a file", () => {
       root = makeTempDir();
-      writeRepo(root, { "src/regular.ts": "export const reg = 1;\n" });
+      const relativePath = "src/lit\\file.ts";
+      const fixturePath =
+        process.platform === "win32"
+          ? path.join(root, "src", "lit", "file.ts")
+          : path.join(root, "src", "lit\\file.ts");
+      fs.mkdirSync(path.dirname(fixturePath), { recursive: true });
+      fs.writeFileSync(fixturePath, "backslash-content\n");
 
-      // On POSIX, a backslash is not a separator: checkComponentLinks treats 'lit\\file.ts' as single segment
-      const check = checkComponentLinks(root, "src/lit\\file.ts", {
-        requireLeafFile: false,
-        pathImpl: path.posix,
+      expect(checkComponentLinks(root, relativePath, { requireLeafFile: true })).toEqual({
+        ok: true,
+        validatedPath: fixturePath,
       });
-      expect(check.ok).toBe(true);
-      if (check.ok) {
-        expect(check.validatedPath).toBe(path.posix.join(root, "src", "lit\\file.ts"));
-      }
-
-      if (process.platform !== "win32") {
-        // Real POSIX: write actual file with backslash in its name
-        fs.writeFileSync(path.join(root, "src", "lit\\file.ts"), "posix-literal-content\n");
-        const read = readBoundedFile(root, "src/lit\\file.ts", 1024, { pathImpl: path.posix });
-        expect(read).toBe("posix-literal-content\n");
-      }
+      expect(readBoundedFile(root, relativePath)).toBe("backslash-content\n");
     });
   });
 });
